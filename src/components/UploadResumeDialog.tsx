@@ -100,7 +100,7 @@ export const UploadResumeDialog = ({
         <DialogHeader>
           <DialogTitle>Upload Resume</DialogTitle>
           <DialogDescription>
-            Upload your resume to use across all your job applications. Supported formats: PDF, DOC, DOCX
+            Upload your resume to use across all your job applications. Supported formats: PDF, DOC, DOCX (Word documents work best for automatic parsing)
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">
