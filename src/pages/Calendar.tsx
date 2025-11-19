@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, LogOut, Calendar as CalendarIcon, Filter, Search } from "lucide-react";
+import { ArrowLeft, LogOut, Calendar as CalendarIcon, Filter, Search, Grid, List } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Calendar } from "@/components/ui/calendar";
@@ -10,7 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { format, isSameDay, startOfMonth, endOfMonth } from "date-fns";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { format, isSameDay, startOfWeek, endOfWeek, addDays, isSameWeek, startOfDay, endOfDay } from "date-fns";
 
 interface TimelineEvent {
   id: string;
@@ -28,6 +29,7 @@ const CalendarPage = () => {
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"month" | "week">("month");
   const [filters, setFilters] = useState(() => {
     // Load filters from localStorage on initial render
     const savedFilters = localStorage.getItem("calendarFilters");
@@ -457,7 +459,32 @@ const CalendarPage = () => {
           </div>
         </Card>
 
-        <div className="grid md:grid-cols-2 gap-8">
+        {/* View Mode Toggle */}
+        <div className="flex justify-center mb-6">
+          <div className="inline-flex rounded-lg border border-border p-1 bg-card">
+            <Button
+              variant={viewMode === "month" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("month")}
+              className="gap-2"
+            >
+              <CalendarIcon className="h-4 w-4" />
+              Month View
+            </Button>
+            <Button
+              variant={viewMode === "week" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("week")}
+              className="gap-2"
+            >
+              <Grid className="h-4 w-4" />
+              Week View
+            </Button>
+          </div>
+        </div>
+
+        {viewMode === "month" ? (
+          <div className="grid md:grid-cols-2 gap-8">
           {/* Calendar Section */}
           <Card className="p-6">
             <h2 className="text-lg font-semibold mb-4">Select a Date</h2>
@@ -519,7 +546,104 @@ const CalendarPage = () => {
               </div>
             )}
           </Card>
-        </div>
+         </div>
+        ) : (
+          /* Week View */
+          <Card className="p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold">
+                  Week of {selectedDate && format(startOfWeek(selectedDate, { weekStartsOn: 0 }), "MMMM d, yyyy")}
+                </h2>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedDate(addDays(selectedDate || new Date(), -7))}
+                >
+                  Previous Week
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedDate(new Date())}
+                >
+                  Today
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedDate(addDays(selectedDate || new Date(), 7))}
+                >
+                  Next Week
+                </Button>
+              </div>
+            </div>
+            
+            {/* Week Grid */}
+            <div className="overflow-x-auto">
+              <div className="min-w-[800px]">
+                {/* Days Header */}
+                <div className="grid grid-cols-8 gap-2 mb-2">
+                  <div className="text-sm font-medium text-muted-foreground p-2">Time</div>
+                  {Array.from({ length: 7 }).map((_, i) => {
+                    const day = addDays(startOfWeek(selectedDate || new Date(), { weekStartsOn: 0 }), i);
+                    const dayEvents = filteredEvents.filter(e => isSameDay(new Date(e.event_date), day));
+                    return (
+                      <div key={i} className="text-center">
+                        <div className="text-sm font-medium">{format(day, "EEE")}</div>
+                        <div className="text-xs text-muted-foreground">{format(day, "MMM d")}</div>
+                        {dayEvents.length > 0 && (
+                          <Badge variant="secondary" className="mt-1 text-xs">
+                            {dayEvents.length}
+                          </Badge>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Time Slots */}
+                <div className="space-y-1">
+                  {Array.from({ length: 24 }).map((_, hour) => (
+                    <div key={hour} className="grid grid-cols-8 gap-2">
+                      <div className="text-xs text-muted-foreground p-2 border-r">
+                        {format(new Date().setHours(hour, 0, 0, 0), "h:mm a")}
+                      </div>
+                      {Array.from({ length: 7 }).map((_, dayIndex) => {
+                        const day = addDays(startOfWeek(selectedDate || new Date(), { weekStartsOn: 0 }), dayIndex);
+                        const dayEvents = filteredEvents.filter(e => {
+                          const eventDate = new Date(e.event_date);
+                          return isSameDay(eventDate, day) && eventDate.getHours() === hour;
+                        });
+
+                        return (
+                          <div
+                            key={dayIndex}
+                            className="min-h-[60px] p-1 border rounded-md hover:bg-accent/50 transition-colors"
+                          >
+                            {dayEvents.map(event => (
+                              <div
+                                key={event.id}
+                                className={`text-xs p-2 rounded mb-1 cursor-pointer ${getEventColor(event.event_type)}`}
+                                onClick={() => navigate(`/application/${event.application_id}`)}
+                              >
+                                <div className="font-semibold truncate">{event.title}</div>
+                                <div className="truncate">{event.company}</div>
+                                <div>{format(new Date(event.event_date), "h:mm a")}</div>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Card>
+        )}
 
         {/* Upcoming Events Section */}
         <Card className="mt-8 p-6">
