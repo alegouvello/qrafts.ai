@@ -99,6 +99,26 @@ const CalendarPage = () => {
     setFilters((prev) => ({ ...prev, [eventType]: checked }));
   };
 
+  const handleSelectAll = () => {
+    setFilters({
+      interview: true,
+      deadline: true,
+      offer: true,
+      rejection: true,
+      other: true,
+    });
+  };
+
+  const handleClearAll = () => {
+    setFilters({
+      interview: false,
+      deadline: false,
+      offer: false,
+      rejection: false,
+      other: false,
+    });
+  };
+
   // Filter events based on selected filters
   const filteredEvents = events.filter((event) => {
     const eventType = event.event_type === "interview" || 
@@ -174,9 +194,27 @@ const CalendarPage = () => {
       <main className="container mx-auto px-4 py-8">
         {/* Filters Section */}
         <Card className="p-4 mb-6">
-          <div className="flex items-center gap-2 mb-3">
-            <Filter className="h-4 w-4 text-primary" />
-            <h3 className="font-semibold">Filter Events</h3>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-primary" />
+              <h3 className="font-semibold">Filter Events</h3>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSelectAll}
+              >
+                Select All
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleClearAll}
+              >
+                Clear All
+              </Button>
+            </div>
           </div>
           <div className="flex flex-wrap gap-4">
             <div className="flex items-center space-x-2">
