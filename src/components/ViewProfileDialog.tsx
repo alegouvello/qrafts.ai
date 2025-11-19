@@ -58,12 +58,17 @@ export function ViewProfileDialog({ open, onOpenChange, onUpdateClick }: ViewPro
 
         {loading ? (
           <div className="py-8 text-center text-muted-foreground">Loading...</div>
-        ) : !profile ? (
-          <div className="py-8 text-center">
-            <p className="text-muted-foreground mb-4">No profile information found</p>
+        ) : !profile || (!profile.full_name && !profile.email && !profile.phone && !profile.linkedin_url && !profile.location) ? (
+          <div className="py-8 text-center space-y-4">
+            <div className="bg-muted/50 p-6 rounded-lg">
+              <p className="text-muted-foreground mb-2">Resume uploaded successfully!</p>
+              <p className="text-sm text-muted-foreground">
+                Please update your profile information manually or upload a new resume for automatic parsing.
+              </p>
+            </div>
             <Button onClick={onUpdateClick}>
               <Upload className="h-4 w-4 mr-2" />
-              Upload Resume
+              Update Resume & Profile
             </Button>
           </div>
         ) : (
@@ -131,14 +136,32 @@ export function ViewProfileDialog({ open, onOpenChange, onUpdateClick }: ViewPro
             </div>
 
             {/* Resume Summary */}
-            {profile.resume_text && (
-              <div className="space-y-2">
-                <h3 className="font-semibold text-lg border-b pb-2">Professional Summary</h3>
-                <div className="bg-muted/50 p-4 rounded-lg">
-                  <p className="text-sm whitespace-pre-wrap">{profile.resume_text}</p>
-                </div>
-              </div>
-            )}
+            {profile.resume_text && (() => {
+              try {
+                const parsed = JSON.parse(profile.resume_text);
+                if (parsed.summary && parsed.summary !== 'Resume uploaded successfully. Please update your profile information.') {
+                  return (
+                    <div className="space-y-2">
+                      <h3 className="font-semibold text-lg border-b pb-2">Professional Summary</h3>
+                      <div className="bg-muted/50 p-4 rounded-lg">
+                        <p className="text-sm whitespace-pre-wrap">{parsed.summary}</p>
+                      </div>
+                    </div>
+                  );
+                }
+              } catch (e) {
+                // If it's not JSON, display as-is
+                return (
+                  <div className="space-y-2">
+                    <h3 className="font-semibold text-lg border-b pb-2">Professional Summary</h3>
+                    <div className="bg-muted/50 p-4 rounded-lg">
+                      <p className="text-sm whitespace-pre-wrap">{profile.resume_text}</p>
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
 
             {/* Actions */}
             <div className="flex gap-3 pt-4 border-t">
