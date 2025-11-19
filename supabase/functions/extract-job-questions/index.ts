@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import FirecrawlApp from 'https://esm.sh/@mendable/firecrawl-js@1.0.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -43,34 +44,33 @@ Deno.serve(async (req) => {
     
     console.log('Extracting questions for application:', applicationId, 'from URL:', jobUrl);
 
-    // Fetch the job posting page
+    // Initialize Firecrawl with API key
+    const firecrawlApiKey = Deno.env.get('FIRECRAWL_API_KEY');
+    if (!firecrawlApiKey) {
+      throw new Error('FIRECRAWL_API_KEY not configured');
+    }
+
+    const firecrawl = new FirecrawlApp({ apiKey: firecrawlApiKey });
+    
+    // Use Firecrawl to scrape the page with JavaScript rendering
     let pageContent = '';
     try {
-      const response = await fetch(jobUrl, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        },
+      console.log('Scraping page with Firecrawl...');
+      const scrapeResult = await firecrawl.scrapeUrl(jobUrl, {
+        formats: ['markdown'],
+        waitFor: 5000, // Wait 5 seconds for dynamic content to load
       });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch job posting: ${response.status}`);
+
+      if (!scrapeResult.success) {
+        throw new Error('Firecrawl scraping failed');
       }
-      
-      const html = await response.text();
-      
-      // Basic HTML to text conversion (strip tags)
-      pageContent = html
-        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-        .replace(/<[^>]+>/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim()
-        .slice(0, 8000); // Limit content size
-      
-      console.log('Fetched page content, length:', pageContent.length);
+
+      // Get the markdown content which is cleaner for AI processing
+      pageContent = scrapeResult.markdown || '';
+      console.log('Scraped page content with Firecrawl, length:', pageContent.length);
     } catch (error) {
-      console.error('Error fetching job posting:', error);
-      throw new Error('Failed to fetch job posting page');
+      console.error('Error scraping with Firecrawl:', error);
+      throw new Error('Failed to scrape job posting page with Firecrawl');
     }
 
     // Use Lovable AI to extract questions
@@ -85,11 +85,11 @@ Deno.serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are an expert at analyzing job postings and extracting application questions. Extract all questions that applicants need to answer, such as: "Why do you want to work here?", "Describe your experience with...", "What is your salary expectation?", etc. Return ONLY a JSON array of question strings, nothing else. If no questions are found, return an empty array [].'
+            content: 'You are an expert at analyzing job application forms (especially Greenhouse forms) and extracting all questions that applicants need to answer. Look for ALL form fields including: text inputs, textareas, select dropdowns, radio buttons, checkboxes, and any labeled fields. Extract the exact question text or label for each field. Common questions include: personal info fields (LinkedIn, phone), essay questions ("Why do you want to work here?", "Why this company?"), experience questions, salary expectations, visa sponsorship, relocation questions, start date, demographics, etc. Return ONLY a JSON array of question strings with the exact wording from the form. If you see field labels like "First Name *", just return "First Name". Be thorough and extract ALL questions you can find.'
           },
           {
             role: 'user',
-            content: `Extract all application questions from this job posting:\n\n${pageContent}`
+            content: `Extract ALL application form questions from this job posting page (look especially for the application form section):\n\n${pageContent}`
           }
         ],
         temperature: 0.3,
