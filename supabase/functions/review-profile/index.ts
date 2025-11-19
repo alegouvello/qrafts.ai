@@ -133,28 +133,30 @@ ${parsedProfile.education?.map((edu) => `
 4. Education - Is it presented clearly?
 5. Overall - Any gaps or areas that need strengthening?
 
+CRITICAL: Keep your response concise with maximum 5 improvements and 4 quick wins to ensure the JSON fits within token limits.
+
 Provide your response as a JSON object with this structure:
 {
   "overall_score": number (1-10),
-  "strengths": ["strength 1", "strength 2", ...],
+  "strengths": ["strength 1", "strength 2", ...] (max 5 items),
   "improvements": [
     {
       "section": "section name",
       "issue": "what needs improvement",
       "suggestion": "specific actionable suggestion"
     }
-  ],
-  "quick_wins": ["easy improvement 1", "easy improvement 2", ...]
+  ] (max 5 items),
+  "quick_wins": ["easy improvement 1", "easy improvement 2", ...] (max 4 items)
 }
 
-Be specific, constructive, and actionable. Return ONLY the JSON.`
+Be specific, constructive, and actionable. Return ONLY the JSON without any markdown formatting.`
           },
           {
             role: 'user',
             content: `Please analyze this profile and suggest improvements:\n\n${profileSummary}`
           }
         ],
-        max_tokens: 2000,
+        max_tokens: 3000,
       }),
     });
 
@@ -173,14 +175,31 @@ Be specific, constructive, and actionable. Return ONLY the JSON.`
 
     console.log('AI review response:', content);
 
-    // Parse the JSON response
+    // Parse the JSON response with robust extraction
     let review;
     try {
-      const jsonText = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      // Remove markdown code blocks
+      let jsonText = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      
+      // Try to find JSON object boundaries if there's extra text
+      const jsonStart = jsonText.indexOf('{');
+      const jsonEnd = jsonText.lastIndexOf('}');
+      
+      if (jsonStart !== -1 && jsonEnd !== -1) {
+        jsonText = jsonText.substring(jsonStart, jsonEnd + 1);
+      }
+      
       review = JSON.parse(jsonText);
+      
+      // Validate required fields
+      if (!review.overall_score || !review.strengths || !review.improvements || !review.quick_wins) {
+        throw new Error('Missing required fields in AI response');
+      }
     } catch (parseError) {
       console.error('Error parsing AI response:', parseError);
-      throw new Error('Failed to parse AI review');
+      console.error('Raw content length:', content.length);
+      console.error('Raw content preview:', content.substring(0, 500));
+      throw new Error('Failed to parse AI review - response may be incomplete or malformed');
     }
 
     return new Response(
