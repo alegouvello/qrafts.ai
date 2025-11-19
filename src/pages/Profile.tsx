@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Mail, Phone, MapPin, Linkedin, Briefcase, GraduationCap, Award, ArrowLeft, Upload, Edit } from "lucide-react";
+import { User, Mail, Phone, MapPin, Linkedin, Briefcase, GraduationCap, Award, ArrowLeft, Upload, Edit, Sparkles } from "lucide-react";
 import { UploadResumeDialog } from "@/components/UploadResumeDialog";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
+import { ProfileReviewDialog } from "@/components/ProfileReviewDialog";
 
 interface ProfileData {
   full_name: string | null;
@@ -44,6 +45,7 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showReviewDialog, setShowReviewDialog] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -142,6 +144,15 @@ export default function Profile() {
               Back
             </Button>
             <div className="flex gap-3">
+              <Button
+                onClick={() => setShowReviewDialog(true)}
+                variant="secondary"
+                size="sm"
+                className="gap-2 bg-background/50 backdrop-blur-sm"
+              >
+                <Sparkles className="h-4 w-4" />
+                AI Review
+              </Button>
               <Button
                 onClick={() => setShowUploadDialog(true)}
                 variant="outline"
@@ -390,6 +401,11 @@ export default function Profile() {
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
         onSaved={fetchProfile}
+      />
+
+      <ProfileReviewDialog
+        open={showReviewDialog}
+        onOpenChange={setShowReviewDialog}
       />
     </div>
   );
