@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      answer_templates: {
+        Row: {
+          category: string | null
+          created_at: string
+          id: string
+          tags: string[] | null
+          template_text: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          tags?: string[] | null
+          template_text: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          tags?: string[] | null
+          template_text?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       answers: {
         Row: {
           answer_text: string | null
