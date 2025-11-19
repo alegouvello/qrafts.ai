@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
     // Download the PDF file
     const { data: fileData, error: downloadError } = await supabase.storage
       .from('resumes')
-      .download(resumeUrl.split('/resumes/')[1]);
+      .download(resumeUrl);
 
     if (downloadError || !fileData) {
       console.error('Error downloading file:', downloadError);
