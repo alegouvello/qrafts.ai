@@ -1,73 +1,192 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { Plus, Upload, ArrowLeft } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Plus, Upload, ArrowLeft, LogOut } from "lucide-react";
 import { ApplicationCard } from "@/components/ApplicationCard";
 import { AddApplicationDialog } from "@/components/AddApplicationDialog";
 import { UploadResumeDialog } from "@/components/UploadResumeDialog";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
-// Mock data for demo
-const mockApplications = [
-  {
-    id: "1",
-    company: "TechCorp",
-    position: "Senior Frontend Developer",
-    status: "pending" as const,
-    appliedDate: "2024-01-15",
-    url: "https://example.com/job1",
-    questions: 3,
-    answersCompleted: 2,
-  },
-  {
-    id: "2",
-    company: "StartupXYZ",
-    position: "Full Stack Engineer",
-    status: "interview" as const,
-    appliedDate: "2024-01-10",
-    url: "https://example.com/job2",
-    questions: 5,
-    answersCompleted: 5,
-  },
-  {
-    id: "3",
-    company: "BigCompany Inc",
-    position: "React Developer",
-    status: "rejected" as const,
-    appliedDate: "2024-01-05",
-    url: "https://example.com/job3",
-    questions: 4,
-    answersCompleted: 4,
-  },
-];
+interface Application {
+  id: string;
+  company: string;
+  position: string;
+  status: "pending" | "interview" | "rejected" | "accepted";
+  appliedDate: string;
+  url: string;
+  questions: number;
+  answersCompleted: number;
+}
 
 const Dashboard = () => {
-  const [applications, setApplications] = useState(mockApplications);
+  const [applications, setApplications] = useState<Application[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleAddApplication = (data: { company: string; position: string; url: string }) => {
-    const newApp = {
-      id: String(applications.length + 1),
-      ...data,
-      status: "pending" as const,
-      appliedDate: new Date().toISOString().split("T")[0],
-      questions: 0,
-      answersCompleted: 0,
-    };
-    setApplications([newApp, ...applications]);
-    toast({
-      title: "Application Added",
-      description: "Your new application has been added successfully.",
-    });
+  useEffect(() => {
+    checkAuth();
+    fetchApplications();
+  }, []);
+
+  const checkAuth = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      navigate("/auth");
+    }
   };
 
-  const handleUploadResume = (file: File) => {
-    toast({
-      title: "Resume Uploaded",
-      description: `${file.name} has been uploaded successfully.`,
-    });
+  const fetchApplications = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("applications")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load applications",
+        variant: "destructive",
+      });
+    } else {
+      // Transform data to match the expected format
+      const transformed = await Promise.all(
+        (data || []).map(async (app) => {
+          // Count questions for this application
+          const { count: questionCount } = await supabase
+            .from("questions")
+            .select("*", { count: "exact", head: true })
+            .eq("application_id", app.id);
+
+          // Count answers for questions in this application
+          const { data: questions } = await supabase
+            .from("questions")
+            .select("id")
+            .eq("application_id", app.id);
+
+          const questionIds = questions?.map((q) => q.id) || [];
+          
+          let answerCount = 0;
+          if (questionIds.length > 0) {
+            const { count } = await supabase
+              .from("answers")
+              .select("*", { count: "exact", head: true })
+              .in("question_id", questionIds);
+            answerCount = count || 0;
+          }
+
+          return {
+            id: app.id,
+            company: app.company,
+            position: app.position,
+            status: app.status as "pending" | "interview" | "rejected" | "accepted",
+            appliedDate: app.applied_date,
+            url: app.url,
+            questions: questionCount || 0,
+            answersCompleted: answerCount,
+          };
+        })
+      );
+      setApplications(transformed);
+    }
+    setLoading(false);
+  };
+
+  const handleAddApplication = async (data: { company: string; position: string; url: string }) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to add applications",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { error } = await supabase
+      .from("applications")
+      .insert({
+        company: data.company,
+        position: data.position,
+        url: data.url,
+        user_id: user.id,
+      });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add application",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Application Added",
+        description: "Your new application has been added successfully.",
+      });
+      fetchApplications();
+    }
+  };
+
+  const handleUploadResume = async (file: File) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to upload resumes",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const filePath = `${user.id}/${file.name}`;
+    
+    const { error: uploadError } = await supabase.storage
+      .from("resumes")
+      .upload(filePath, file, {
+        upsert: true
+      });
+
+    if (uploadError) {
+      toast({
+        title: "Upload Failed",
+        description: uploadError.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { error: dbError } = await supabase
+      .from("resumes")
+      .insert({
+        user_id: user.id,
+        file_name: file.name,
+        file_path: filePath,
+        file_size: file.size,
+      });
+
+    if (dbError) {
+      toast({
+        title: "Error",
+        description: "Failed to save resume information",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Resume Uploaded",
+        description: `${file.name} has been uploaded successfully.`,
+      });
+    }
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/auth");
   };
 
   return (
@@ -96,6 +215,10 @@ const Dashboard = () => {
                 <Plus className="h-4 w-4 mr-2" />
                 Add Application
               </Button>
+              <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </Button>
             </div>
           </div>
         </div>
@@ -123,14 +246,22 @@ const Dashboard = () => {
           </div>
           <div className="p-6 rounded-xl bg-card shadow-soft">
             <p className="text-sm text-muted-foreground mb-1">Response Rate</p>
-            <p className="text-3xl font-bold text-success">67%</p>
+            <p className="text-3xl font-bold text-success">
+              {applications.length > 0
+                ? Math.round((applications.filter((a) => a.status !== "pending").length / applications.length) * 100)
+                : 0}%
+            </p>
           </div>
         </div>
 
         {/* Applications Grid */}
         <div className="space-y-4">
           <h2 className="text-2xl font-bold mb-4">Your Applications</h2>
-          {applications.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-16">
+              <p className="text-muted-foreground text-lg">Loading applications...</p>
+            </div>
+          ) : applications.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-muted-foreground text-lg mb-4">No applications yet</p>
               <Button onClick={() => setShowAddDialog(true)}>
