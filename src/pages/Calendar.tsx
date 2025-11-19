@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, LogOut, Calendar as CalendarIcon, Filter } from "lucide-react";
+import { ArrowLeft, LogOut, Calendar as CalendarIcon, Filter, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Calendar } from "@/components/ui/calendar";
@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { format, isSameDay, startOfMonth, endOfMonth } from "date-fns";
 
 interface TimelineEvent {
@@ -26,6 +27,7 @@ const CalendarPage = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState(() => {
     // Load filters from localStorage on initial render
     const savedFilters = localStorage.getItem("calendarFilters");
@@ -144,7 +146,18 @@ const CalendarPage = () => {
                       event.event_type === "rejection"
       ? event.event_type
       : "other";
-    return filters[eventType as keyof typeof filters];
+    
+    // Check if event type is selected
+    const typeMatch = filters[eventType as keyof typeof filters];
+    
+    // Check if search query matches
+    const searchLower = searchQuery.toLowerCase();
+    const searchMatch = !searchQuery || 
+      event.title.toLowerCase().includes(searchLower) ||
+      event.company?.toLowerCase().includes(searchLower) ||
+      event.position?.toLowerCase().includes(searchLower);
+    
+    return typeMatch && searchMatch;
   });
 
   // Get events for selected date
@@ -209,6 +222,29 @@ const CalendarPage = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        {/* Search Bar */}
+        <Card className="p-4 mb-4">
+          <div className="flex items-center gap-2">
+            <Search className="h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search by company, position, or event title..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1"
+            />
+            {searchQuery && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSearchQuery("")}
+              >
+                Clear
+              </Button>
+            )}
+          </div>
+        </Card>
+
         {/* Filters Section */}
         <Card className="p-4 mb-6">
           <div className="flex items-center justify-between mb-3">
