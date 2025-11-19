@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, LogOut, Calendar as CalendarIcon } from "lucide-react";
+import { ArrowLeft, LogOut, Calendar as CalendarIcon, Filter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Calendar } from "@/components/ui/calendar";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { format, isSameDay, startOfMonth, endOfMonth } from "date-fns";
 
 interface TimelineEvent {
@@ -24,6 +26,13 @@ const CalendarPage = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState({
+    interview: true,
+    deadline: true,
+    offer: true,
+    rejection: true,
+    other: true,
+  });
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -86,15 +95,30 @@ const CalendarPage = () => {
     navigate("/auth");
   };
 
+  const handleFilterChange = (eventType: string, checked: boolean) => {
+    setFilters((prev) => ({ ...prev, [eventType]: checked }));
+  };
+
+  // Filter events based on selected filters
+  const filteredEvents = events.filter((event) => {
+    const eventType = event.event_type === "interview" || 
+                      event.event_type === "deadline" || 
+                      event.event_type === "offer" || 
+                      event.event_type === "rejection"
+      ? event.event_type
+      : "other";
+    return filters[eventType as keyof typeof filters];
+  });
+
   // Get events for selected date
   const selectedDateEvents = selectedDate
-    ? events.filter((event) =>
+    ? filteredEvents.filter((event) =>
         isSameDay(new Date(event.event_date), selectedDate)
       )
     : [];
 
   // Get events with dates for calendar highlighting
-  const eventDates = events.map((event) => new Date(event.event_date));
+  const eventDates = filteredEvents.map((event) => new Date(event.event_date));
 
   const getEventColor = (eventType: string) => {
     switch (eventType) {
@@ -148,6 +172,84 @@ const CalendarPage = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        {/* Filters Section */}
+        <Card className="p-4 mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <Filter className="h-4 w-4 text-primary" />
+            <h3 className="font-semibold">Filter Events</h3>
+          </div>
+          <div className="flex flex-wrap gap-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="interview"
+                checked={filters.interview}
+                onCheckedChange={(checked) =>
+                  handleFilterChange("interview", checked as boolean)
+                }
+              />
+              <Label htmlFor="interview" className="cursor-pointer">
+                <Badge className="bg-primary text-primary-foreground">
+                  Interview
+                </Badge>
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="deadline"
+                checked={filters.deadline}
+                onCheckedChange={(checked) =>
+                  handleFilterChange("deadline", checked as boolean)
+                }
+              />
+              <Label htmlFor="deadline" className="cursor-pointer">
+                <Badge className="bg-destructive text-destructive-foreground">
+                  Deadline
+                </Badge>
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="offer"
+                checked={filters.offer}
+                onCheckedChange={(checked) =>
+                  handleFilterChange("offer", checked as boolean)
+                }
+              />
+              <Label htmlFor="offer" className="cursor-pointer">
+                <Badge className="bg-green-500 text-white">Offer</Badge>
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="rejection"
+                checked={filters.rejection}
+                onCheckedChange={(checked) =>
+                  handleFilterChange("rejection", checked as boolean)
+                }
+              />
+              <Label htmlFor="rejection" className="cursor-pointer">
+                <Badge className="bg-muted text-muted-foreground">
+                  Rejection
+                </Badge>
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="other"
+                checked={filters.other}
+                onCheckedChange={(checked) =>
+                  handleFilterChange("other", checked as boolean)
+                }
+              />
+              <Label htmlFor="other" className="cursor-pointer">
+                <Badge className="bg-secondary text-secondary-foreground">
+                  Other
+                </Badge>
+              </Label>
+            </div>
+          </div>
+        </Card>
+
         <div className="grid md:grid-cols-2 gap-8">
           {/* Calendar Section */}
           <Card className="p-6">
@@ -161,22 +263,9 @@ const CalendarPage = () => {
               className="rounded-md border pointer-events-auto"
             />
             <div className="mt-6 space-y-2">
-              <h3 className="text-sm font-medium">Event Types:</h3>
-              <div className="flex flex-wrap gap-2">
-                <Badge className="bg-primary text-primary-foreground">
-                  Interview
-                </Badge>
-                <Badge className="bg-destructive text-destructive-foreground">
-                  Deadline
-                </Badge>
-                <Badge className="bg-green-500 text-white">Offer</Badge>
-                <Badge className="bg-muted text-muted-foreground">
-                  Rejection
-                </Badge>
-                <Badge className="bg-secondary text-secondary-foreground">
-                  Other
-                </Badge>
-              </div>
+              <h3 className="text-sm font-medium text-muted-foreground">
+                Dates with events are highlighted
+              </h3>
             </div>
           </Card>
 
@@ -230,11 +319,11 @@ const CalendarPage = () => {
           <h2 className="text-lg font-semibold mb-4">All Upcoming Events</h2>
           {loading ? (
             <p className="text-muted-foreground">Loading events...</p>
-          ) : events.filter(e => new Date(e.event_date) >= new Date()).length === 0 ? (
-            <p className="text-muted-foreground">No upcoming events.</p>
+          ) : filteredEvents.filter(e => new Date(e.event_date) >= new Date()).length === 0 ? (
+            <p className="text-muted-foreground">No upcoming events match your filters.</p>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {events
+              {filteredEvents
                 .filter(e => new Date(e.event_date) >= new Date())
                 .slice(0, 9)
                 .map((event) => (
