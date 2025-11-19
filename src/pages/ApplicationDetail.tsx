@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { AnswerImprovementDialog } from "@/components/AnswerImprovementDialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -16,6 +17,7 @@ import {
   Loader2,
   CheckCircle,
   Sparkles,
+  Lightbulb,
 } from "lucide-react";
 import {
   Select,
@@ -65,6 +67,14 @@ const ApplicationDetail = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [suggesting, setSuggesting] = useState<Record<string, boolean>>({});
+  const [improving, setImproving] = useState<Record<string, boolean>>({});
+  const [showImprovementDialog, setShowImprovementDialog] = useState(false);
+  const [currentImprovement, setCurrentImprovement] = useState<{
+    questionId: string;
+    strengths: string;
+    improvements: string;
+    improvedVersion: string;
+  } | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -239,6 +249,80 @@ const ApplicationDetail = () => {
     setSuggesting((prev) => ({ ...prev, [questionId]: false }));
   };
 
+  const handleImproveAnswer = async (questionId: string, questionText: string) => {
+    if (!application) return;
+
+    const currentAnswer = answers[questionId];
+    if (!currentAnswer || currentAnswer.trim().length < 10) {
+      toast({
+        title: "No Answer to Improve",
+        description: "Please write at least a basic answer first before requesting improvements.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setImproving((prev) => ({ ...prev, [questionId]: true }));
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const response = await supabase.functions.invoke('improve-answer', {
+        body: {
+          questionText: questionText,
+          currentAnswer: currentAnswer,
+          company: application.company,
+          position: application.position,
+        },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      if (response.data?.success) {
+        setCurrentImprovement({
+          questionId: questionId,
+          strengths: response.data.strengths,
+          improvements: response.data.improvements,
+          improvedVersion: response.data.improvedVersion,
+        });
+        setShowImprovementDialog(true);
+      } else {
+        throw new Error(response.data?.error || 'Failed to improve answer');
+      }
+    } catch (error) {
+      console.error('Error improving answer:', error);
+      toast({
+        title: "Improvement Failed",
+        description: error instanceof Error ? error.message : "Could not generate improvements. Please try again.",
+        variant: "destructive",
+      });
+    }
+
+    setImproving((prev) => ({ ...prev, [questionId]: false }));
+  };
+
+  const handleApplyImprovement = () => {
+    if (!currentImprovement) return;
+
+    setAnswers((prev) => ({
+      ...prev,
+      [currentImprovement.questionId]: currentImprovement.improvedVersion,
+    }));
+
+    toast({
+      title: "Improvement Applied",
+      description: "The improved version has been applied. Don't forget to save!",
+    });
+
+    setShowImprovementDialog(false);
+    setCurrentImprovement(null);
+  };
+
   const handleStatusChange = async (newStatus: string) => {
     const { error } = await supabase
       .from("applications")
@@ -371,6 +455,8 @@ const ApplicationDetail = () => {
                 const isModified = answers[question.id] !== savedAnswers[question.id];
                 const isSaving = saving[question.id];
                 const isSuggesting = suggesting[question.id];
+                const isImproving = improving[question.id];
+                const hasCurrentAnswer = answers[question.id]?.trim();
 
                 return (
                   <Card key={question.id} className="p-6">
@@ -391,25 +477,47 @@ const ApplicationDetail = () => {
                           onChange={(e) => handleAnswerChange(question.id, e.target.value)}
                           className="min-h-[120px] mb-3"
                         />
-                        <div className="flex justify-between items-center">
-                          <Button
-                            onClick={() => handleGetSuggestion(question.id, question.question_text)}
-                            disabled={isSuggesting}
-                            variant="outline"
-                            size="sm"
-                          >
-                            {isSuggesting ? (
-                              <>
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                Generating...
-                              </>
-                            ) : (
-                              <>
-                                <Sparkles className="h-4 w-4 mr-2" />
-                                AI Suggest
-                              </>
+                        <div className="flex justify-between items-center gap-2">
+                          <div className="flex gap-2">
+                            <Button
+                              onClick={() => handleGetSuggestion(question.id, question.question_text)}
+                              disabled={isSuggesting}
+                              variant="outline"
+                              size="sm"
+                            >
+                              {isSuggesting ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  Generating...
+                                </>
+                              ) : (
+                                <>
+                                  <Sparkles className="h-4 w-4 mr-2" />
+                                  AI Suggest
+                                </>
+                              )}
+                            </Button>
+                            {hasCurrentAnswer && (
+                              <Button
+                                onClick={() => handleImproveAnswer(question.id, question.question_text)}
+                                disabled={isImproving}
+                                variant="outline"
+                                size="sm"
+                              >
+                                {isImproving ? (
+                                  <>
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                    Analyzing...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Lightbulb className="h-4 w-4 mr-2" />
+                                    Improve
+                                  </>
+                                )}
+                              </Button>
                             )}
-                          </Button>
+                          </div>
                           <Button
                             onClick={() => handleSaveAnswer(question.id)}
                             disabled={isSaving || !isModified}
@@ -437,6 +545,18 @@ const ApplicationDetail = () => {
           )}
         </div>
       </main>
+
+      {/* Answer Improvement Dialog */}
+      {currentImprovement && (
+        <AnswerImprovementDialog
+          open={showImprovementDialog}
+          onOpenChange={setShowImprovementDialog}
+          strengths={currentImprovement.strengths}
+          improvements={currentImprovement.improvements}
+          improvedVersion={currentImprovement.improvedVersion}
+          onApply={handleApplyImprovement}
+        />
+      )}
     </div>
   );
 };
