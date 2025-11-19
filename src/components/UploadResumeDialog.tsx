@@ -9,11 +9,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Upload, FileText, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface UploadResumeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onUpload: (file: File) => void;
+  onUpload: (file: File) => Promise<boolean>;
 }
 
 export const UploadResumeDialog = ({
@@ -23,6 +25,8 @@ export const UploadResumeDialog = ({
 }: UploadResumeDialogProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const { toast } = useToast();
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -50,12 +54,44 @@ export const UploadResumeDialog = ({
     }
   };
 
-  const handleSubmit = () => {
-    if (selectedFile) {
-      onUpload(selectedFile);
+  const handleSubmit = async () => {
+    if (!selectedFile) return;
+
+    setUploading(true);
+    const success = await onUpload(selectedFile);
+    
+    if (success) {
+      // Call parse-resume function after successful upload
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const filePath = `${user.id}/${selectedFile.name}`;
+          const { data: { session } } = await supabase.auth.getSession();
+          
+          const response = await supabase.functions.invoke('parse-resume', {
+            body: { resumeUrl: filePath },
+            headers: {
+              Authorization: `Bearer ${session?.access_token}`,
+            },
+          });
+
+          if (response.data?.success) {
+            toast({
+              title: "Resume Parsed",
+              description: "Your profile has been updated. Questions will auto-fill!",
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error parsing resume:', error);
+        // Don't show error to user as upload was successful
+      }
+      
       setSelectedFile(null);
       onOpenChange(false);
     }
+    
+    setUploading(false);
   };
 
   return (
@@ -124,8 +160,8 @@ export const UploadResumeDialog = ({
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={!selectedFile}>
-            Upload Resume
+          <Button onClick={handleSubmit} disabled={!selectedFile || uploading}>
+            {uploading ? "Uploading..." : "Upload Resume"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -178,7 +178,7 @@ const Dashboard = () => {
     fetchApplications();
   };
 
-  const handleUploadResume = async (file: File) => {
+  const handleUploadResume = async (file: File): Promise<boolean> => {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
@@ -187,7 +187,7 @@ const Dashboard = () => {
         description: "You must be logged in to upload resumes",
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
     const filePath = `${user.id}/${file.name}`;
@@ -204,7 +204,7 @@ const Dashboard = () => {
         description: uploadError.message,
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
     const { error: dbError } = await supabase
@@ -222,11 +222,13 @@ const Dashboard = () => {
         description: "Failed to save resume information",
         variant: "destructive",
       });
+      return false;
     } else {
       toast({
         title: "Resume Uploaded",
         description: `${file.name} has been uploaded successfully.`,
       });
+      return true;
     }
   };
 
