@@ -8,7 +8,10 @@ import { Progress } from "@/components/ui/progress";
 import { AnswerImprovementDialog } from "@/components/AnswerImprovementDialog";
 import { SaveTemplateDialog } from "@/components/SaveTemplateDialog";
 import { BrowseTemplatesDialog } from "@/components/BrowseTemplatesDialog";
+import { AddTimelineEventDialog } from "@/components/AddTimelineEventDialog";
+import { TimelineView } from "@/components/TimelineView";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft,
@@ -22,6 +25,8 @@ import {
   Lightbulb,
   BookmarkPlus,
   Library,
+  Clock,
+  Plus,
 } from "lucide-react";
 import {
   Select,
@@ -52,6 +57,15 @@ interface Answer {
   answer_text: string;
 }
 
+interface TimelineEvent {
+  id: string;
+  event_type: string;
+  title: string;
+  description: string | null;
+  event_date: string;
+  created_at: string;
+}
+
 const statusConfig = {
   pending: { label: "Pending", variant: "secondary" as const },
   interview: { label: "Interview", variant: "default" as const },
@@ -68,6 +82,7 @@ const ApplicationDetail = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [savedAnswers, setSavedAnswers] = useState<Record<string, string>>({});
+  const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [suggesting, setSuggesting] = useState<Record<string, boolean>>({});
@@ -75,6 +90,7 @@ const ApplicationDetail = () => {
   const [showImprovementDialog, setShowImprovementDialog] = useState(false);
   const [showSaveTemplateDialog, setShowSaveTemplateDialog] = useState(false);
   const [showBrowseTemplatesDialog, setShowBrowseTemplatesDialog] = useState(false);
+  const [showAddTimelineDialog, setShowAddTimelineDialog] = useState(false);
   const [currentQuestionForTemplate, setCurrentQuestionForTemplate] = useState<string | null>(null);
   const [currentImprovement, setCurrentImprovement] = useState<{
     questionId: string;
@@ -87,6 +103,7 @@ const ApplicationDetail = () => {
     checkAuth();
     if (id) {
       fetchApplicationData();
+      fetchTimelineEvents();
     }
   }, [id]);
 
@@ -151,6 +168,20 @@ const ApplicationDetail = () => {
     }
 
     setLoading(false);
+  };
+
+  const fetchTimelineEvents = async () => {
+    const { data, error } = await supabase
+      .from("timeline_events")
+      .select("*")
+      .eq("application_id", id)
+      .order("event_date", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching timeline events:", error);
+    } else {
+      setTimelineEvents(data || []);
+    }
   };
 
   const handleAnswerChange = (questionId: string, value: string) => {
@@ -375,6 +406,62 @@ const ApplicationDetail = () => {
     });
   };
 
+  const handleAddTimelineEvent = async (event: {
+    eventType: string;
+    title: string;
+    description: string;
+    eventDate: Date;
+  }) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || !id) return;
+
+    const { error } = await supabase
+      .from("timeline_events")
+      .insert({
+        application_id: id,
+        user_id: user.id,
+        event_type: event.eventType,
+        title: event.title,
+        description: event.description || null,
+        event_date: event.eventDate.toISOString(),
+      });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add timeline event",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Event Added",
+        description: "Timeline event has been added successfully",
+      });
+      fetchTimelineEvents();
+    }
+  };
+
+  const handleDeleteTimelineEvent = async (eventId: string) => {
+    const { error } = await supabase
+      .from("timeline_events")
+      .delete()
+      .eq("id", eventId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete timeline event",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Deleted",
+        description: "Timeline event has been removed",
+      });
+      fetchTimelineEvents();
+    }
+  };
+
   const handleStatusChange = async (newStatus: string) => {
     const { error } = await supabase
       .from("applications")
@@ -487,9 +574,19 @@ const ApplicationDetail = () => {
           )}
         </Card>
 
-        {/* Questions Section */}
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold mb-4">Application Questions</h2>
+        {/* Tabs for Questions and Timeline */}
+        <Tabs defaultValue="questions" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="questions">Questions & Answers</TabsTrigger>
+            <TabsTrigger value="timeline">
+              <Clock className="h-4 w-4 mr-2" />
+              Timeline & Notes
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Questions Tab */}
+          <TabsContent value="questions" className="space-y-4">
+            <h2 className="text-2xl font-bold mb-4">Application Questions</h2>
 
           {questions.length === 0 ? (
             <Card className="p-8 text-center">
@@ -619,8 +716,25 @@ const ApplicationDetail = () => {
               })}
             </div>
           )}
-        </div>
-      </main>
+        </TabsContent>
+
+        {/* Timeline Tab */}
+        <TabsContent value="timeline" className="space-y-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold">Timeline & Notes</h2>
+            <Button onClick={() => setShowAddTimelineDialog(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Event
+            </Button>
+          </div>
+
+          <TimelineView
+            events={timelineEvents}
+            onDelete={handleDeleteTimelineEvent}
+          />
+        </TabsContent>
+      </Tabs>
+    </main>
 
       {/* Answer Improvement Dialog */}
       {currentImprovement && (
@@ -651,6 +765,13 @@ const ApplicationDetail = () => {
             handleApplyTemplate(currentQuestionForTemplate, templateText);
           }
         }}
+      />
+
+      {/* Add Timeline Event Dialog */}
+      <AddTimelineEventDialog
+        open={showAddTimelineDialog}
+        onOpenChange={setShowAddTimelineDialog}
+        onAdd={handleAddTimelineEvent}
       />
     </div>
   );
