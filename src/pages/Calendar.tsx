@@ -170,6 +170,17 @@ const CalendarPage = () => {
   // Get events with dates for calendar highlighting
   const eventDates = filteredEvents.map((event) => new Date(event.event_date));
 
+  // Calculate statistics
+  const totalEvents = events.length;
+  const upcomingEvents = events.filter(e => new Date(e.event_date) >= new Date()).length;
+  const eventStats = {
+    interview: events.filter(e => e.event_type === "interview").length,
+    deadline: events.filter(e => e.event_type === "deadline").length,
+    offer: events.filter(e => e.event_type === "offer").length,
+    rejection: events.filter(e => e.event_type === "rejection").length,
+    other: events.filter(e => !["interview", "deadline", "offer", "rejection"].includes(e.event_type)).length,
+  };
+
   const getEventColor = (eventType: string) => {
     switch (eventType) {
       case "interview":
@@ -222,6 +233,111 @@ const CalendarPage = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        {/* Statistics Card */}
+        <Card className="p-6 mb-4">
+          <h2 className="text-lg font-semibold mb-4">Event Statistics</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Total Events</p>
+              <p className="text-3xl font-bold">{totalEvents}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Upcoming</p>
+              <p className="text-3xl font-bold text-primary">{upcomingEvents}</p>
+            </div>
+            <div className="col-span-2 md:col-span-1">
+              <p className="text-sm text-muted-foreground mb-1">Past Events</p>
+              <p className="text-3xl font-bold text-muted-foreground">{totalEvents - upcomingEvents}</p>
+            </div>
+          </div>
+          
+          <div className="mt-6 space-y-3">
+            <h3 className="text-sm font-semibold mb-3">Breakdown by Type</h3>
+            
+            {/* Interview */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-primary text-primary-foreground">Interview</Badge>
+                </div>
+                <span className="font-semibold">{eventStats.interview}</span>
+              </div>
+              <div className="w-full bg-secondary rounded-full h-2">
+                <div 
+                  className="bg-primary h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${totalEvents > 0 ? (eventStats.interview / totalEvents) * 100 : 0}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Deadline */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-destructive text-destructive-foreground">Deadline</Badge>
+                </div>
+                <span className="font-semibold">{eventStats.deadline}</span>
+              </div>
+              <div className="w-full bg-secondary rounded-full h-2">
+                <div 
+                  className="bg-destructive h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${totalEvents > 0 ? (eventStats.deadline / totalEvents) * 100 : 0}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Offer */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-green-500 text-white">Offer</Badge>
+                </div>
+                <span className="font-semibold">{eventStats.offer}</span>
+              </div>
+              <div className="w-full bg-secondary rounded-full h-2">
+                <div 
+                  className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${totalEvents > 0 ? (eventStats.offer / totalEvents) * 100 : 0}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Rejection */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-muted text-muted-foreground">Rejection</Badge>
+                </div>
+                <span className="font-semibold">{eventStats.rejection}</span>
+              </div>
+              <div className="w-full bg-secondary rounded-full h-2">
+                <div 
+                  className="bg-muted-foreground h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${totalEvents > 0 ? (eventStats.rejection / totalEvents) * 100 : 0}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Other */}
+            {eventStats.other > 0 && (
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-secondary text-secondary-foreground">Other</Badge>
+                  </div>
+                  <span className="font-semibold">{eventStats.other}</span>
+                </div>
+                <div className="w-full bg-secondary rounded-full h-2">
+                  <div 
+                    className="bg-secondary-foreground h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${totalEvents > 0 ? (eventStats.other / totalEvents) * 100 : 0}%` }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </Card>
+
         {/* Search Bar */}
         <Card className="p-4 mb-4">
           <div className="flex items-center gap-2">
