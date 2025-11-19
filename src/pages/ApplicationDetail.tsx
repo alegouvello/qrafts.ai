@@ -15,6 +15,7 @@ import {
   Save,
   Loader2,
   CheckCircle,
+  Sparkles,
 } from "lucide-react";
 import {
   Select,
@@ -63,6 +64,7 @@ const ApplicationDetail = () => {
   const [savedAnswers, setSavedAnswers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<Record<string, boolean>>({});
+  const [suggesting, setSuggesting] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     checkAuth();
@@ -189,6 +191,52 @@ const ApplicationDetail = () => {
     }
 
     setSaving((prev) => ({ ...prev, [questionId]: false }));
+  };
+
+  const handleGetSuggestion = async (questionId: string, questionText: string) => {
+    if (!application) return;
+    
+    setSuggesting((prev) => ({ ...prev, [questionId]: true }));
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const response = await supabase.functions.invoke('suggest-answer', {
+        body: {
+          questionText: questionText,
+          applicationId: application.id,
+          company: application.company,
+          position: application.position,
+        },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      if (response.data?.success) {
+        // Set the suggestion as the answer
+        setAnswers((prev) => ({ ...prev, [questionId]: response.data.suggestion }));
+        toast({
+          title: "AI Suggestion Generated",
+          description: "Review and customize the suggested answer before saving.",
+        });
+      } else {
+        throw new Error(response.data?.error || 'Failed to generate suggestion');
+      }
+    } catch (error) {
+      console.error('Error getting suggestion:', error);
+      toast({
+        title: "Suggestion Failed",
+        description: error instanceof Error ? error.message : "Could not generate AI suggestion. Please try again.",
+        variant: "destructive",
+      });
+    }
+
+    setSuggesting((prev) => ({ ...prev, [questionId]: false }));
   };
 
   const handleStatusChange = async (newStatus: string) => {
@@ -322,6 +370,7 @@ const ApplicationDetail = () => {
                 const hasAnswer = savedAnswers[question.id]?.trim();
                 const isModified = answers[question.id] !== savedAnswers[question.id];
                 const isSaving = saving[question.id];
+                const isSuggesting = suggesting[question.id];
 
                 return (
                   <Card key={question.id} className="p-6">
@@ -342,7 +391,25 @@ const ApplicationDetail = () => {
                           onChange={(e) => handleAnswerChange(question.id, e.target.value)}
                           className="min-h-[120px] mb-3"
                         />
-                        <div className="flex justify-end">
+                        <div className="flex justify-between items-center">
+                          <Button
+                            onClick={() => handleGetSuggestion(question.id, question.question_text)}
+                            disabled={isSuggesting}
+                            variant="outline"
+                            size="sm"
+                          >
+                            {isSuggesting ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Generating...
+                              </>
+                            ) : (
+                              <>
+                                <Sparkles className="h-4 w-4 mr-2" />
+                                AI Suggest
+                              </>
+                            )}
+                          </Button>
                           <Button
                             onClick={() => handleSaveAnswer(question.id)}
                             disabled={isSaving || !isModified}
