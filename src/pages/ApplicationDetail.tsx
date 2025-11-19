@@ -871,103 +871,102 @@ const ApplicationDetail = () => {
                 const hasCurrentAnswer = answers[question.id]?.trim();
 
                 return (
-                  <Card key={question.id} className="p-6">
-                    <div className="flex items-start gap-3 mb-4">
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                  <Card key={question.id} className="p-4 bg-card/30 backdrop-blur-sm border-border/50 hover:border-primary/30 transition-all">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold mt-0.5">
                         {index + 1}
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between gap-4 mb-4">
-                          <h3 className="text-lg font-semibold">{question.question_text}</h3>
+                      <div className="flex-1 min-w-0 space-y-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <h3 className="font-medium leading-tight">{question.question_text}</h3>
                           {hasAnswer && !isModified && (
-                            <CheckCircle className="h-5 w-5 text-success flex-shrink-0" />
+                            <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
                           )}
                         </div>
                         <Textarea
                           placeholder="Type your answer here..."
                           value={answers[question.id] || ""}
                           onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                          className="min-h-[120px] mb-3"
+                          className="min-h-[100px]"
                         />
-                        <div className="flex justify-between items-center gap-2">
-                          <div className="flex gap-2 flex-wrap">
-                            <Button
-                              onClick={() => handleGetSuggestion(question.id, question.question_text)}
-                              disabled={isSuggesting}
-                              variant="outline"
-                              size="sm"
-                            >
-                              {isSuggesting ? (
-                                <>
-                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                  Generating...
-                                </>
-                              ) : (
-                                <>
-                                  <Sparkles className="h-4 w-4 mr-2" />
-                                  AI Suggest
-                                </>
-                              )}
-                            </Button>
-                            {hasCurrentAnswer && (
+                        <div className="flex gap-2 flex-wrap items-center">
+                          <Button
+                            onClick={() => handleGetSuggestion(question.id, question.question_text)}
+                            disabled={isSuggesting}
+                            variant="outline"
+                            size="sm"
+                          >
+                            {isSuggesting ? (
                               <>
-                                <Button
-                                  onClick={() => handleImproveAnswer(question.id, question.question_text)}
-                                  disabled={isImproving}
-                                  variant="outline"
-                                  size="sm"
-                                >
-                                  {isImproving ? (
-                                    <>
-                                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                      Analyzing...
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Lightbulb className="h-4 w-4 mr-2" />
-                                      Improve
-                                    </>
-                                  )}
-                                </Button>
-                                <Button
-                                  onClick={() => {
-                                    setCurrentQuestionForTemplate(question.id);
-                                    setShowSaveTemplateDialog(true);
-                                  }}
-                                  variant="outline"
-                                  size="sm"
-                                >
-                                  <BookmarkPlus className="h-4 w-4 mr-2" />
-                                  Save Template
-                                </Button>
+                                <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
+                                Generating...
+                              </>
+                            ) : (
+                              <>
+                                <Sparkles className="h-3 w-3 mr-1.5" />
+                                AI Suggest
                               </>
                             )}
-                            <Button
-                              onClick={() => {
-                                setCurrentQuestionForTemplate(question.id);
-                                setShowBrowseTemplatesDialog(true);
-                              }}
-                              variant="outline"
-                              size="sm"
-                            >
-                              <Library className="h-4 w-4 mr-2" />
-                              Browse Templates
-                            </Button>
-                          </div>
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              setCurrentQuestionForTemplate(question.id);
+                              setShowBrowseTemplatesDialog(true);
+                            }}
+                            variant="outline"
+                            size="sm"
+                          >
+                            <Library className="h-3 w-3 mr-1.5" />
+                            Templates
+                          </Button>
+                          {hasCurrentAnswer && (
+                            <>
+                              <Button
+                                onClick={() => handleImproveAnswer(question.id, question.question_text)}
+                                disabled={isImproving}
+                                variant="outline"
+                                size="sm"
+                              >
+                                {isImproving ? (
+                                  <>
+                                    <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
+                                    Analyzing...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Lightbulb className="h-3 w-3 mr-1.5" />
+                                    Improve
+                                  </>
+                                )}
+                              </Button>
+                              <Button
+                                onClick={() => {
+                                  setCurrentQuestionForTemplate(question.id);
+                                  setShowSaveTemplateDialog(true);
+                                }}
+                                variant="outline"
+                                size="sm"
+                              >
+                                <BookmarkPlus className="h-3 w-3 mr-1.5" />
+                                Save
+                              </Button>
+                            </>
+                          )}
                           <Button
                             onClick={() => handleSaveAnswer(question.id)}
                             disabled={isSaving || !isModified}
                             size="sm"
+                            className="ml-auto"
                           >
                             {isSaving ? (
                               <>
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
                                 Saving...
                               </>
                             ) : (
                               <>
-                                <Save className="h-4 w-4 mr-2" />
-                                {hasAnswer && !isModified ? "Saved" : "Save Answer"}
+                                <Save className="h-3 w-3 mr-1.5" />
+                                Save Answer
                               </>
                             )}
                           </Button>
