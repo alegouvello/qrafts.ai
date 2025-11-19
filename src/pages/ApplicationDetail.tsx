@@ -117,6 +117,7 @@ const ApplicationDetail = () => {
     linkedin_url?: string;
     location?: string;
   } | null>(null);
+  const [autoPopulatedAnswers, setAutoPopulatedAnswers] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     checkAuth();
@@ -250,14 +251,17 @@ const ApplicationDetail = () => {
         }
 
         // Auto-suggest from profile for empty answers
+        const autoPopulated = new Set<string>();
         questionsData.forEach((question) => {
           if (!answersMap[question.id]) {
             const suggestion = autoSuggestFromProfile(question.question_text);
             if (suggestion) {
               answersMap[question.id] = suggestion;
+              autoPopulated.add(question.id);
             }
           }
         });
+        setAutoPopulatedAnswers(autoPopulated);
 
         setAnswers(answersMap);
         setSavedAnswers(answersData ? answersData.reduce((acc, answer) => {
@@ -286,6 +290,14 @@ const ApplicationDetail = () => {
 
   const handleAnswerChange = (questionId: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
+    // Remove from auto-populated set when user edits
+    if (autoPopulatedAnswers.has(questionId)) {
+      setAutoPopulatedAnswers(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(questionId);
+        return newSet;
+      });
+    }
   };
 
   const handleSaveAnswer = async (questionId: string) => {
@@ -963,7 +975,15 @@ const ApplicationDetail = () => {
                       </div>
                       <div className="flex-1 min-w-0 space-y-3">
                         <div className="flex items-start justify-between gap-3">
-                          <h3 className="font-medium leading-tight">{question.question_text}</h3>
+                          <div className="flex items-start gap-2 flex-1">
+                            <h3 className="font-medium leading-tight flex-1">{question.question_text}</h3>
+                            {autoPopulatedAnswers.has(question.id) && (
+                              <Badge variant="secondary" className="text-xs flex-shrink-0">
+                                <Sparkles className="w-3 h-3 mr-1" />
+                                Auto-filled
+                              </Badge>
+                            )}
+                          </div>
                           {hasAnswer && !isModified && (
                             <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
                           )}
