@@ -113,6 +113,11 @@ export default function Profile() {
     return true;
   };
 
+  const getInitials = () => {
+    const name = parsedData?.full_name || profile?.full_name || "User";
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -122,139 +127,167 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
+      {/* Header with gradient background */}
+      <div className="relative bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 border-b">
+        <div className="absolute inset-0 bg-grid-white/5 [mask-image:linear-gradient(0deg,transparent,black)]" />
+        <div className="container mx-auto px-4 py-8 relative">
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
               onClick={() => navigate("/dashboard")}
-              className="gap-2"
+              className="gap-2 hover:bg-background/50"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to Dashboard
+              Back
             </Button>
-            <Button
-              onClick={() => setShowUploadDialog(true)}
-              variant="outline"
-              className="gap-2"
-            >
-              <Upload className="h-4 w-4" />
-              Update Resume
-            </Button>
-            <Button
-              onClick={() => setShowEditDialog(true)}
-              className="gap-2"
-            >
-              <Edit className="h-4 w-4" />
-              Edit Profile
-            </Button>
+            <div className="flex gap-3">
+              <Button
+                onClick={() => setShowUploadDialog(true)}
+                variant="outline"
+                size="sm"
+                className="gap-2 bg-background/50 backdrop-blur-sm"
+              >
+                <Upload className="h-4 w-4" />
+                Upload Resume
+              </Button>
+              <Button
+                onClick={() => setShowEditDialog(true)}
+                size="sm"
+                className="gap-2"
+              >
+                <Edit className="h-4 w-4" />
+                Edit Profile
+              </Button>
+            </div>
           </div>
         </div>
-      </header>
+      </div>
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="space-y-6">
-          {/* Header Section */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <User className="h-8 w-8 text-primary" />
-                <div>
-                  <CardTitle className="text-3xl">
-                    {parsedData?.full_name || profile?.full_name || "My Profile"}
-                  </CardTitle>
+      <main className="container mx-auto px-4 py-12 max-w-5xl">
+        <div className="space-y-8">
+          {/* Profile Header Card with Avatar */}
+          <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-sm overflow-hidden">
+            <div className="relative h-32 bg-gradient-to-r from-primary/20 via-primary/10 to-accent/20" />
+            <CardContent className="relative pt-0 pb-8">
+              <div className="flex flex-col md:flex-row items-start md:items-end gap-6 -mt-16 md:-mt-12">
+                {/* Avatar */}
+                <div className="relative">
+                  <div className="w-32 h-32 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-xl border-4 border-background">
+                    <span className="text-4xl font-bold text-primary-foreground">
+                      {getInitials()}
+                    </span>
+                  </div>
+                </div>
+                
+                {/* Name and Location */}
+                <div className="flex-1 space-y-2 md:mb-2">
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                    {parsedData?.full_name || profile?.full_name || "Your Name"}
+                  </h1>
                   {parsedData?.location && (
-                    <p className="text-muted-foreground flex items-center gap-2 mt-1">
+                    <p className="text-muted-foreground flex items-center gap-2">
                       <MapPin className="h-4 w-4" />
                       {parsedData.location}
                     </p>
                   )}
                 </div>
               </div>
-            </CardHeader>
-          </Card>
-
-          {/* Contact Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Mail className="h-5 w-5" />
-                Contact Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {parsedData?.email && (
-                <div className="flex items-center gap-3">
-                  <Mail className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Email</p>
-                    <a href={`mailto:${parsedData.email}`} className="font-medium hover:underline">
-                      {parsedData.email}
-                    </a>
-                  </div>
-                </div>
-              )}
-              {parsedData?.phone && (
-                <div className="flex items-center gap-3">
-                  <Phone className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Phone</p>
-                    <a href={`tel:${parsedData.phone}`} className="font-medium hover:underline">
-                      {parsedData.phone}
-                    </a>
-                  </div>
-                </div>
-              )}
-              {parsedData?.linkedin_url && (
-                <div className="flex items-center gap-3">
-                  <Linkedin className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">LinkedIn</p>
-                    <a
-                      href={parsedData.linkedin_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-medium text-primary hover:underline"
-                    >
-                      {parsedData.linkedin_url}
-                    </a>
-                  </div>
-                </div>
-              )}
             </CardContent>
           </Card>
 
+          {/* Contact Information - Minimalist Cards */}
+          <div className="grid md:grid-cols-2 gap-4">
+            {parsedData?.email && (
+              <Card className="border-none shadow-lg hover:shadow-xl transition-shadow bg-card/50 backdrop-blur-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Mail className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Email</p>
+                      <a href={`mailto:${parsedData.email}`} className="font-medium hover:text-primary transition-colors truncate block">
+                        {parsedData.email}
+                      </a>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            
+            {parsedData?.phone && (
+              <Card className="border-none shadow-lg hover:shadow-xl transition-shadow bg-card/50 backdrop-blur-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Phone className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Phone</p>
+                      <a href={`tel:${parsedData.phone}`} className="font-medium hover:text-primary transition-colors truncate block">
+                        {parsedData.phone}
+                      </a>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            
+            {parsedData?.linkedin_url && (
+              <Card className="border-none shadow-lg hover:shadow-xl transition-shadow bg-card/50 backdrop-blur-sm md:col-span-2">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Linkedin className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">LinkedIn</p>
+                      <a
+                        href={parsedData.linkedin_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-medium text-primary hover:underline truncate block"
+                      >
+                        {parsedData.linkedin_url}
+                      </a>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
           {/* Professional Summary */}
           {parsedData?.summary && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  Professional Summary
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-foreground whitespace-pre-wrap">{parsedData.summary}</p>
+            <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm">
+              <CardContent className="p-8">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <User className="h-5 w-5 text-primary" />
+                  </div>
+                  <h2 className="text-2xl font-semibold">Professional Summary</h2>
+                </div>
+                <p className="text-foreground/80 leading-relaxed">{parsedData.summary}</p>
               </CardContent>
             </Card>
           )}
 
           {/* Skills */}
           {parsedData?.skills && parsedData.skills.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Award className="h-5 w-5" />
-                  Skills
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
+            <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm">
+              <CardContent className="p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Award className="h-5 w-5 text-primary" />
+                  </div>
+                  <h2 className="text-2xl font-semibold">Skills</h2>
+                </div>
+                <div className="flex flex-wrap gap-3">
                   {parsedData.skills.map((skill, index) => (
                     <span
                       key={index}
-                      className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
+                      className="px-4 py-2 bg-gradient-to-r from-primary/10 to-accent/10 text-foreground rounded-full text-sm font-medium border border-primary/20 hover:border-primary/40 transition-colors"
                     >
                       {skill}
                     </span>
@@ -266,58 +299,76 @@ export default function Profile() {
 
           {/* Experience */}
           {parsedData?.experience && parsedData.experience.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Briefcase className="h-5 w-5" />
-                  Experience
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {parsedData.experience.map((exp, index) => (
-                  <div key={index} className="border-l-2 border-primary pl-4">
-                    <h3 className="font-semibold text-lg">{exp.title}</h3>
-                    <p className="text-muted-foreground">{exp.company}</p>
-                    <p className="text-sm text-muted-foreground mb-2">{exp.duration}</p>
-                    <p className="text-foreground whitespace-pre-wrap">{exp.description}</p>
+            <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm">
+              <CardContent className="p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Briefcase className="h-5 w-5 text-primary" />
                   </div>
-                ))}
+                  <h2 className="text-2xl font-semibold">Experience</h2>
+                </div>
+                <div className="space-y-8">
+                  {parsedData.experience.map((exp, index) => (
+                    <div key={index} className="relative pl-8 before:absolute before:left-0 before:top-2 before:bottom-0 before:w-0.5 before:bg-gradient-to-b before:from-primary before:to-transparent">
+                      <div className="absolute left-0 top-1 w-2 h-2 bg-primary rounded-full -translate-x-[3px]" />
+                      <div className="space-y-2">
+                        <h3 className="text-xl font-semibold">{exp.title}</h3>
+                        <p className="text-primary font-medium">{exp.company}</p>
+                        <p className="text-sm text-muted-foreground">{exp.duration}</p>
+                        <p className="text-foreground/80 leading-relaxed mt-3">{exp.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           )}
 
           {/* Education */}
           {parsedData?.education && parsedData.education.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <GraduationCap className="h-5 w-5" />
-                  Education
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {parsedData.education.map((edu, index) => (
-                  <div key={index} className="border-l-2 border-primary pl-4">
-                    <h3 className="font-semibold">{edu.degree}</h3>
-                    <p className="text-muted-foreground">{edu.school}</p>
-                    <p className="text-sm text-muted-foreground">{edu.year}</p>
+            <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm">
+              <CardContent className="p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <GraduationCap className="h-5 w-5 text-primary" />
                   </div>
-                ))}
+                  <h2 className="text-2xl font-semibold">Education</h2>
+                </div>
+                <div className="space-y-6">
+                  {parsedData.education.map((edu, index) => (
+                    <div key={index} className="relative pl-8 before:absolute before:left-0 before:top-2 before:w-0.5 before:h-full before:bg-gradient-to-b before:from-primary before:to-transparent">
+                      <div className="absolute left-0 top-1 w-2 h-2 bg-primary rounded-full -translate-x-[3px]" />
+                      <h3 className="text-lg font-semibold">{edu.degree}</h3>
+                      <p className="text-primary font-medium">{edu.school}</p>
+                      <p className="text-sm text-muted-foreground">{edu.year}</p>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           )}
 
           {/* Empty State */}
           {!parsedData && (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground mb-4">
-                  No resume data found. Upload your resume to populate your profile.
+            <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm">
+              <CardContent className="py-16 text-center">
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mx-auto mb-6">
+                  <Upload className="h-10 w-10 text-primary" />
+                </div>
+                <h3 className="text-2xl font-semibold mb-2">No Profile Data Yet</h3>
+                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                  Upload your resume or manually add your information to create your professional profile.
                 </p>
-                <Button onClick={() => setShowUploadDialog(true)} className="gap-2">
-                  <Upload className="h-4 w-4" />
-                  Upload Resume
-                </Button>
+                <div className="flex gap-3 justify-center">
+                  <Button onClick={() => setShowUploadDialog(true)} className="gap-2">
+                    <Upload className="h-4 w-4" />
+                    Upload Resume
+                  </Button>
+                  <Button onClick={() => setShowEditDialog(true)} variant="outline" className="gap-2">
+                    <Edit className="h-4 w-4" />
+                    Add Manually
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           )}
