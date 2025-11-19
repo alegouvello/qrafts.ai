@@ -87,6 +87,7 @@ const ApplicationDetail = () => {
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [suggesting, setSuggesting] = useState<Record<string, boolean>>({});
   const [improving, setImproving] = useState<Record<string, boolean>>({});
+  const [reextracting, setReextracting] = useState(false);
   const [showImprovementDialog, setShowImprovementDialog] = useState(false);
   const [showSaveTemplateDialog, setShowSaveTemplateDialog] = useState(false);
   const [showBrowseTemplatesDialog, setShowBrowseTemplatesDialog] = useState(false);
@@ -483,6 +484,62 @@ const ApplicationDetail = () => {
     }
   };
 
+  const handleReextractQuestions = async () => {
+    if (!application) return;
+
+    setReextracting(true);
+    
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      // First, delete existing questions for this application
+      const { error: deleteError } = await supabase
+        .from("questions")
+        .delete()
+        .eq("application_id", application.id);
+
+      if (deleteError) {
+        throw new Error("Failed to clear existing questions");
+      }
+
+      // Call the edge function to extract questions
+      const response = await supabase.functions.invoke('extract-job-questions', {
+        body: {
+          applicationId: application.id,
+          jobUrl: application.url,
+        },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      if (response.data?.success) {
+        toast({
+          title: "Questions Re-extracted",
+          description: `Found ${response.data.questionsFound} questions using Firecrawl scraper`,
+        });
+        
+        // Refresh questions list
+        await fetchApplicationData();
+      } else {
+        throw new Error(response.data?.error || 'Failed to extract questions');
+      }
+    } catch (error) {
+      console.error('Error re-extracting questions:', error);
+      toast({
+        title: "Re-extraction Failed",
+        description: error instanceof Error ? error.message : "Could not extract questions. Please try again.",
+        variant: "destructive",
+      });
+    }
+
+    setReextracting(false);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background to-secondary/30">
@@ -586,7 +643,27 @@ const ApplicationDetail = () => {
 
           {/* Questions Tab */}
           <TabsContent value="questions" className="space-y-4">
-            <h2 className="text-2xl font-bold mb-4">Application Questions</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold">Application Questions</h2>
+              <Button
+                onClick={handleReextractQuestions}
+                disabled={reextracting}
+                variant="outline"
+                size="sm"
+              >
+                {reextracting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Re-extracting...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Re-extract Questions
+                  </>
+                )}
+              </Button>
+            </div>
 
           {questions.length === 0 ? (
             <Card className="p-8 text-center">
@@ -596,6 +673,24 @@ const ApplicationDetail = () => {
               <p className="text-muted-foreground text-sm mt-2">
                 Questions are automatically extracted when you add the application.
               </p>
+              <Button
+                onClick={handleReextractQuestions}
+                disabled={reextracting}
+                variant="default"
+                className="mt-4"
+              >
+                {reextracting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Extracting Questions...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Extract Questions
+                  </>
+                )}
+              </Button>
             </Card>
           ) : (
             <div className="space-y-6">
