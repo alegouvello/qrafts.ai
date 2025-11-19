@@ -45,28 +45,31 @@ Deno.serve(async (req) => {
     
     console.log('Generating answer suggestion for question:', questionText);
 
-    // Fetch the most recent resume for this user
-    let resumeContent = '';
-    const { data: resumes } = await supabase
-      .from('resumes')
-      .select('file_path, file_name')
+    // Fetch user profile data for personalized context
+    const { data: userProfile } = await supabase
+      .from('user_profiles')
+      .select('full_name, email, phone, linkedin_url, location, resume_text')
       .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(1);
+      .single();
 
-    if (resumes && resumes.length > 0) {
-      const resume = resumes[0];
-      console.log('Found resume:', resume.file_name);
-      
-      // Download resume content
-      const { data: fileData, error: downloadError } = await supabase.storage
-        .from('resumes')
-        .download(resume.file_path);
+    let profileContext = '';
+    if (userProfile) {
+      console.log('Found user profile data');
+      profileContext = `**Your Profile:**
+- Name: ${userProfile.full_name || 'Not provided'}
+- Location: ${userProfile.location || 'Not provided'}
+- LinkedIn: ${userProfile.linkedin_url || 'Not provided'}
+- Email: ${userProfile.email || 'Not provided'}`;
 
-      if (!downloadError && fileData) {
-        // For PDF/DOC files, we'll provide basic context
-        resumeContent = `Resume: ${resume.file_name} (on file)`;
-        console.log('Resume available for context');
+      if (userProfile.resume_text) {
+        try {
+          const resumeData = JSON.parse(userProfile.resume_text);
+          if (resumeData.summary) {
+            profileContext += `\n- Professional Summary: ${resumeData.summary}`;
+          }
+        } catch (e) {
+          console.log('Could not parse resume_text');
+        }
       }
     }
 
@@ -88,9 +91,9 @@ Deno.serve(async (req) => {
       contextPrompt += `\n- Job Posting URL: ${application.url}`;
     }
 
-    if (resumeContent) {
-      contextPrompt += `\n\n**Applicant Context:**
-The applicant has uploaded their resume (${resumeContent}). Consider that they have relevant professional experience.`;
+    if (profileContext) {
+      contextPrompt += `\n\n${profileContext}\n`;
+      contextPrompt += `\nUse this information to craft a personalized, authentic answer that reflects the candidate's background.`;
     }
 
     contextPrompt += `\n\n**Question:**
