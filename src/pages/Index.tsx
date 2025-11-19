@@ -14,9 +14,9 @@ const Index = () => {
           <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             ApplicationTracker
           </h1>
-          <Link to="/dashboard">
+          <Link to="/auth">
             <Button variant="outline" size="sm">
-              Dashboard
+              Sign In
             </Button>
           </Link>
         </div>
@@ -37,12 +37,12 @@ const Index = () => {
               The simple, beautiful platform that makes job hunting less overwhelming.
             </p>
             <div className="flex gap-4">
-              <Link to="/dashboard">
-                <Button size="lg" className="group">
-                  Get Started
-                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
+            <Link to="/auth">
+              <Button size="lg" className="group">
+                Get Started
+                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
               <Button size="lg" variant="outline">
                 Learn More
               </Button>
