@@ -12,6 +12,15 @@ interface RequestBody {
   jobUrl: string;
 }
 
+interface RoleSummary {
+  location?: string;
+  salary_range?: string;
+  description?: string;
+  responsibilities?: string[];
+  requirements?: string[];
+  benefits?: string[];
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -71,6 +80,71 @@ Deno.serve(async (req) => {
     } catch (error) {
       console.error('Error scraping with Firecrawl:', error);
       throw new Error('Failed to scrape job posting page with Firecrawl');
+    }
+
+    // Extract job information (company, position, summary) using AI
+    const jobInfoResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${lovableApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an expert at analyzing job postings. Extract the company name, position/job title, and key job details. Return ONLY valid JSON with this exact structure: {"company": "Company Name", "position": "Job Title", "summary": {"location": "Location", "salary_range": "Salary range or null", "description": "Brief role description", "responsibilities": ["resp1", "resp2"], "requirements": ["req1", "req2"], "benefits": ["benefit1", "benefit2"]}}. If any field is not found, use null or empty array.'
+          },
+          {
+            role: 'user',
+            content: `Extract company name, position title, and job details from this job posting:\n\n${pageContent}`
+          }
+        ],
+        temperature: 0.3,
+        max_tokens: 1500,
+      }),
+    });
+
+    if (!jobInfoResponse.ok) {
+      console.error('Job info AI API error:', await jobInfoResponse.text());
+    }
+
+    let company = null;
+    let position = null;
+    let roleSummary = null;
+
+    if (jobInfoResponse.ok) {
+      const jobInfoData = await jobInfoResponse.json();
+      const jobInfoContent = jobInfoData.choices[0].message.content;
+      
+      try {
+        const cleaned = jobInfoContent.trim().replace(/```json\n?/g, '').replace(/```\n?/g, '');
+        const jobInfo = JSON.parse(cleaned);
+        company = jobInfo.company;
+        position = jobInfo.position;
+        roleSummary = jobInfo.summary;
+        console.log('Extracted job info:', { company, position, roleSummary });
+      } catch (e) {
+        console.error('Failed to parse job info:', e);
+      }
+    }
+
+    // Update application with extracted company, position, and summary
+    if (company || position || roleSummary) {
+      const updateData: any = {};
+      if (company) updateData.company = company;
+      if (position) updateData.position = position;
+      if (roleSummary) updateData.role_summary = roleSummary;
+
+      const { error: updateError } = await supabase
+        .from('applications')
+        .update(updateData)
+        .eq('id', applicationId);
+
+      if (updateError) {
+        console.error('Error updating application:', updateError);
+      }
     }
 
     // Use Lovable AI to extract questions
@@ -148,6 +222,9 @@ Deno.serve(async (req) => {
         success: true,
         questionsFound: questions.length,
         questions: questions,
+        company: company,
+        position: position,
+        roleSummary: roleSummary,
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

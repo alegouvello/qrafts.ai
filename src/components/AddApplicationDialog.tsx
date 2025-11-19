@@ -15,7 +15,7 @@ import { Loader2 } from "lucide-react";
 interface AddApplicationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAdd: (data: { company: string; position: string; url: string }) => void;
+  onAdd: (data: { company?: string; position?: string; url: string }) => void;
 }
 
 export const AddApplicationDialog = ({
@@ -32,7 +32,11 @@ export const AddApplicationDialog = ({
     e.preventDefault();
     setLoading(true);
     
-    onAdd({ company, position, url });
+    const data: { company?: string; position?: string; url: string } = { url };
+    if (company.trim()) data.company = company;
+    if (position.trim()) data.position = position;
+    
+    onAdd(data);
     setCompany("");
     setPosition("");
     setUrl("");
@@ -46,33 +50,13 @@ export const AddApplicationDialog = ({
         <DialogHeader>
           <DialogTitle>Add New Application</DialogTitle>
           <DialogDescription>
-            Enter the details of your job application. We'll automatically extract questions from the job posting URL.
+            Enter the job posting URL. We'll automatically extract the company name, position, and key details from the page.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="company">Company Name</Label>
-              <Input
-                id="company"
-                placeholder="e.g., TechCorp"
-                value={company}
-                onChange={(e) => setCompany(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="position">Position</Label>
-              <Input
-                id="position"
-                placeholder="e.g., Senior Frontend Developer"
-                value={position}
-                onChange={(e) => setPosition(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="url">Job Posting URL</Label>
+              <Label htmlFor="url">Job Posting URL *</Label>
               <Input
                 id="url"
                 type="url"
@@ -82,7 +66,31 @@ export const AddApplicationDialog = ({
                 required
               />
               <p className="text-sm text-muted-foreground">
-                We'll automatically extract application questions from this page
+                We'll automatically extract application questions, company, position, and role details
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="company">Company Name (Optional)</Label>
+              <Input
+                id="company"
+                placeholder="Auto-extracted from URL"
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Leave blank to auto-extract from the job posting
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="position">Position (Optional)</Label>
+              <Input
+                id="position"
+                placeholder="Auto-extracted from URL"
+                value={position}
+                onChange={(e) => setPosition(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Leave blank to auto-extract from the job posting
               </p>
             </div>
           </div>
