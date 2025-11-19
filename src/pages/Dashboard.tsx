@@ -277,54 +277,67 @@ const Dashboard = () => {
     }
   };
 
+  const stats = {
+    total: applications.length,
+    pending: applications.filter((a) => a.status === "pending").length,
+    interviews: applications.filter((a) => a.status === "interview").length,
+    responseRate: applications.length > 0 
+      ? Math.round(((applications.filter((a) => a.status !== "pending").length) / applications.length) * 100)
+      : 0,
+  };
+
+  // Group applications by company
+  const groupedApplications = applications.reduce((acc, app) => {
+    if (!acc[app.company]) {
+      acc[app.company] = [];
+    }
+    acc[app.company].push(app);
+    return acc;
+  }, {} as Record<string, Application[]>);
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-secondary/30">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+      <header className="border-b bg-card/30 backdrop-blur-md sticky top-0 z-10">
+        <div className="container mx-auto px-6 py-5">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <Link to="/">
-                <Button variant="ghost" size="sm">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <ArrowLeft className="h-5 w-5" />
                 </Button>
               </Link>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                My Applications
-              </h1>
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight">Applications</h1>
+                <p className="text-sm text-muted-foreground">Track your journey</p>
+              </div>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+              <Button onClick={() => setShowAddDialog(true)} className="flex-1 sm:flex-none rounded-full">
+                <Plus className="h-4 w-4 mr-2" />
+                Add
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowUploadDialog(true)}
+                className="flex-1 sm:flex-none rounded-full"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Resume
+              </Button>
+              <Link to="/profile">
+                <Button variant="ghost" className="w-full sm:w-auto rounded-full">
+                  Profile
+                </Button>
+              </Link>
               <Link to="/calendar">
-                <Button variant="outline" size="sm">
+                <Button variant="ghost" className="w-full sm:w-auto rounded-full">
                   <Calendar className="h-4 w-4 mr-2" />
                   Calendar
                 </Button>
               </Link>
-              {resumeInfo ? (
-                <Link to="/profile">
-                  <Button variant="outline" size="sm">
-                    <Upload className="h-4 w-4 mr-2" />
-                    My Profile
-                  </Button>
-                </Link>
-              ) : (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setShowUploadDialog(true)}
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Upload Resume
-                </Button>
-              )}
-              <Button size="sm" onClick={() => setShowAddDialog(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Application
-              </Button>
-              <Button variant="ghost" size="sm" onClick={handleSignOut}>
-                <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
+              <Button variant="ghost" onClick={handleSignOut} className="rounded-full">
+                <LogOut className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -334,56 +347,67 @@ const Dashboard = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="p-6 rounded-xl bg-card shadow-soft">
-            <p className="text-sm text-muted-foreground mb-1">Total Applications</p>
-            <p className="text-3xl font-bold">{applications.length}</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+          <div className="bg-card/30 backdrop-blur-sm p-6 rounded-2xl border border-border/50">
+            <div className="text-3xl font-bold mb-1">{stats.total}</div>
+            <div className="text-xs text-muted-foreground uppercase tracking-wider">Total</div>
           </div>
-          <div className="p-6 rounded-xl bg-card shadow-soft">
-            <p className="text-sm text-muted-foreground mb-1">Pending</p>
-            <p className="text-3xl font-bold text-warning">
-              {applications.filter((a) => a.status === "pending").length}
-            </p>
+          <div className="bg-card/30 backdrop-blur-sm p-6 rounded-2xl border border-border/50">
+            <div className="text-3xl font-bold mb-1 text-amber-500">{stats.pending}</div>
+            <div className="text-xs text-muted-foreground uppercase tracking-wider">Pending</div>
           </div>
-          <div className="p-6 rounded-xl bg-card shadow-soft">
-            <p className="text-sm text-muted-foreground mb-1">Interviews</p>
-            <p className="text-3xl font-bold text-primary">
-              {applications.filter((a) => a.status === "interview").length}
-            </p>
+          <div className="bg-card/30 backdrop-blur-sm p-6 rounded-2xl border border-border/50">
+            <div className="text-3xl font-bold mb-1 text-blue-500">{stats.interviews}</div>
+            <div className="text-xs text-muted-foreground uppercase tracking-wider">Interviews</div>
           </div>
-          <div className="p-6 rounded-xl bg-card shadow-soft">
-            <p className="text-sm text-muted-foreground mb-1">Response Rate</p>
-            <p className="text-3xl font-bold text-success">
-              {applications.length > 0
-                ? Math.round((applications.filter((a) => a.status !== "pending").length / applications.length) * 100)
-                : 0}%
-            </p>
+          <div className="bg-card/30 backdrop-blur-sm p-6 rounded-2xl border border-border/50">
+            <div className="text-3xl font-bold mb-1 text-green-500">{stats.responseRate}%</div>
+            <div className="text-xs text-muted-foreground uppercase tracking-wider">Response</div>
           </div>
         </div>
 
-        {/* Applications Grid */}
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold mb-4">Your Applications</h2>
-          {loading ? (
-            <div className="text-center py-16">
-              <p className="text-muted-foreground text-lg">Loading applications...</p>
-            </div>
-          ) : applications.length === 0 ? (
-            <div className="text-center py-16">
-              <p className="text-muted-foreground text-lg mb-4">No applications yet</p>
-              <Button onClick={() => setShowAddDialog(true)}>
+        {loading ? (
+          <div className="space-y-8">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="space-y-3">
+                <div className="h-8 w-32 bg-muted/30 rounded-lg animate-pulse" />
+                <div className="h-32 bg-card/30 rounded-2xl animate-pulse" />
+              </div>
+            ))}
+          </div>
+        ) : applications.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="max-w-md mx-auto space-y-4">
+              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <Plus className="h-10 w-10 text-primary" />
+              </div>
+              <h3 className="text-2xl font-semibold">Start your journey</h3>
+              <p className="text-muted-foreground">Add your first job application to begin tracking your progress</p>
+              <Button onClick={() => setShowAddDialog(true)} className="rounded-full mt-4">
                 <Plus className="h-4 w-4 mr-2" />
-                Add Your First Application
+                Add Application
               </Button>
             </div>
-          ) : (
-            <div className="grid gap-4">
-              {applications.map((app) => (
-                <ApplicationCard key={app.id} application={app} onDelete={handleDeleteApplication} />
-              ))}
-            </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {Object.entries(groupedApplications).map(([company, companyApps]) => (
+              <div key={company} className="space-y-3">
+                <div className="flex items-center gap-3 px-2">
+                  <h2 className="text-lg font-semibold">{company}</h2>
+                  <span className="text-xs text-muted-foreground bg-muted/30 px-2 py-1 rounded-full">
+                    {companyApps.length} {companyApps.length === 1 ? 'role' : 'roles'}
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  {companyApps.map((application) => (
+                    <ApplicationCard key={application.id} application={application} onDelete={handleDeleteApplication} />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </main>
 
       <AddApplicationDialog
