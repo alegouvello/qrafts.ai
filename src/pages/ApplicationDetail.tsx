@@ -6,6 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { AnswerImprovementDialog } from "@/components/AnswerImprovementDialog";
+import { SaveTemplateDialog } from "@/components/SaveTemplateDialog";
+import { BrowseTemplatesDialog } from "@/components/BrowseTemplatesDialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -18,6 +20,8 @@ import {
   CheckCircle,
   Sparkles,
   Lightbulb,
+  BookmarkPlus,
+  Library,
 } from "lucide-react";
 import {
   Select,
@@ -69,6 +73,9 @@ const ApplicationDetail = () => {
   const [suggesting, setSuggesting] = useState<Record<string, boolean>>({});
   const [improving, setImproving] = useState<Record<string, boolean>>({});
   const [showImprovementDialog, setShowImprovementDialog] = useState(false);
+  const [showSaveTemplateDialog, setShowSaveTemplateDialog] = useState(false);
+  const [showBrowseTemplatesDialog, setShowBrowseTemplatesDialog] = useState(false);
+  const [currentQuestionForTemplate, setCurrentQuestionForTemplate] = useState<string | null>(null);
   const [currentImprovement, setCurrentImprovement] = useState<{
     questionId: string;
     strengths: string;
@@ -323,6 +330,51 @@ const ApplicationDetail = () => {
     setCurrentImprovement(null);
   };
 
+  const handleSaveAsTemplate = async (title: string, category: string, tags: string[]) => {
+    if (!currentQuestionForTemplate) return;
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const answerText = answers[currentQuestionForTemplate];
+    if (!answerText) return;
+
+    const { error } = await supabase
+      .from("answer_templates")
+      .insert({
+        user_id: user.id,
+        title: title,
+        template_text: answerText,
+        category: category || null,
+        tags: tags.length > 0 ? tags : null,
+      });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save template",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Template Saved",
+        description: "Your answer has been saved as a reusable template",
+      });
+    }
+  };
+
+  const handleApplyTemplate = (questionId: string, templateText: string) => {
+    setAnswers((prev) => ({
+      ...prev,
+      [questionId]: templateText,
+    }));
+
+    toast({
+      title: "Template Applied",
+      description: "Template has been applied to your answer. Don't forget to save!",
+    });
+  };
+
   const handleStatusChange = async (newStatus: string) => {
     const { error } = await supabase
       .from("applications")
@@ -478,7 +530,7 @@ const ApplicationDetail = () => {
                           className="min-h-[120px] mb-3"
                         />
                         <div className="flex justify-between items-center gap-2">
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 flex-wrap">
                             <Button
                               onClick={() => handleGetSuggestion(question.id, question.question_text)}
                               disabled={isSuggesting}
@@ -498,25 +550,49 @@ const ApplicationDetail = () => {
                               )}
                             </Button>
                             {hasCurrentAnswer && (
-                              <Button
-                                onClick={() => handleImproveAnswer(question.id, question.question_text)}
-                                disabled={isImproving}
-                                variant="outline"
-                                size="sm"
-                              >
-                                {isImproving ? (
-                                  <>
-                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                    Analyzing...
-                                  </>
-                                ) : (
-                                  <>
-                                    <Lightbulb className="h-4 w-4 mr-2" />
-                                    Improve
-                                  </>
-                                )}
-                              </Button>
+                              <>
+                                <Button
+                                  onClick={() => handleImproveAnswer(question.id, question.question_text)}
+                                  disabled={isImproving}
+                                  variant="outline"
+                                  size="sm"
+                                >
+                                  {isImproving ? (
+                                    <>
+                                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                      Analyzing...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Lightbulb className="h-4 w-4 mr-2" />
+                                      Improve
+                                    </>
+                                  )}
+                                </Button>
+                                <Button
+                                  onClick={() => {
+                                    setCurrentQuestionForTemplate(question.id);
+                                    setShowSaveTemplateDialog(true);
+                                  }}
+                                  variant="outline"
+                                  size="sm"
+                                >
+                                  <BookmarkPlus className="h-4 w-4 mr-2" />
+                                  Save Template
+                                </Button>
+                              </>
                             )}
+                            <Button
+                              onClick={() => {
+                                setCurrentQuestionForTemplate(question.id);
+                                setShowBrowseTemplatesDialog(true);
+                              }}
+                              variant="outline"
+                              size="sm"
+                            >
+                              <Library className="h-4 w-4 mr-2" />
+                              Browse Templates
+                            </Button>
                           </div>
                           <Button
                             onClick={() => handleSaveAnswer(question.id)}
@@ -557,6 +633,25 @@ const ApplicationDetail = () => {
           onApply={handleApplyImprovement}
         />
       )}
+
+      {/* Save Template Dialog */}
+      <SaveTemplateDialog
+        open={showSaveTemplateDialog}
+        onOpenChange={setShowSaveTemplateDialog}
+        answerText={currentQuestionForTemplate ? answers[currentQuestionForTemplate] || "" : ""}
+        onSave={handleSaveAsTemplate}
+      />
+
+      {/* Browse Templates Dialog */}
+      <BrowseTemplatesDialog
+        open={showBrowseTemplatesDialog}
+        onOpenChange={setShowBrowseTemplatesDialog}
+        onApply={(templateText) => {
+          if (currentQuestionForTemplate) {
+            handleApplyTemplate(currentQuestionForTemplate, templateText);
+          }
+        }}
+      />
     </div>
   );
 };
