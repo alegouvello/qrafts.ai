@@ -108,14 +108,16 @@ const Dashboard = () => {
       return;
     }
 
-    const { error } = await supabase
+    const { data: newApp, error } = await supabase
       .from("applications")
       .insert({
         company: data.company,
         position: data.position,
         url: data.url,
         user_id: user.id,
-      });
+      })
+      .select()
+      .single();
 
     if (error) {
       toast({
@@ -123,13 +125,51 @@ const Dashboard = () => {
         description: "Failed to add application",
         variant: "destructive",
       });
-    } else {
-      toast({
-        title: "Application Added",
-        description: "Your new application has been added successfully.",
-      });
-      fetchApplications();
+      return;
     }
+
+    toast({
+      title: "Application Added",
+      description: "Extracting questions from job posting...",
+    });
+
+    // Extract questions in the background
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const response = await supabase.functions.invoke('extract-job-questions', {
+        body: {
+          applicationId: newApp.id,
+          jobUrl: data.url,
+        },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
+
+      if (response.data?.success) {
+        toast({
+          title: "Questions Extracted",
+          description: `Found ${response.data.questionsFound} questions from the job posting.`,
+        });
+      } else {
+        console.error('Failed to extract questions:', response.data?.error);
+        toast({
+          title: "Questions Extraction",
+          description: "Could not extract questions automatically. You can add them manually.",
+          variant: "destructive",
+        });
+      }
+    } catch (extractError) {
+      console.error('Error calling extract function:', extractError);
+      toast({
+        title: "Questions Extraction",
+        description: "Could not extract questions automatically. You can add them manually.",
+        variant: "destructive",
+      });
+    }
+
+    fetchApplications();
   };
 
   const handleUploadResume = async (file: File) => {

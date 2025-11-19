@@ -32,9 +32,6 @@ export const AddApplicationDialog = ({
     e.preventDefault();
     setLoading(true);
     
-    // Simulate processing
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
     onAdd({ company, position, url });
     setCompany("");
     setPosition("");
