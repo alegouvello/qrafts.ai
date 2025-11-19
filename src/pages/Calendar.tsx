@@ -26,12 +26,24 @@ const CalendarPage = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({
-    interview: true,
-    deadline: true,
-    offer: true,
-    rejection: true,
-    other: true,
+  const [filters, setFilters] = useState(() => {
+    // Load filters from localStorage on initial render
+    const savedFilters = localStorage.getItem("calendarFilters");
+    if (savedFilters) {
+      try {
+        return JSON.parse(savedFilters);
+      } catch (e) {
+        console.error("Failed to parse saved filters:", e);
+      }
+    }
+    // Default filters
+    return {
+      interview: true,
+      deadline: true,
+      offer: true,
+      rejection: true,
+      other: true,
+    };
   });
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -40,6 +52,11 @@ const CalendarPage = () => {
     checkAuth();
     fetchEvents();
   }, []);
+
+  // Save filters to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem("calendarFilters", JSON.stringify(filters));
+  }, [filters]);
 
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
