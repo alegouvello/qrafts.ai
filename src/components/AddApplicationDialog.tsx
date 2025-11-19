@@ -23,8 +23,6 @@ export const AddApplicationDialog = ({
   onOpenChange,
   onAdd,
 }: AddApplicationDialogProps) => {
-  const [company, setCompany] = useState("");
-  const [position, setPosition] = useState("");
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -32,13 +30,7 @@ export const AddApplicationDialog = ({
     e.preventDefault();
     setLoading(true);
     
-    const data: { company?: string; position?: string; url: string } = { url };
-    if (company.trim()) data.company = company;
-    if (position.trim()) data.position = position;
-    
-    onAdd(data);
-    setCompany("");
-    setPosition("");
+    onAdd({ url });
     setUrl("");
     setLoading(false);
     onOpenChange(false);
@@ -50,13 +42,13 @@ export const AddApplicationDialog = ({
         <DialogHeader>
           <DialogTitle>Add New Application</DialogTitle>
           <DialogDescription>
-            Enter the job posting URL. We'll automatically extract the company name, position, and key details from the page.
+            Paste the job posting URL and we'll automatically extract all the details for you.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="url">Job Posting URL *</Label>
+              <Label htmlFor="url">Job Posting URL</Label>
               <Input
                 id="url"
                 type="url"
@@ -66,31 +58,7 @@ export const AddApplicationDialog = ({
                 required
               />
               <p className="text-sm text-muted-foreground">
-                We'll automatically extract application questions, company, position, and role details
-              </p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="company">Company Name (Optional)</Label>
-              <Input
-                id="company"
-                placeholder="Auto-extracted from URL"
-                value={company}
-                onChange={(e) => setCompany(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground">
-                Leave blank to auto-extract from the job posting
-              </p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="position">Position (Optional)</Label>
-              <Input
-                id="position"
-                placeholder="Auto-extracted from URL"
-                value={position}
-                onChange={(e) => setPosition(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground">
-                Leave blank to auto-extract from the job posting
+                We'll extract the company, position, application questions, and key details automatically
               </p>
             </div>
           </div>
