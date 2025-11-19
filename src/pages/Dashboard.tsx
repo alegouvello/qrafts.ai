@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
-import { Plus, Upload, ArrowLeft, LogOut } from "lucide-react";
+import { Plus, Upload, ArrowLeft, LogOut, Calendar } from "lucide-react";
 import { ApplicationCard } from "@/components/ApplicationCard";
 import { AddApplicationDialog } from "@/components/AddApplicationDialog";
 import { UploadResumeDialog } from "@/components/UploadResumeDialog";
@@ -247,6 +247,12 @@ const Dashboard = () => {
               </h1>
             </div>
             <div className="flex gap-3">
+              <Link to="/calendar">
+                <Button variant="outline" size="sm">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Calendar
+                </Button>
+              </Link>
               <Button variant="outline" size="sm" onClick={() => setShowUploadDialog(true)}>
                 <Upload className="h-4 w-4 mr-2" />
                 Upload Resume
