@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Building2, Calendar, ExternalLink, MessageSquare } from "lucide-react";
+import { Link } from "react-router-dom";
 
 type ApplicationStatus = "pending" | "interview" | "rejected" | "accepted";
 
@@ -74,9 +75,11 @@ export const ApplicationCard = ({ application }: ApplicationCardProps) => {
         </div>
 
         <div className="flex md:flex-col gap-2">
-          <Button className="flex-1 md:flex-none" size="sm">
-            View Details
-          </Button>
+          <Link to={`/application/${application.id}`} className="flex-1 md:flex-none">
+            <Button className="w-full" size="sm">
+              View Details
+            </Button>
+          </Link>
           <Button 
             variant="outline" 
             size="sm"
