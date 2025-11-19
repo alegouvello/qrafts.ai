@@ -16,7 +16,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft,
-  Building2,
   Calendar,
   ExternalLink,
   Save,
@@ -110,6 +109,7 @@ const ApplicationDetail = () => {
     improvements: string;
     improvedVersion: string;
   } | null>(null);
+  const [logoError, setLogoError] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -587,9 +587,15 @@ const ApplicationDetail = () => {
     }
   };
 
+  // Get company logo
+  const getCompanyLogo = (company: string) => {
+    const domain = company.toLowerCase().replace(/\s+/g, '') + '.com';
+    return `https://logo.clearbit.com/${domain}`;
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background to-secondary/30">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -603,45 +609,81 @@ const ApplicationDetail = () => {
   const progress = questions.length > 0 ? (answeredCount / questions.length) * 100 : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-secondary/30">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
+      <header className="border-b bg-card/30 backdrop-blur-md sticky top-0 z-50">
+        <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link to="/dashboard">
-                <Button variant="ghost" size="sm">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Dashboard
-                </Button>
-              </Link>
-            </div>
+            <Link to="/dashboard">
+              <Button variant="ghost" size="sm" className="rounded-full">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
+              </Button>
+            </Link>
             <Button
               variant="outline"
               size="sm"
               onClick={() => window.open(application.url, "_blank")}
+              className="rounded-full"
             >
               <ExternalLink className="h-4 w-4 mr-2" />
-              View Job Posting
+              Job Page
             </Button>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-6 py-8 max-w-5xl">
         {/* Application Header */}
-        <Card className="p-8 mb-8">
-          <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-6">
-            <div className="flex-1">
-              <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                {application.position}
-              </h1>
-              <div className="flex items-center gap-2 text-muted-foreground mb-4">
-                <Building2 className="h-5 w-5" />
-                <span className="text-xl">{application.company}</span>
+        <div className="mb-8">
+          <div className="flex items-start gap-6 mb-6">
+            {/* Company Logo */}
+            <div className="shrink-0">
+              {!logoError ? (
+                <div className="w-20 h-20 rounded-2xl overflow-hidden bg-muted/30 flex items-center justify-center border border-border/50">
+                  <img 
+                    src={getCompanyLogo(application.company)}
+                    alt={application.company}
+                    className="w-full h-full object-contain p-3"
+                    onError={() => setLogoError(true)}
+                  />
+                </div>
+              ) : (
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center border border-border/50">
+                  <span className="text-3xl font-bold text-primary">
+                    {application.company.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Company & Position Info */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-4 mb-3">
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-3xl font-bold mb-2 truncate">{application.position}</h1>
+                  <p className="text-xl text-muted-foreground mb-3">{application.company}</p>
+                </div>
+                <div className="flex flex-col gap-2 shrink-0">
+                  <Badge variant={statusConfig[application.status as keyof typeof statusConfig]?.variant}>
+                    {statusConfig[application.status as keyof typeof statusConfig]?.label}
+                  </Badge>
+                  <Select value={application.status} onValueChange={handleStatusChange}>
+                    <SelectTrigger className="w-32 h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="interview">Interview</SelectItem>
+                      <SelectItem value="accepted">Accepted</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <div className="flex items-center gap-3 text-muted-foreground">
+
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar className="h-4 w-4" />
                 {editingDate ? (
                   <div className="flex items-center gap-2">
@@ -649,128 +691,121 @@ const ApplicationDetail = () => {
                       type="date"
                       value={newAppliedDate}
                       onChange={(e) => setNewAppliedDate(e.target.value)}
-                      className="w-40"
+                      className="w-40 h-8"
                     />
-                    <Button size="sm" onClick={handleUpdateAppliedDate}>
+                    <Button size="sm" onClick={handleUpdateAppliedDate} className="h-8">
                       Save
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => setEditingDate(false)}>
+                    <Button size="sm" variant="ghost" onClick={() => setEditingDate(false)} className="h-8">
                       Cancel
                     </Button>
                   </div>
                 ) : (
-                  <>
-                    <span>Applied on {new Date(application.applied_date).toLocaleDateString()}</span>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        setEditingDate(true);
-                        setNewAppliedDate(application.applied_date);
-                      }}
-                    >
-                      Edit
-                    </Button>
-                  </>
+                  <button
+                    onClick={() => {
+                      setNewAppliedDate(application.applied_date);
+                      setEditingDate(true);
+                    }}
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Applied {application.applied_date}
+                  </button>
                 )}
               </div>
-            </div>
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">Status:</span>
-                <Select value={application.status} onValueChange={handleStatusChange}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="interview">Interview</SelectItem>
-                    <SelectItem value="accepted">Accepted</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+
+              {/* Progress */}
+              {questions.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Progress</span>
+                    <span className="font-medium">
+                      {answeredCount} / {questions.length} answered
+                    </span>
+                  </div>
+                  <Progress value={progress} className="h-2" />
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Role Summary */}
+          {/* Role Details */}
           {application.role_summary && (
-            <div className="mt-6 pt-6 border-t border-border">
-              <h3 className="text-lg font-semibold mb-4">Role Details</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {application.role_summary.location && (
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Location:</span>
-                    <p className="mt-1">{application.role_summary.location}</p>
+            <Card className="p-6 bg-card/30 backdrop-blur-sm border-border/50">
+              <h3 className="font-semibold mb-4 text-lg">Role Details</h3>
+              <div className="grid gap-4">
+                {(application.role_summary.location || application.role_summary.salary_range) && (
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {application.role_summary.location && (
+                      <div>
+                        <span className="text-sm text-muted-foreground">Location</span>
+                        <p className="font-medium">{application.role_summary.location}</p>
+                      </div>
+                    )}
+                    {application.role_summary.salary_range && (
+                      <div>
+                        <span className="text-sm text-muted-foreground">Salary Range</span>
+                        <p className="font-medium">{application.role_summary.salary_range}</p>
+                      </div>
+                    )}
                   </div>
                 )}
-                {application.role_summary.salary_range && (
+                {application.role_summary.description && (
                   <div>
-                    <span className="text-sm font-medium text-muted-foreground">Salary Range:</span>
-                    <p className="mt-1">{application.role_summary.salary_range}</p>
+                    <span className="text-sm text-muted-foreground">Description</span>
+                    <p className="text-sm mt-1 leading-relaxed">{application.role_summary.description}</p>
+                  </div>
+                )}
+                {application.role_summary.responsibilities && application.role_summary.responsibilities.length > 0 && (
+                  <div>
+                    <span className="text-sm text-muted-foreground">Key Responsibilities</span>
+                    <ul className="mt-2 space-y-1">
+                      {application.role_summary.responsibilities.map((item, idx) => (
+                        <li key={idx} className="text-sm flex items-start gap-2">
+                          <span className="text-primary mt-1">•</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {application.role_summary.requirements && application.role_summary.requirements.length > 0 && (
+                  <div>
+                    <span className="text-sm text-muted-foreground">Requirements</span>
+                    <ul className="mt-2 space-y-1">
+                      {application.role_summary.requirements.map((item, idx) => (
+                        <li key={idx} className="text-sm flex items-start gap-2">
+                          <span className="text-primary mt-1">•</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {application.role_summary.benefits && application.role_summary.benefits.length > 0 && (
+                  <div>
+                    <span className="text-sm text-muted-foreground">Benefits</span>
+                    <ul className="mt-2 space-y-1">
+                      {application.role_summary.benefits.map((item, idx) => (
+                        <li key={idx} className="text-sm flex items-start gap-2">
+                          <span className="text-primary mt-1">•</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 )}
               </div>
-              {application.role_summary.description && (
-                <div className="mt-4">
-                  <span className="text-sm font-medium text-muted-foreground">Description:</span>
-                  <p className="mt-1 text-sm">{application.role_summary.description}</p>
-                </div>
-              )}
-              {application.role_summary.responsibilities && application.role_summary.responsibilities.length > 0 && (
-                <div className="mt-4">
-                  <span className="text-sm font-medium text-muted-foreground">Key Responsibilities:</span>
-                  <ul className="mt-2 list-disc list-inside space-y-1">
-                    {application.role_summary.responsibilities.map((item, idx) => (
-                      <li key={idx} className="text-sm">{item}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {application.role_summary.requirements && application.role_summary.requirements.length > 0 && (
-                <div className="mt-4">
-                  <span className="text-sm font-medium text-muted-foreground">Requirements:</span>
-                  <ul className="mt-2 list-disc list-inside space-y-1">
-                    {application.role_summary.requirements.map((item, idx) => (
-                      <li key={idx} className="text-sm">{item}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {application.role_summary.benefits && application.role_summary.benefits.length > 0 && (
-                <div className="mt-4">
-                  <span className="text-sm font-medium text-muted-foreground">Benefits:</span>
-                  <ul className="mt-2 list-disc list-inside space-y-1">
-                    {application.role_summary.benefits.map((item, idx) => (
-                      <li key={idx} className="text-sm">{item}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
+            </Card>
           )}
+        </div>
 
-          {/* Progress */}
-          {questions.length > 0 && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Questions Progress</span>
-                <span className="font-medium">
-                  {answeredCount} / {questions.length} answered ({Math.round(progress)}%)
-                </span>
-              </div>
-              <Progress value={progress} className="h-3" />
-            </div>
-          )}
-        </Card>
-
-        {/* Tabs for Questions and Timeline */}
-        <Tabs defaultValue="questions" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="questions">Questions & Answers</TabsTrigger>
+        {/* Tabs */}
+        <Tabs defaultValue="questions" className="space-y-6">
+          <TabsList className="bg-muted/30">
+            <TabsTrigger value="questions">Questions</TabsTrigger>
             <TabsTrigger value="timeline">
               <Clock className="h-4 w-4 mr-2" />
-              Timeline & Notes
+              Timeline
             </TabsTrigger>
           </TabsList>
 
@@ -946,23 +981,23 @@ const ApplicationDetail = () => {
           )}
         </TabsContent>
 
-        {/* Timeline Tab */}
-        <TabsContent value="timeline" className="space-y-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold">Timeline & Notes</h2>
-            <Button onClick={() => setShowAddTimelineDialog(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Event
-            </Button>
-          </div>
+          {/* Timeline Tab */}
+          <TabsContent value="timeline" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-semibold">Timeline & Notes</h2>
+              <Button onClick={() => setShowAddTimelineDialog(true)} className="rounded-full">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Event
+              </Button>
+            </div>
 
           <TimelineView
             events={timelineEvents}
             onDelete={handleDeleteTimelineEvent}
           />
         </TabsContent>
-      </Tabs>
-    </main>
+        </Tabs>
+      </main>
 
       {/* Answer Improvement Dialog */}
       {currentImprovement && (
