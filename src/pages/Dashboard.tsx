@@ -5,7 +5,6 @@ import { Plus, Upload, ArrowLeft, LogOut, Calendar } from "lucide-react";
 import { ApplicationCard } from "@/components/ApplicationCard";
 import { AddApplicationDialog } from "@/components/AddApplicationDialog";
 import { UploadResumeDialog } from "@/components/UploadResumeDialog";
-import { ViewProfileDialog } from "@/components/ViewProfileDialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -24,7 +23,6 @@ const Dashboard = () => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
-  const [showProfileDialog, setShowProfileDialog] = useState(false);
   const [loading, setLoading] = useState(true);
   const [resumeInfo, setResumeInfo] = useState<{ file_name: string; created_at: string } | null>(null);
   const { toast } = useToast();
@@ -303,22 +301,23 @@ const Dashboard = () => {
                   Calendar
                 </Button>
               </Link>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => resumeInfo ? setShowProfileDialog(true) : setShowUploadDialog(true)}
-                className="flex flex-col items-start h-auto py-2"
-              >
-                <div className="flex items-center w-full">
+              {resumeInfo ? (
+                <Link to="/profile">
+                  <Button variant="outline" size="sm">
+                    <Upload className="h-4 w-4 mr-2" />
+                    My Profile
+                  </Button>
+                </Link>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setShowUploadDialog(true)}
+                >
                   <Upload className="h-4 w-4 mr-2" />
-                  {resumeInfo ? "My Resume" : "Upload Resume"}
-                </div>
-                {resumeInfo && (
-                  <span className="text-xs text-muted-foreground mt-1 w-full text-left">
-                    {resumeInfo.file_name}
-                  </span>
-                )}
-              </Button>
+                  Upload Resume
+                </Button>
+              )}
               <Button size="sm" onClick={() => setShowAddDialog(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Application
@@ -391,15 +390,6 @@ const Dashboard = () => {
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
         onAdd={handleAddApplication}
-      />
-
-      <ViewProfileDialog
-        open={showProfileDialog}
-        onOpenChange={setShowProfileDialog}
-        onUpdateClick={() => {
-          setShowProfileDialog(false);
-          setShowUploadDialog(true);
-        }}
       />
 
       <UploadResumeDialog
