@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Sparkles, CheckCircle2, AlertCircle, Lightbulb, TrendingUp, Loader2 } from "lucide-react";
+import { Sparkles, CheckCircle2, AlertCircle, Lightbulb, TrendingUp, Loader2, Check } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProfileReviewDialogProps {
   open: boolean;
@@ -24,6 +25,8 @@ interface Review {
 export function ProfileReviewDialog({ open, onOpenChange }: ProfileReviewDialogProps) {
   const [loading, setLoading] = useState(false);
   const [review, setReview] = useState<Review | null>(null);
+  const [applyingIndex, setApplyingIndex] = useState<number | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (open && !review) {
@@ -65,6 +68,46 @@ export function ProfileReviewDialog({ open, onOpenChange }: ProfileReviewDialogP
     if (score >= 6) return "Good";
     if (score >= 4) return "Fair";
     return "Needs Work";
+  };
+
+  const applyImprovement = async (improvement: Review['improvements'][0], index: number) => {
+    setApplyingIndex(index);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const { data, error } = await supabase.functions.invoke('apply-profile-improvement', {
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: {
+          section: improvement.section,
+          suggestion: improvement.suggestion,
+        },
+      });
+
+      if (error) throw error;
+      
+      if (data?.success) {
+        toast({
+          title: "Improvement Applied",
+          description: "Your profile has been updated successfully!",
+        });
+        
+        // Refresh the review after a short delay
+        setTimeout(() => {
+          fetchReview();
+        }, 1000);
+      }
+    } catch (error) {
+      console.error('Error applying improvement:', error);
+      toast({
+        title: "Error",
+        description: "Failed to apply improvement. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setApplyingIndex(null);
+    }
   };
 
   return (
@@ -148,11 +191,29 @@ export function ProfileReviewDialog({ open, onOpenChange }: ProfileReviewDialogP
                 <div className="space-y-3">
                   {review.improvements.map((improvement, index) => (
                     <Card key={index} className="border-l-4 border-l-orange-500">
-                      <CardContent className="p-4 space-y-2">
-                        <div className="flex items-center gap-2">
+                      <CardContent className="p-4 space-y-3">
+                        <div className="flex items-center justify-between">
                           <span className="text-xs font-semibold px-2 py-1 bg-primary/10 text-primary rounded">
                             {improvement.section}
                           </span>
+                          <Button
+                            size="sm"
+                            onClick={() => applyImprovement(improvement, index)}
+                            disabled={applyingIndex !== null}
+                            className="gap-2"
+                          >
+                            {applyingIndex === index ? (
+                              <>
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                                Applying...
+                              </>
+                            ) : (
+                              <>
+                                <Check className="h-3 w-3" />
+                                Apply
+                              </>
+                            )}
+                          </Button>
                         </div>
                         <p className="text-sm font-medium">{improvement.issue}</p>
                         <p className="text-sm text-muted-foreground">{improvement.suggestion}</p>
