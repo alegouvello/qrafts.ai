@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 interface ProfileReviewDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onProfileUpdate?: () => void;
 }
 
 interface Review {
@@ -22,7 +23,7 @@ interface Review {
   quick_wins: string[];
 }
 
-export function ProfileReviewDialog({ open, onOpenChange }: ProfileReviewDialogProps) {
+export function ProfileReviewDialog({ open, onOpenChange, onProfileUpdate }: ProfileReviewDialogProps) {
   const [loading, setLoading] = useState(false);
   const [review, setReview] = useState<Review | null>(null);
   const [applyingIndex, setApplyingIndex] = useState<number | null>(null);
@@ -92,6 +93,11 @@ export function ProfileReviewDialog({ open, onOpenChange }: ProfileReviewDialogP
           title: "Improvement Applied",
           description: "Your profile has been updated successfully!",
         });
+        
+        // Refresh the profile page data
+        if (onProfileUpdate) {
+          onProfileUpdate();
+        }
         
         // Refresh the review after a short delay
         setTimeout(() => {

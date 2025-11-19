@@ -403,9 +403,10 @@ export default function Profile() {
         onSaved={fetchProfile}
       />
 
-      <ProfileReviewDialog
-        open={showReviewDialog}
+      <ProfileReviewDialog 
+        open={showReviewDialog} 
         onOpenChange={setShowReviewDialog}
+        onProfileUpdate={fetchProfile}
       />
     </div>
   );
