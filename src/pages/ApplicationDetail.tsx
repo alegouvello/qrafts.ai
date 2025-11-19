@@ -967,6 +967,20 @@ const ApplicationDetail = () => {
                 const isImproving = improving[question.id];
                 const hasCurrentAnswer = answers[question.id]?.trim();
 
+                const isShortAnswer = (() => {
+                  const lowerQuestion = question.question_text.toLowerCase();
+                  return (
+                    lowerQuestion.includes('first name') ||
+                    lowerQuestion.includes('last name') ||
+                    lowerQuestion.includes('email') ||
+                    lowerQuestion.includes('phone') ||
+                    lowerQuestion.includes('linkedin') ||
+                    lowerQuestion.includes('location') ||
+                    lowerQuestion.includes('city') ||
+                    (lowerQuestion === 'name' || lowerQuestion.includes('your name'))
+                  ) && (answers[question.id] || '').length < 150;
+                })();
+
                 return (
                   <Card key={question.id} className="p-4 bg-card/30 backdrop-blur-sm border-border/50 hover:border-primary/30 transition-all">
                     <div className="flex items-start gap-3">
@@ -988,12 +1002,20 @@ const ApplicationDetail = () => {
                             <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
                           )}
                         </div>
-                        <Textarea
-                          placeholder="Type your answer here..."
-                          value={answers[question.id] || ""}
-                          onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                          className="min-h-[100px]"
-                        />
+                        {isShortAnswer ? (
+                          <Input
+                            placeholder="Type your answer here..."
+                            value={answers[question.id] || ""}
+                            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                          />
+                        ) : (
+                          <Textarea
+                            placeholder="Type your answer here..."
+                            value={answers[question.id] || ""}
+                            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                            className="min-h-[100px]"
+                          />
+                        )}
                         <div className="flex gap-2 flex-wrap items-center">
                           <Button
                             onClick={() => handleGetSuggestion(question.id, question.question_text)}
