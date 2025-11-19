@@ -24,18 +24,37 @@ const Dashboard = () => {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [resumeInfo, setResumeInfo] = useState<{ file_name: string; created_at: string } | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
     checkAuth();
     fetchApplications();
+    fetchResumeInfo();
   }, []);
 
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       navigate("/auth");
+    }
+  };
+
+  const fetchResumeInfo = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from("resumes")
+      .select("file_name, created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (!error && data) {
+      setResumeInfo(data);
     }
   };
 
@@ -282,9 +301,21 @@ const Dashboard = () => {
                   Calendar
                 </Button>
               </Link>
-              <Button variant="outline" size="sm" onClick={() => setShowUploadDialog(true)}>
-                <Upload className="h-4 w-4 mr-2" />
-                Upload Resume
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowUploadDialog(true)}
+                className="flex flex-col items-start h-auto py-2"
+              >
+                <div className="flex items-center w-full">
+                  <Upload className="h-4 w-4 mr-2" />
+                  {resumeInfo ? "Update Resume" : "Upload Resume"}
+                </div>
+                {resumeInfo && (
+                  <span className="text-xs text-muted-foreground mt-1 w-full text-left">
+                    {resumeInfo.file_name}
+                  </span>
+                )}
               </Button>
               <Button size="sm" onClick={() => setShowAddDialog(true)}>
                 <Plus className="h-4 w-4 mr-2" />
@@ -363,7 +394,13 @@ const Dashboard = () => {
       <UploadResumeDialog
         open={showUploadDialog}
         onOpenChange={setShowUploadDialog}
-        onUpload={handleUploadResume}
+        onUpload={async (file) => {
+          const success = await handleUploadResume(file);
+          if (success) {
+            fetchResumeInfo(); // Refresh resume info
+          }
+          return success;
+        }}
       />
     </div>
   );
