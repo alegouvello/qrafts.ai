@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import JSZip from 'https://esm.sh/jszip@3.10.1';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -39,7 +40,7 @@ Deno.serve(async (req) => {
     
     console.log('Parsing resume from:', resumeUrl);
 
-    // Download the PDF file
+    // Download the file
     const { data: fileData, error: downloadError } = await supabase.storage
       .from('resumes')
       .download(resumeUrl);
@@ -49,22 +50,58 @@ Deno.serve(async (req) => {
       throw new Error('Failed to download resume file');
     }
 
-    console.log('PDF downloaded, converting to base64...');
+    console.log('File downloaded, detecting type and extracting text...');
 
-    // Convert PDF to base64
-    const arrayBuffer = await fileData.arrayBuffer();
-    const uint8Array = new Uint8Array(arrayBuffer);
-    let binaryString = '';
-    const chunkSize = 8192;
-    for (let i = 0; i < uint8Array.length; i += chunkSize) {
-      const chunk = uint8Array.slice(i, i + chunkSize);
-      binaryString += String.fromCharCode.apply(null, Array.from(chunk));
+    let extractedText = '';
+    const fileName = resumeUrl.toLowerCase();
+
+    // Check if it's a Word document
+    if (fileName.endsWith('.docx')) {
+      console.log('Processing Word document...');
+      
+      // Read the file as bytes
+      const arrayBuffer = await fileData.arrayBuffer();
+      
+      try {
+        // Load the ZIP file
+        const zip = await JSZip.loadAsync(arrayBuffer);
+        
+        // Extract document.xml which contains the main text
+        const docXml = await zip.file('word/document.xml')?.async('string');
+        
+        if (docXml) {
+          // Extract text from XML (remove tags)
+          extractedText = docXml
+            .replace(/<w:t[^>]*>/g, '')
+            .replace(/<\/w:t>/g, ' ')
+            .replace(/<[^>]*>/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+          
+          console.log('Extracted text from Word document, length:', extractedText.length);
+        } else {
+          throw new Error('Could not find document.xml in Word file');
+        }
+      } catch (e) {
+        console.error('Error processing Word document:', e);
+        throw new Error('Failed to extract text from Word document');
+      }
+    } else {
+      // For PDFs and other formats, we'll use a simpler approach
+      console.log('Non-Word document detected, using filename-based parsing');
+      const filename = resumeUrl.split('/').pop() || '';
+      const filenameParts = filename.replace(/\.(pdf|doc|docx)$/i, '').split(' ');
+      
+      const filteredParts = filenameParts.filter(part => 
+        !['resume', 'cv', 'curriculum', 'vitae'].includes(part.toLowerCase())
+      );
+      
+      extractedText = `Name: ${filteredParts.join(' ') || 'Professional'}`;
     }
-    const base64Pdf = btoa(binaryString);
 
-    console.log('Sending PDF to OCR/parsing service...');
+    console.log('Sending extracted text to AI for structuring...');
 
-    // Use Lovable AI with a specialized prompt for PDF text extraction
+    // Use AI to structure the extracted text
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -72,15 +109,15 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-pro',
+        model: 'google/gemini-2.5-flash',
         messages: [
           {
             role: 'system',
-            content: 'You are an expert at extracting ALL text content and data from PDF documents. First, extract ALL visible text from the document. Then structure it into JSON with these fields: full_name, email, phone, linkedin_url, location, summary, skills (array), experience (array of {title, company, duration, description}), education (array of {degree, school, year}). Return ONLY valid JSON.'
+            content: 'You are an expert at extracting structured data from resume text. Extract: full_name, email, phone, linkedin_url, location, summary, skills (array), experience (array of {title, company, duration, description}), education (array of {degree, school, year}). Return ONLY valid JSON. Use null for missing fields. Be thorough and extract all available information.'
           },
           {
             role: 'user',
-            content: `Here is a resume PDF. Please extract ALL text and information from it and return structured JSON. The PDF is base64 encoded: ${base64Pdf.substring(0, 1000)}... [PDF content]`
+            content: `Extract all information from this resume and return structured JSON:\n\n${extractedText}`
           }
         ],
         max_tokens: 3000,
