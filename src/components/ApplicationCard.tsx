@@ -2,8 +2,20 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Building2, Calendar, ExternalLink, MessageSquare } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Building2, Calendar, ExternalLink, MessageSquare, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 type ApplicationStatus = "pending" | "interview" | "rejected" | "accepted";
 
@@ -18,6 +30,7 @@ interface ApplicationCardProps {
     questions: number;
     answersCompleted: number;
   };
+  onDelete: (id: string) => void;
 }
 
 const statusConfig = {
@@ -27,11 +40,18 @@ const statusConfig = {
   accepted: { label: "Accepted", variant: "outline" as const },
 };
 
-export const ApplicationCard = ({ application }: ApplicationCardProps) => {
+export const ApplicationCard = ({ application, onDelete }: ApplicationCardProps) => {
   const statusInfo = statusConfig[application.status];
   const progress = application.questions > 0 
     ? (application.answersCompleted / application.questions) * 100 
     : 0;
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    await onDelete(application.id);
+    setIsDeleting(false);
+  };
 
   return (
     <Card className="p-6 hover:shadow-medium transition-all duration-300 group">
@@ -89,6 +109,33 @@ export const ApplicationCard = ({ application }: ApplicationCardProps) => {
             <ExternalLink className="h-4 w-4 mr-2" />
             Job Page
           </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button 
+                variant="destructive" 
+                size="sm"
+                className="flex-1 md:flex-none"
+                disabled={isDeleting}
+              >
+                <Trash2 className="h-4 w-4 md:mr-0 mr-2" />
+                <span className="md:hidden">Delete</span>
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Application?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete this application for {application.position} at {application.company}? This will also delete all associated questions, answers, and timeline events. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </Card>

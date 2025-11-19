@@ -235,6 +235,27 @@ const Dashboard = () => {
     navigate("/auth");
   };
 
+  const handleDeleteApplication = async (id: string) => {
+    const { error } = await supabase
+      .from("applications")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete application",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Application Deleted",
+        description: "The application and all associated data have been removed",
+      });
+      fetchApplications();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/30">
       {/* Header */}
@@ -324,7 +345,7 @@ const Dashboard = () => {
           ) : (
             <div className="grid gap-4">
               {applications.map((app) => (
-                <ApplicationCard key={app.id} application={app} />
+                <ApplicationCard key={app.id} application={app} onDelete={handleDeleteApplication} />
               ))}
             </div>
           )}
