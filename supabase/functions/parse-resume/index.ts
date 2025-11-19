@@ -70,15 +70,34 @@ Deno.serve(async (req) => {
         const docXml = await zip.file('word/document.xml')?.async('string');
         
         if (docXml) {
-          // Extract text from XML (remove tags)
+          // Extract text from XML and clean thoroughly
           extractedText = docXml
+            // Extract text from w:t tags
             .replace(/<w:t[^>]*>/g, '')
             .replace(/<\/w:t>/g, ' ')
-            .replace(/<[^>]*>/g, '')
+            // Remove all other XML tags
+            .replace(/<[^>]*>/g, ' ')
+            // Decode common XML entities
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&amp;/g, '&')
+            .replace(/&quot;/g, '"')
+            .replace(/&apos;/g, "'")
+            // Remove non-printable characters and control characters
+            .replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F-\x9F]/g, '')
+            // Fix common encoding issues
+            .replace(/â€™/g, "'")
+            .replace(/â€œ/g, '"')
+            .replace(/â€�/g, '"')
+            .replace(/â€"/g, '-')
+            .replace(/â€"/g, '—')
+            .replace(/Â/g, '')
+            // Normalize whitespace
             .replace(/\s+/g, ' ')
+            .replace(/\n+/g, '\n')
             .trim();
           
-          console.log('Extracted text from Word document, length:', extractedText.length);
+          console.log('Extracted and cleaned text from Word document, length:', extractedText.length);
         } else {
           throw new Error('Could not find document.xml in Word file');
         }
