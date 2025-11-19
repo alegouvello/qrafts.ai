@@ -49,13 +49,22 @@ Deno.serve(async (req) => {
       throw new Error('Failed to download resume file');
     }
 
-    // Convert to base64
+    // Convert to base64 using chunk-based approach for large files
     const arrayBuffer = await fileData.arrayBuffer();
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+    const uint8Array = new Uint8Array(arrayBuffer);
+    
+    // Process in chunks to avoid call stack issues
+    let binaryString = '';
+    const chunkSize = 8192;
+    for (let i = 0; i < uint8Array.length; i += chunkSize) {
+      const chunk = uint8Array.slice(i, i + chunkSize);
+      binaryString += String.fromCharCode.apply(null, Array.from(chunk));
+    }
+    const base64 = btoa(binaryString);
 
     console.log('Resume downloaded, parsing with AI...');
 
-    // Use Lovable AI to parse the resume
+    // Use Lovable AI to parse the resume (using Pro model for better document handling)
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -63,7 +72,7 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'google/gemini-2.5-pro',
         messages: [
           {
             role: 'system',
@@ -85,7 +94,6 @@ Deno.serve(async (req) => {
             ]
           }
         ],
-        temperature: 0.1,
         max_tokens: 2000,
       }),
     });
