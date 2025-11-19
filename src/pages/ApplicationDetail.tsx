@@ -110,10 +110,18 @@ const ApplicationDetail = () => {
     improvedVersion: string;
   } | null>(null);
   const [logoError, setLogoError] = useState(false);
+  const [userProfile, setUserProfile] = useState<{
+    full_name?: string;
+    email?: string;
+    phone?: string;
+    linkedin_url?: string;
+    location?: string;
+  } | null>(null);
 
   useEffect(() => {
     checkAuth();
     if (id) {
+      fetchUserProfile();
       fetchApplicationData();
       fetchTimelineEvents();
     }
@@ -124,6 +132,68 @@ const ApplicationDetail = () => {
     if (!session) {
       navigate("/auth");
     }
+  };
+
+  const fetchUserProfile = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data } = await supabase
+      .from("user_profiles")
+      .select("full_name, email, phone, linkedin_url, location")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (data) {
+      setUserProfile(data);
+    }
+  };
+
+  const autoSuggestFromProfile = (questionText: string): string | null => {
+    if (!userProfile) return null;
+
+    const lowerQuestion = questionText.toLowerCase();
+
+    // LinkedIn URL
+    if ((lowerQuestion.includes('linkedin') && lowerQuestion.includes('url')) || 
+        lowerQuestion.includes('linkedin profile')) {
+      return userProfile.linkedin_url || null;
+    }
+
+    // Email
+    if (lowerQuestion.includes('email') && !lowerQuestion.includes('phone')) {
+      return userProfile.email || null;
+    }
+
+    // Phone
+    if (lowerQuestion.includes('phone') || lowerQuestion.includes('mobile') || 
+        lowerQuestion.includes('contact number')) {
+      return userProfile.phone || null;
+    }
+
+    // Full name
+    if (lowerQuestion.includes('full name') || lowerQuestion === 'name') {
+      return userProfile.full_name || null;
+    }
+
+    // First name
+    if (lowerQuestion.includes('first name')) {
+      return userProfile.full_name?.split(' ')[0] || null;
+    }
+
+    // Last name
+    if (lowerQuestion.includes('last name') || lowerQuestion.includes('surname')) {
+      const nameParts = userProfile.full_name?.split(' ');
+      return nameParts && nameParts.length > 1 ? nameParts.slice(1).join(' ') : null;
+    }
+
+    // Location
+    if (lowerQuestion.includes('location') || lowerQuestion.includes('city') || 
+        lowerQuestion.includes('where do you live') || lowerQuestion.includes('based')) {
+      return userProfile.location || null;
+    }
+
+    return null;
   };
 
   const fetchApplicationData = async () => {
@@ -171,14 +241,29 @@ const ApplicationDetail = () => {
           .select("*")
           .in("question_id", questionIds);
 
+        const answersMap: Record<string, string> = {};
+        
         if (answersData) {
-          const answersMap: Record<string, string> = {};
           answersData.forEach((answer) => {
             answersMap[answer.question_id] = answer.answer_text || "";
           });
-          setAnswers(answersMap);
-          setSavedAnswers(answersMap);
         }
+
+        // Auto-suggest from profile for empty answers
+        questionsData.forEach((question) => {
+          if (!answersMap[question.id]) {
+            const suggestion = autoSuggestFromProfile(question.question_text);
+            if (suggestion) {
+              answersMap[question.id] = suggestion;
+            }
+          }
+        });
+
+        setAnswers(answersMap);
+        setSavedAnswers(answersData ? answersData.reduce((acc, answer) => {
+          acc[answer.question_id] = answer.answer_text || "";
+          return acc;
+        }, {} as Record<string, string>) : {});
       }
     }
 
