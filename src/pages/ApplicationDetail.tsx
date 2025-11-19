@@ -763,9 +763,6 @@ const ApplicationDetail = () => {
                   <p className="text-xl text-muted-foreground mb-3">{application.company}</p>
                 </div>
                 <div className="flex flex-col gap-2 shrink-0">
-                  <Badge variant={statusConfig[application.status as keyof typeof statusConfig]?.variant}>
-                    {statusConfig[application.status as keyof typeof statusConfig]?.label}
-                  </Badge>
                   <Select value={application.status} onValueChange={handleStatusChange}>
                     <SelectTrigger className="w-32 h-8 text-xs">
                       <SelectValue />
