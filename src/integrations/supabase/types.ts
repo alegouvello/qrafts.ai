@@ -89,6 +89,7 @@ export type Database = {
           created_at: string
           id: string
           position: string
+          role_summary: Json | null
           status: string
           updated_at: string
           url: string
@@ -100,6 +101,7 @@ export type Database = {
           created_at?: string
           id?: string
           position: string
+          role_summary?: Json | null
           status?: string
           updated_at?: string
           url: string
@@ -111,6 +113,7 @@ export type Database = {
           created_at?: string
           id?: string
           position?: string
+          role_summary?: Json | null
           status?: string
           updated_at?: string
           url?: string

@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { AnswerImprovementDialog } from "@/components/AnswerImprovementDialog";
@@ -43,6 +44,14 @@ interface Application {
   status: string;
   applied_date: string;
   url: string;
+  role_summary?: {
+    location?: string;
+    salary_range?: string;
+    description?: string;
+    responsibilities?: string[];
+    requirements?: string[];
+    benefits?: string[];
+  };
 }
 
 interface Question {
@@ -88,6 +97,8 @@ const ApplicationDetail = () => {
   const [suggesting, setSuggesting] = useState<Record<string, boolean>>({});
   const [improving, setImproving] = useState<Record<string, boolean>>({});
   const [reextracting, setReextracting] = useState(false);
+  const [editingDate, setEditingDate] = useState(false);
+  const [newAppliedDate, setNewAppliedDate] = useState("");
   const [showImprovementDialog, setShowImprovementDialog] = useState(false);
   const [showSaveTemplateDialog, setShowSaveTemplateDialog] = useState(false);
   const [showBrowseTemplatesDialog, setShowBrowseTemplatesDialog] = useState(false);
@@ -135,7 +146,10 @@ const ApplicationDetail = () => {
       return;
     }
 
-    setApplication(appData);
+    setApplication({
+      ...appData,
+      role_summary: appData.role_summary as Application['role_summary']
+    });
 
     // Fetch questions
     const { data: questionsData, error: questionsError } = await supabase
@@ -518,9 +532,18 @@ const ApplicationDetail = () => {
       }
 
       if (response.data?.success) {
+        const parts = [];
+        if (response.data.company && response.data.position) {
+          parts.push(`Updated: ${response.data.company} - ${response.data.position}`);
+        }
+        if (response.data.roleSummary) {
+          parts.push('Role details extracted');
+        }
+        parts.push(`${response.data.questionsFound} questions found`);
+        
         toast({
-          title: "Questions Re-extracted",
-          description: `Found ${response.data.questionsFound} questions using Firecrawl scraper`,
+          title: "Re-extraction Complete",
+          description: parts.join('. '),
         });
         
         // Refresh questions list
@@ -538,6 +561,30 @@ const ApplicationDetail = () => {
     }
 
     setReextracting(false);
+  };
+
+  const handleUpdateAppliedDate = async () => {
+    if (!application || !newAppliedDate) return;
+
+    const { error } = await supabase
+      .from("applications")
+      .update({ applied_date: newAppliedDate })
+      .eq("id", application.id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update applied date",
+        variant: "destructive",
+      });
+    } else {
+      setApplication({ ...application, applied_date: newAppliedDate });
+      setEditingDate(false);
+      toast({
+        title: "Date Updated",
+        description: "Applied date has been updated successfully",
+      });
+    }
   };
 
   if (loading) {
@@ -594,9 +641,38 @@ const ApplicationDetail = () => {
                 <Building2 className="h-5 w-5" />
                 <span className="text-xl">{application.company}</span>
               </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="flex items-center gap-3 text-muted-foreground">
                 <Calendar className="h-4 w-4" />
-                <span>Applied on {new Date(application.applied_date).toLocaleDateString()}</span>
+                {editingDate ? (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="date"
+                      value={newAppliedDate}
+                      onChange={(e) => setNewAppliedDate(e.target.value)}
+                      className="w-40"
+                    />
+                    <Button size="sm" onClick={handleUpdateAppliedDate}>
+                      Save
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => setEditingDate(false)}>
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <span>Applied on {new Date(application.applied_date).toLocaleDateString()}</span>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setEditingDate(true);
+                        setNewAppliedDate(application.applied_date);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
             <div className="flex flex-col gap-3">
@@ -616,6 +692,63 @@ const ApplicationDetail = () => {
               </div>
             </div>
           </div>
+
+          {/* Role Summary */}
+          {application.role_summary && (
+            <div className="mt-6 pt-6 border-t border-border">
+              <h3 className="text-lg font-semibold mb-4">Role Details</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {application.role_summary.location && (
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Location:</span>
+                    <p className="mt-1">{application.role_summary.location}</p>
+                  </div>
+                )}
+                {application.role_summary.salary_range && (
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Salary Range:</span>
+                    <p className="mt-1">{application.role_summary.salary_range}</p>
+                  </div>
+                )}
+              </div>
+              {application.role_summary.description && (
+                <div className="mt-4">
+                  <span className="text-sm font-medium text-muted-foreground">Description:</span>
+                  <p className="mt-1 text-sm">{application.role_summary.description}</p>
+                </div>
+              )}
+              {application.role_summary.responsibilities && application.role_summary.responsibilities.length > 0 && (
+                <div className="mt-4">
+                  <span className="text-sm font-medium text-muted-foreground">Key Responsibilities:</span>
+                  <ul className="mt-2 list-disc list-inside space-y-1">
+                    {application.role_summary.responsibilities.map((item, idx) => (
+                      <li key={idx} className="text-sm">{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {application.role_summary.requirements && application.role_summary.requirements.length > 0 && (
+                <div className="mt-4">
+                  <span className="text-sm font-medium text-muted-foreground">Requirements:</span>
+                  <ul className="mt-2 list-disc list-inside space-y-1">
+                    {application.role_summary.requirements.map((item, idx) => (
+                      <li key={idx} className="text-sm">{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {application.role_summary.benefits && application.role_summary.benefits.length > 0 && (
+                <div className="mt-4">
+                  <span className="text-sm font-medium text-muted-foreground">Benefits:</span>
+                  <ul className="mt-2 list-disc list-inside space-y-1">
+                    {application.role_summary.benefits.map((item, idx) => (
+                      <li key={idx} className="text-sm">{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Progress */}
           {questions.length > 0 && (

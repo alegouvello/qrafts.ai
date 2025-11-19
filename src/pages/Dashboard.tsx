@@ -96,7 +96,7 @@ const Dashboard = () => {
     setLoading(false);
   };
 
-  const handleAddApplication = async (data: { company: string; position: string; url: string }) => {
+  const handleAddApplication = async (data: { company?: string; position?: string; url: string }) => {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
@@ -111,8 +111,8 @@ const Dashboard = () => {
     const { data: newApp, error } = await supabase
       .from("applications")
       .insert({
-        company: data.company,
-        position: data.position,
+        company: data.company || "Unknown Company",
+        position: data.position || "Unknown Position",
         url: data.url,
         user_id: user.id,
       })
@@ -130,10 +130,10 @@ const Dashboard = () => {
 
     toast({
       title: "Application Added",
-      description: "Extracting questions from job posting...",
+      description: "Extracting job details and questions...",
     });
 
-    // Extract questions in the background
+    // Extract questions and job info in the background
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -148,23 +148,29 @@ const Dashboard = () => {
       });
 
       if (response.data?.success) {
+        const parts = [];
+        if (response.data.company && response.data.position) {
+          parts.push(`Company: ${response.data.company}, Position: ${response.data.position}`);
+        }
+        parts.push(`${response.data.questionsFound} questions extracted`);
+        
         toast({
-          title: "Questions Extracted",
-          description: `Found ${response.data.questionsFound} questions from the job posting.`,
+          title: "Extraction Complete",
+          description: parts.join('. '),
         });
       } else {
-        console.error('Failed to extract questions:', response.data?.error);
+        console.error('Failed to extract:', response.data?.error);
         toast({
-          title: "Questions Extraction",
-          description: "Could not extract questions automatically. You can add them manually.",
+          title: "Extraction Issue",
+          description: "Could not extract all details. You can edit them manually.",
           variant: "destructive",
         });
       }
     } catch (extractError) {
       console.error('Error calling extract function:', extractError);
       toast({
-        title: "Questions Extraction",
-        description: "Could not extract questions automatically. You can add them manually.",
+        title: "Extraction Issue",
+        description: "Could not extract details automatically. You can edit them manually.",
         variant: "destructive",
       });
     }
