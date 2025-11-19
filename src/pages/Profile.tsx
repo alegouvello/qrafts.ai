@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Mail, Phone, MapPin, Linkedin, Briefcase, GraduationCap, Award, ArrowLeft, Upload } from "lucide-react";
+import { User, Mail, Phone, MapPin, Linkedin, Briefcase, GraduationCap, Award, ArrowLeft, Upload, Edit } from "lucide-react";
 import { UploadResumeDialog } from "@/components/UploadResumeDialog";
+import { EditProfileDialog } from "@/components/EditProfileDialog";
 
 interface ProfileData {
   full_name: string | null;
@@ -42,6 +43,7 @@ export default function Profile() {
   const [parsedData, setParsedData] = useState<ParsedResume | null>(null);
   const [loading, setLoading] = useState(true);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -139,6 +141,13 @@ export default function Profile() {
             >
               <Upload className="h-4 w-4" />
               Update Resume
+            </Button>
+            <Button
+              onClick={() => setShowEditDialog(true)}
+              className="gap-2"
+            >
+              <Edit className="h-4 w-4" />
+              Edit Profile
             </Button>
           </div>
         </div>
@@ -324,6 +333,12 @@ export default function Profile() {
           }
         }}
         onUpload={handleUploadResume}
+      />
+
+      <EditProfileDialog
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        onSaved={fetchProfile}
       />
     </div>
   );
