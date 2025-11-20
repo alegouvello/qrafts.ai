@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Mail, Phone, MapPin, Linkedin, Briefcase, GraduationCap, Award, ArrowLeft, Upload, Edit, Sparkles, BookOpen, Trophy, BookMarked, Lightbulb, Globe, Heart } from "lucide-react";
+import { User, Mail, Phone, MapPin, Linkedin, Briefcase, GraduationCap, Award, ArrowLeft, Upload, Edit, Sparkles, BookOpen, Trophy, BookMarked, Lightbulb, Globe, Heart, Settings } from "lucide-react";
 import { UploadResumeDialog } from "@/components/UploadResumeDialog";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { ProfileReviewDialog } from "@/components/ProfileReviewDialog";
@@ -205,6 +205,15 @@ export default function Profile() {
                 <span className="hidden sm:inline">Edit Profile</span>
                 <span className="sm:hidden">Edit</span>
               </Button>
+              <Link to="/settings">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 bg-background/50 backdrop-blur-sm"
+                >
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
