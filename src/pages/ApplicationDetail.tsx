@@ -643,8 +643,13 @@ const ApplicationDetail = () => {
           description: parts.join('. '),
         });
         
-        // Refresh questions list
+        // Wait a moment for database to fully update, then refresh
+        await new Promise(resolve => setTimeout(resolve, 500));
         await fetchApplicationData();
+        
+        // Force a re-render by updating state
+        setQuestions([]);
+        setAnswers({});
       } else {
         throw new Error(response.data?.error || 'Failed to extract questions');
       }
