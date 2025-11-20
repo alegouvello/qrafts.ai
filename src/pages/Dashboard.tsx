@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
-import { Plus, Upload, ArrowLeft, LogOut, Calendar } from "lucide-react";
+import { Plus, Upload, ArrowLeft, LogOut, Calendar, BarChart3 } from "lucide-react";
 import { ApplicationCard } from "@/components/ApplicationCard";
 import { AddApplicationDialog } from "@/components/AddApplicationDialog";
 import { UploadResumeDialog } from "@/components/UploadResumeDialog";
@@ -334,6 +334,12 @@ const Dashboard = () => {
                 <Button variant="ghost" className="w-full sm:w-auto rounded-full">
                   <Calendar className="h-4 w-4 mr-2" />
                   Calendar
+                </Button>
+              </Link>
+              <Link to="/comparison">
+                <Button variant="ghost" className="w-full sm:w-auto rounded-full">
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  Compare
                 </Button>
               </Link>
               <Button variant="ghost" onClick={handleSignOut} className="rounded-full">
