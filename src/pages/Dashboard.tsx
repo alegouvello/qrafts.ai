@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Link, useNavigate } from "react-router-dom";
-import { Plus, ArrowLeft, LogOut, BarChart3 } from "lucide-react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Plus, ArrowLeft, LogOut, BarChart3, Crown, Sparkles } from "lucide-react";
 import { ApplicationCard } from "@/components/ApplicationCard";
 import { AddApplicationDialog } from "@/components/AddApplicationDialog";
 import { useToast } from "@/hooks/use-toast";
@@ -23,18 +23,104 @@ const Dashboard = () => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<{
+    subscribed: boolean;
+    product_id: string | null;
+    subscription_end: string | null;
+  }>({ subscribed: false, product_id: null, subscription_end: null });
+  const [checkingSubscription, setCheckingSubscription] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     checkAuth();
     fetchApplications();
+    checkSubscription();
+    
+    // Check for checkout success/cancel
+    const checkout = searchParams.get('checkout');
+    if (checkout === 'success') {
+      toast({
+        title: "Subscription Activated!",
+        description: "Welcome to Qraft Pro! Your subscription is now active.",
+      });
+      // Remove the query param
+      window.history.replaceState({}, '', '/dashboard');
+      // Recheck subscription
+      setTimeout(() => checkSubscription(), 2000);
+    } else if (checkout === 'canceled') {
+      toast({
+        title: "Checkout Canceled",
+        description: "You can upgrade to Qraft Pro anytime.",
+        variant: "destructive",
+      });
+      window.history.replaceState({}, '', '/dashboard');
+    }
   }, []);
 
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       navigate("/auth");
+    }
+  };
+
+  const checkSubscription = async () => {
+    setCheckingSubscription(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('check-subscription');
+      if (error) {
+        console.error('Error checking subscription:', error);
+      } else if (data) {
+        setSubscriptionStatus(data);
+      }
+    } catch (error) {
+      console.error('Error checking subscription:', error);
+    } finally {
+      setCheckingSubscription(false);
+    }
+  };
+
+  const handleUpgrade = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout');
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to create checkout session",
+          variant: "destructive",
+        });
+      } else if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to initiate checkout",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to open subscription management",
+          variant: "destructive",
+        });
+      } else if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to open portal",
+        variant: "destructive",
+      });
     }
   };
 
@@ -276,6 +362,66 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <main className="relative container mx-auto px-4 py-6 sm:py-8">
+        {/* Subscription Banner */}
+        {!subscriptionStatus.subscribed && (
+          <div className="mb-6 sm:mb-8 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 border border-primary/20 backdrop-blur-sm">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <Crown className="h-5 w-5 text-primary" />
+                  <h3 className="text-lg font-semibold">Upgrade to Qraft Pro</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Get unlimited applications, advanced analytics, and priority support for just $5/month
+                </p>
+                <ul className="text-sm space-y-1 text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <Sparkles className="h-3 w-3 text-primary" />
+                    Unlimited job applications
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Sparkles className="h-3 w-3 text-primary" />
+                    AI-powered role fit analysis
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Sparkles className="h-3 w-3 text-primary" />
+                    Priority support
+                  </li>
+                </ul>
+              </div>
+              <Button onClick={handleUpgrade} size="lg" className="rounded-full shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all">
+                <Crown className="h-4 w-4 mr-2" />
+                Upgrade Now
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {subscriptionStatus.subscribed && (
+          <div className="mb-6 sm:mb-8 p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-success/10 via-success/5 to-primary/10 border border-success/20 backdrop-blur-sm">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-success/20">
+                  <Crown className="h-5 w-5 text-success" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold flex items-center gap-2">
+                    Qraft Pro Active
+                  </h3>
+                  {subscriptionStatus.subscription_end && (
+                    <p className="text-xs text-muted-foreground">
+                      Renews on {new Date(subscriptionStatus.subscription_end).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <Button onClick={handleManageSubscription} variant="outline" size="sm" className="rounded-full">
+                Manage Subscription
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
           <div className="group relative bg-gradient-to-br from-card to-card/50 backdrop-blur-sm p-4 sm:p-6 rounded-2xl border border-border/50 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/5">
