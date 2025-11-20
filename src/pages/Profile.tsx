@@ -8,7 +8,7 @@ import { UploadResumeDialog } from "@/components/UploadResumeDialog";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { ProfileReviewDialog } from "@/components/ProfileReviewDialog";
 import { MasterAnswersDialog } from "@/components/MasterAnswersDialog";
-import qraftLogo from "@/assets/qraft-logo-new.png";
+import qraftLogo from "@/assets/qraft-logo-original.png";
 
 interface ProfileData {
   full_name: string | null;
@@ -162,7 +162,7 @@ export default function Profile() {
                 <ArrowLeft className="h-4 w-4" />
                 Back
               </Button>
-              <img src={qraftLogo} alt="QRAFT.AI" className="h-12 opacity-80" />
+              <img src={qraftLogo} alt="QRAFT.AI" className="h-9 opacity-80" />
             </div>
             <div className="flex gap-3">
               <Button
