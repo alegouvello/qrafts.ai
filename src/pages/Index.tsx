@@ -140,16 +140,6 @@ const Index = () => {
                 See How It Works
               </Button>
             </div>
-            <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 sm:gap-6 pt-4 text-sm text-muted-foreground animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-success" />
-                <span>Free forever</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-success" />
-                <span>No credit card</span>
-              </div>
-            </div>
           </div>
           <div className="relative order-first md:order-last animate-fade-in-right" style={{ animationDelay: '0.2s' }}>
             <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur-3xl opacity-50 animate-glow-pulse" />
