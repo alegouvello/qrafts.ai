@@ -73,10 +73,14 @@ serve(async (req) => {
       const subscription = subscriptions.data[0];
       
       if (subscription.status === "active" || subscription.status === "trialing") {
-        subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
+        // Validate timestamp exists before creating Date
+        if (subscription.current_period_end && typeof subscription.current_period_end === 'number') {
+          subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
+        }
+        
         isTrialing = subscription.status === "trialing";
         
-        if (isTrialing && subscription.trial_end) {
+        if (isTrialing && subscription.trial_end && typeof subscription.trial_end === 'number') {
           trialEnd = new Date(subscription.trial_end * 1000).toISOString();
         }
         
@@ -86,7 +90,7 @@ serve(async (req) => {
           endDate: subscriptionEnd,
           trialEnd 
         });
-        productId = subscription.items.data[0].price.product;
+        productId = subscription.items.data[0]?.price?.product || null;
         logStep("Determined subscription tier", { productId });
       }
     } else {
