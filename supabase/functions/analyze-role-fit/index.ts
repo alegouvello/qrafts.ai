@@ -12,8 +12,8 @@ const requestSchema = z.object({
   roleDetails: z.object({
     company: z.string().min(1).max(200),
     position: z.string().min(1).max(200),
-    requirements: z.string().max(5000).optional(),
-    responsibilities: z.string().max(5000).optional(),
+    requirements: z.union([z.string().max(5000), z.array(z.string())]).optional(),
+    responsibilities: z.union([z.string().max(5000), z.array(z.string())]).optional(),
   }),
   resumeText: z.string().min(10).max(50000),
 });
