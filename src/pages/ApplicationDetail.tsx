@@ -966,6 +966,17 @@ const ApplicationDetail = () => {
                 const isImproving = improving[question.id];
                 const hasCurrentAnswer = answers[question.id]?.trim();
 
+                const isFileUpload = (() => {
+                  const lowerQuestion = question.question_text.toLowerCase();
+                  return (
+                    lowerQuestion.includes('resume') ||
+                    lowerQuestion.includes('cv') ||
+                    lowerQuestion.includes('cover letter') ||
+                    lowerQuestion.includes('upload') ||
+                    lowerQuestion.includes('attach')
+                  );
+                })();
+
                 const isShortAnswer = (() => {
                   const lowerQuestion = question.question_text.toLowerCase();
                   return (
@@ -974,6 +985,9 @@ const ApplicationDetail = () => {
                     lowerQuestion.includes('email') ||
                     lowerQuestion.includes('phone') ||
                     lowerQuestion.includes('linkedin') ||
+                    lowerQuestion.includes('github') ||
+                    lowerQuestion.includes('portfolio') ||
+                    lowerQuestion.includes('website') ||
                     lowerQuestion.includes('location') ||
                     lowerQuestion.includes('city') ||
                     (lowerQuestion === 'name' || lowerQuestion.includes('your name'))
@@ -1001,7 +1015,18 @@ const ApplicationDetail = () => {
                             <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
                           )}
                         </div>
-                        {isShortAnswer ? (
+                        {isFileUpload ? (
+                          <div className="space-y-2">
+                            <div className="text-sm text-muted-foreground">
+                              File upload - Please upload directly on the application form
+                            </div>
+                            <Input
+                              placeholder="Or paste file URL here..."
+                              value={answers[question.id] || ""}
+                              onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                            />
+                          </div>
+                        ) : isShortAnswer ? (
                           <Input
                             placeholder="Type your answer here..."
                             value={answers[question.id] || ""}
@@ -1015,6 +1040,7 @@ const ApplicationDetail = () => {
                             className="min-h-[100px]"
                           />
                         )}
+                        {!isFileUpload && (
                         <div className="flex gap-2 flex-wrap items-center">
                           <Button
                             onClick={() => handleGetSuggestion(question.id, question.question_text)}
@@ -1096,8 +1122,9 @@ const ApplicationDetail = () => {
                               </>
                             )}
                           </Button>
-                        </div>
-                      </div>
+                         </div>
+                        )}
+                       </div>
                     </div>
                   </Card>
                 );
