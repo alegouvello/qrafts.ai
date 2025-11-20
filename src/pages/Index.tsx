@@ -51,7 +51,14 @@ const Index = () => {
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Button size="lg" variant="outline" className="rounded-full border-border/60 hover:border-primary/50 transition-all">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="rounded-full border-border/60 hover:border-primary/50 transition-all"
+                onClick={() => {
+                  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }}
+              >
                 See How It Works
               </Button>
             </div>
@@ -78,7 +85,7 @@ const Index = () => {
       </section>
 
       {/* Features Section */}
-      <section className="relative container mx-auto px-6 py-24">
+      <section id="features" className="relative container mx-auto px-6 py-24">
         <div className="text-center mb-20 space-y-4 animate-fade-in-up">
           <div className="inline-block px-4 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-sm font-medium mb-4">
             Everything You Need
