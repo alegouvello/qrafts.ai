@@ -654,8 +654,8 @@ const ApplicationDetail = () => {
         throw new Error(response.error.message);
       }
 
-      if (response.data?.success && response.data.improvedAnswer) {
-        setAnswers((prev) => ({ ...prev, [questionId]: response.data.improvedAnswer }));
+      if (response.data?.success && response.data.improvedVersion) {
+        setAnswers((prev) => ({ ...prev, [questionId]: response.data.improvedVersion }));
         // Clear the confidence score so user can re-check after applying
         setConfidenceScores((prev) => {
           const updated = { ...prev };
