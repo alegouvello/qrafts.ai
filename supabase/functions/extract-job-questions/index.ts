@@ -147,7 +147,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Use Lovable AI to extract questions with better model for accuracy
+    // Use Lovable AI to extract questions
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -155,29 +155,30 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-pro',
+        model: 'google/gemini-2.5-flash',
         messages: [
           {
             role: 'system',
-            content: `You are a precise form field extractor. Extract ONLY the fields that appear in the actual application form section.
+            content: `Extract form fields from the APPLICATION FORM section only. Look for input fields, file uploads, dropdowns, radio buttons where users enter data.
 
-CRITICAL RULES:
-- Only extract fields you can see in the APPLICATION FORM
-- DO NOT add common fields like "First Name", "Last Name", "Phone", "Cover Letter" unless they explicitly appear
-- DO NOT extract questions from job descriptions or requirements
-- Extract exact labels/questions as they appear
-- Strip asterisks (*) and "required" markers
-- If you see a single "Name" field, return it as "Name" (not "First Name" and "Last Name")
-- Be conservative - only include what you are 100% certain is a form field
+DO extract if you see:
+- "Name", "Email", "Resume" (upload), "LinkedIn", "Github", "Personal Website"
+- Work authorization questions, visa sponsorship questions
+- Office location preferences
 
-Return ONLY a JSON array of strings with the exact field labels.`
+DO NOT extract:
+- Questions from job description text
+- Requirements or qualifications lists
+- Standard fields unless explicitly shown (don't assume "First Name", "Last Name", "Phone" exist)
+
+Return a JSON array of the exact field labels you see. Strip asterisks (*).`
           },
           {
             role: 'user',
-            content: `Extract the exact application form fields from this page. Only include fields that are actually present:\n\n${pageContent}`
+            content: `Find the application form fields in this page:\n\n${pageContent}`
           }
         ],
-        temperature: 0.1,
+        temperature: 0.2,
         max_tokens: 800,
       }),
     });
