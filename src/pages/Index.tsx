@@ -163,13 +163,18 @@ const Index = () => {
         
         <div className="max-w-5xl mx-auto">
           <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-border/50 bg-card">
-            <div className="aspect-video">
-              <iframe
-                src="https://sora.chatgpt.com/p/s_691f92e33f80819180eae39ec3e1f41b?psh=HXVzZXItOWxjblJxdDZPM2twNEdlbEZVZ2ZoZUZL.cKK8gz01abV8"
+            <div className="aspect-video bg-black">
+              <video
+                src="/qrafts-demo.mp4"
                 className="w-full h-full"
-                allowFullScreen
-                title="QRAFTS Demo Video"
-              />
+                controls
+                autoPlay
+                muted
+                loop
+                playsInline
+              >
+                Your browser does not support the video tag.
+              </video>
             </div>
           </div>
         </div>
