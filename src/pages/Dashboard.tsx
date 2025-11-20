@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
-import { Plus, Upload, ArrowLeft, LogOut, Calendar, BarChart3 } from "lucide-react";
+import { Plus, ArrowLeft, LogOut, Calendar, BarChart3 } from "lucide-react";
 import { ApplicationCard } from "@/components/ApplicationCard";
 import { AddApplicationDialog } from "@/components/AddApplicationDialog";
-import { UploadResumeDialog } from "@/components/UploadResumeDialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -22,39 +21,19 @@ interface Application {
 const Dashboard = () => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [resumeInfo, setResumeInfo] = useState<{ file_name: string; created_at: string } | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
     checkAuth();
     fetchApplications();
-    fetchResumeInfo();
   }, []);
 
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       navigate("/auth");
-    }
-  };
-
-  const fetchResumeInfo = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data, error } = await supabase
-      .from("resumes")
-      .select("file_name, created_at")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (!error && data) {
-      setResumeInfo(data);
     }
   };
 
@@ -208,60 +187,6 @@ const Dashboard = () => {
     fetchApplications();
   };
 
-  const handleUploadResume = async (file: File): Promise<boolean> => {
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to upload resumes",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    const filePath = `${user.id}/${file.name}`;
-    
-    const { error: uploadError } = await supabase.storage
-      .from("resumes")
-      .upload(filePath, file, {
-        upsert: true
-      });
-
-    if (uploadError) {
-      toast({
-        title: "Upload Failed",
-        description: uploadError.message,
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    const { error: dbError } = await supabase
-      .from("resumes")
-      .insert({
-        user_id: user.id,
-        file_name: file.name,
-        file_path: filePath,
-        file_size: file.size,
-      });
-
-    if (dbError) {
-      toast({
-        title: "Error",
-        description: "Failed to save resume information",
-        variant: "destructive",
-      });
-      return false;
-    } else {
-      toast({
-        title: "Resume Uploaded",
-        description: `${file.name} has been uploaded successfully.`,
-      });
-      return true;
-    }
-  };
-
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/auth");
@@ -327,14 +252,6 @@ const Dashboard = () => {
               <Button onClick={() => setShowAddDialog(true)} className="flex-1 sm:flex-none rounded-full">
                 <Plus className="h-4 w-4 mr-2" />
                 Add
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => setShowUploadDialog(true)}
-                className="flex-1 sm:flex-none rounded-full"
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                Resume
               </Button>
               <Link to="/profile">
                 <Button variant="ghost" className="w-full sm:w-auto rounded-full">
@@ -431,18 +348,6 @@ const Dashboard = () => {
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
         onAdd={handleAddApplication}
-      />
-
-      <UploadResumeDialog
-        open={showUploadDialog}
-        onOpenChange={setShowUploadDialog}
-        onUpload={async (file) => {
-          const success = await handleUploadResume(file);
-          if (success) {
-            fetchResumeInfo(); // Refresh resume info
-          }
-          return success;
-        }}
       />
     </div>
   );
