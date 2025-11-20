@@ -1,17 +1,23 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface RequestBody {
-  questionText: string;
-  answerText: string;
-  roleDetails: any;
-  resumeText?: string;
-}
+const requestSchema = z.object({
+  questionText: z.string().trim().min(1).max(1000),
+  answerText: z.string().trim().min(1).max(10000),
+  roleDetails: z.object({
+    company: z.string().min(1).max(200),
+    position: z.string().min(1).max(200),
+    requirements: z.union([z.string().max(5000), z.array(z.string())]).optional(),
+    responsibilities: z.union([z.string().max(5000), z.array(z.string())]).optional(),
+  }),
+  resumeText: z.string().max(50000).optional(),
+});
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -38,9 +44,10 @@ Deno.serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    const { questionText, answerText, roleDetails, resumeText }: RequestBody = await req.json();
+    const requestBody = await req.json();
+    const { questionText, answerText, roleDetails, resumeText } = requestSchema.parse(requestBody);
     
-    console.log('Calculating confidence for question:', questionText);
+    console.log('Calculating confidence for answer');
 
     if (!answerText || answerText.trim().length < 10) {
       return new Response(
@@ -56,8 +63,12 @@ Deno.serve(async (req) => {
     }
 
     // Extract key requirements
-    const requirements = roleDetails?.requirements || [];
-    const responsibilities = roleDetails?.responsibilities || [];
+    const requirements = Array.isArray(roleDetails?.requirements) 
+      ? roleDetails.requirements 
+      : (roleDetails?.requirements ? [roleDetails.requirements] : []);
+    const responsibilities = Array.isArray(roleDetails?.responsibilities)
+      ? roleDetails.responsibilities
+      : (roleDetails?.responsibilities ? [roleDetails.responsibilities] : []);
     
     const roleContext = `
 Job Requirements:
@@ -137,7 +148,7 @@ SUGGESTIONS: [If score < 100, provide 2-3 specific, actionable suggestions to im
     const aiData = await aiResponse.json();
     const content = aiData.choices?.[0]?.message?.content || '';
 
-    console.log('AI response:', content);
+    console.log('AI response received');
 
     // Parse the response
     const scoreMatch = content.match(/CONFIDENCE_SCORE:\s*(\d+)/i);

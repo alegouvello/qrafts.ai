@@ -1,19 +1,20 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface RequestBody {
-  questionText: string;
-  currentAnswer: string;
-  company: string;
-  position: string;
-  resumeText?: string;
-  userInstructions?: string;
-}
+const requestSchema = z.object({
+  questionText: z.string().trim().min(1).max(1000),
+  currentAnswer: z.string().trim().min(10).max(10000),
+  company: z.string().trim().min(1).max(200),
+  position: z.string().trim().min(1).max(200),
+  resumeText: z.string().max(50000).optional(),
+  userInstructions: z.string().trim().max(1000).optional(),
+});
 
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
@@ -44,9 +45,17 @@ Deno.serve(async (req) => {
     }
 
     // Parse the request body
-    const { questionText, currentAnswer, company, position, resumeText, userInstructions }: RequestBody = await req.json();
+    const requestBody = await req.json();
+    const { 
+      questionText, 
+      currentAnswer, 
+      company, 
+      position,
+      resumeText,
+      userInstructions 
+    } = requestSchema.parse(requestBody);
     
-    console.log('Improving answer for question:', questionText);
+    console.log('Improving answer');
 
     if (!currentAnswer || currentAnswer.trim().length < 10) {
       return new Response(
@@ -172,8 +181,6 @@ IMPROVED VERSION:
 
     const aiData = await aiResponse.json();
     const fullResponse = aiData.choices[0].message.content.trim();
-    
-    console.log('Generated improvement response length:', fullResponse.length);
 
     // Parse the structured response
     const strengthsMatch = fullResponse.match(/STRENGTHS:\s*([\s\S]*?)(?=IMPROVEMENTS:)/i);

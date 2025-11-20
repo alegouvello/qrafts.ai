@@ -1,10 +1,22 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const requestSchema = z.object({
+  roleDetails: z.object({
+    company: z.string().min(1).max(200),
+    position: z.string().min(1).max(200),
+    requirements: z.string().max(5000).optional(),
+    responsibilities: z.string().max(5000).optional(),
+  }),
+  resumeText: z.string().min(10).max(50000),
+});
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -12,7 +24,31 @@ serve(async (req) => {
   }
 
   try {
-    const { roleDetails, resumeText } = await req.json();
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Missing authorization header' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    );
+
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const requestBody = await req.json();
+    const { roleDetails, resumeText } = requestSchema.parse(requestBody);
 
     if (!roleDetails || !resumeText) {
       return new Response(
