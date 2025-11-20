@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Crown, CreditCard, Calendar, Download, Settings as SettingsIcon } from "lucide-react";
+import { ArrowLeft, Crown, CreditCard, Calendar, Download, Settings as SettingsIcon, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import qraftLogo from "@/assets/qraft-logo-clean.png";
@@ -56,15 +56,32 @@ const Settings = () => {
   };
 
   const checkSubscription = async () => {
+    setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('check-subscription');
       if (error) {
         console.error('Error checking subscription:', error);
+        toast({
+          title: "Error",
+          description: "Failed to check subscription status",
+          variant: "destructive",
+        });
       } else if (data) {
         setSubscriptionStatus(data);
+        toast({
+          title: "Status Updated",
+          description: "Subscription status refreshed successfully",
+        });
       }
     } catch (error) {
       console.error('Error checking subscription:', error);
+      toast({
+        title: "Error",
+        description: "Failed to check subscription status",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -166,11 +183,25 @@ const Settings = () => {
         {/* Subscription Section */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Crown className="h-5 w-5 text-primary" />
-              Subscription
-            </CardTitle>
-            <CardDescription>Manage your Qraft Pro subscription</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Crown className="h-5 w-5 text-primary" />
+                  Subscription
+                </CardTitle>
+                <CardDescription>Manage your Qraft Pro subscription</CardDescription>
+              </div>
+              <Button
+                onClick={checkSubscription}
+                variant="outline"
+                size="sm"
+                disabled={loading}
+                className="rounded-full"
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                Refresh Status
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             {subscriptionStatus.subscribed ? (
