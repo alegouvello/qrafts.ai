@@ -979,7 +979,18 @@ const ApplicationDetail = () => {
 
                 const isShortAnswer = (() => {
                   const lowerQuestion = question.question_text.toLowerCase();
-                  return (
+                  const questionWords = lowerQuestion.split(' ').length;
+                  
+                  // Yes/no questions and short field questions
+                  const isYesNoQuestion = 
+                    lowerQuestion.includes('are you') ||
+                    lowerQuestion.includes('do you') ||
+                    lowerQuestion.includes('will you') ||
+                    lowerQuestion.includes('have you') ||
+                    lowerQuestion.includes('can you') ||
+                    (lowerQuestion.includes('?') && questionWords > 5);
+                  
+                  const isShortField = 
                     lowerQuestion.includes('first name') ||
                     lowerQuestion.includes('last name') ||
                     lowerQuestion.includes('email') ||
@@ -990,8 +1001,10 @@ const ApplicationDetail = () => {
                     lowerQuestion.includes('website') ||
                     lowerQuestion.includes('location') ||
                     lowerQuestion.includes('city') ||
-                    (lowerQuestion === 'name' || lowerQuestion.includes('your name'))
-                  ) && (answers[question.id] || '').length < 150;
+                    lowerQuestion.includes('office') ||
+                    (lowerQuestion === 'name' || lowerQuestion.includes('your name'));
+                  
+                  return (isYesNoQuestion || isShortField) && (answers[question.id] || '').length < 150;
                 })();
 
                 return (
