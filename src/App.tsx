@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ChatAssistant } from "@/components/ChatAssistant";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/application/:id" element={<ApplicationDetail />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <ChatAssistant />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
