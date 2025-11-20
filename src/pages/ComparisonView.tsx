@@ -225,25 +225,27 @@ const ComparisonView = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="container mx-auto px-4 py-6 sm:py-8 max-w-6xl">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
             <Button
               variant="ghost"
               onClick={() => navigate("/dashboard")}
               className="rounded-full"
+              size="sm"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
+              <span className="hidden sm:inline">Back to Dashboard</span>
+              <span className="sm:hidden">Back</span>
             </Button>
-            <img src={qraftLogo} alt="QRAFT.AI" className="h-12 opacity-70" />
+            <img src={qraftLogo} alt="QRAFT.AI" className="h-10 sm:h-12 opacity-70" />
           </div>
 
-          <div className="flex items-start justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Application Comparison</h1>
-              <p className="text-muted-foreground">
+              <h1 className="text-3xl sm:text-4xl font-bold mb-2">Application Comparison</h1>
+              <p className="text-sm sm:text-base text-muted-foreground">
                 Compare your applications ranked by AI fit score
               </p>
             </div>
@@ -251,6 +253,7 @@ const ComparisonView = () => {
               onClick={analyzeAll}
               disabled={analyzingAll || !resumeText}
               size="lg"
+              className="w-full sm:w-auto"
             >
               {analyzingAll ? (
                 <>
@@ -269,23 +272,23 @@ const ComparisonView = () => {
 
         {/* Stats */}
         {analyzedCount > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <Card className="p-6">
-              <div className="text-sm text-muted-foreground mb-1">Applications Analyzed</div>
-              <div className="text-3xl font-bold">{analyzedCount}</div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 sm:mb-8">
+            <Card className="p-4 sm:p-6">
+              <div className="text-xs sm:text-sm text-muted-foreground mb-1">Applications Analyzed</div>
+              <div className="text-2xl sm:text-3xl font-bold">{analyzedCount}</div>
               <div className="text-xs text-muted-foreground mt-1">
                 out of {applications.length} total
               </div>
             </Card>
-            <Card className="p-6">
-              <div className="text-sm text-muted-foreground mb-1">Average Fit Score</div>
-              <div className={`text-3xl font-bold ${getScoreColor(avgScore)}`}>
+            <Card className="p-4 sm:p-6">
+              <div className="text-xs sm:text-sm text-muted-foreground mb-1">Average Fit Score</div>
+              <div className={`text-2xl sm:text-3xl font-bold ${getScoreColor(avgScore)}`}>
                 {avgScore}%
               </div>
             </Card>
-            <Card className="p-6">
-              <div className="text-sm text-muted-foreground mb-1">Best Match</div>
-              <div className="text-3xl font-bold text-green-600">
+            <Card className="p-4 sm:p-6">
+              <div className="text-xs sm:text-sm text-muted-foreground mb-1">Best Match</div>
+              <div className="text-2xl sm:text-3xl font-bold text-green-600">
                 {Math.max(...applications.map(app => app.fitScore || 0))}%
               </div>
             </Card>
