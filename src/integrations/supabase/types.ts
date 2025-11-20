@@ -121,6 +121,33 @@ export type Database = {
         }
         Relationships: []
       }
+      master_answers: {
+        Row: {
+          answer_text: string
+          created_at: string
+          id: string
+          question_pattern: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answer_text: string
+          created_at?: string
+          id?: string
+          question_pattern: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answer_text?: string
+          created_at?: string
+          id?: string
+          question_pattern?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       questions: {
         Row: {
           application_id: string

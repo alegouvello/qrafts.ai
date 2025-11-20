@@ -202,7 +202,35 @@ const ApplicationDetail = () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
 
-    // Get all previous answers from this user
+    const lowerQuestion = questionText.toLowerCase().trim();
+
+    // First, check master answers
+    const { data: masterAnswers } = await supabase
+      .from('master_answers')
+      .select('*')
+      .eq('user_id', user.id);
+
+    if (masterAnswers && masterAnswers.length > 0) {
+      // Try exact match first
+      const exactMatch = masterAnswers.find(ma => 
+        ma.question_pattern.toLowerCase().trim() === lowerQuestion
+      );
+      if (exactMatch) return exactMatch.answer_text;
+
+      // Try keyword match
+      const keywordMatch = masterAnswers.find(ma => {
+        const pattern = ma.question_pattern.toLowerCase();
+        const questionWords = lowerQuestion.split(' ').filter(w => w.length > 3);
+        const patternWords = pattern.split(' ').filter(w => w.length > 3);
+        
+        // Check if most key words match
+        const matchCount = questionWords.filter(w => patternWords.some(pw => pw.includes(w) || w.includes(pw))).length;
+        return matchCount >= Math.min(3, questionWords.length / 2);
+      });
+      if (keywordMatch) return keywordMatch.answer_text;
+    }
+
+    // If no master answer, check previous answers from other applications
     const { data: allAnswers } = await supabase
       .from('answers')
       .select('answer_text, questions!inner(question_text)')
@@ -210,8 +238,6 @@ const ApplicationDetail = () => {
       .not('answer_text', 'is', null);
 
     if (!allAnswers || allAnswers.length === 0) return null;
-
-    const lowerQuestion = questionText.toLowerCase().trim();
     
     // Try exact match first
     const exactMatch = allAnswers.find(a => 
