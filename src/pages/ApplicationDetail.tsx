@@ -30,6 +30,8 @@ import {
   Plus,
   TrendingUp,
   Info,
+  Copy,
+  Check,
 } from "lucide-react";
 import {
   Select,
@@ -102,6 +104,7 @@ const ApplicationDetail = () => {
   const [confidenceScores, setConfidenceScores] = useState<Record<string, { score: number; reasoning: string; suggestions?: string }>>({});
   const [expandedConfidence, setExpandedConfidence] = useState<string | null>(null);
   const [applyingSuggestion, setApplyingSuggestion] = useState<Record<string, boolean>>({});
+  const [copiedAnswers, setCopiedAnswers] = useState<Record<string, boolean>>({});
   const [reextracting, setReextracting] = useState(false);
   const [editingDate, setEditingDate] = useState(false);
   const [newAppliedDate, setNewAppliedDate] = useState("");
@@ -727,6 +730,29 @@ const ApplicationDetail = () => {
     }
   };
 
+  const handleCopyAnswer = async (questionId: string) => {
+    const answerText = answers[questionId];
+    if (!answerText) return;
+
+    try {
+      await navigator.clipboard.writeText(answerText);
+      setCopiedAnswers(prev => ({ ...prev, [questionId]: true }));
+      toast({
+        title: "Copied to clipboard",
+        description: "Answer copied successfully",
+      });
+      setTimeout(() => {
+        setCopiedAnswers(prev => ({ ...prev, [questionId]: false }));
+      }, 2000);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to copy answer",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleApplyTemplate = (questionId: string, templateText: string) => {
     setAnswers((prev) => ({
       ...prev,
@@ -1327,31 +1353,50 @@ const ApplicationDetail = () => {
                             </div>
                           </div>
                         )}
-                        {isFileUpload ? (
-                          <div className="space-y-2">
-                            <div className="text-sm text-muted-foreground">
-                              File upload - Please upload directly on the application form
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium">Your Answer</span>
+                            {hasCurrentAnswer && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleCopyAnswer(question.id)}
+                                className="h-8"
+                              >
+                                {copiedAnswers[question.id] ? (
+                                  <Check className="h-4 w-4 text-green-600" />
+                                ) : (
+                                  <Copy className="h-4 w-4" />
+                                )}
+                              </Button>
+                            )}
+                          </div>
+                          {isFileUpload ? (
+                            <div className="space-y-2">
+                              <div className="text-sm text-muted-foreground">
+                                File upload - Please upload directly on the application form
+                              </div>
+                              <Input
+                                placeholder="Or paste file URL here..."
+                                value={answers[question.id] || ""}
+                                onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                              />
                             </div>
+                          ) : isShortAnswer ? (
                             <Input
-                              placeholder="Or paste file URL here..."
+                              placeholder="Type your answer here..."
                               value={answers[question.id] || ""}
                               onChange={(e) => handleAnswerChange(question.id, e.target.value)}
                             />
-                          </div>
-                        ) : isShortAnswer ? (
-                          <Input
-                            placeholder="Type your answer here..."
-                            value={answers[question.id] || ""}
-                            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                          />
-                        ) : (
-                          <Textarea
-                            placeholder="Type your answer here..."
-                            value={answers[question.id] || ""}
-                            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                            className="min-h-[100px]"
-                          />
-                        )}
+                          ) : (
+                            <Textarea
+                              placeholder="Type your answer here..."
+                              value={answers[question.id] || ""}
+                              onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                              className="min-h-[100px]"
+                            />
+                          )}
+                        </div>
                         {!isFileUpload && (
                         <div className="flex gap-2 flex-wrap items-center">
                           <Button
