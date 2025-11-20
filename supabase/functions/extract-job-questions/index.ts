@@ -147,7 +147,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Use Lovable AI to extract questions
+    // Use Lovable AI to extract questions with better model for accuracy
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -155,19 +155,30 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'google/gemini-2.5-pro',
         messages: [
           {
             role: 'system',
-            content: 'You are an expert at extracting ONLY the actual form fields from job application pages. CRITICAL: Only extract fields that appear in the APPLICATION FORM section, NOT from the job description. Look for: input fields, text areas, dropdowns, radio buttons, checkboxes, and file upload fields. DO NOT include: questions from job descriptions, interview questions, or requirements listed in the job posting. Common real form fields include: Name, Email, Phone, Resume upload, LinkedIn URL, GitHub, Portfolio, Cover Letter, Work authorization questions, Visa sponsorship questions, Office location preference. Return ONLY a JSON array of the actual form field labels/questions. Strip asterisks and required markers. Be conservative - only include fields you are certain are part of the application form.'
+            content: `You are a precise form field extractor. Extract ONLY the fields that appear in the actual application form section.
+
+CRITICAL RULES:
+- Only extract fields you can see in the APPLICATION FORM
+- DO NOT add common fields like "First Name", "Last Name", "Phone", "Cover Letter" unless they explicitly appear
+- DO NOT extract questions from job descriptions or requirements
+- Extract exact labels/questions as they appear
+- Strip asterisks (*) and "required" markers
+- If you see a single "Name" field, return it as "Name" (not "First Name" and "Last Name")
+- Be conservative - only include what you are 100% certain is a form field
+
+Return ONLY a JSON array of strings with the exact field labels.`
           },
           {
             role: 'user',
-            content: `Extract ONLY the actual application form fields from this page. Ignore any questions in the job description or requirements section. Focus only on the form where applicants enter their information:\n\n${pageContent}`
+            content: `Extract the exact application form fields from this page. Only include fields that are actually present:\n\n${pageContent}`
           }
         ],
-        temperature: 0.3,
-        max_tokens: 1000,
+        temperature: 0.1,
+        max_tokens: 800,
       }),
     });
 
