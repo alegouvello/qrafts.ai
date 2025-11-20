@@ -101,6 +101,7 @@ const ApplicationDetail = () => {
   const [calculatingConfidence, setCalculatingConfidence] = useState<Record<string, boolean>>({});
   const [confidenceScores, setConfidenceScores] = useState<Record<string, { score: number; reasoning: string; suggestions?: string }>>({});
   const [expandedConfidence, setExpandedConfidence] = useState<string | null>(null);
+  const [applyingSuggestion, setApplyingSuggestion] = useState<Record<string, boolean>>({});
   const [reextracting, setReextracting] = useState(false);
   const [editingDate, setEditingDate] = useState(false);
   const [newAppliedDate, setNewAppliedDate] = useState("");
@@ -607,6 +608,73 @@ const ApplicationDetail = () => {
     }
 
     setCalculatingConfidence((prev) => ({ ...prev, [questionId]: false }));
+  };
+
+  const handleQuickApplySuggestion = async (questionId: string, questionText: string) => {
+    if (!application) return;
+
+    const currentAnswer = answers[questionId];
+    const suggestions = confidenceScores[questionId]?.suggestions;
+    
+    if (!currentAnswer || !suggestions) {
+      toast({
+        title: "Cannot Apply",
+        description: "No suggestions available to apply.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setApplyingSuggestion((prev) => ({ ...prev, [questionId]: true }));
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const response = await supabase.functions.invoke('improve-answer', {
+        body: {
+          questionText: questionText,
+          currentAnswer: currentAnswer,
+          company: application.company,
+          position: application.position,
+          resumeText: userProfile?.resume_text || "",
+          userInstructions: `Incorporate these specific improvements:\n${suggestions}`,
+        },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      if (response.data?.success && response.data.improvedAnswer) {
+        setAnswers((prev) => ({ ...prev, [questionId]: response.data.improvedAnswer }));
+        // Clear the confidence score so user can re-check after applying
+        setConfidenceScores((prev) => {
+          const updated = { ...prev };
+          delete updated[questionId];
+          return updated;
+        });
+        setExpandedConfidence(null);
+        
+        toast({
+          title: "Suggestions Applied",
+          description: "Your answer has been improved. Review and save the changes.",
+        });
+      } else {
+        throw new Error(response.data?.error || 'Failed to apply suggestions');
+      }
+    } catch (error) {
+      console.error('Error applying suggestion:', error);
+      toast({
+        title: "Application Failed",
+        description: error instanceof Error ? error.message : "Could not apply suggestions. Please try again.",
+        variant: "destructive",
+      });
+    }
+
+    setApplyingSuggestion((prev) => ({ ...prev, [questionId]: false }));
   };
 
   const handleApplyImprovement = () => {
@@ -1227,8 +1295,29 @@ const ApplicationDetail = () => {
                                   <span className="font-medium">Analysis:</span> {confidenceScores[question.id].reasoning}
                                 </p>
                                 {confidenceScores[question.id].suggestions && confidenceScores[question.id].score < 100 && (
-                                  <div className="space-y-1">
-                                    <p className="text-sm font-medium text-foreground">Suggestions to improve:</p>
+                                  <div className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                      <p className="text-sm font-medium text-foreground">Suggestions to improve:</p>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => handleQuickApplySuggestion(question.id, question.question_text)}
+                                        disabled={applyingSuggestion[question.id]}
+                                        className="h-7 text-xs"
+                                      >
+                                        {applyingSuggestion[question.id] ? (
+                                          <>
+                                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                            Applying...
+                                          </>
+                                        ) : (
+                                          <>
+                                            <Sparkles className="h-3 w-3 mr-1" />
+                                            Quick Apply
+                                          </>
+                                        )}
+                                      </Button>
+                                    </div>
                                     <p className="text-sm text-muted-foreground whitespace-pre-line">
                                       {confidenceScores[question.id].suggestions}
                                     </p>
@@ -1237,7 +1326,7 @@ const ApplicationDetail = () => {
                               </div>
                             </div>
                           </div>
-                         )}
+                        )}
                         {isFileUpload ? (
                           <div className="space-y-2">
                             <div className="text-sm text-muted-foreground">
