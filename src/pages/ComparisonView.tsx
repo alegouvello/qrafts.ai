@@ -254,7 +254,7 @@ const ComparisonView = () => {
                 </Button>
               </Link>
             </div>
-            <img src={qraftLogo} alt="QRAFTS" className="h-10 sm:h-12 opacity-70" />
+            <img src={qraftLogo} alt="QRAFTS" className="h-14 sm:h-16 opacity-70" />
           </div>
 
           <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
