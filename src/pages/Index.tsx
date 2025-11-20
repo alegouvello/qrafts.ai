@@ -12,7 +12,7 @@ import {
 import heroWorkspace from "@/assets/hero-workspace.jpg";
 import featureOrganize from "@/assets/feature-organize.jpg";
 import featureAutomate from "@/assets/feature-automate.jpg";
-import qraftLogo from "@/assets/qraft-logo-clean.png";
+import qraftLogo from "@/assets/qrafts-logo.png";
 
 
 const Index = () => {
@@ -37,7 +37,7 @@ const Index = () => {
       <header className="relative border-b border-border/40 bg-background/80 backdrop-blur-xl sticky top-0 z-50">
         <div className="container mx-auto px-4 sm:px-6 py-2 sm:py-3 flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3">
-            <img src={qraftLogo} alt="QRAFT.AI" className="h-16 sm:h-20 md:h-24" />
+            <img src={qraftLogo} alt="QRAFTS" className="h-16 sm:h-20 md:h-24" />
           </div>
           
           {/* Desktop Navigation */}
@@ -62,7 +62,7 @@ const Index = () => {
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
               <SheetHeader>
                 <SheetTitle className="flex items-center gap-2">
-                  <img src={qraftLogo} alt="QRAFT.AI" className="h-8" />
+                  <img src={qraftLogo} alt="QRAFTS" className="h-8" />
                 </SheetTitle>
               </SheetHeader>
               <div className="flex flex-col gap-4 mt-8">
@@ -241,7 +241,7 @@ const Index = () => {
               Ready to Transform Your Job Search?
             </h3>
             <p className="text-lg sm:text-xl mb-8 sm:mb-10 opacity-95 max-w-2xl mx-auto px-4">
-              Join thousands of professionals who landed their dream jobs with QRAFT.AI
+              Join thousands of professionals who landed their dream jobs with QRAFTS
             </p>
             <Link to="/auth">
               <Button size="lg" variant="secondary" className="w-full sm:w-auto rounded-full group shadow-2xl hover:scale-105 transition-all">
@@ -256,8 +256,8 @@ const Index = () => {
       {/* Footer */}
       <footer className="relative border-t border-border/40 mt-12 sm:mt-20">
         <div className="container mx-auto px-4 sm:px-6 py-10 sm:py-12 text-center space-y-4">
-          <img src={qraftLogo} alt="QRAFT.AI" className="h-8 sm:h-10 md:h-12 mx-auto opacity-60" />
-          <p className="text-sm sm:text-base text-muted-foreground">© 2025 QRAFT.AI. Built for ambitious job seekers.</p>
+          <img src={qraftLogo} alt="QRAFTS" className="h-8 sm:h-10 md:h-12 mx-auto opacity-60" />
+          <p className="text-sm sm:text-base text-muted-foreground">© 2025 QRAFTS. Built for ambitious job seekers.</p>
         </div>
       </footer>
     </div>
