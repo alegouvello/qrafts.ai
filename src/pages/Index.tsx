@@ -12,7 +12,7 @@ import {
 import heroWorkspace from "@/assets/hero-workspace.jpg";
 import featureOrganize from "@/assets/feature-organize.jpg";
 import featureAutomate from "@/assets/feature-automate.jpg";
-import qraftLogo from "@/assets/qraft-logo-original.png";
+import qraftLogo from "@/assets/qraft-logo-clean.png";
 
 
 const Index = () => {
