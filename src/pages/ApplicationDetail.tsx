@@ -40,7 +40,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import qraftLogo from "@/assets/qraft-logo.png";
+import qraftLogo from "@/assets/qraft-logo-new.png";
 
 interface Application {
   id: string;
@@ -1058,7 +1058,7 @@ const ApplicationDetail = () => {
                   Back
                 </Button>
               </Link>
-              <div className="text-lg font-bold">QRAFT.AI</div>
+              <img src={qraftLogo} alt="QRAFT.AI" className="h-12 opacity-70" />
             </div>
             <div className="flex items-center gap-2">
               {editingUrl ? (
