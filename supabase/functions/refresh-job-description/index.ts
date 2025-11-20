@@ -73,35 +73,46 @@ Deno.serve(async (req) => {
     }
 
     // Extract job information (company, position, summary) using AI
-    const jobInfoResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${lovableApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an expert at analyzing job postings. Extract the company name, position/job title, and key job details. Return ONLY valid JSON with this exact structure: {"company": "Company Name", "position": "Job Title", "summary": {"location": "Location", "salary_range": "Salary range or null", "description": "Brief role description", "responsibilities": ["resp1", "resp2"], "requirements": ["req1", "req2"], "benefits": ["benefit1", "benefit2"]}}. If any field is not found, use null or empty array.'
-          },
-          {
-            role: 'user',
-            content: `Extract company name, position title, and job details from this job posting:\n\n${pageContent}`
-          }
-        ],
-        temperature: 0.3,
-        max_tokens: 1500,
-      }),
-    });
-
-    if (!jobInfoResponse.ok) {
-      console.error('Job info AI API error:', await jobInfoResponse.text());
-      throw new Error('Failed to extract job information');
+    console.log('Calling AI to extract job information...');
+    let jobInfoResponse;
+    try {
+      jobInfoResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${lovableApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert at analyzing job postings. Extract the company name, position/job title, and key job details. Return ONLY valid JSON with this exact structure: {"company": "Company Name", "position": "Job Title", "summary": {"location": "Location", "salary_range": "Salary range or null", "description": "Brief role description", "responsibilities": ["resp1", "resp2"], "requirements": ["req1", "req2"], "benefits": ["benefit1", "benefit2"]}}. If any field is not found, use null or empty array.'
+            },
+            {
+              role: 'user',
+              content: `Extract company name, position title, and job details from this job posting:\n\n${pageContent.substring(0, 10000)}`
+            }
+          ],
+          temperature: 0.3,
+          max_tokens: 1500,
+        }),
+      });
+    } catch (fetchError) {
+      console.error('Network error calling AI API:', fetchError);
+      throw new Error('Network error while calling AI service');
     }
 
+    if (!jobInfoResponse.ok) {
+      const errorText = await jobInfoResponse.text();
+      console.error('Job info AI API error status:', jobInfoResponse.status);
+      console.error('Job info AI API error body:', errorText);
+      throw new Error(`AI API returned status ${jobInfoResponse.status}: ${errorText}`);
+    }
+
+    console.log('AI response received, parsing...');
     const jobInfoData = await jobInfoResponse.json();
+    console.log('AI response parsed successfully');
     const jobInfoContent = jobInfoData.choices[0].message.content;
     
     let company = null;
