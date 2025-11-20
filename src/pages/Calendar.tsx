@@ -210,46 +210,47 @@ const CalendarPage = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border bg-card sticky top-0 z-50 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+        <div className="container mx-auto px-4 py-3 sm:py-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/dashboard")}
+                className="flex-shrink-0"
               >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
+                <ArrowLeft className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Back to Dashboard</span>
               </Button>
-              <div className="flex items-center gap-2">
-                <CalendarIcon className="h-5 w-5 text-primary" />
-                <h1 className="text-xl font-bold">Event Calendar</h1>
+              <div className="flex items-center gap-2 min-w-0">
+                <CalendarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+                <h1 className="text-base sm:text-xl font-bold truncate">Event Calendar</h1>
               </div>
             </div>
-            <Button variant="outline" size="sm" onClick={handleSignOut}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
+            <Button variant="outline" size="sm" onClick={handleSignOut} className="flex-shrink-0">
+              <LogOut className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Sign Out</span>
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-4 sm:py-8">
         {/* Statistics Card */}
-        <Card className="p-6 mb-4">
-          <h2 className="text-lg font-semibold mb-4">Event Statistics</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+        <Card className="p-4 sm:p-6 mb-4">
+          <h2 className="text-base sm:text-lg font-semibold mb-4">Event Statistics</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Total Events</p>
-              <p className="text-3xl font-bold">{totalEvents}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-1">Total Events</p>
+              <p className="text-2xl sm:text-3xl font-bold">{totalEvents}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Upcoming</p>
-              <p className="text-3xl font-bold text-primary">{upcomingEvents}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-1">Upcoming</p>
+              <p className="text-2xl sm:text-3xl font-bold text-primary">{upcomingEvents}</p>
             </div>
-            <div className="col-span-2 md:col-span-1">
-              <p className="text-sm text-muted-foreground mb-1">Past Events</p>
-              <p className="text-3xl font-bold text-muted-foreground">{totalEvents - upcomingEvents}</p>
+            <div className="col-span-2 sm:col-span-1">
+              <p className="text-xs sm:text-sm text-muted-foreground mb-1">Past Events</p>
+              <p className="text-2xl sm:text-3xl font-bold text-muted-foreground">{totalEvents - upcomingEvents}</p>
             </div>
           </div>
           
@@ -364,17 +365,18 @@ const CalendarPage = () => {
         </Card>
 
         {/* Filters Section */}
-        <Card className="p-4 mb-6">
-          <div className="flex items-center justify-between mb-3">
+        <Card className="p-4 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
             <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-primary" />
-              <h3 className="font-semibold">Filter Events</h3>
+              <Filter className="h-4 w-4 text-primary flex-shrink-0" />
+              <h3 className="font-semibold text-sm sm:text-base">Filter Events</h3>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full sm:w-auto">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleSelectAll}
+                className="flex-1 sm:flex-none"
               >
                 Select All
               </Button>
@@ -382,12 +384,13 @@ const CalendarPage = () => {
                 variant="outline"
                 size="sm"
                 onClick={handleClearAll}
+                className="flex-1 sm:flex-none"
               >
                 Clear All
               </Button>
             </div>
           </div>
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap gap-3 sm:gap-4">
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="interview"
@@ -460,31 +463,33 @@ const CalendarPage = () => {
         </Card>
 
         {/* View Mode Toggle */}
-        <div className="flex justify-center mb-6">
-          <div className="inline-flex rounded-lg border border-border p-1 bg-card">
+        <div className="flex justify-center mb-4 sm:mb-6">
+          <div className="inline-flex rounded-lg border border-border p-1 bg-card w-full sm:w-auto">
             <Button
               variant={viewMode === "month" ? "default" : "ghost"}
               size="sm"
               onClick={() => setViewMode("month")}
-              className="gap-2"
+              className="gap-2 flex-1 sm:flex-none"
             >
               <CalendarIcon className="h-4 w-4" />
-              Month View
+              <span className="hidden xs:inline">Month View</span>
+              <span className="xs:hidden">Month</span>
             </Button>
             <Button
               variant={viewMode === "week" ? "default" : "ghost"}
               size="sm"
               onClick={() => setViewMode("week")}
-              className="gap-2"
+              className="gap-2 flex-1 sm:flex-none"
             >
               <Grid className="h-4 w-4" />
-              Week View
+              <span className="hidden xs:inline">Week View</span>
+              <span className="xs:hidden">Week</span>
             </Button>
           </div>
         </div>
 
         {viewMode === "month" ? (
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid lg:grid-cols-2 gap-6 sm:gap-8">
           {/* Calendar Section */}
           <Card className="p-6">
             <h2 className="text-lg font-semibold mb-4">Select a Date</h2>

@@ -239,33 +239,34 @@ const Dashboard = () => {
       
       {/* Header */}
       <header className="relative border-b border-border/40 bg-background/80 backdrop-blur-xl sticky top-0 z-10">
-        <div className="container mx-auto px-6 py-5">
+        <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-5">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
               <Link to="/">
-                <Button variant="ghost" size="icon" className="rounded-full">
+                <Button variant="ghost" size="icon" className="rounded-full flex-shrink-0">
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
               </Link>
-              <img src={qraftLogo} alt="QRAFT.AI" className="h-12" />
+              <img src={qraftLogo} alt="QRAFT.AI" className="h-10 sm:h-12" />
             </div>
-            <div className="flex items-center gap-4">
-              <Button onClick={() => setShowAddDialog(true)} className="flex-1 sm:flex-none rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto">
+              <Button onClick={() => setShowAddDialog(true)} className="flex-1 sm:flex-none rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all text-sm">
                 <Plus className="h-4 w-4 mr-2" />
                 Add
               </Button>
-              <Link to="/profile">
-                <Button variant="ghost" className="w-full sm:w-auto rounded-full hover:bg-primary/5 transition-all">
+              <Link to="/profile" className="flex-1 sm:flex-none">
+                <Button variant="ghost" className="w-full rounded-full hover:bg-primary/5 transition-all text-sm">
                   Profile
                 </Button>
               </Link>
-              <Link to="/comparison">
-                <Button variant="ghost" className="w-full sm:w-auto rounded-full hover:bg-accent/5 transition-all">
+              <Link to="/comparison" className="flex-1 sm:flex-none">
+                <Button variant="ghost" className="w-full rounded-full hover:bg-accent/5 transition-all text-sm">
                   <BarChart3 className="h-4 w-4 mr-2" />
-                  Compare
+                  <span className="hidden sm:inline">Compare</span>
+                  <span className="sm:hidden">Stats</span>
                 </Button>
               </Link>
-              <Button variant="ghost" onClick={handleSignOut} className="rounded-full hover:bg-destructive/5 transition-all">
+              <Button variant="ghost" onClick={handleSignOut} className="rounded-full hover:bg-destructive/5 transition-all" size="icon">
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
@@ -274,23 +275,23 @@ const Dashboard = () => {
       </header>
 
       {/* Main Content */}
-      <main className="relative container mx-auto px-4 py-8">
+      <main className="relative container mx-auto px-4 py-6 sm:py-8">
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-          <div className="group relative bg-gradient-to-br from-card to-card/50 backdrop-blur-sm p-6 rounded-2xl border border-border/50 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/5">
-            <div className="text-4xl font-bold mb-2 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{stats.total}</div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
+          <div className="group relative bg-gradient-to-br from-card to-card/50 backdrop-blur-sm p-4 sm:p-6 rounded-2xl border border-border/50 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/5">
+            <div className="text-3xl sm:text-4xl font-bold mb-2 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{stats.total}</div>
             <div className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Total Applications</div>
           </div>
-          <div className="group relative bg-gradient-to-br from-card to-card/50 backdrop-blur-sm p-6 rounded-2xl border border-border/50 hover:border-warning/30 transition-all hover:shadow-lg hover:shadow-warning/5">
-            <div className="text-4xl font-bold mb-2 text-warning">{stats.pending}</div>
+          <div className="group relative bg-gradient-to-br from-card to-card/50 backdrop-blur-sm p-4 sm:p-6 rounded-2xl border border-border/50 hover:border-warning/30 transition-all hover:shadow-lg hover:shadow-warning/5">
+            <div className="text-3xl sm:text-4xl font-bold mb-2 text-warning">{stats.pending}</div>
             <div className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Pending Review</div>
           </div>
-          <div className="group relative bg-gradient-to-br from-card to-card/50 backdrop-blur-sm p-6 rounded-2xl border border-border/50 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/5">
-            <div className="text-4xl font-bold mb-2 text-primary">{stats.interviews}</div>
+          <div className="group relative bg-gradient-to-br from-card to-card/50 backdrop-blur-sm p-4 sm:p-6 rounded-2xl border border-border/50 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/5">
+            <div className="text-3xl sm:text-4xl font-bold mb-2 text-primary">{stats.interviews}</div>
             <div className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Interviews</div>
           </div>
-          <div className="group relative bg-gradient-to-br from-card to-card/50 backdrop-blur-sm p-6 rounded-2xl border border-border/50 hover:border-success/30 transition-all hover:shadow-lg hover:shadow-success/5">
-            <div className="text-4xl font-bold mb-2 text-success">{stats.responseRate}%</div>
+          <div className="group relative bg-gradient-to-br from-card to-card/50 backdrop-blur-sm p-4 sm:p-6 rounded-2xl border border-border/50 hover:border-success/30 transition-all hover:shadow-lg hover:shadow-success/5">
+            <div className="text-3xl sm:text-4xl font-bold mb-2 text-success">{stats.responseRate}%</div>
             <div className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Response Rate</div>
           </div>
         </div>

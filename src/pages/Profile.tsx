@@ -151,84 +151,89 @@ export default function Profile() {
       {/* Header with gradient background */}
       <div className="relative bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 border-b">
         <div className="absolute inset-0 bg-grid-white/5 [mask-image:linear-gradient(0deg,transparent,black)]" />
-        <div className="container mx-auto px-4 py-8 relative">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+        <div className="container mx-auto px-4 py-4 sm:py-8 relative">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
               <Button
                 variant="ghost"
                 onClick={() => navigate("/dashboard")}
-                className="gap-2 hover:bg-background/50 rounded-full"
+                className="gap-2 hover:bg-background/50 rounded-full flex-shrink-0"
+                size="sm"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Back
+                <span className="hidden sm:inline">Back</span>
               </Button>
-              <img src={qraftLogo} alt="QRAFT.AI" className="h-9 opacity-80" />
+              <img src={qraftLogo} alt="QRAFT.AI" className="h-8 sm:h-9 opacity-80" />
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
               <Button
                 onClick={() => setShowMasterAnswersDialog(true)}
                 variant="secondary"
                 size="sm"
-                className="gap-2 bg-background/50 backdrop-blur-sm"
+                className="gap-2 bg-background/50 backdrop-blur-sm flex-1 sm:flex-none"
               >
                 <BookOpen className="h-4 w-4" />
-                Master Answers
+                <span className="hidden sm:inline">Master Answers</span>
+                <span className="sm:hidden">Answers</span>
               </Button>
               <Button
                 onClick={() => setShowReviewDialog(true)}
                 variant="secondary"
                 size="sm"
-                className="gap-2 bg-background/50 backdrop-blur-sm"
+                className="gap-2 bg-background/50 backdrop-blur-sm flex-1 sm:flex-none"
               >
                 <Sparkles className="h-4 w-4" />
-                AI Review
+                <span className="hidden sm:inline">AI Review</span>
+                <span className="sm:hidden">Review</span>
               </Button>
               <Button
                 onClick={() => setShowUploadDialog(true)}
                 variant="outline"
                 size="sm"
-                className="gap-2 bg-background/50 backdrop-blur-sm"
+                className="gap-2 bg-background/50 backdrop-blur-sm flex-1 sm:flex-none"
               >
                 <Upload className="h-4 w-4" />
-                Upload Resume
+                <span className="hidden md:inline">Upload Resume</span>
+                <span className="md:hidden">Upload</span>
               </Button>
               <Button
                 onClick={() => setShowEditDialog(true)}
                 size="sm"
-                className="gap-2"
+                className="gap-2 flex-1 sm:flex-none"
               >
                 <Edit className="h-4 w-4" />
-                Edit Profile
+                <span className="hidden sm:inline">Edit Profile</span>
+                <span className="sm:hidden">Edit</span>
               </Button>
             </div>
           </div>
         </div>
       </div>
 
-      <main className="container mx-auto px-4 py-12 max-w-5xl">
+      <main className="container mx-auto px-4 py-8 sm:py-12 max-w-5xl">
         <div className="space-y-8">
           {/* Profile Header Card with Avatar */}
           <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-sm overflow-hidden">
-            <div className="relative h-32 bg-gradient-to-r from-primary/20 via-primary/10 to-accent/20" />
-            <CardContent className="relative pt-0 pb-8">
-              <div className="flex flex-col md:flex-row items-start md:items-end gap-6 -mt-16 md:-mt-12">
+            <div className="relative h-24 sm:h-32 bg-gradient-to-r from-primary/20 via-primary/10 to-accent/20" />
+            <CardContent className="relative pt-0 pb-6 sm:pb-8">
+              <div className="flex flex-col md:flex-row items-center md:items-end gap-4 sm:gap-6 -mt-12 sm:-mt-16 md:-mt-12">
                 {/* Avatar */}
                 <div className="relative">
-                  <div className="w-32 h-32 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-xl border-4 border-background">
-                    <span className="text-4xl font-bold text-primary-foreground">
+                  <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-xl border-4 border-background">
+                    <span className="text-3xl sm:text-4xl font-bold text-primary-foreground">
                       {getInitials()}
                     </span>
                   </div>
                 </div>
                 
                 {/* Name and Location */}
-                <div className="flex-1 space-y-2 md:mb-2">
-                  <h1 className="text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                <div className="flex-1 space-y-2 md:mb-2 text-center md:text-left">
+                  <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                     {parsedData?.full_name || profile?.full_name || "Your Name"}
                   </h1>
                   {parsedData?.location && (
-                    <p className="text-muted-foreground flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
+                    <p className="text-sm sm:text-base text-muted-foreground flex items-center gap-2 justify-center md:justify-start">
+                      <MapPin className="h-4 w-4 flex-shrink-0" />
                       {parsedData.location}
                     </p>
                   )}
@@ -238,17 +243,17 @@ export default function Profile() {
           </Card>
 
           {/* Contact Information - Minimalist Cards */}
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid sm:grid-cols-2 gap-4">
             {parsedData?.email && (
               <Card className="border-none shadow-lg hover:shadow-xl transition-shadow bg-card/50 backdrop-blur-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Mail className="h-6 w-6 text-primary" />
+                <CardContent className="p-5 sm:p-6">
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Mail className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Email</p>
-                      <a href={`mailto:${parsedData.email}`} className="font-medium hover:text-primary transition-colors truncate block">
+                      <a href={`mailto:${parsedData.email}`} className="text-sm sm:text-base font-medium hover:text-primary transition-colors truncate block">
                         {parsedData.email}
                       </a>
                     </div>
@@ -259,14 +264,14 @@ export default function Profile() {
             
             {parsedData?.phone && (
               <Card className="border-none shadow-lg hover:shadow-xl transition-shadow bg-card/50 backdrop-blur-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Phone className="h-6 w-6 text-primary" />
+                <CardContent className="p-5 sm:p-6">
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Phone className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Phone</p>
-                      <a href={`tel:${parsedData.phone}`} className="font-medium hover:text-primary transition-colors truncate block">
+                      <a href={`tel:${parsedData.phone}`} className="text-sm sm:text-base font-medium hover:text-primary transition-colors truncate block">
                         {parsedData.phone}
                       </a>
                     </div>
@@ -276,11 +281,11 @@ export default function Profile() {
             )}
             
             {parsedData?.linkedin_url && (
-              <Card className="border-none shadow-lg hover:shadow-xl transition-shadow bg-card/50 backdrop-blur-sm md:col-span-2">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Linkedin className="h-6 w-6 text-primary" />
+              <Card className="border-none shadow-lg hover:shadow-xl transition-shadow bg-card/50 backdrop-blur-sm sm:col-span-2">
+                <CardContent className="p-5 sm:p-6">
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Linkedin className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">LinkedIn</p>
@@ -288,7 +293,7 @@ export default function Profile() {
                         href={parsedData.linkedin_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="font-medium text-primary hover:underline truncate block"
+                        className="text-sm sm:text-base font-medium text-primary hover:underline truncate block"
                       >
                         {parsedData.linkedin_url}
                       </a>
@@ -302,14 +307,14 @@ export default function Profile() {
           {/* Professional Summary */}
           {parsedData?.summary && (
             <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm">
-              <CardContent className="p-8">
+              <CardContent className="p-6 sm:p-8">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <User className="h-5 w-5 text-primary" />
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <User className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                   </div>
-                  <h2 className="text-2xl font-semibold">Professional Summary</h2>
+                  <h2 className="text-xl sm:text-2xl font-semibold">Professional Summary</h2>
                 </div>
-                <p className="text-foreground/80 leading-relaxed">{parsedData.summary}</p>
+                <p className="text-sm sm:text-base text-foreground/80 leading-relaxed">{parsedData.summary}</p>
               </CardContent>
             </Card>
           )}
