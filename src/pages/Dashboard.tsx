@@ -27,6 +27,8 @@ const Dashboard = () => {
     subscribed: boolean;
     product_id: string | null;
     subscription_end: string | null;
+    is_trialing?: boolean;
+    trial_end?: string | null;
   }>({ subscribed: false, product_id: null, subscription_end: null });
   const [checkingSubscription, setCheckingSubscription] = useState(false);
   const { toast } = useToast();
@@ -370,9 +372,12 @@ const Dashboard = () => {
                 <div className="flex items-center gap-2 mb-2">
                   <Crown className="h-5 w-5 text-primary" />
                   <h3 className="text-lg font-semibold">Upgrade to Qraft Pro</h3>
+                  <span className="px-2 py-1 text-xs font-semibold rounded-full bg-success/20 text-success border border-success/30">
+                    14-Day Free Trial
+                  </span>
                 </div>
                 <p className="text-sm text-muted-foreground mb-3">
-                  Get unlimited applications, advanced analytics, and priority support for just $5/month
+                  Try Qraft Pro free for 14 days, then just $5/month. Cancel anytime.
                 </p>
                 <ul className="text-sm space-y-1 text-muted-foreground">
                   <li className="flex items-center gap-2">
@@ -391,7 +396,7 @@ const Dashboard = () => {
               </div>
               <Button onClick={handleUpgrade} size="lg" className="rounded-full shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all">
                 <Crown className="h-4 w-4 mr-2" />
-                Upgrade Now
+                Start Free Trial
               </Button>
             </div>
           </div>
@@ -407,12 +412,21 @@ const Dashboard = () => {
                 <div>
                   <h3 className="text-sm font-semibold flex items-center gap-2">
                     Qraft Pro Active
+                    {subscriptionStatus.is_trialing && (
+                      <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-primary/20 text-primary border border-primary/30">
+                        Trial
+                      </span>
+                    )}
                   </h3>
-                  {subscriptionStatus.subscription_end && (
+                  {subscriptionStatus.is_trialing && subscriptionStatus.trial_end ? (
+                    <p className="text-xs text-muted-foreground">
+                      Trial ends on {new Date(subscriptionStatus.trial_end).toLocaleDateString()}
+                    </p>
+                  ) : subscriptionStatus.subscription_end ? (
                     <p className="text-xs text-muted-foreground">
                       Renews on {new Date(subscriptionStatus.subscription_end).toLocaleDateString()}
                     </p>
-                  )}
+                  ) : null}
                 </div>
               </div>
               <Button onClick={handleManageSubscription} variant="outline" size="sm" className="rounded-full">
