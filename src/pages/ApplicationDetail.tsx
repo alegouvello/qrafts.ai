@@ -156,8 +156,7 @@ const ApplicationDetail = () => {
     const lowerQuestion = questionText.toLowerCase();
 
     // LinkedIn URL
-    if ((lowerQuestion.includes('linkedin') && lowerQuestion.includes('url')) || 
-        lowerQuestion.includes('linkedin profile')) {
+    if (lowerQuestion.includes('linkedin')) {
       return userProfile.linkedin_url || null;
     }
 
