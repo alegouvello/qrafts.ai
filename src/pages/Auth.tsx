@@ -9,11 +9,21 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import qraftLogo from "@/assets/qrafts-logo.png";
+import { z } from "zod";
+
+const authSchema = z.object({
+  email: z.string().trim().email("Invalid email address").max(255, "Email too long"),
+  password: z.string().min(8, "Password must be at least 8 characters")
+    .max(100, "Password too long")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number"),
+});
 
 const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -37,13 +47,28 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+    
+    // Validate input
+    const result = authSchema.safeParse({ email, password });
+    if (!result.success) {
+      const fieldErrors: { email?: string; password?: string } = {};
+      result.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          fieldErrors[err.path[0] as 'email' | 'password'] = err.message;
+        }
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
     setLoading(true);
 
     const redirectUrl = `${window.location.origin}/dashboard`;
 
     const { error } = await supabase.auth.signUp({
-      email,
-      password,
+      email: result.data.email,
+      password: result.data.password,
       options: {
         emailRedirectTo: redirectUrl
       }
@@ -67,11 +92,31 @@ const Auth = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+    
+    // Validate input with relaxed password rules for sign in
+    const signInSchema = z.object({
+      email: z.string().trim().email("Invalid email address").max(255, "Email too long"),
+      password: z.string().min(1, "Password required").max(100, "Password too long"),
+    });
+
+    const result = signInSchema.safeParse({ email, password });
+    if (!result.success) {
+      const fieldErrors: { email?: string; password?: string } = {};
+      result.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          fieldErrors[err.path[0] as 'email' | 'password'] = err.message;
+        }
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
     setLoading(true);
 
     const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+      email: result.data.email,
+      password: result.data.password,
     });
 
     if (error) {
@@ -121,6 +166,9 @@ const Auth = () => {
                   className="h-11 rounded-xl border-border/60 focus:border-primary/50 transition-all"
                   required
                 />
+                {errors.email && (
+                  <p className="text-xs text-destructive">{errors.email}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="signin-password" className="text-sm font-medium">Password</Label>
@@ -133,6 +181,9 @@ const Auth = () => {
                   className="h-11 rounded-xl border-border/60 focus:border-primary/50 transition-all"
                   required
                 />
+                {errors.password && (
+                  <p className="text-xs text-destructive">{errors.password}</p>
+                )}
               </div>
               <Button 
                 type="submit" 
@@ -158,6 +209,9 @@ const Auth = () => {
                   className="h-11 rounded-xl border-border/60 focus:border-primary/50 transition-all"
                   required
                 />
+                {errors.email && (
+                  <p className="text-xs text-destructive">{errors.email}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="signup-password" className="text-sm font-medium">Password</Label>
@@ -169,10 +223,13 @@ const Auth = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   className="h-11 rounded-xl border-border/60 focus:border-primary/50 transition-all"
                   required
-                  minLength={6}
+                  minLength={8}
                 />
+                {errors.password && (
+                  <p className="text-xs text-destructive">{errors.password}</p>
+                )}
                 <p className="text-xs text-muted-foreground">
-                  Password must be at least 6 characters
+                  Password must be 8+ characters with uppercase and number
                 </p>
               </div>
               <Button 
