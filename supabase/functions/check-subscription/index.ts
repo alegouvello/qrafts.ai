@@ -58,27 +58,47 @@ serve(async (req) => {
 
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
-      status: "active",
+      status: "all",
       limit: 1,
     });
-    const hasActiveSub = subscriptions.data.length > 0;
+    
+    const hasActiveSub = subscriptions.data.length > 0 && 
+      (subscriptions.data[0].status === "active" || subscriptions.data[0].status === "trialing");
     let productId = null;
     let subscriptionEnd = null;
+    let trialEnd = null;
+    let isTrialing = false;
 
-    if (hasActiveSub) {
+    if (subscriptions.data.length > 0) {
       const subscription = subscriptions.data[0];
-      subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
-      logStep("Active subscription found", { subscriptionId: subscription.id, endDate: subscriptionEnd });
-      productId = subscription.items.data[0].price.product;
-      logStep("Determined subscription tier", { productId });
+      
+      if (subscription.status === "active" || subscription.status === "trialing") {
+        subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
+        isTrialing = subscription.status === "trialing";
+        
+        if (isTrialing && subscription.trial_end) {
+          trialEnd = new Date(subscription.trial_end * 1000).toISOString();
+        }
+        
+        logStep("Subscription found", { 
+          subscriptionId: subscription.id, 
+          status: subscription.status,
+          endDate: subscriptionEnd,
+          trialEnd 
+        });
+        productId = subscription.items.data[0].price.product;
+        logStep("Determined subscription tier", { productId });
+      }
     } else {
-      logStep("No active subscription found");
+      logStep("No subscription found");
     }
 
     return new Response(JSON.stringify({
       subscribed: hasActiveSub,
       product_id: productId,
-      subscription_end: subscriptionEnd
+      subscription_end: subscriptionEnd,
+      is_trialing: isTrialing,
+      trial_end: trialEnd
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
