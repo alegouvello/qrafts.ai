@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight, FileText, Sparkles, TrendingUp, CheckCircle2, Menu, X } from "lucide-react";
+import { ArrowRight, FileText, Sparkles, TrendingUp, CheckCircle2, Menu } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -9,6 +9,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import heroWorkspace from "@/assets/hero-workspace.jpg";
 import featureOrganize from "@/assets/feature-organize.jpg";
 import featureAutomate from "@/assets/feature-automate.jpg";
@@ -17,6 +18,14 @@ import qraftLogo from "@/assets/qrafts-logo.png";
 
 const Index = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Scroll animations for different sections
+  const videoSection = useScrollAnimation({ threshold: 0.2 });
+  const featuresSection = useScrollAnimation({ threshold: 0.1 });
+  const feature1 = useScrollAnimation({ threshold: 0.3 });
+  const feature2 = useScrollAnimation({ threshold: 0.3 });
+  const feature3 = useScrollAnimation({ threshold: 0.3 });
+  const ctaSection = useScrollAnimation({ threshold: 0.3 });
 
   const scrollToFeatures = () => {
     document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -95,25 +104,29 @@ const Index = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="relative container mx-auto px-4 sm:px-6 py-16 sm:py-24 md:py-32" aria-labelledby="hero-heading">
+      <section className="relative container mx-auto px-4 sm:px-6 py-16 sm:py-24 md:py-32 overflow-hidden" aria-labelledby="hero-heading">
+        {/* Animated gradient orbs */}
+        <div className="absolute top-20 -left-20 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-20 -right-20 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
+        
         <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
-          <div className="space-y-6 sm:space-y-8 animate-fade-in-up text-center md:text-left">
-            <div className="inline-block px-3 sm:px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium">
+          <div className="space-y-6 sm:space-y-8 text-center md:text-left">
+            <div className="inline-block px-3 sm:px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium animate-fade-in-down">
               ✨ Your Job Search Assistant
             </div>
-            <h2 id="hero-heading" className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
+            <h2 id="hero-heading" className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
               Stay Organized.
               <span className="block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mt-2">
                 Get Better.
               </span>
             </h2>
-            <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-lg mx-auto md:mx-0">
+            <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-lg mx-auto md:mx-0 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               Keep all your applications organized in one place. Build a library of your best answers 
               and improve them over time. Learn what works and refine your approach with every application.
             </p>
-            <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 pt-4 justify-center md:justify-start">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 pt-4 justify-center md:justify-start animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
               <Link to="/auth" className="w-full sm:w-auto">
-                <Button size="lg" className="w-full sm:w-auto rounded-full group shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all min-h-[48px]">
+                <Button size="lg" className="w-full sm:w-auto rounded-full group shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:scale-105 transition-all duration-300 min-h-[48px]">
                   Get Started Free
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
@@ -121,13 +134,13 @@ const Index = () => {
               <Button 
                 size="lg" 
                 variant="outline" 
-                className="w-full sm:w-auto rounded-full border-border/60 hover:border-primary/50 transition-all min-h-[48px]"
+                className="w-full sm:w-auto rounded-full border-border/60 hover:border-primary/50 hover:scale-105 transition-all duration-300 min-h-[48px]"
                 onClick={scrollToFeatures}
               >
                 See How It Works
               </Button>
             </div>
-            <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 sm:gap-6 pt-4 text-sm text-muted-foreground">
+            <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 sm:gap-6 pt-4 text-sm text-muted-foreground animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-success" />
                 <span>Free forever</span>
@@ -138,12 +151,12 @@ const Index = () => {
               </div>
             </div>
           </div>
-          <div className="relative animate-slide-in-right order-first md:order-last">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur-3xl opacity-50" />
+          <div className="relative order-first md:order-last animate-fade-in-right" style={{ animationDelay: '0.2s' }}>
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur-3xl opacity-50 animate-glow-pulse" />
             <img 
               src={heroWorkspace} 
               alt="Professional workspace with laptop and coffee" 
-              className="relative rounded-2xl sm:rounded-3xl shadow-2xl w-full border border-border/50"
+              className="relative rounded-2xl sm:rounded-3xl shadow-2xl w-full border border-border/50 hover:scale-105 transition-transform duration-500"
               loading="eager"
             />
           </div>
@@ -151,9 +164,15 @@ const Index = () => {
       </section>
 
       {/* Video Demo Section */}
-      <section className="relative container mx-auto px-4 sm:px-6 py-16 sm:py-24" aria-labelledby="video-heading">
-        <div className="text-center mb-12 sm:mb-16 space-y-4 animate-fade-in-up">
-          <div className="inline-block px-3 sm:px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium mb-4">
+      <section 
+        ref={videoSection.ref}
+        className="relative container mx-auto px-4 sm:px-6 py-16 sm:py-24" 
+        aria-labelledby="video-heading"
+      >
+        <div className={`text-center mb-12 sm:mb-16 space-y-4 transition-all duration-1000 ${
+          videoSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        }`}>
+          <div className="inline-block px-3 sm:px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium mb-4 animate-glow-pulse">
             See It In Action
           </div>
           <h3 id="video-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">Watch QRAFTS in Action</h3>
@@ -162,8 +181,10 @@ const Index = () => {
           </p>
         </div>
         
-        <div className="max-w-5xl mx-auto">
-          <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-border/50 bg-card">
+        <div className={`max-w-5xl mx-auto transition-all duration-1000 delay-300 ${
+          videoSection.isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+        }`}>
+          <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-border/50 bg-card hover:shadow-primary/20 hover:shadow-3xl transition-shadow duration-500">
             <div className="aspect-video bg-black">
               <video
                 src="/qrafts-demo.mp4"
@@ -182,8 +203,15 @@ const Index = () => {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="relative container mx-auto px-4 sm:px-6 py-16 sm:py-24" aria-labelledby="features-heading">
-        <div className="text-center mb-16 sm:mb-20 space-y-4 animate-fade-in-up">
+      <section 
+        id="features" 
+        ref={featuresSection.ref}
+        className="relative container mx-auto px-4 sm:px-6 py-16 sm:py-24" 
+        aria-labelledby="features-heading"
+      >
+        <div className={`text-center mb-16 sm:mb-20 space-y-4 transition-all duration-1000 ${
+          featuresSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        }`}>
           <div className="inline-block px-3 sm:px-4 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs sm:text-sm font-medium mb-4">
             Everything You Need
           </div>
@@ -195,8 +223,13 @@ const Index = () => {
 
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
           {/* Feature 1 */}
-          <div className="group relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-3xl transition-all group-hover:from-primary/10" />
+          <div 
+            ref={feature1.ref}
+            className={`group relative transition-all duration-1000 ${
+              feature1.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            }`}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-3xl transition-all duration-500 group-hover:from-primary/10 group-hover:scale-105" />
             <div className="relative p-6 sm:p-8 space-y-4 sm:space-y-6">
               <div className="relative h-40 sm:h-48 rounded-2xl overflow-hidden">
                 <img 
@@ -220,8 +253,13 @@ const Index = () => {
           </div>
 
           {/* Feature 2 */}
-          <div className="group relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent rounded-3xl transition-all group-hover:from-accent/10" />
+          <div 
+            ref={feature2.ref}
+            className={`group relative transition-all duration-1000 delay-200 ${
+              feature2.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            }`}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent rounded-3xl transition-all duration-500 group-hover:from-accent/10 group-hover:scale-105" />
             <div className="relative p-6 sm:p-8 space-y-4 sm:space-y-6">
               <div className="relative h-40 sm:h-48 rounded-2xl overflow-hidden">
                 <img 
@@ -245,8 +283,13 @@ const Index = () => {
           </div>
 
           {/* Feature 3 */}
-          <div className="group relative sm:col-span-2 md:col-span-1">
-            <div className="absolute inset-0 bg-gradient-to-br from-success/5 to-transparent rounded-3xl transition-all group-hover:from-success/10" />
+          <div 
+            ref={feature3.ref}
+            className={`group relative sm:col-span-2 md:col-span-1 transition-all duration-1000 delay-400 ${
+              feature3.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            }`}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-success/5 to-transparent rounded-3xl transition-all duration-500 group-hover:from-success/10 group-hover:scale-105" />
             <div className="relative p-6 sm:p-8 space-y-4 sm:space-y-6">
               <div className="relative h-40 sm:h-48 rounded-2xl overflow-hidden bg-gradient-to-br from-success/10 via-primary/5 to-accent/10 flex items-center justify-center">
                 <TrendingUp className="h-24 w-24 sm:h-32 sm:w-32 text-primary/30" />
@@ -267,9 +310,16 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section id="cta" className="relative container mx-auto px-4 sm:px-6 py-16 sm:py-24" aria-labelledby="cta-heading">
-        <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-primary opacity-90" />
+      <section 
+        id="cta" 
+        ref={ctaSection.ref}
+        className="relative container mx-auto px-4 sm:px-6 py-16 sm:py-24" 
+        aria-labelledby="cta-heading"
+      >
+        <div className={`relative rounded-2xl sm:rounded-3xl overflow-hidden transition-all duration-1000 ${
+          ctaSection.isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+        }`}>
+          <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-primary opacity-90 animate-glow-pulse" />
           <div className="relative px-6 sm:px-12 py-16 sm:py-20 text-center text-white">
             <h3 id="cta-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">
               Ready to Transform Your Job Search?
@@ -278,7 +328,7 @@ const Index = () => {
               Join thousands of professionals who landed their dream jobs with QRAFTS
             </p>
             <Link to="/auth">
-              <Button size="lg" variant="secondary" className="w-full sm:w-auto rounded-full group shadow-2xl hover:scale-105 transition-all min-h-[48px]">
+              <Button size="lg" variant="secondary" className="w-full sm:w-auto rounded-full group shadow-2xl hover:scale-110 hover:shadow-primary/30 transition-all duration-300 min-h-[48px]">
                 Start Tracking for Free
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
