@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AnswerImprovementDialog } from "@/components/AnswerImprovementDialog";
 import { SaveTemplateDialog } from "@/components/SaveTemplateDialog";
 import { BrowseTemplatesDialog } from "@/components/BrowseTemplatesDialog";
@@ -28,6 +29,8 @@ import {
   Library,
   Clock,
   Plus,
+  TrendingUp,
+  Info,
 } from "lucide-react";
 import {
   Select,
@@ -96,6 +99,8 @@ const ApplicationDetail = () => {
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [suggesting, setSuggesting] = useState<Record<string, boolean>>({});
   const [improving, setImproving] = useState<Record<string, boolean>>({});
+  const [calculatingConfidence, setCalculatingConfidence] = useState<Record<string, boolean>>({});
+  const [confidenceScores, setConfidenceScores] = useState<Record<string, { score: number; reasoning: string }>>({});
   const [reextracting, setReextracting] = useState(false);
   const [editingDate, setEditingDate] = useState(false);
   const [newAppliedDate, setNewAppliedDate] = useState("");
@@ -536,6 +541,68 @@ const ApplicationDetail = () => {
       questions.find(q => q.id === currentImprovement.questionId)?.question_text || '', 
       userInstructions
     );
+  };
+
+  const handleCalculateConfidence = async (questionId: string, questionText: string) => {
+    if (!application) return;
+
+    const currentAnswer = answers[questionId];
+    if (!currentAnswer || currentAnswer.trim().length < 10) {
+      toast({
+        title: "No Answer to Evaluate",
+        description: "Please write an answer first before calculating confidence.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setCalculatingConfidence((prev) => ({ ...prev, [questionId]: true }));
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const response = await supabase.functions.invoke('calculate-answer-confidence', {
+        body: {
+          questionText: questionText,
+          answerText: currentAnswer,
+          roleDetails: application.role_summary,
+          resumeText: userProfile?.resume_text || undefined,
+        },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      if (response.data?.success) {
+        setConfidenceScores((prev) => ({
+          ...prev,
+          [questionId]: {
+            score: response.data.score,
+            reasoning: response.data.reasoning,
+          },
+        }));
+        
+        toast({
+          title: "Confidence Score Calculated",
+          description: `Score: ${response.data.score}/100`,
+        });
+      } else {
+        throw new Error(response.data?.error || 'Failed to calculate confidence');
+      }
+    } catch (error) {
+      console.error('Error calculating confidence:', error);
+      toast({
+        title: "Calculation Failed",
+        description: error instanceof Error ? error.message : "Could not calculate confidence. Please try again.",
+        variant: "destructive",
+      });
+    }
+
+    setCalculatingConfidence((prev) => ({ ...prev, [questionId]: false }));
   };
 
   const handleApplyImprovement = () => {
@@ -1116,13 +1183,35 @@ const ApplicationDetail = () => {
                       </div>
                       <div className="flex-1 min-w-0 space-y-3">
                         <div className="flex items-start justify-between gap-3">
-                          <div className="flex items-start gap-2 flex-1">
-                            <h3 className="font-medium leading-tight flex-1">{question.question_text}</h3>
+                          <div className="flex items-start gap-2 flex-1 flex-wrap">
+                            <h3 className="font-medium leading-tight flex-1 min-w-0">{question.question_text}</h3>
                             {autoPopulatedAnswers.has(question.id) && (
                               <Badge variant="secondary" className="text-xs flex-shrink-0">
                                 <Sparkles className="w-3 h-3 mr-1" />
                                 Auto-filled
                               </Badge>
+                            )}
+                            {confidenceScores[question.id] && (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Badge 
+                                      variant={
+                                        confidenceScores[question.id].score >= 80 ? "default" :
+                                        confidenceScores[question.id].score >= 60 ? "secondary" :
+                                        "destructive"
+                                      }
+                                      className="text-xs flex-shrink-0 cursor-help"
+                                    >
+                                      <TrendingUp className="w-3 h-3 mr-1" />
+                                      {confidenceScores[question.id].score}% fit
+                                    </Badge>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="max-w-xs">
+                                    <p className="text-sm">{confidenceScores[question.id].reasoning}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
                             )}
                           </div>
                           {hasAnswer && !isModified && (
@@ -1202,6 +1291,24 @@ const ApplicationDetail = () => {
                                   <>
                                     <Lightbulb className="h-3 w-3 mr-1.5" />
                                     Improve
+                                  </>
+                                )}
+                              </Button>
+                              <Button
+                                onClick={() => handleCalculateConfidence(question.id, question.question_text)}
+                                disabled={calculatingConfidence[question.id]}
+                                variant="outline"
+                                size="sm"
+                              >
+                                {calculatingConfidence[question.id] ? (
+                                  <>
+                                    <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
+                                    Calculating...
+                                  </>
+                                ) : (
+                                  <>
+                                    <TrendingUp className="h-3 w-3 mr-1.5" />
+                                    Check Fit
                                   </>
                                 )}
                               </Button>
