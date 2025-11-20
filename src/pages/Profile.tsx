@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Mail, Phone, MapPin, Linkedin, Briefcase, GraduationCap, Award, ArrowLeft, Upload, Edit, Sparkles, BookOpen } from "lucide-react";
+import { User, Mail, Phone, MapPin, Linkedin, Briefcase, GraduationCap, Award, ArrowLeft, Upload, Edit, Sparkles, BookOpen, Trophy, BookMarked, Lightbulb, Globe, Heart } from "lucide-react";
 import { UploadResumeDialog } from "@/components/UploadResumeDialog";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { ProfileReviewDialog } from "@/components/ProfileReviewDialog";
@@ -37,6 +37,21 @@ interface ParsedResume {
     school: string;
     year: string;
   }>;
+  certifications?: string[];
+  publications?: string[];
+  projects?: Array<{
+    name: string;
+    description: string;
+  }>;
+  awards?: string[];
+  languages?: string[];
+  volunteer_work?: Array<{
+    role: string;
+    organization: string;
+    description: string;
+  }>;
+  interests?: string[];
+  additional_skills?: string[];
 }
 
 export default function Profile() {
@@ -345,6 +360,195 @@ export default function Profile() {
               </CardContent>
             </Card>
           )}
+
+          {/* Publications */}
+          {parsedData?.publications && parsedData.publications.length > 0 && (
+            <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm">
+              <CardContent className="p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <BookMarked className="h-5 w-5 text-primary" />
+                  </div>
+                  <h2 className="text-2xl font-semibold">Publications</h2>
+                </div>
+                <ul className="space-y-3">
+                  {parsedData.publications.map((pub, index) => (
+                    <li key={index} className="text-foreground/80 leading-relaxed pl-6 relative before:absolute before:left-0 before:top-2 before:w-2 before:h-2 before:bg-primary before:rounded-full">
+                      {pub}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Certifications */}
+          {parsedData?.certifications && parsedData.certifications.length > 0 && (
+            <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm">
+              <CardContent className="p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Trophy className="h-5 w-5 text-primary" />
+                  </div>
+                  <h2 className="text-2xl font-semibold">Certifications</h2>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {parsedData.certifications.map((cert, index) => (
+                    <span
+                      key={index}
+                      className="px-4 py-2 bg-gradient-to-r from-primary/10 to-accent/10 text-foreground rounded-full text-sm font-medium border border-primary/20 hover:border-primary/40 transition-colors"
+                    >
+                      {cert}
+                    </span>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Awards */}
+          {parsedData?.awards && parsedData.awards.length > 0 && (
+            <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm">
+              <CardContent className="p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Award className="h-5 w-5 text-primary" />
+                  </div>
+                  <h2 className="text-2xl font-semibold">Awards & Honors</h2>
+                </div>
+                <ul className="space-y-3">
+                  {parsedData.awards.map((award, index) => (
+                    <li key={index} className="text-foreground/80 leading-relaxed pl-6 relative before:absolute before:left-0 before:top-2 before:w-2 before:h-2 before:bg-primary before:rounded-full">
+                      {award}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Projects */}
+          {parsedData?.projects && parsedData.projects.length > 0 && (
+            <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm">
+              <CardContent className="p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Lightbulb className="h-5 w-5 text-primary" />
+                  </div>
+                  <h2 className="text-2xl font-semibold">Projects</h2>
+                </div>
+                <div className="space-y-6">
+                  {parsedData.projects.map((project, index) => (
+                    <div key={index} className="relative pl-8 before:absolute before:left-0 before:top-2 before:w-0.5 before:h-full before:bg-gradient-to-b before:from-primary before:to-transparent">
+                      <div className="absolute left-0 top-1 w-2 h-2 bg-primary rounded-full -translate-x-[3px]" />
+                      <h3 className="text-lg font-semibold mb-2">{project.name}</h3>
+                      <p className="text-foreground/80 leading-relaxed">{project.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Languages */}
+          {parsedData?.languages && parsedData.languages.length > 0 && (
+            <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm">
+              <CardContent className="p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Globe className="h-5 w-5 text-primary" />
+                  </div>
+                  <h2 className="text-2xl font-semibold">Languages</h2>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {parsedData.languages.map((lang, index) => (
+                    <span
+                      key={index}
+                      className="px-4 py-2 bg-gradient-to-r from-primary/10 to-accent/10 text-foreground rounded-full text-sm font-medium border border-primary/20 hover:border-primary/40 transition-colors"
+                    >
+                      {lang}
+                    </span>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Volunteer Work */}
+          {parsedData?.volunteer_work && parsedData.volunteer_work.length > 0 && (
+            <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm">
+              <CardContent className="p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Heart className="h-5 w-5 text-primary" />
+                  </div>
+                  <h2 className="text-2xl font-semibold">Volunteer Work</h2>
+                </div>
+                <div className="space-y-6">
+                  {parsedData.volunteer_work.map((work, index) => (
+                    <div key={index} className="relative pl-8 before:absolute before:left-0 before:top-2 before:w-0.5 before:h-full before:bg-gradient-to-b before:from-primary before:to-transparent">
+                      <div className="absolute left-0 top-1 w-2 h-2 bg-primary rounded-full -translate-x-[3px]" />
+                      <h3 className="text-lg font-semibold">{work.role}</h3>
+                      <p className="text-primary font-medium">{work.organization}</p>
+                      <p className="text-foreground/80 leading-relaxed mt-2">{work.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Interests & Additional Skills */}
+          {((parsedData?.interests && parsedData.interests.length > 0) || (parsedData?.additional_skills && parsedData.additional_skills.length > 0)) && (
+            <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm">
+              <CardContent className="p-8">
+                <div className="space-y-8">
+                  {parsedData.interests && parsedData.interests.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                          <Heart className="h-5 w-5 text-primary" />
+                        </div>
+                        <h2 className="text-2xl font-semibold">Interests</h2>
+                      </div>
+                      <div className="flex flex-wrap gap-3">
+                        {parsedData.interests.map((interest, index) => (
+                          <span
+                            key={index}
+                            className="px-4 py-2 bg-gradient-to-r from-primary/10 to-accent/10 text-foreground rounded-full text-sm font-medium border border-primary/20 hover:border-primary/40 transition-colors"
+                          >
+                            {interest}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {parsedData.additional_skills && parsedData.additional_skills.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                          <Award className="h-5 w-5 text-primary" />
+                        </div>
+                        <h2 className="text-2xl font-semibold">Additional Skills</h2>
+                      </div>
+                      <div className="flex flex-wrap gap-3">
+                        {parsedData.additional_skills.map((skill, index) => (
+                          <span
+                            key={index}
+                            className="px-4 py-2 bg-gradient-to-r from-primary/10 to-accent/10 text-foreground rounded-full text-sm font-medium border border-primary/20 hover:border-primary/40 transition-colors"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
 
           {/* Education */}
           {parsedData?.education && parsedData.education.length > 0 && (

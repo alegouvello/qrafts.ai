@@ -132,7 +132,7 @@ Deno.serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are an expert at extracting structured data from resume text. Extract: full_name, email, phone, linkedin_url, location, summary, skills (array), experience (array of {title, company, duration, description}), education (array of {degree, school, year}). Return ONLY valid JSON. Use null for missing fields. Be thorough and extract all available information.'
+            content: 'You are an expert at extracting structured data from resume text. Extract ALL available information including: full_name, email, phone, linkedin_url, location, summary, skills (array), experience (array of {title, company, duration, description}), education (array of {degree, school, year}), certifications (array of strings), publications (array of strings), projects (array of {name, description}), awards (array of strings), languages (array of strings), volunteer_work (array of {role, organization, description}), interests (array of strings), additional_skills (array of strings). Return ONLY valid JSON. Use null or empty arrays for missing fields. Be thorough and extract ALL sections from the resume.'
           },
           {
             role: 'user',
