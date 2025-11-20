@@ -108,6 +108,8 @@ const ApplicationDetail = () => {
   const [reextracting, setReextracting] = useState(false);
   const [editingDate, setEditingDate] = useState(false);
   const [newAppliedDate, setNewAppliedDate] = useState("");
+  const [editingUrl, setEditingUrl] = useState(false);
+  const [newUrl, setNewUrl] = useState("");
   const [showImprovementDialog, setShowImprovementDialog] = useState(false);
   const [showSaveTemplateDialog, setShowSaveTemplateDialog] = useState(false);
   const [showBrowseTemplatesDialog, setShowBrowseTemplatesDialog] = useState(false);
@@ -934,6 +936,30 @@ const ApplicationDetail = () => {
     }
   };
 
+  const handleUpdateUrl = async () => {
+    if (!application || !newUrl) return;
+
+    const { error } = await supabase
+      .from("applications")
+      .update({ url: newUrl })
+      .eq("id", application.id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update job URL",
+        variant: "destructive",
+      });
+    } else {
+      setApplication({ ...application, url: newUrl });
+      setEditingUrl(false);
+      toast({
+        title: "URL Updated",
+        description: "Job posting URL has been updated successfully",
+      });
+    }
+  };
+
   // Get company logo
   const getCompanyLogo = (company: string) => {
     const domain = company.toLowerCase().replace(/\s+/g, '') + '.com';
@@ -977,15 +1003,48 @@ const ApplicationDetail = () => {
                 Back
               </Button>
             </Link>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => window.open(application.url, "_blank")}
-              className="rounded-full"
-            >
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Job Page
-            </Button>
+            <div className="flex items-center gap-2">
+              {editingUrl ? (
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="url"
+                    value={newUrl}
+                    onChange={(e) => setNewUrl(e.target.value)}
+                    placeholder="Enter job posting URL"
+                    className="w-80 h-8"
+                  />
+                  <Button size="sm" onClick={handleUpdateUrl} className="h-8">
+                    Save
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setEditingUrl(false)} className="h-8">
+                    Cancel
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(application.url, "_blank")}
+                    className="rounded-full"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Job Page
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setEditingUrl(true);
+                      setNewUrl(application.url);
+                    }}
+                    className="rounded-full"
+                  >
+                    Edit URL
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </header>
