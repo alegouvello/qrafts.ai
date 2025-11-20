@@ -257,7 +257,7 @@ const Index = () => {
       <footer className="relative border-t border-border/40 mt-12 sm:mt-20">
         <div className="container mx-auto px-4 sm:px-6 py-10 sm:py-12 text-center space-y-4">
           <img src={qraftLogo} alt="QRAFT.AI" className="h-8 sm:h-10 md:h-12 mx-auto opacity-60" />
-          <p className="text-sm sm:text-base text-muted-foreground">© 2024 QRAFT.AI. Built for ambitious job seekers.</p>
+          <p className="text-sm sm:text-base text-muted-foreground">© 2025 QRAFT.AI. Built for ambitious job seekers.</p>
         </div>
       </footer>
     </div>
