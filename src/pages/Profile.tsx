@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Mail, Phone, MapPin, Linkedin, Briefcase, GraduationCap, Award, ArrowLeft, Upload, Edit, Sparkles } from "lucide-react";
+import { User, Mail, Phone, MapPin, Linkedin, Briefcase, GraduationCap, Award, ArrowLeft, Upload, Edit, Sparkles, BookOpen } from "lucide-react";
 import { UploadResumeDialog } from "@/components/UploadResumeDialog";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { ProfileReviewDialog } from "@/components/ProfileReviewDialog";
+import { MasterAnswersDialog } from "@/components/MasterAnswersDialog";
 
 interface ProfileData {
   full_name: string | null;
@@ -46,6 +47,7 @@ export default function Profile() {
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showReviewDialog, setShowReviewDialog] = useState(false);
+  const [showMasterAnswersDialog, setShowMasterAnswersDialog] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -144,6 +146,15 @@ export default function Profile() {
               Back
             </Button>
             <div className="flex gap-3">
+              <Button
+                onClick={() => setShowMasterAnswersDialog(true)}
+                variant="secondary"
+                size="sm"
+                className="gap-2 bg-background/50 backdrop-blur-sm"
+              >
+                <BookOpen className="h-4 w-4" />
+                Master Answers
+              </Button>
               <Button
                 onClick={() => setShowReviewDialog(true)}
                 variant="secondary"
@@ -407,6 +418,11 @@ export default function Profile() {
         open={showReviewDialog} 
         onOpenChange={setShowReviewDialog}
         onProfileUpdate={fetchProfile}
+      />
+
+      <MasterAnswersDialog
+        open={showMasterAnswersDialog}
+        onOpenChange={setShowMasterAnswersDialog}
       />
     </div>
   );
