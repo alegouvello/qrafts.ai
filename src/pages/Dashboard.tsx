@@ -94,7 +94,9 @@ const Dashboard = () => {
             const { count } = await supabase
               .from("answers")
               .select("*", { count: "exact", head: true })
-              .in("question_id", questionIds);
+              .in("question_id", questionIds)
+              .not("answer_text", "is", null)
+              .neq("answer_text", "");
             answerCount = count || 0;
           }
 
