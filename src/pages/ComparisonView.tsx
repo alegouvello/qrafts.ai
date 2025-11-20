@@ -237,7 +237,7 @@ const ComparisonView = () => {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Dashboard
             </Button>
-            <img src={qraftLogo} alt="QRAFT.AI" className="h-16 opacity-70" />
+            <div className="text-lg font-bold">QRAFT.AI</div>
           </div>
 
           <div className="flex items-start justify-between">

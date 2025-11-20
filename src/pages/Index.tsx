@@ -16,8 +16,11 @@ const Index = () => {
       {/* Header */}
       <header className="relative border-b border-border/40 bg-background/80 backdrop-blur-xl sticky top-0 z-50">
         <div className="container mx-auto px-6 py-5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src={qraftLogo} alt="QRAFT.AI" className="h-24" />
+          <div className="flex items-center gap-2">
+            <div className="text-2xl font-bold flex items-center gap-1">
+              <span className="text-foreground">Q</span>
+              <span className="text-foreground">QRAFT.AI</span>
+            </div>
           </div>
           <Link to="/auth">
             <Button variant="outline" size="sm" className="rounded-full border-border/60 hover:border-primary/50 transition-all">
@@ -184,7 +187,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="relative border-t border-border/40 mt-20">
         <div className="container mx-auto px-6 py-12 text-center space-y-4">
-          <img src={qraftLogo} alt="QRAFT.AI" className="h-20 mx-auto opacity-60" />
+          <div className="text-2xl font-bold mb-2">QRAFT.AI</div>
           <p className="text-muted-foreground">© 2024 QRAFT.AI. Built for ambitious job seekers.</p>
         </div>
       </footer>
