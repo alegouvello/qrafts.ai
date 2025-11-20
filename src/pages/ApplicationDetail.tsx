@@ -106,6 +106,7 @@ const ApplicationDetail = () => {
   const [applyingSuggestion, setApplyingSuggestion] = useState<Record<string, boolean>>({});
   const [copiedAnswers, setCopiedAnswers] = useState<Record<string, boolean>>({});
   const [reextracting, setReextracting] = useState(false);
+  const [refreshingDescription, setRefreshingDescription] = useState(false);
   const [editingDate, setEditingDate] = useState(false);
   const [newAppliedDate, setNewAppliedDate] = useState("");
   const [editingUrl, setEditingUrl] = useState(false);
@@ -960,6 +961,58 @@ const ApplicationDetail = () => {
     }
   };
 
+  const handleRefreshJobDescription = async () => {
+    if (!application) return;
+
+    setRefreshingDescription(true);
+    
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      // Call the edge function to refresh job description only
+      const response = await supabase.functions.invoke('refresh-job-description', {
+        body: {
+          applicationId: application.id,
+          jobUrl: application.url,
+        },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      if (response.data?.success) {
+        // Update the application with new data
+        const updatedApp = { ...application };
+        if (response.data.company) updatedApp.company = response.data.company;
+        if (response.data.position) updatedApp.position = response.data.position;
+        if (response.data.roleSummary) updatedApp.role_summary = response.data.roleSummary;
+        
+        setApplication(updatedApp);
+        
+        toast({
+          title: "Description Refreshed",
+          description: "Job description has been updated from the new URL.",
+        });
+      } else {
+        throw new Error(response.data?.error || 'Failed to refresh description');
+      }
+    } catch (error) {
+      console.error('Error refreshing description:', error);
+      toast({
+        title: "Refresh Failed",
+        description: error instanceof Error ? error.message : "Could not refresh job description. Please try again.",
+        variant: "destructive",
+      });
+    }
+
+    setRefreshingDescription(false);
+  };
+
+
   // Get company logo
   const getCompanyLogo = (company: string) => {
     const domain = company.toLowerCase().replace(/\s+/g, '') + '.com';
@@ -1144,7 +1197,27 @@ const ApplicationDetail = () => {
           {/* Role Details */}
           {application.role_summary && (
             <Card className="p-6 bg-card/30 backdrop-blur-sm border-border/50">
-              <h3 className="font-semibold mb-4 text-lg">Role Details</h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-lg">Role Details</h3>
+                <Button
+                  onClick={handleRefreshJobDescription}
+                  disabled={refreshingDescription}
+                  variant="outline"
+                  size="sm"
+                >
+                  {refreshingDescription ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Refreshing...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Refresh Description
+                    </>
+                  )}
+                </Button>
+              </div>
               <div className="grid gap-4">
                 {(application.role_summary.location || application.role_summary.salary_range) && (
                   <div className="grid md:grid-cols-2 gap-4">
