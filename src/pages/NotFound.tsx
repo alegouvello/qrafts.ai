@@ -12,7 +12,7 @@ const NotFound = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
       <div className="text-center space-y-6">
-        <img src={qraftLogo} alt="QRAFT.AI" className="h-28 mx-auto opacity-60" />
+        <div className="text-4xl font-bold mb-2">QRAFT.AI</div>
         <div>
           <h1 className="mb-2 text-6xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">404</h1>
           <p className="mb-6 text-xl text-muted-foreground">Page not found</p>

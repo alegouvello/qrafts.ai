@@ -98,7 +98,7 @@ const Auth = () => {
           <div className="inline-block px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-4">
             Welcome Back
           </div>
-          <img src={qraftLogo} alt="QRAFT.AI" className="h-28 mx-auto" />
+          <div className="text-4xl font-bold mb-2">QRAFT.AI</div>
           <p className="text-muted-foreground">Your journey to success starts here</p>
         </div>
 

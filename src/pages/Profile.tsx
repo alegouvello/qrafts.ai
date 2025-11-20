@@ -162,7 +162,7 @@ export default function Profile() {
                 <ArrowLeft className="h-4 w-4" />
                 Back
               </Button>
-              <img src={qraftLogo} alt="QRAFT.AI" className="h-16 opacity-80" />
+              <div className="text-lg font-bold">QRAFT.AI</div>
             </div>
             <div className="flex gap-3">
               <Button
