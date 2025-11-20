@@ -149,6 +149,46 @@ const Index = () => {
         </div>
       </section>
 
+      {/* How It Works Video Section */}
+      <section className="relative container mx-auto px-4 sm:px-6 py-16 sm:py-24">
+        <div className="text-center mb-8 sm:mb-12 space-y-4 animate-fade-in-up">
+          <div className="inline-block px-3 sm:px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium">
+            See It In Action
+          </div>
+          <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">How It Works</h3>
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
+            Watch how QRAFT.AI helps you organize applications and build better answers
+          </p>
+        </div>
+        
+        <div className="max-w-5xl mx-auto">
+          <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-border/50 bg-muted/30">
+            <div className="aspect-video relative">
+              {/* Placeholder - Replace the src with your actual video URL */}
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-accent/10">
+                <div className="text-center space-y-4 px-4">
+                  <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto border-2 border-primary/30">
+                    <Sparkles className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
+                  </div>
+                  <p className="text-muted-foreground text-sm sm:text-base">
+                    Demo video coming soon
+                  </p>
+                </div>
+              </div>
+              {/* Uncomment and add your video URL when ready:
+              <iframe 
+                className="absolute inset-0 w-full h-full"
+                src="YOUR_VIDEO_URL_HERE"
+                title="How QRAFT.AI Works"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+              */}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section id="features" className="relative container mx-auto px-4 sm:px-6 py-16 sm:py-24">
         <div className="text-center mb-16 sm:mb-20 space-y-4 animate-fade-in-up">
