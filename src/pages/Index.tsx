@@ -1,6 +1,14 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight, FileText, Sparkles, TrendingUp, CheckCircle2 } from "lucide-react";
+import { ArrowRight, FileText, Sparkles, TrendingUp, CheckCircle2, Menu, X } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import heroWorkspace from "@/assets/hero-workspace.jpg";
 import featureOrganize from "@/assets/feature-organize.jpg";
 import featureAutomate from "@/assets/feature-automate.jpg";
@@ -8,6 +16,18 @@ import qraftLogo from "@/assets/qraft-logo-original.png";
 
 
 const Index = () => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const scrollToFeatures = () => {
+    document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setMobileMenuOpen(false);
+  };
+
+  const scrollToCTA = () => {
+    document.getElementById('cta')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setMobileMenuOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Decorative background gradient */}
@@ -19,11 +39,58 @@ const Index = () => {
           <div className="flex items-center gap-2 sm:gap-3">
             <img src={qraftLogo} alt="QRAFT.AI" className="h-8 sm:h-10 md:h-12" />
           </div>
-          <Link to="/auth">
-            <Button variant="outline" size="sm" className="rounded-full border-border/60 hover:border-primary/50 transition-all text-xs sm:text-sm">
-              Sign In
+          
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-4">
+            <Button variant="ghost" onClick={scrollToFeatures} className="rounded-full">
+              Features
             </Button>
-          </Link>
+            <Link to="/auth">
+              <Button variant="outline" size="sm" className="rounded-full border-border/60 hover:border-primary/50 transition-all">
+                Sign In
+              </Button>
+            </Link>
+          </div>
+
+          {/* Mobile Menu */}
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild className="md:hidden">
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+              <SheetHeader>
+                <SheetTitle className="flex items-center gap-2">
+                  <img src={qraftLogo} alt="QRAFT.AI" className="h-8" />
+                </SheetTitle>
+              </SheetHeader>
+              <div className="flex flex-col gap-4 mt-8">
+                <Button 
+                  variant="ghost" 
+                  onClick={scrollToFeatures}
+                  className="w-full justify-start text-lg rounded-full"
+                >
+                  <Sparkles className="h-5 w-5 mr-3" />
+                  Features
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  onClick={scrollToCTA}
+                  className="w-full justify-start text-lg rounded-full"
+                >
+                  <ArrowRight className="h-5 w-5 mr-3" />
+                  Get Started
+                </Button>
+                <div className="h-px bg-border my-2" />
+                <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
+                  <Button className="w-full rounded-full shadow-lg shadow-primary/20">
+                    Sign In
+                  </Button>
+                </Link>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </header>
 
@@ -55,9 +122,7 @@ const Index = () => {
                 size="lg" 
                 variant="outline" 
                 className="w-full sm:w-auto rounded-full border-border/60 hover:border-primary/50 transition-all"
-                onClick={() => {
-                  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }}
+                onClick={scrollToFeatures}
               >
                 See How It Works
               </Button>
@@ -168,7 +233,7 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="relative container mx-auto px-4 sm:px-6 py-16 sm:py-24">
+      <section id="cta" className="relative container mx-auto px-4 sm:px-6 py-16 sm:py-24">
         <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-primary opacity-90" />
           <div className="relative px-6 sm:px-12 py-16 sm:py-20 text-center text-white">
