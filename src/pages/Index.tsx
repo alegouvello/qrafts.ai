@@ -112,7 +112,7 @@ const Index = () => {
         <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
           <div className="space-y-6 sm:space-y-8 text-center md:text-left">
             <div className="inline-block px-3 sm:px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium animate-fade-in-down">
-              ✨ Your Job Search Assistant
+              ✨ Your Job Application Assistant
             </div>
             <h2 id="hero-heading" className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
               Stay Organized.
