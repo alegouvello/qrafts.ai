@@ -4,6 +4,7 @@ import { ArrowRight, FileText, Sparkles, TrendingUp, CheckCircle2 } from "lucide
 import heroWorkspace from "@/assets/hero-workspace.jpg";
 import featureOrganize from "@/assets/feature-organize.jpg";
 import featureAutomate from "@/assets/feature-automate.jpg";
+import qraftLogo from "@/assets/qraft-logo.png";
 
 
 const Index = () => {
@@ -15,9 +16,9 @@ const Index = () => {
       {/* Header */}
       <header className="relative border-b border-border/40 bg-background/80 backdrop-blur-xl sticky top-0 z-50">
         <div className="container mx-auto px-6 py-5 flex items-center justify-between">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-gradient">
-            ApplicationTracker
-          </h1>
+          <div className="flex items-center gap-3">
+            <img src={qraftLogo} alt="QRAFT.AI" className="h-8" />
+          </div>
           <Link to="/auth">
             <Button variant="outline" size="sm" className="rounded-full border-border/60 hover:border-primary/50 transition-all">
               Sign In
@@ -168,7 +169,7 @@ const Index = () => {
               Ready to Transform Your Job Search?
             </h3>
             <p className="text-xl mb-10 opacity-95 max-w-2xl mx-auto">
-              Join thousands of professionals who landed their dream jobs with ApplicationTracker
+              Join thousands of professionals who landed their dream jobs with QRAFT.AI
             </p>
             <Link to="/auth">
               <Button size="lg" variant="secondary" className="rounded-full group shadow-2xl hover:scale-105 transition-all">
@@ -182,8 +183,9 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="relative border-t border-border/40 mt-20">
-        <div className="container mx-auto px-6 py-12 text-center">
-          <p className="text-muted-foreground">© 2024 ApplicationTracker. Built for ambitious job seekers.</p>
+        <div className="container mx-auto px-6 py-12 text-center space-y-4">
+          <img src={qraftLogo} alt="QRAFT.AI" className="h-6 mx-auto opacity-60" />
+          <p className="text-muted-foreground">© 2024 QRAFT.AI. Built for ambitious job seekers.</p>
         </div>
       </footer>
     </div>

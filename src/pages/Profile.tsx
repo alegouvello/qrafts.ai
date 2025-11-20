@@ -8,6 +8,7 @@ import { UploadResumeDialog } from "@/components/UploadResumeDialog";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { ProfileReviewDialog } from "@/components/ProfileReviewDialog";
 import { MasterAnswersDialog } from "@/components/MasterAnswersDialog";
+import qraftLogo from "@/assets/qraft-logo.png";
 
 interface ProfileData {
   full_name: string | null;
@@ -152,14 +153,17 @@ export default function Profile() {
         <div className="absolute inset-0 bg-grid-white/5 [mask-image:linear-gradient(0deg,transparent,black)]" />
         <div className="container mx-auto px-4 py-8 relative">
           <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
-              onClick={() => navigate("/dashboard")}
-              className="gap-2 hover:bg-background/50"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                onClick={() => navigate("/dashboard")}
+                className="gap-2 hover:bg-background/50 rounded-full"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
+              <img src={qraftLogo} alt="QRAFT.AI" className="h-6 opacity-80" />
+            </div>
             <div className="flex gap-3">
               <Button
                 onClick={() => setShowMasterAnswersDialog(true)}
