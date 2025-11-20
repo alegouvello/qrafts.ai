@@ -247,7 +247,7 @@ const Dashboard = () => {
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
               </Link>
-              <img src={qraftLogo} alt="QRAFT.AI" className="h-10" />
+              <img src={qraftLogo} alt="QRAFT.AI" className="h-14" />
             </div>
             <div className="flex items-center gap-4">
               <Button onClick={() => setShowAddDialog(true)} className="flex-1 sm:flex-none rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">
