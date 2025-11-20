@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Minus, ExternalLink, Sparkles } from "lucide-react";
+import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Minus, ExternalLink, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 
 interface Application {
   id: string;
@@ -21,6 +21,10 @@ interface Application {
 interface ApplicationWithScore extends Application {
   fitScore?: number;
   analyzing?: boolean;
+  overallFit?: string;
+  strengths?: string[];
+  gaps?: string[];
+  suggestions?: string[];
 }
 
 const ComparisonView = () => {
@@ -30,6 +34,7 @@ const ComparisonView = () => {
   const [loading, setLoading] = useState(true);
   const [analyzingAll, setAnalyzingAll] = useState(false);
   const [resumeText, setResumeText] = useState<string | null>(null);
+  const [expandedReasons, setExpandedReasons] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     checkAuth();
@@ -113,7 +118,15 @@ const ComparisonView = () => {
       if (error) throw error;
 
       setApplications(apps =>
-        apps.map(a => a.id === app.id ? { ...a, fitScore: data.confidenceScore, analyzing: false } : a)
+        apps.map(a => a.id === app.id ? { 
+          ...a, 
+          fitScore: data.confidenceScore,
+          overallFit: data.overallFit,
+          strengths: data.strengths,
+          gaps: data.gaps,
+          suggestions: data.suggestions,
+          analyzing: false 
+        } : a)
       );
 
       toast({
@@ -199,6 +212,10 @@ const ComparisonView = () => {
       </div>
     );
   }
+
+  const toggleReasoning = (appId: string) => {
+    setExpandedReasons(prev => ({ ...prev, [appId]: !prev[appId] }));
+  };
 
   const analyzedCount = applications.filter(app => app.fitScore !== undefined).length;
   const avgScore = analyzedCount > 0
@@ -289,7 +306,7 @@ const ComparisonView = () => {
                   <div className="text-muted-foreground mb-3">{app.company}</div>
 
                   {app.fitScore !== undefined && (
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <div className="flex items-center gap-4">
                         <div className="flex-1">
                           <div className="flex items-center justify-between text-sm mb-1">
@@ -304,6 +321,58 @@ const ComparisonView = () => {
                           Rank #{index + 1}
                         </Badge>
                       </div>
+
+                      {app.overallFit && (
+                        <div>
+                          <button
+                            onClick={() => toggleReasoning(app.id)}
+                            className="flex items-center gap-2 text-sm text-primary hover:underline"
+                          >
+                            {expandedReasons[app.id] ? (
+                              <>
+                                <ChevronUp className="h-4 w-4" />
+                                Hide reasoning
+                              </>
+                            ) : (
+                              <>
+                                <ChevronDown className="h-4 w-4" />
+                                Show reasoning
+                              </>
+                            )}
+                          </button>
+                          
+                          {expandedReasons[app.id] && (
+                            <div className="mt-3 p-4 bg-muted/50 rounded-lg space-y-3">
+                              <div>
+                                <div className="text-sm font-medium mb-1">Overall Assessment</div>
+                                <p className="text-sm text-muted-foreground">{app.overallFit}</p>
+                              </div>
+                              
+                              {app.strengths && app.strengths.length > 0 && (
+                                <div>
+                                  <div className="text-sm font-medium text-green-600 mb-1">Strengths</div>
+                                  <ul className="list-disc list-inside space-y-1">
+                                    {app.strengths.map((strength, i) => (
+                                      <li key={i} className="text-sm text-muted-foreground">{strength}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                              
+                              {app.gaps && app.gaps.length > 0 && (
+                                <div>
+                                  <div className="text-sm font-medium text-orange-600 mb-1">Areas for Improvement</div>
+                                  <ul className="list-disc list-inside space-y-1">
+                                    {app.gaps.map((gap, i) => (
+                                      <li key={i} className="text-sm text-muted-foreground">{gap}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
