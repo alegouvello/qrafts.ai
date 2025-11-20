@@ -28,7 +28,35 @@ const Settings = () => {
   useEffect(() => {
     checkAuth();
     fetchUserProfile();
-    checkSubscription();
+    
+    // Check for checkout success/cancel in URL
+    const searchParams = new URLSearchParams(window.location.search);
+    const checkoutStatus = searchParams.get('checkout');
+    
+    if (checkoutStatus === 'success') {
+      // Wait a moment for Stripe webhook to process, then refresh
+      setTimeout(() => {
+        checkSubscription();
+        toast({
+          title: "Welcome to Qraft Pro!",
+          description: "Your subscription is now active. Enjoy all premium features!",
+        });
+      }, 2000);
+      
+      // Clean up URL
+      window.history.replaceState({}, '', '/settings');
+    } else if (checkoutStatus === 'canceled') {
+      toast({
+        title: "Checkout Canceled",
+        description: "You can upgrade to Pro anytime from this page.",
+        variant: "destructive",
+      });
+      
+      // Clean up URL
+      window.history.replaceState({}, '', '/settings');
+    } else {
+      checkSubscription();
+    }
   }, []);
 
   const checkAuth = async () => {
