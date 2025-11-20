@@ -1,17 +1,18 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface RequestBody {
-  questionText: string;
-  applicationId: string;
-  company: string;
-  position: string;
-}
+const requestSchema = z.object({
+  questionText: z.string().trim().min(1).max(1000),
+  applicationId: z.string().uuid(),
+  company: z.string().trim().min(1).max(200),
+  position: z.string().trim().min(1).max(200),
+});
 
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
@@ -41,9 +42,10 @@ Deno.serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    const { questionText, applicationId, company, position }: RequestBody = await req.json();
+    const requestBody = await req.json();
+    const { questionText, applicationId, company, position } = requestSchema.parse(requestBody);
     
-    console.log('Generating answer suggestion for question:', questionText);
+    console.log('Generating answer suggestion');
 
     // Fetch user profile data for personalized context
     const { data: userProfile } = await supabase
@@ -58,8 +60,7 @@ Deno.serve(async (req) => {
       profileContext = `**Your Profile:**
 - Name: ${userProfile.full_name || 'Not provided'}
 - Location: ${userProfile.location || 'Not provided'}
-- LinkedIn: ${userProfile.linkedin_url || 'Not provided'}
-- Email: ${userProfile.email || 'Not provided'}`;
+- LinkedIn: ${userProfile.linkedin_url || 'Not provided'}`;
 
       if (userProfile.resume_text) {
         try {
@@ -173,8 +174,6 @@ Return ONLY the suggested answer text, no additional commentary.`;
 
     const aiData = await aiResponse.json();
     const suggestion = aiData.choices[0].message.content.trim();
-    
-    console.log('Generated suggestion length:', suggestion.length);
 
     return new Response(
       JSON.stringify({

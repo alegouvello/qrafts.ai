@@ -1,15 +1,30 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import FirecrawlApp from 'https://esm.sh/@mendable/firecrawl-js@1.0.0';
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface RequestBody {
-  applicationId: string;
-  jobUrl: string;
+const requestSchema = z.object({
+  applicationId: z.string().uuid(),
+  jobUrl: z.string().url().max(2000),
+});
+
+function isInternalUrl(urlString: string): boolean {
+  try {
+    const url = new URL(urlString);
+    const hostname = url.hostname.toLowerCase();
+    
+    if (['localhost', '127.0.0.1', '0.0.0.0'].includes(hostname)) return true;
+    if (hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.startsWith('172.')) return true;
+    
+    return false;
+  } catch {
+    return true;
+  }
 }
 
 Deno.serve(async (req) => {
@@ -40,9 +55,17 @@ Deno.serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    const { applicationId, jobUrl }: RequestBody = await req.json();
+    const requestBody = await req.json();
+    const { applicationId, jobUrl } = requestSchema.parse(requestBody);
     
-    console.log('Refreshing job description for application:', applicationId, 'from URL:', jobUrl);
+    if (isInternalUrl(jobUrl)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid URL: internal network addresses are not allowed' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    console.log('Refreshing job description for application:', applicationId);
 
     // Initialize Firecrawl with API key
     const firecrawlApiKey = Deno.env.get('FIRECRAWL_API_KEY');
@@ -125,7 +148,7 @@ Deno.serve(async (req) => {
       company = jobInfo.company;
       position = jobInfo.position;
       roleSummary = jobInfo.summary;
-      console.log('Extracted job info:', { company, position, roleSummary });
+      console.log('Extracted job info');
     } catch (e) {
       console.error('Failed to parse job info:', e);
       throw new Error('Failed to parse job information');

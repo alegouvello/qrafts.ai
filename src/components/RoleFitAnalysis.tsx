@@ -37,8 +37,22 @@ export const RoleFitAnalysis = ({ roleDetails, resumeText }: RoleFitAnalysisProp
 
     setLoading(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to use this feature",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('analyze-role-fit', {
-        body: { roleDetails, resumeText }
+        body: { roleDetails, resumeText },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
       });
 
       if (error) {
