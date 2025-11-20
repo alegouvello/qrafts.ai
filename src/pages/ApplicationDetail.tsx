@@ -1054,18 +1054,18 @@ const ApplicationDetail = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b bg-card/30 backdrop-blur-md sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+        <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0">
               <Link to="/dashboard">
-                <Button variant="ghost" size="sm" className="rounded-full">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back
+                <Button variant="ghost" size="sm" className="rounded-full min-h-[44px]">
+                  <ArrowLeft className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Back</span>
                 </Button>
               </Link>
-              <img src={qraftLogo} alt="QRAFTS" className="h-16 sm:h-20 opacity-70" />
+              <img src={qraftLogo} alt="QRAFTS" className="h-10 sm:h-16 md:h-20 opacity-70" />
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
               {editingUrl ? (
                 <div className="flex items-center gap-2">
                   <Input
@@ -1073,12 +1073,12 @@ const ApplicationDetail = () => {
                     value={newUrl}
                     onChange={(e) => setNewUrl(e.target.value)}
                     placeholder="Enter job posting URL"
-                    className="w-80 h-8"
+                    className="w-40 sm:w-60 md:w-80 h-8"
                   />
-                  <Button size="sm" onClick={handleUpdateUrl} className="h-8">
+                  <Button size="sm" onClick={handleUpdateUrl} className="h-8 min-h-[44px]">
                     Save
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={() => setEditingUrl(false)} className="h-8">
+                  <Button size="sm" variant="ghost" onClick={() => setEditingUrl(false)} className="h-8 min-h-[44px]">
                     Cancel
                   </Button>
                 </div>
@@ -1088,10 +1088,10 @@ const ApplicationDetail = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => window.open(application.url, "_blank")}
-                    className="rounded-full"
+                    className="rounded-full min-h-[44px]"
                   >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Job Page
+                    <ExternalLink className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Job Page</span>
                   </Button>
                   <Button
                     variant="ghost"
@@ -1100,9 +1100,10 @@ const ApplicationDetail = () => {
                       setEditingUrl(true);
                       setNewUrl(application.url);
                     }}
-                    className="rounded-full"
+                    className="rounded-full min-h-[44px]"
                   >
-                    Edit URL
+                    <span className="hidden sm:inline">Edit URL</span>
+                    <span className="sm:hidden">Edit</span>
                   </Button>
                 </>
               )}
