@@ -102,14 +102,14 @@ const Index = () => {
               ✨ Your Job Search Assistant
             </div>
             <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
-              Land Your
+              Stay Organized.
               <span className="block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mt-2">
-                Dream Job
+                Get Better.
               </span>
             </h2>
             <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-lg mx-auto md:mx-0">
-              The beautiful, minimalist platform that organizes your applications, 
-              tracks your progress, and helps you stand out.
+              Keep all your applications organized in one place. Build a library of your best answers 
+              and improve them over time. Learn what works and refine your approach with every application.
             </p>
             <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 pt-4 justify-center md:justify-start">
               <Link to="/auth" className="w-full sm:w-auto">
@@ -155,9 +155,9 @@ const Index = () => {
           <div className="inline-block px-3 sm:px-4 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs sm:text-sm font-medium mb-4">
             Everything You Need
           </div>
-          <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">Simple. Beautiful. Effective.</h3>
+          <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">Organize. Learn. Improve.</h3>
           <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
-            Built for modern job seekers who value clarity and organization
+            Manage all your applications and answers in one place, then get better with every submission
           </p>
         </div>
 
@@ -179,8 +179,8 @@ const Index = () => {
               <div className="space-y-3">
                 <h4 className="text-xl sm:text-2xl font-bold">Stay Organized</h4>
                 <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                  One dashboard for all your applications. Track progress, deadlines, 
-                  and responses in a beautiful, clutter-free interface.
+                  Track all your applications in one dashboard. Keep every question, answer, 
+                  and deadline organized so you never lose track of where you stand.
                 </p>
               </div>
             </div>
@@ -201,10 +201,10 @@ const Index = () => {
                 <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-accent" />
               </div>
               <div className="space-y-3">
-                <h4 className="text-xl sm:text-2xl font-bold">Smart Automation</h4>
+                <h4 className="text-xl sm:text-2xl font-bold">Save Your Best Answers</h4>
                 <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                  Paste any job URL and watch as questions are automatically extracted. 
-                  Spend less time copying, more time crafting perfect answers.
+                  Build a library of your strongest responses. Save answers that work well 
+                  and reuse them across applications to maintain consistency and quality.
                 </p>
               </div>
             </div>
@@ -221,10 +221,10 @@ const Index = () => {
                 <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-success" />
               </div>
               <div className="space-y-3">
-                <h4 className="text-xl sm:text-2xl font-bold">Get Better Fast</h4>
+                <h4 className="text-xl sm:text-2xl font-bold">Learn and Improve</h4>
                 <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                  Build a library of your best answers. Reuse and refine them across 
-                  applications to continuously improve your response quality.
+                  See what works across your applications. Refine your answers over time, 
+                  track patterns, and continuously improve your response quality.
                 </p>
               </div>
             </div>
