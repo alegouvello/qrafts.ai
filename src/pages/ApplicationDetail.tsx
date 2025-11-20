@@ -11,6 +11,7 @@ import { SaveTemplateDialog } from "@/components/SaveTemplateDialog";
 import { BrowseTemplatesDialog } from "@/components/BrowseTemplatesDialog";
 import { AddTimelineEventDialog } from "@/components/AddTimelineEventDialog";
 import { TimelineView } from "@/components/TimelineView";
+import { RoleFitAnalysis } from "@/components/RoleFitAnalysis";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
@@ -116,6 +117,7 @@ const ApplicationDetail = () => {
     phone?: string;
     linkedin_url?: string;
     location?: string;
+    resume_text?: string;
   } | null>(null);
   const [autoPopulatedAnswers, setAutoPopulatedAnswers] = useState<Set<string>>(new Set());
 
@@ -141,7 +143,7 @@ const ApplicationDetail = () => {
 
     const { data } = await supabase
       .from("user_profiles")
-      .select("full_name, email, phone, linkedin_url, location")
+      .select("full_name, email, phone, linkedin_url, location, resume_text")
       .eq("user_id", user.id)
       .maybeSingle();
 
@@ -972,6 +974,14 @@ const ApplicationDetail = () => {
                 )}
               </div>
             </Card>
+          )}
+
+          {/* AI Role Fit Analysis */}
+          {application.role_summary && (
+            <RoleFitAnalysis 
+              roleDetails={application.role_summary} 
+              resumeText={userProfile?.resume_text || null}
+            />
           )}
         </div>
 
