@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import qraftLogo from "@/assets/qraft-logo-clean.png";
+import qraftLogo from "@/assets/qrafts-logo.png";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -98,7 +98,7 @@ const Auth = () => {
           <div className="inline-block px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-4">
             Welcome Back
           </div>
-          <img src={qraftLogo} alt="QRAFT.AI" className="h-20 mx-auto" />
+          <img src={qraftLogo} alt="QRAFTS" className="h-20 mx-auto" />
           <p className="text-muted-foreground">Your journey to success starts here</p>
         </div>
 
