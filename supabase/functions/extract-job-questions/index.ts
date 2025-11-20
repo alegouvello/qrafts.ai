@@ -159,11 +159,11 @@ Deno.serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are an expert at analyzing job application forms (especially Greenhouse forms) and extracting all questions that applicants need to answer. Look for ALL form fields including: text inputs, textareas, select dropdowns, radio buttons, checkboxes, and any labeled fields. Extract the exact question text or label for each field. Common questions include: personal info fields (LinkedIn, phone), essay questions ("Why do you want to work here?", "Why this company?"), experience questions, salary expectations, visa sponsorship, relocation questions, start date, demographics, etc. Return ONLY a JSON array of question strings with the exact wording from the form. If you see field labels like "First Name *", just return "First Name". Be thorough and extract ALL questions you can find.'
+            content: 'You are an expert at extracting ONLY the actual form fields from job application pages. CRITICAL: Only extract fields that appear in the APPLICATION FORM section, NOT from the job description. Look for: input fields, text areas, dropdowns, radio buttons, checkboxes, and file upload fields. DO NOT include: questions from job descriptions, interview questions, or requirements listed in the job posting. Common real form fields include: Name, Email, Phone, Resume upload, LinkedIn URL, GitHub, Portfolio, Cover Letter, Work authorization questions, Visa sponsorship questions, Office location preference. Return ONLY a JSON array of the actual form field labels/questions. Strip asterisks and required markers. Be conservative - only include fields you are certain are part of the application form.'
           },
           {
             role: 'user',
-            content: `Extract ALL application form questions from this job posting page (look especially for the application form section):\n\n${pageContent}`
+            content: `Extract ONLY the actual application form fields from this page. Ignore any questions in the job description or requirements section. Focus only on the form where applicants enter their information:\n\n${pageContent}`
           }
         ],
         temperature: 0.3,
