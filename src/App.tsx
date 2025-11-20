@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import ApplicationDetail from "./pages/ApplicationDetail";
 import Calendar from "./pages/Calendar";
 import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 import ComparisonView from "./pages/ComparisonView";
 import NotFound from "./pages/NotFound";
 
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="/comparison" element={<ComparisonView />} />
           <Route path="/application/:id" element={<ApplicationDetail />} />
           <Route path="*" element={<NotFound />} />

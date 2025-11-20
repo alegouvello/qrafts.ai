@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Plus, ArrowLeft, LogOut, BarChart3, Crown, Sparkles } from "lucide-react";
+import { Plus, ArrowLeft, LogOut, BarChart3, Crown, Sparkles, Settings } from "lucide-react";
 import { ApplicationCard } from "@/components/ApplicationCard";
 import { AddApplicationDialog } from "@/components/AddApplicationDialog";
 import { useToast } from "@/hooks/use-toast";
@@ -352,6 +352,11 @@ const Dashboard = () => {
                   <BarChart3 className="h-4 w-4 mr-2" />
                   <span className="hidden sm:inline">Compare</span>
                   <span className="sm:hidden">Stats</span>
+                </Button>
+              </Link>
+              <Link to="/settings">
+                <Button variant="ghost" className="rounded-full hover:bg-primary/5 transition-all" size="icon">
+                  <Settings className="h-4 w-4" />
                 </Button>
               </Link>
               <Button variant="ghost" onClick={handleSignOut} className="rounded-full hover:bg-destructive/5 transition-all" size="icon">

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Minus, ExternalLink, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Minus, ExternalLink, Sparkles, ChevronDown, ChevronUp, Settings } from "lucide-react";
 import qraftLogo from "@/assets/qraft-logo-clean.png";
 
 interface Application {
@@ -237,16 +237,23 @@ const ComparisonView = () => {
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
-            <Button
-              variant="ghost"
-              onClick={() => navigate("/dashboard")}
-              className="rounded-full"
-              size="sm"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Back to Dashboard</span>
-              <span className="sm:hidden">Back</span>
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                onClick={() => navigate("/dashboard")}
+                className="rounded-full"
+                size="sm"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Back to Dashboard</span>
+                <span className="sm:hidden">Back</span>
+              </Button>
+              <Link to="/settings">
+                <Button variant="ghost" size="sm" className="rounded-full">
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
             <img src={qraftLogo} alt="QRAFT.AI" className="h-10 sm:h-12 opacity-70" />
           </div>
 
