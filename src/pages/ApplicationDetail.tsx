@@ -196,6 +196,41 @@ const ApplicationDetail = () => {
     return null;
   };
 
+  const autoSuggestFromPreviousAnswers = async (questionText: string): Promise<string | null> => {
+    if (!questionText) return null;
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    // Get all previous answers from this user
+    const { data: allAnswers } = await supabase
+      .from('answers')
+      .select('answer_text, questions!inner(question_text)')
+      .eq('user_id', user.id)
+      .not('answer_text', 'is', null);
+
+    if (!allAnswers || allAnswers.length === 0) return null;
+
+    const lowerQuestion = questionText.toLowerCase().trim();
+    
+    // Try exact match first
+    const exactMatch = allAnswers.find(a => 
+      a.questions?.question_text?.toLowerCase().trim() === lowerQuestion
+    );
+    if (exactMatch?.answer_text) return exactMatch.answer_text;
+
+    // Try fuzzy match - if question texts are very similar
+    const similarMatch = allAnswers.find(a => {
+      const prevQuestion = a.questions?.question_text?.toLowerCase().trim();
+      if (!prevQuestion) return false;
+      
+      // Check if one contains the other (for minor variations)
+      return prevQuestion.includes(lowerQuestion) || lowerQuestion.includes(prevQuestion);
+    });
+    
+    return similarMatch?.answer_text || null;
+  };
+
   const fetchApplicationData = async () => {
     setLoading(true);
 
@@ -249,17 +284,26 @@ const ApplicationDetail = () => {
           });
         }
 
-        // Auto-suggest from profile for empty answers
+        // Auto-suggest from profile and previous answers for empty answers
         const autoPopulated = new Set<string>();
-        questionsData.forEach((question) => {
+        
+        for (const question of questionsData) {
           if (!answersMap[question.id]) {
-            const suggestion = autoSuggestFromProfile(question.question_text);
+            // Try profile first
+            let suggestion = autoSuggestFromProfile(question.question_text);
+            
+            // If no profile match, try previous answers
+            if (!suggestion) {
+              suggestion = await autoSuggestFromPreviousAnswers(question.question_text);
+            }
+            
             if (suggestion) {
               answersMap[question.id] = suggestion;
               autoPopulated.add(question.id);
             }
           }
-        });
+        }
+        
         setAutoPopulatedAnswers(autoPopulated);
 
         setAnswers(answersMap);
