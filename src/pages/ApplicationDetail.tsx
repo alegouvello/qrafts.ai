@@ -573,7 +573,12 @@ const ApplicationDetail = () => {
         body: {
           questionText: questionText,
           answerText: currentAnswer,
-          roleDetails: application.role_summary,
+          roleDetails: {
+            company: application.company,
+            position: application.position,
+            requirements: application.role_summary?.requirements,
+            responsibilities: application.role_summary?.responsibilities,
+          },
           resumeText: userProfile?.resume_text || undefined,
         },
         headers: {
