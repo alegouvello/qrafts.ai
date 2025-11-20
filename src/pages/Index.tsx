@@ -149,6 +149,32 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Video Demo Section */}
+      <section className="relative container mx-auto px-4 sm:px-6 py-16 sm:py-24">
+        <div className="text-center mb-12 sm:mb-16 space-y-4 animate-fade-in-up">
+          <div className="inline-block px-3 sm:px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium mb-4">
+            See It In Action
+          </div>
+          <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">Watch QRAFTS in Action</h3>
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
+            See how QRAFTS helps organize job applications and streamline your job search
+          </p>
+        </div>
+        
+        <div className="max-w-5xl mx-auto">
+          <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-border/50 bg-card">
+            <div className="aspect-video">
+              <iframe
+                src="https://sora.chatgpt.com/p/s_691f92e33f80819180eae39ec3e1f41b?psh=HXVzZXItOWxjblJxdDZPM2twNEdlbEZVZ2ZoZUZL.cKK8gz01abV8"
+                className="w-full h-full"
+                allowFullScreen
+                title="QRAFTS Demo Video"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section id="features" className="relative container mx-auto px-4 sm:px-6 py-16 sm:py-24">
         <div className="text-center mb-16 sm:mb-20 space-y-4 animate-fade-in-up">
