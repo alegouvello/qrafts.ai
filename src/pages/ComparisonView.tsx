@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Minus, ExternalLink, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
-import qraftLogo from "@/assets/qraft-logo-new.png";
+import qraftLogo from "@/assets/qraft-logo-original.png";
 
 interface Application {
   id: string;
@@ -237,7 +237,7 @@ const ComparisonView = () => {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Dashboard
             </Button>
-            <img src={qraftLogo} alt="QRAFT.AI" className="h-12 opacity-70" />
+            <img src={qraftLogo} alt="QRAFT.AI" className="h-9 opacity-70" />
           </div>
 
           <div className="flex items-start justify-between">
