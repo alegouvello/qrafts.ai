@@ -40,6 +40,7 @@ export function EditProfileDialog({ open, onOpenChange, onSaved }: EditProfileDi
   const [skillInput, setSkillInput] = useState("");
   const [experience, setExperience] = useState<Experience[]>([]);
   const [education, setEducation] = useState<Education[]>([]);
+  const [existingResumeData, setExistingResumeData] = useState<any>(null);
 
   useEffect(() => {
     if (open) {
@@ -67,6 +68,7 @@ export function EditProfileDialog({ open, onOpenChange, onSaved }: EditProfileDi
       if (data.resume_text) {
         try {
           const parsed = JSON.parse(data.resume_text);
+          setExistingResumeData(parsed); // Store all existing data
           setSummary(parsed.summary || "");
           setSkills(parsed.skills || []);
           setExperience(parsed.experience || []);
@@ -83,7 +85,9 @@ export function EditProfileDialog({ open, onOpenChange, onSaved }: EditProfileDi
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
+    // Preserve all existing resume data and only update the edited fields
     const resumeData = {
+      ...existingResumeData, // Keep all existing fields (interests, certifications, etc.)
       full_name: fullName,
       email,
       phone,
