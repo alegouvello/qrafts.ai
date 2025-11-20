@@ -113,7 +113,15 @@ const ComparisonView = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke('analyze-role-fit', {
-        body: { roleDetails: app.role_summary, resumeText }
+        body: { 
+          roleDetails: {
+            company: app.company,
+            position: app.position,
+            requirements: app.role_summary?.requirements,
+            responsibilities: app.role_summary?.responsibilities,
+          },
+          resumeText 
+        }
       });
 
       if (error) throw error;

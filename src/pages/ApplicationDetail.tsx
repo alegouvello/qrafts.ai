@@ -1296,6 +1296,8 @@ const ApplicationDetail = () => {
           {/* AI Role Fit Analysis */}
           {application.role_summary && (
             <RoleFitAnalysis 
+              company={application.company}
+              position={application.position}
               roleDetails={application.role_summary} 
               resumeText={userProfile?.resume_text || null}
             />

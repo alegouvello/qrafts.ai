@@ -8,6 +8,8 @@ import { Sparkles, CheckCircle2, XCircle, Lightbulb, Loader2 } from "lucide-reac
 import { Progress } from "@/components/ui/progress";
 
 interface RoleFitAnalysisProps {
+  company: string;
+  position: string;
   roleDetails: any;
   resumeText: string | null;
 }
@@ -20,7 +22,7 @@ interface Analysis {
   suggestions: string[];
 }
 
-export const RoleFitAnalysis = ({ roleDetails, resumeText }: RoleFitAnalysisProps) => {
+export const RoleFitAnalysis = ({ company, position, roleDetails, resumeText }: RoleFitAnalysisProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
@@ -49,7 +51,15 @@ export const RoleFitAnalysis = ({ roleDetails, resumeText }: RoleFitAnalysisProp
       }
 
       const { data, error } = await supabase.functions.invoke('analyze-role-fit', {
-        body: { roleDetails, resumeText },
+        body: { 
+          roleDetails: {
+            company,
+            position,
+            requirements: roleDetails?.requirements,
+            responsibilities: roleDetails?.responsibilities,
+          },
+          resumeText 
+        },
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
