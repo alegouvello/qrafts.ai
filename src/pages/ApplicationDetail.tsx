@@ -704,8 +704,18 @@ const ApplicationDetail = () => {
     return null;
   }
 
-  const answeredCount = questions.filter((q) => savedAnswers[q.id]?.trim()).length;
-  const progress = questions.length > 0 ? (answeredCount / questions.length) * 100 : 0;
+  // Helper to identify file upload questions
+  const isFileUploadQuestion = (questionText: string) => {
+    const lower = questionText.toLowerCase();
+    return lower.includes('resume') || lower.includes('cv') || 
+           lower.includes('cover letter') || lower.includes('upload') || 
+           lower.includes('attach');
+  };
+
+  // Filter out file upload questions from progress tracking
+  const textQuestions = questions.filter(q => !isFileUploadQuestion(q.question_text));
+  const answeredCount = textQuestions.filter((q) => savedAnswers[q.id]?.trim()).length;
+  const progress = textQuestions.length > 0 ? (answeredCount / textQuestions.length) * 100 : 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -810,12 +820,12 @@ const ApplicationDetail = () => {
               </div>
 
               {/* Progress */}
-              {questions.length > 0 && (
+              {textQuestions.length > 0 && (
                 <div className="mt-4 space-y-2">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Progress</span>
                     <span className="font-medium">
-                      {answeredCount} / {questions.length} answered
+                      {answeredCount} / {textQuestions.length} answered
                     </span>
                   </div>
                   <Progress value={progress} className="h-2" />
