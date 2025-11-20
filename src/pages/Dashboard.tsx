@@ -91,13 +91,18 @@ const Dashboard = () => {
           
           let answerCount = 0;
           if (questionIds.length > 0) {
-            const { count } = await supabase
+            const { data: answersData } = await supabase
               .from("answers")
-              .select("*", { count: "exact", head: true })
-              .in("question_id", questionIds)
-              .not("answer_text", "is", null)
-              .neq("answer_text", "");
-            answerCount = count || 0;
+              .select("question_id, answer_text")
+              .in("question_id", questionIds);
+            
+            // Count only questions that have non-empty, non-whitespace answers
+            const uniqueAnsweredQuestions = new Set(
+              answersData
+                ?.filter(a => a.answer_text && a.answer_text.trim().length > 0)
+                .map(a => a.question_id)
+            );
+            answerCount = uniqueAnsweredQuestions.size;
           }
 
           return {
