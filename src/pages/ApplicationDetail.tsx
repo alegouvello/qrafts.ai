@@ -40,6 +40,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import qraftLogo from "@/assets/qraft-logo.png";
 
 interface Application {
   id: string;
@@ -1050,12 +1051,15 @@ const ApplicationDetail = () => {
       <header className="border-b bg-card/30 backdrop-blur-md sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <Link to="/dashboard">
-              <Button variant="ghost" size="sm" className="rounded-full">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
-              </Button>
-            </Link>
+            <div className="flex items-center gap-4">
+              <Link to="/dashboard">
+                <Button variant="ghost" size="sm" className="rounded-full">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back
+                </Button>
+              </Link>
+              <img src={qraftLogo} alt="QRAFT.AI" className="h-6 opacity-70" />
+            </div>
             <div className="flex items-center gap-2">
               {editingUrl ? (
                 <div className="flex items-center gap-2">

@@ -6,6 +6,7 @@ import { ApplicationCard } from "@/components/ApplicationCard";
 import { AddApplicationDialog } from "@/components/AddApplicationDialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import qraftLogo from "@/assets/qraft-logo.png";
 
 interface Application {
   id: string;
@@ -246,10 +247,7 @@ const Dashboard = () => {
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
               </Link>
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight">Applications</h1>
-                <p className="text-sm text-muted-foreground">Track your journey</p>
-              </div>
+              <img src={qraftLogo} alt="QRAFT.AI" className="h-7" />
             </div>
             <div className="flex items-center gap-4">
               <Button onClick={() => setShowAddDialog(true)} className="flex-1 sm:flex-none rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">

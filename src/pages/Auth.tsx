@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import qraftLogo from "@/assets/qraft-logo.png";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -93,13 +94,11 @@ const Auth = () => {
       <div className="fixed bottom-1/4 -left-32 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
       
       <Card className="relative w-full max-w-md p-10 border-border/40 bg-card/80 backdrop-blur-xl shadow-2xl">
-        <div className="text-center mb-10 space-y-3">
+        <div className="text-center mb-10 space-y-4">
           <div className="inline-block px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-4">
             Welcome Back
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-            ApplicationTracker
-          </h1>
+          <img src={qraftLogo} alt="QRAFT.AI" className="h-10 mx-auto" />
           <p className="text-muted-foreground">Your journey to success starts here</p>
         </div>
 
