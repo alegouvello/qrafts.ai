@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -8,7 +9,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CheckCircle, AlertCircle, Sparkles } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { CheckCircle, AlertCircle, Sparkles, Loader2 } from "lucide-react";
 
 interface AnswerImprovementDialogProps {
   open: boolean;
@@ -17,6 +19,8 @@ interface AnswerImprovementDialogProps {
   improvements: string;
   improvedVersion: string;
   onApply: () => void;
+  onRegenerate?: (instructions: string) => Promise<void>;
+  isRegenerating?: boolean;
 }
 
 export const AnswerImprovementDialog = ({
@@ -26,7 +30,12 @@ export const AnswerImprovementDialog = ({
   improvements,
   improvedVersion,
   onApply,
+  onRegenerate,
+  isRegenerating = false,
 }: AnswerImprovementDialogProps) => {
+  const [userInstructions, setUserInstructions] = useState("");
+  const [showInstructions, setShowInstructions] = useState(false);
+
   const parseListItems = (text: string) => {
     return text
       .split('\n')
@@ -36,6 +45,14 @@ export const AnswerImprovementDialog = ({
 
   const strengthsList = parseListItems(strengths);
   const improvementsList = parseListItems(improvements);
+
+  const handleRegenerate = async () => {
+    if (onRegenerate && userInstructions.trim()) {
+      await onRegenerate(userInstructions);
+      setUserInstructions("");
+      setShowInstructions(false);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -52,6 +69,65 @@ export const AnswerImprovementDialog = ({
         
         <ScrollArea className="max-h-[60vh] pr-4">
           <div className="space-y-6">
+            {/* User Instructions */}
+            {onRegenerate && (
+              <div className="space-y-3 pb-4 border-b border-border">
+                {!showInstructions ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowInstructions(true)}
+                    className="w-full"
+                  >
+                    <Sparkles className="h-3 w-3 mr-2" />
+                    Want specific changes? Add instructions
+                  </Button>
+                ) : (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">
+                      Specific improvements you'd like (optional)
+                    </label>
+                    <Textarea
+                      placeholder="E.g., 'Make it more concise', 'Add more technical details', 'Focus on leadership experience'..."
+                      value={userInstructions}
+                      onChange={(e) => setUserInstructions(e.target.value)}
+                      rows={3}
+                      disabled={isRegenerating}
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={handleRegenerate}
+                        disabled={!userInstructions.trim() || isRegenerating}
+                      >
+                        {isRegenerating ? (
+                          <>
+                            <Loader2 className="h-3 w-3 mr-2 animate-spin" />
+                            Regenerating...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="h-3 w-3 mr-2" />
+                            Regenerate
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setShowInstructions(false);
+                          setUserInstructions("");
+                        }}
+                        disabled={isRegenerating}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
             {/* Strengths */}
             {strengthsList.length > 0 && (
               <div className="space-y-3">

@@ -470,7 +470,7 @@ const ApplicationDetail = () => {
     setSuggesting((prev) => ({ ...prev, [questionId]: false }));
   };
 
-  const handleImproveAnswer = async (questionId: string, questionText: string) => {
+  const handleImproveAnswer = async (questionId: string, questionText: string, userInstructions?: string) => {
     if (!application) return;
 
     const currentAnswer = answers[questionId];
@@ -494,6 +494,8 @@ const ApplicationDetail = () => {
           currentAnswer: currentAnswer,
           company: application.company,
           position: application.position,
+          resumeText: userProfile?.resume_text || undefined,
+          userInstructions: userInstructions || undefined,
         },
         headers: {
           Authorization: `Bearer ${session?.access_token}`,
@@ -525,6 +527,15 @@ const ApplicationDetail = () => {
     }
 
     setImproving((prev) => ({ ...prev, [questionId]: false }));
+  };
+
+  const handleRegenerateImprovement = async (userInstructions: string) => {
+    if (!currentImprovement) return;
+    
+    await handleImproveAnswer(currentImprovement.questionId, 
+      questions.find(q => q.id === currentImprovement.questionId)?.question_text || '', 
+      userInstructions
+    );
   };
 
   const handleApplyImprovement = () => {
@@ -1263,6 +1274,8 @@ const ApplicationDetail = () => {
           improvements={currentImprovement.improvements}
           improvedVersion={currentImprovement.improvedVersion}
           onApply={handleApplyImprovement}
+          onRegenerate={handleRegenerateImprovement}
+          isRegenerating={improving[currentImprovement.questionId]}
         />
       )}
 

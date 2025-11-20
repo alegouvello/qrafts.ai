@@ -11,6 +11,8 @@ interface RequestBody {
   currentAnswer: string;
   company: string;
   position: string;
+  resumeText?: string;
+  userInstructions?: string;
 }
 
 Deno.serve(async (req) => {
@@ -41,7 +43,8 @@ Deno.serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    const { questionText, currentAnswer, company, position }: RequestBody = await req.json();
+    // Parse the request body
+    const { questionText, currentAnswer, company, position, resumeText, userInstructions }: RequestBody = await req.json();
     
     console.log('Improving answer for question:', questionText);
 
@@ -58,12 +61,21 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Build resume context
+    const resumeContext = resumeText 
+      ? `\n\n**Candidate's Resume/Background:**\n${resumeText.substring(0, 3000)}\n\n**CRITICAL:** Use ONLY real experiences and information from the candidate's resume above. Do not invent or hallucinate any roles, companies, or achievements. Base all improvements on actual resume content.`
+      : '';
+    
+    const instructionsContext = userInstructions 
+      ? `\n\n**Specific Instructions from User:**\n${userInstructions}\n\n**IMPORTANT:** Make sure to incorporate these specific requests in your improved version.`
+      : '';
+
     // Build prompt for AI
     const improvementPrompt = `You are an expert career coach reviewing a job application answer.
 
 **Job Context:**
 - Company: ${company}
-- Position: ${position}
+- Position: ${position}${resumeContext}${instructionsContext}
 
 **Question:**
 "${questionText}"
@@ -85,7 +97,7 @@ Provide a comprehensive critique and improvement of this answer. Structure your 
    - Uses stronger action verbs and concrete examples
    - Is well-structured with clear flow
    - Shows enthusiasm and cultural fit
-   - Is 150-300 words
+   - Is 150-300 words${resumeText ? '\n   - **Uses ONLY real information from the provided resume - do not invent roles, companies, or achievements**' : ''}${userInstructions ? '\n   - **Incorporates the specific instructions provided by the user**' : ''}
 
 Format your response EXACTLY as follows:
 
