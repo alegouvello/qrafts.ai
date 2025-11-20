@@ -11,6 +11,26 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
+import { z } from "zod";
+import { useToast } from "@/hooks/use-toast";
+
+const urlSchema = z.object({
+  url: z.string()
+    .trim()
+    .url("Please enter a valid URL")
+    .max(2000, "URL too long")
+    .refine(
+      (url) => {
+        try {
+          const parsed = new URL(url);
+          return !['localhost', '127.0.0.1', '0.0.0.0'].includes(parsed.hostname);
+        } catch {
+          return false;
+        }
+      },
+      "Invalid job posting URL"
+    ),
+});
 
 interface AddApplicationDialogProps {
   open: boolean;
@@ -25,13 +45,30 @@ export const AddApplicationDialog = ({
 }: AddApplicationDialogProps) => {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>("");
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+    
+    // Validate URL
+    const result = urlSchema.safeParse({ url });
+    if (!result.success) {
+      setError(result.error.errors[0]?.message || "Invalid URL");
+      toast({
+        title: "Invalid URL",
+        description: result.error.errors[0]?.message,
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setLoading(true);
     
-    onAdd({ url });
+    onAdd({ url: result.data.url });
     setUrl("");
+    setError("");
     setLoading(false);
     onOpenChange(false);
   };
@@ -57,6 +94,9 @@ export const AddApplicationDialog = ({
                 onChange={(e) => setUrl(e.target.value)}
                 required
               />
+              {error && (
+                <p className="text-xs text-destructive">{error}</p>
+              )}
               <p className="text-sm text-muted-foreground">
                 We'll extract the company, position, application questions, and key details automatically
               </p>

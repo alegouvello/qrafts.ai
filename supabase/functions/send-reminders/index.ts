@@ -173,7 +173,7 @@ const handler = async (req: Request): Promise<Response> => {
           continue;
         }
 
-        console.log(`Successfully sent reminder for event ${event.id} to ${userEmail}`);
+        console.log(`Successfully sent reminder for event ${event.id}`);
         sentCount++;
       } catch (error) {
         console.error(`Error processing event ${event.id}:`, error);

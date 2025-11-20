@@ -189,7 +189,7 @@ Deno.serve(async (req) => {
       throw new Error('Failed to save profile data');
     }
 
-    console.log('Profile saved successfully for:', extractedData.full_name);
+    console.log('Profile saved successfully');
 
     return new Response(
       JSON.stringify({
