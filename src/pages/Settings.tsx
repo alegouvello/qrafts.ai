@@ -177,7 +177,7 @@ const Settings = () => {
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>
-            <img src={qraftLogo} alt="QRAFTS" className="h-10 sm:h-12" />
+            <img src={qraftLogo} alt="QRAFTS" className="h-16 sm:h-20" />
             <div className="flex items-center gap-2 ml-auto">
               <SettingsIcon className="h-5 w-5 text-muted-foreground" />
               <h1 className="text-xl font-semibold">Settings</h1>

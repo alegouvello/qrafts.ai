@@ -1063,7 +1063,7 @@ const ApplicationDetail = () => {
                   Back
                 </Button>
               </Link>
-              <img src={qraftLogo} alt="QRAFTS" className="h-12 opacity-70" />
+              <img src={qraftLogo} alt="QRAFTS" className="h-16 sm:h-20 opacity-70" />
             </div>
             <div className="flex items-center gap-2">
               {editingUrl ? (
