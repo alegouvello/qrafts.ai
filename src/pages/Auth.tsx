@@ -86,73 +86,89 @@ const Auth = () => {
 
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background to-secondary/30 p-4">
-      <Card className="w-full max-w-md p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-2">
-            JobTrack Pro
+    <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden p-4">
+      {/* Background decoration */}
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/10 via-background to-background pointer-events-none" />
+      <div className="fixed top-1/4 -right-32 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+      <div className="fixed bottom-1/4 -left-32 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+      
+      <Card className="relative w-full max-w-md p-10 border-border/40 bg-card/80 backdrop-blur-xl shadow-2xl">
+        <div className="text-center mb-10 space-y-3">
+          <div className="inline-block px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-4">
+            Welcome Back
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+            ApplicationTracker
           </h1>
-          <p className="text-muted-foreground">Track your job applications with ease</p>
+          <p className="text-muted-foreground">Your journey to success starts here</p>
         </div>
 
         <Tabs defaultValue="signin" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="signin">Sign In</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 bg-muted/50 p-1 rounded-full">
+            <TabsTrigger value="signin" className="rounded-full data-[state=active]:shadow-md">Sign In</TabsTrigger>
+            <TabsTrigger value="signup" className="rounded-full data-[state=active]:shadow-md">Sign Up</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="signin">
-            <form onSubmit={handleSignIn} className="space-y-4">
+          <TabsContent value="signin" className="mt-6">
+            <form onSubmit={handleSignIn} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="signin-email">Email</Label>
+                <Label htmlFor="signin-email" className="text-sm font-medium">Email</Label>
                 <Input
                   id="signin-email"
                   type="email"
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className="h-11 rounded-xl border-border/60 focus:border-primary/50 transition-all"
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="signin-password">Password</Label>
+                <Label htmlFor="signin-password" className="text-sm font-medium">Password</Label>
                 <Input
                   id="signin-password"
                   type="password"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="h-11 rounded-xl border-border/60 focus:border-primary/50 transition-all"
                   required
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button 
+                type="submit" 
+                className="w-full h-11 rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all" 
+                disabled={loading}
+              >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Sign In
               </Button>
             </form>
           </TabsContent>
 
-          <TabsContent value="signup">
-            <form onSubmit={handleSignUp} className="space-y-4">
+          <TabsContent value="signup" className="mt-6">
+            <form onSubmit={handleSignUp} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="signup-email">Email</Label>
+                <Label htmlFor="signup-email" className="text-sm font-medium">Email</Label>
                 <Input
                   id="signup-email"
                   type="email"
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className="h-11 rounded-xl border-border/60 focus:border-primary/50 transition-all"
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="signup-password">Password</Label>
+                <Label htmlFor="signup-password" className="text-sm font-medium">Password</Label>
                 <Input
                   id="signup-password"
                   type="password"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="h-11 rounded-xl border-border/60 focus:border-primary/50 transition-all"
                   required
                   minLength={6}
                 />
@@ -160,7 +176,11 @@ const Auth = () => {
                   Password must be at least 6 characters
                 </p>
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button 
+                type="submit" 
+                className="w-full h-11 rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all" 
+                disabled={loading}
+              >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Create Account
               </Button>

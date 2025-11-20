@@ -61,7 +61,7 @@ export const ApplicationCard = ({ application, onDelete }: ApplicationCardProps)
   };
 
   return (
-    <Card className="group relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/30 hover:shadow-lg transition-all duration-300">
+    <Card className="group relative overflow-hidden border-border/40 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500">
       <div className="p-6">
         <div className="flex items-start gap-6">
           {/* Company Logo */}
@@ -121,15 +121,16 @@ export const ApplicationCard = ({ application, onDelete }: ApplicationCardProps)
             )}
 
             {/* Actions */}
-            <div className="flex items-center gap-2 pt-1">
+            <div className="flex items-center gap-2 pt-2">
               <Link to={`/application/${application.id}`} className="flex-1">
-                <Button variant="default" size="sm" className="w-full">
+                <Button variant="default" size="sm" className="w-full rounded-full shadow-md shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all">
                   View Details
                 </Button>
               </Link>
               <Button 
                 variant="outline" 
                 size="sm"
+                className="rounded-full border-border/60 hover:border-primary/50 transition-all"
                 onClick={() => window.open(application.url, "_blank")}
               >
                 <ExternalLink className="h-4 w-4" />
@@ -139,6 +140,7 @@ export const ApplicationCard = ({ application, onDelete }: ApplicationCardProps)
                   <Button 
                     variant="ghost" 
                     size="sm"
+                    className="rounded-full hover:bg-destructive/10 transition-all"
                     disabled={isDeleting}
                   >
                     <Trash2 className="h-4 w-4 text-destructive" />

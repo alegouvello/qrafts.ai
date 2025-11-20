@@ -232,9 +232,12 @@ const Dashboard = () => {
   }, {} as Record<string, Application[]>);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {/* Subtle background pattern */}
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/3 via-background to-background pointer-events-none" />
+      
       {/* Header */}
-      <header className="border-b bg-card/30 backdrop-blur-md sticky top-0 z-10">
+      <header className="relative border-b border-border/40 bg-background/80 backdrop-blur-xl sticky top-0 z-10">
         <div className="container mx-auto px-6 py-5">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
@@ -248,23 +251,23 @@ const Dashboard = () => {
                 <p className="text-sm text-muted-foreground">Track your journey</p>
               </div>
             </div>
-            <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-              <Button onClick={() => setShowAddDialog(true)} className="flex-1 sm:flex-none rounded-full">
+            <div className="flex items-center gap-4">
+              <Button onClick={() => setShowAddDialog(true)} className="flex-1 sm:flex-none rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">
                 <Plus className="h-4 w-4 mr-2" />
                 Add
               </Button>
               <Link to="/profile">
-                <Button variant="ghost" className="w-full sm:w-auto rounded-full">
+                <Button variant="ghost" className="w-full sm:w-auto rounded-full hover:bg-primary/5 transition-all">
                   Profile
                 </Button>
               </Link>
               <Link to="/comparison">
-                <Button variant="ghost" className="w-full sm:w-auto rounded-full">
+                <Button variant="ghost" className="w-full sm:w-auto rounded-full hover:bg-accent/5 transition-all">
                   <BarChart3 className="h-4 w-4 mr-2" />
                   Compare
                 </Button>
               </Link>
-              <Button variant="ghost" onClick={handleSignOut} className="rounded-full">
+              <Button variant="ghost" onClick={handleSignOut} className="rounded-full hover:bg-destructive/5 transition-all">
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
@@ -273,24 +276,24 @@ const Dashboard = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="relative container mx-auto px-4 py-8">
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-          <div className="bg-card/30 backdrop-blur-sm p-6 rounded-2xl border border-border/50">
-            <div className="text-3xl font-bold mb-1">{stats.total}</div>
-            <div className="text-xs text-muted-foreground uppercase tracking-wider">Total</div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+          <div className="group relative bg-gradient-to-br from-card to-card/50 backdrop-blur-sm p-6 rounded-2xl border border-border/50 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/5">
+            <div className="text-4xl font-bold mb-2 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{stats.total}</div>
+            <div className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Total Applications</div>
           </div>
-          <div className="bg-card/30 backdrop-blur-sm p-6 rounded-2xl border border-border/50">
-            <div className="text-3xl font-bold mb-1 text-amber-500">{stats.pending}</div>
-            <div className="text-xs text-muted-foreground uppercase tracking-wider">Pending</div>
+          <div className="group relative bg-gradient-to-br from-card to-card/50 backdrop-blur-sm p-6 rounded-2xl border border-border/50 hover:border-warning/30 transition-all hover:shadow-lg hover:shadow-warning/5">
+            <div className="text-4xl font-bold mb-2 text-warning">{stats.pending}</div>
+            <div className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Pending Review</div>
           </div>
-          <div className="bg-card/30 backdrop-blur-sm p-6 rounded-2xl border border-border/50">
-            <div className="text-3xl font-bold mb-1 text-blue-500">{stats.interviews}</div>
-            <div className="text-xs text-muted-foreground uppercase tracking-wider">Interviews</div>
+          <div className="group relative bg-gradient-to-br from-card to-card/50 backdrop-blur-sm p-6 rounded-2xl border border-border/50 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/5">
+            <div className="text-4xl font-bold mb-2 text-primary">{stats.interviews}</div>
+            <div className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Interviews</div>
           </div>
-          <div className="bg-card/30 backdrop-blur-sm p-6 rounded-2xl border border-border/50">
-            <div className="text-3xl font-bold mb-1 text-green-500">{stats.responseRate}%</div>
-            <div className="text-xs text-muted-foreground uppercase tracking-wider">Response</div>
+          <div className="group relative bg-gradient-to-br from-card to-card/50 backdrop-blur-sm p-6 rounded-2xl border border-border/50 hover:border-success/30 transition-all hover:shadow-lg hover:shadow-success/5">
+            <div className="text-4xl font-bold mb-2 text-success">{stats.responseRate}%</div>
+            <div className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Response Rate</div>
           </div>
         </div>
 
@@ -304,14 +307,17 @@ const Dashboard = () => {
             ))}
           </div>
         ) : applications.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="max-w-md mx-auto space-y-4">
-              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <Plus className="h-10 w-10 text-primary" />
+          <div className="text-center py-24">
+            <div className="max-w-md mx-auto space-y-6">
+              <div className="relative mx-auto mb-8">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-full blur-2xl" />
+                <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center mx-auto border border-primary/20">
+                  <Plus className="h-12 w-12 text-primary" />
+                </div>
               </div>
-              <h3 className="text-2xl font-semibold">Start your journey</h3>
-              <p className="text-muted-foreground">Add your first job application to begin tracking your progress</p>
-              <Button onClick={() => setShowAddDialog(true)} className="rounded-full mt-4">
+              <h3 className="text-3xl font-bold">Start Your Journey</h3>
+              <p className="text-muted-foreground text-lg leading-relaxed">Add your first application to begin tracking your progress and organizing your job search</p>
+              <Button onClick={() => setShowAddDialog(true)} className="rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all mt-6">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Application
               </Button>
