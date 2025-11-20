@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import qraftLogo from "@/assets/qraft-logo-original.png";
+import qraftLogo from "@/assets/qraft-logo-clean.png";
 
 const Auth = () => {
   const [email, setEmail] = useState("");

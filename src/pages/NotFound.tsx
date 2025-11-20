@@ -1,6 +1,6 @@
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
-import qraftLogo from "@/assets/qraft-logo-original.png";
+import qraftLogo from "@/assets/qraft-logo-clean.png";
 
 const NotFound = () => {
   const location = useLocation();
