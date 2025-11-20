@@ -72,29 +72,33 @@ const Dashboard = () => {
         variant: "destructive",
       });
     } else {
+      // Helper function to identify file upload questions (same as ApplicationDetail)
+      const isFileUploadQuestion = (questionText: string) => {
+        const lower = questionText.toLowerCase();
+        return lower.includes('resume') || lower.includes('cv') || 
+               lower.includes('cover letter') || lower.includes('upload') || 
+               lower.includes('attach');
+      };
+
       // Transform data to match the expected format
       const transformed = await Promise.all(
         (data || []).map(async (app) => {
-          // Count questions for this application
-          const { count: questionCount } = await supabase
-            .from("questions")
-            .select("*", { count: "exact", head: true })
-            .eq("application_id", app.id);
-
-          // Count answers for questions in this application
+          // Get all questions for this application
           const { data: questions } = await supabase
             .from("questions")
-            .select("id")
+            .select("id, question_text")
             .eq("application_id", app.id);
 
-          const questionIds = questions?.map((q) => q.id) || [];
+          // Filter out file upload questions
+          const textQuestions = questions?.filter(q => !isFileUploadQuestion(q.question_text)) || [];
+          const textQuestionIds = textQuestions.map(q => q.id);
           
           let answerCount = 0;
-          if (questionIds.length > 0) {
+          if (textQuestionIds.length > 0) {
             const { data: answersData } = await supabase
               .from("answers")
               .select("question_id, answer_text")
-              .in("question_id", questionIds);
+              .in("question_id", textQuestionIds);
             
             // Count only questions that have non-empty, non-whitespace answers
             const uniqueAnsweredQuestions = new Set(
@@ -112,7 +116,7 @@ const Dashboard = () => {
             status: app.status as "pending" | "interview" | "rejected" | "accepted",
             appliedDate: app.applied_date,
             url: app.url,
-            questions: questionCount || 0,
+            questions: textQuestions.length,
             answersCompleted: answerCount,
           };
         })
