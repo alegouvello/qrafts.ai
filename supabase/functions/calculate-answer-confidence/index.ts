@@ -90,7 +90,8 @@ ${answerText}
 Provide your response in this format:
 
 CONFIDENCE_SCORE: [0-100]
-REASONING: [Brief explanation of the score in 2-3 sentences]`;
+REASONING: [Brief explanation of the score in 2-3 sentences]
+SUGGESTIONS: [If score < 100, provide 2-3 specific, actionable suggestions to improve the answer and reach a higher score. Each suggestion should be concrete and implementable.]`;
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -140,16 +141,19 @@ REASONING: [Brief explanation of the score in 2-3 sentences]`;
 
     // Parse the response
     const scoreMatch = content.match(/CONFIDENCE_SCORE:\s*(\d+)/i);
-    const reasoningMatch = content.match(/REASONING:\s*(.+?)(?:\n|$)/is);
+    const reasoningMatch = content.match(/REASONING:\s*(.+?)(?=SUGGESTIONS:|$)/is);
+    const suggestionsMatch = content.match(/SUGGESTIONS:\s*(.+?)$/is);
 
     const score = scoreMatch ? parseInt(scoreMatch[1]) : 50;
     const reasoning = reasoningMatch ? reasoningMatch[1].trim() : 'Unable to generate reasoning';
+    const suggestions = suggestionsMatch ? suggestionsMatch[1].trim() : '';
 
     return new Response(
       JSON.stringify({
         success: true,
         score: Math.min(100, Math.max(0, score)),
         reasoning,
+        suggestions,
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

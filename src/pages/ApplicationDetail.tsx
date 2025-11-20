@@ -6,7 +6,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AnswerImprovementDialog } from "@/components/AnswerImprovementDialog";
 import { SaveTemplateDialog } from "@/components/SaveTemplateDialog";
 import { BrowseTemplatesDialog } from "@/components/BrowseTemplatesDialog";
@@ -100,7 +99,8 @@ const ApplicationDetail = () => {
   const [suggesting, setSuggesting] = useState<Record<string, boolean>>({});
   const [improving, setImproving] = useState<Record<string, boolean>>({});
   const [calculatingConfidence, setCalculatingConfidence] = useState<Record<string, boolean>>({});
-  const [confidenceScores, setConfidenceScores] = useState<Record<string, { score: number; reasoning: string }>>({});
+  const [confidenceScores, setConfidenceScores] = useState<Record<string, { score: number; reasoning: string; suggestions?: string }>>({});
+  const [expandedConfidence, setExpandedConfidence] = useState<string | null>(null);
   const [reextracting, setReextracting] = useState(false);
   const [editingDate, setEditingDate] = useState(false);
   const [newAppliedDate, setNewAppliedDate] = useState("");
@@ -583,8 +583,12 @@ const ApplicationDetail = () => {
           [questionId]: {
             score: response.data.score,
             reasoning: response.data.reasoning,
+            suggestions: response.data.suggestions,
           },
         }));
+        
+        // Auto-expand the confidence details
+        setExpandedConfidence(questionId);
         
         toast({
           title: "Confidence Score Calculated",
@@ -1192,32 +1196,48 @@ const ApplicationDetail = () => {
                               </Badge>
                             )}
                             {confidenceScores[question.id] && (
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Badge 
-                                      variant={
-                                        confidenceScores[question.id].score >= 80 ? "default" :
-                                        confidenceScores[question.id].score >= 60 ? "secondary" :
-                                        "destructive"
-                                      }
-                                      className="text-xs flex-shrink-0 cursor-help"
-                                    >
-                                      <TrendingUp className="w-3 h-3 mr-1" />
-                                      {confidenceScores[question.id].score}% fit
-                                    </Badge>
-                                  </TooltipTrigger>
-                                  <TooltipContent className="max-w-xs">
-                                    <p className="text-sm">{confidenceScores[question.id].reasoning}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
+                              <Badge 
+                                variant={
+                                  confidenceScores[question.id].score >= 80 ? "default" :
+                                  confidenceScores[question.id].score >= 60 ? "secondary" :
+                                  "destructive"
+                                }
+                                className="text-xs flex-shrink-0 cursor-pointer"
+                                onClick={() => setExpandedConfidence(
+                                  expandedConfidence === question.id ? null : question.id
+                                )}
+                              >
+                                <TrendingUp className="w-3 h-3 mr-1" />
+                                ~{confidenceScores[question.id].score}% fit
+                              </Badge>
                             )}
                           </div>
                           {hasAnswer && !isModified && (
                             <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
                           )}
                         </div>
+                        
+                        {/* Confidence Score Details */}
+                        {confidenceScores[question.id] && expandedConfidence === question.id && (
+                          <div className="mt-3 p-3 rounded-lg bg-muted/50 border border-border space-y-2">
+                            <div className="flex items-start gap-2">
+                              <Info className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                              <div className="space-y-2 flex-1">
+                                <p className="text-sm text-foreground">
+                                  <span className="font-medium">Analysis:</span> {confidenceScores[question.id].reasoning}
+                                </p>
+                                {confidenceScores[question.id].suggestions && confidenceScores[question.id].score < 100 && (
+                                  <div className="space-y-1">
+                                    <p className="text-sm font-medium text-foreground">Suggestions to improve:</p>
+                                    <p className="text-sm text-muted-foreground whitespace-pre-line">
+                                      {confidenceScores[question.id].suggestions}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                         )}
                         {isFileUpload ? (
                           <div className="space-y-2">
                             <div className="text-sm text-muted-foreground">
