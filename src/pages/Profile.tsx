@@ -8,7 +8,7 @@ import { UploadResumeDialog } from "@/components/UploadResumeDialog";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { ProfileReviewDialog } from "@/components/ProfileReviewDialog";
 import { MasterAnswersDialog } from "@/components/MasterAnswersDialog";
-import qraftLogo from "@/assets/qraft-logo-original.png";
+import qraftLogo from "@/assets/qraft-logo-clean.png";
 
 interface ProfileData {
   full_name: string | null;

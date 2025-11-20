@@ -40,7 +40,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import qraftLogo from "@/assets/qraft-logo-original.png";
+import qraftLogo from "@/assets/qraft-logo-clean.png";
 
 interface Application {
   id: string;
