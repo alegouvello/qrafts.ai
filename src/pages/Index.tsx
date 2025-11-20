@@ -37,7 +37,7 @@ const Index = () => {
       <header className="relative border-b border-border/40 bg-background/80 backdrop-blur-xl sticky top-0 z-50">
         <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3">
-            <img src={qraftLogo} alt="QRAFT.AI" className="h-10 sm:h-12 md:h-16" />
+            <img src={qraftLogo} alt="QRAFT.AI" className="h-16 sm:h-20 md:h-24" />
           </div>
           
           {/* Desktop Navigation */}
