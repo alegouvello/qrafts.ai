@@ -38,19 +38,44 @@ export const UploadResumeDialog = ({
     }
   };
 
+  const validateFileType = (file: File): boolean => {
+    const allowedTypes = [
+      'application/msword', // .doc
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+    ];
+    const allowedExtensions = ['.doc', '.docx'];
+    const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+    
+    if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
+      toast({
+        title: "Invalid File Type",
+        description: "Please upload only DOC or DOCX files. PDF parsing is currently unavailable.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    return true;
+  };
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setSelectedFile(e.dataTransfer.files[0]);
+      const file = e.dataTransfer.files[0];
+      if (validateFileType(file)) {
+        setSelectedFile(file);
+      }
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
+      const file = e.target.files[0];
+      if (validateFileType(file)) {
+        setSelectedFile(file);
+      }
     }
   };
 
@@ -100,7 +125,7 @@ export const UploadResumeDialog = ({
         <DialogHeader>
           <DialogTitle>Upload Resume</DialogTitle>
           <DialogDescription>
-            Upload your resume to use across all your job applications. Supported formats: PDF, DOC, DOCX (Word documents work best for automatic parsing)
+            Upload your resume to use across all your job applications. Supported formats: DOC, DOCX (Word documents only for automatic parsing)
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">
@@ -121,11 +146,11 @@ export const UploadResumeDialog = ({
                 Drag and drop your resume here, or click to browse
               </p>
               <p className="text-xs text-muted-foreground mb-4">
-                PDF, DOC, or DOCX (max 10MB)
+                DOC or DOCX (max 10MB)
               </p>
               <input
                 type="file"
-                accept=".pdf,.doc,.docx"
+                accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 onChange={handleChange}
                 className="hidden"
                 id="resume-upload"
