@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, X, Send, Loader2 } from "lucide-react";
+import { MessageCircle, X, Send, Loader2, Crown } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 type Message = {
   role: "user" | "assistant";
@@ -22,8 +23,51 @@ export const ChatAssistant = () => {
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<{
+    subscribed: boolean;
+    product_id: string | null;
+  }>({ subscribed: false, product_id: null });
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
   const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-assistant`;
+
+  useEffect(() => {
+    checkSubscription();
+  }, []);
+
+  const checkSubscription = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('check-subscription');
+      if (error) {
+        console.error('Error checking subscription:', error);
+      } else if (data) {
+        setSubscriptionStatus(data);
+      }
+    } catch (error) {
+      console.error('Error checking subscription:', error);
+    }
+  };
+
+  const handleUpgrade = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout');
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to create checkout session",
+          variant: "destructive",
+        });
+      } else if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to start checkout process",
+        variant: "destructive",
+      });
+    }
+  };
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -108,6 +152,22 @@ export const ChatAssistant = () => {
 
   const handleSend = () => {
     if (!input.trim() || isLoading) return;
+    
+    // Check subscription status
+    if (!subscriptionStatus.subscribed) {
+      toast({
+        title: "Pro Feature",
+        description: "AI chat assistant is available with Qraft Pro. Upgrade to get personalized AI assistance.",
+        variant: "destructive",
+        action: (
+          <Button onClick={handleUpgrade} size="sm" className="ml-auto">
+            Upgrade to Pro
+          </Button>
+        ),
+      });
+      return;
+    }
+    
     streamChat(input);
   };
 
@@ -122,13 +182,20 @@ export const ChatAssistant = () => {
     <>
       {/* Floating Button */}
       {!isOpen && (
-        <Button
-          onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all z-50"
-          size="icon"
-        >
-          <MessageCircle className="h-6 w-6" />
-        </Button>
+        <div className="fixed bottom-6 right-6 z-50">
+          <Button
+            onClick={() => setIsOpen(true)}
+            className="h-14 w-14 rounded-full shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all relative"
+            size="icon"
+          >
+            <MessageCircle className="h-6 w-6" />
+            {!subscriptionStatus.subscribed && (
+              <div className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary flex items-center justify-center border-2 border-background">
+                <Crown className="h-3 w-3 text-primary-foreground" />
+              </div>
+            )}
+          </Button>
+        </div>
       )}
 
       {/* Chat Window */}
@@ -143,8 +210,15 @@ export const ChatAssistant = () => {
                 </AvatarFallback>
               </Avatar>
               <div>
-                <h3 className="font-semibold">QRAFTS Assistant</h3>
-                <p className="text-xs text-muted-foreground">Here to help</p>
+                <h3 className="font-semibold flex items-center gap-2">
+                  QRAFTS Assistant
+                  {!subscriptionStatus.subscribed && (
+                    <Crown className="h-3.5 w-3.5 text-primary" />
+                  )}
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  {subscriptionStatus.subscribed ? "Here to help" : "Pro feature"}
+                </p>
               </div>
             </div>
             <Button
