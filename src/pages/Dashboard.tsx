@@ -416,40 +416,6 @@ const Dashboard = () => {
           </div>
         )}
 
-        {subscriptionStatus.subscribed && (
-          <div className="mb-6 sm:mb-8 p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-success/10 via-success/5 to-primary/10 border border-success/20 backdrop-blur-sm">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-full bg-success/20">
-                  <Crown className="h-5 w-5 text-success" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold flex items-center gap-2">
-                    Qraft Pro Active
-                    {subscriptionStatus.is_trialing && (
-                      <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-primary/20 text-primary border border-primary/30">
-                        Trial
-                      </span>
-                    )}
-                  </h3>
-                  {subscriptionStatus.is_trialing && subscriptionStatus.trial_end ? (
-                    <p className="text-xs text-muted-foreground">
-                      Trial ends on {new Date(subscriptionStatus.trial_end).toLocaleDateString()}
-                    </p>
-                  ) : subscriptionStatus.subscription_end ? (
-                    <p className="text-xs text-muted-foreground">
-                      Renews on {new Date(subscriptionStatus.subscription_end).toLocaleDateString()}
-                    </p>
-                  ) : null}
-                </div>
-              </div>
-              <Button onClick={handleManageSubscription} variant="outline" size="sm" className="rounded-full">
-                Manage Subscription
-              </Button>
-            </div>
-          </div>
-        )}
-
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
           <div className="group relative bg-gradient-to-br from-card to-card/50 backdrop-blur-sm p-4 sm:p-6 rounded-2xl border border-border/50 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/5">
