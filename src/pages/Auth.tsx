@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Footer } from "@/components/Footer";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 import qraftLogo from "@/assets/qrafts-logo.png";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
@@ -165,6 +165,15 @@ const Auth = () => {
       {/* Main content - centered */}
       <div className="flex-1 flex items-center justify-center px-3 py-4 sm:p-4">
         <Card className="relative w-full max-w-[95vw] sm:max-w-md p-5 sm:p-8 md:p-10 border-border/40 bg-card/80 backdrop-blur-xl shadow-2xl animate-enter">
+          {/* Back button */}
+          <Link 
+            to="/" 
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4 sm:mb-6 group"
+          >
+            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+            <span>Back to Home</span>
+          </Link>
+
           <div className="text-center mb-5 sm:mb-8 md:mb-10 space-y-2 sm:space-y-3 md:space-y-4">
             <div className="inline-block px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium mb-2 sm:mb-4 animate-fade-in" style={{ animationDelay: '0.1s', animationFillMode: 'backwards' }}>
               Welcome Back
