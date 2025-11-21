@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Mail, Phone, MapPin, Linkedin, Briefcase, GraduationCap, Award, ArrowLeft, Upload, Edit, Sparkles, BookOpen, Trophy, BookMarked, Lightbulb, Globe, Heart, Settings, Camera, Image as ImageIcon, ExternalLink } from "lucide-react";
+import { User, Mail, Phone, MapPin, Linkedin, Briefcase, GraduationCap, Award, ArrowLeft, Upload, Edit, Sparkles, BookOpen, Trophy, BookMarked, Lightbulb, Globe, Heart, Settings, Camera, Image as ImageIcon, ExternalLink, FileDown } from "lucide-react";
 import { UploadResumeDialog } from "@/components/UploadResumeDialog";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { ProfileReviewDialog } from "@/components/ProfileReviewDialog";
@@ -13,6 +13,7 @@ import { EnhancementPreviewDialog } from "@/components/EnhancementPreviewDialog"
 import { Footer } from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 import { convertBulletsToHTML } from "@/utils/bulletFormatter";
+import { generateResumePDF } from "@/utils/generateResumePDF";
 import {
   Dialog,
   DialogContent,
@@ -423,6 +424,32 @@ export default function Profile() {
     }
   };
 
+  const handleExportPDF = () => {
+    if (!parsedData) {
+      toast({
+        title: "No Profile Data",
+        description: "Please upload or add your profile information first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      generateResumePDF(parsedData);
+      toast({
+        title: "PDF Generated",
+        description: "Your professional resume has been downloaded",
+      });
+    } catch (error: any) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: "Export Failed",
+        description: error.message || "Failed to generate PDF",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -500,6 +527,16 @@ export default function Profile() {
                 <Edit className="h-4 w-4" />
                 <span className="hidden sm:inline">Edit Profile</span>
                 <span className="sm:hidden">Edit</span>
+              </Button>
+              <Button
+                onClick={handleExportPDF}
+                variant="outline"
+                size="sm"
+                className="gap-2 bg-background/50 backdrop-blur-sm flex-1 sm:flex-none"
+              >
+                <FileDown className="h-4 w-4" />
+                <span className="hidden md:inline">Export PDF</span>
+                <span className="md:hidden">PDF</span>
               </Button>
               <Link to="/settings">
                 <Button
