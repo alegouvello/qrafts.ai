@@ -63,6 +63,7 @@ const CompanyProfile = () => {
   const [savedNotes, setSavedNotes] = useState("");
   const [editingNotes, setEditingNotes] = useState(false);
   const [savingNotes, setSavingNotes] = useState(false);
+  const [logoError, setLogoError] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -252,6 +253,12 @@ const CompanyProfile = () => {
 
   const metrics = calculateMetrics();
 
+  // Get company logo from Clearbit
+  const getCompanyLogo = (company: string) => {
+    const domain = company.toLowerCase().replace(/\s+/g, '') + '.com';
+    return `https://logo.clearbit.com/${domain}`;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
@@ -288,9 +295,22 @@ const CompanyProfile = () => {
       <main className="container mx-auto px-4 py-8 space-y-6">
         {/* Company Header */}
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-primary/10 rounded-xl">
-            <Building2 className="h-8 w-8 text-primary" />
-          </div>
+          {!logoError ? (
+            <div className="w-20 h-20 rounded-xl overflow-hidden bg-muted/30 flex items-center justify-center border border-border/50 shrink-0">
+              <img 
+                src={getCompanyLogo(decodedCompany)}
+                alt={decodedCompany}
+                className="w-full h-full object-contain p-3"
+                onError={() => setLogoError(true)}
+              />
+            </div>
+          ) : (
+            <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center border border-border/50 shrink-0">
+              <span className="text-3xl font-bold text-primary">
+                {decodedCompany.charAt(0).toUpperCase()}
+              </span>
+            </div>
+          )}
           <div>
             <h1 className="text-3xl font-bold">{decodedCompany}</h1>
             <p className="text-muted-foreground">{metrics.totalApps} application{metrics.totalApps !== 1 ? 's' : ''}</p>
