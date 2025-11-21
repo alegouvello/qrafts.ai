@@ -10,6 +10,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import qraftLogo from "@/assets/qrafts-logo.png";
+import PullToRefresh from "react-simple-pull-to-refresh";
 
 interface Application {
   id: string;
@@ -143,6 +144,14 @@ const Dashboard = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleRefresh = async () => {
+    await Promise.all([
+      fetchApplications(),
+      fetchUserProfile(),
+      checkSubscription()
+    ]);
   };
 
   const handleManageSubscription = async () => {
@@ -466,7 +475,16 @@ const Dashboard = () => {
       </header>
 
       {/* Main Content */}
-      <main className="relative container mx-auto px-4 py-6 sm:py-8">
+      <PullToRefresh
+        onRefresh={handleRefresh}
+        pullingContent=""
+        refreshingContent={
+          <div className="flex items-center justify-center py-4">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+          </div>
+        }
+      >
+        <main className="relative container mx-auto px-4 py-6 sm:py-8">
         {/* Subscription Banner */}
         {!subscriptionStatus.subscribed && (
           <div className="mb-6 sm:mb-8 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 border border-primary/20 backdrop-blur-sm">
@@ -638,6 +656,7 @@ const Dashboard = () => {
           </div>
         )}
       </main>
+      </PullToRefresh>
 
       <AddApplicationDialog
         open={showAddDialog}
