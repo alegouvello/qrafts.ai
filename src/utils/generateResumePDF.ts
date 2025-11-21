@@ -195,8 +195,47 @@ function generateSingleColumnPDF(data: ResumeData, preview: boolean = false): st
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     
-    const summaryText = stripHTML(data.summary);
-    addWrappedText(summaryText, 10, contentWidth, 5.5);
+    // Check if summary has bullet points
+    const summaryBullets = extractBulletPoints(data.summary);
+    
+    if (summaryBullets.length > 1) {
+      // Has multiple bullet points - format as list
+      const firstParagraph = summaryBullets[0];
+      // First paragraph (before bullets)
+      if (firstParagraph && !firstParagraph.includes('–') && !firstParagraph.includes('-') && firstParagraph.length > 100) {
+        addWrappedText(firstParagraph, 10, contentWidth, 5.5);
+        yPos += 2;
+      }
+      
+      // Bullet points
+      summaryBullets.forEach((bullet, idx) => {
+        // Skip first item if it was the intro paragraph
+        if (idx === 0 && firstParagraph === bullet && firstParagraph.length > 100) return;
+        
+        const cleanBullet = bullet.trim();
+        if (cleanBullet) {
+          doc.setFontSize(10);
+          const lines = doc.splitTextToSize(cleanBullet, contentWidth - 8);
+          const bulletHeight = (lines.length * 5.5) + 2;
+          
+          checkPageBreak(bulletHeight);
+          
+          doc.setFontSize(12);
+          doc.text('•', margin + 2, yPos);
+          
+          doc.setFontSize(10);
+          lines.forEach((line: string) => {
+            doc.text(line, margin + 8, yPos);
+            yPos += 5.5;
+          });
+          yPos += 1;
+        }
+      });
+    } else {
+      // No bullet points - format as paragraph
+      const summaryText = stripHTML(data.summary);
+      addWrappedText(summaryText, 10, contentWidth, 5.5);
+    }
     yPos += 4;
   }
 
@@ -676,13 +715,57 @@ function generateTwoColumnPDF(data: ResumeData, preview: boolean = false): strin
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9.5);
     doc.setTextColor(...TEXT_COLOR);
-    const summaryText = stripHTML(data.summary);
-    const summaryLines = doc.splitTextToSize(summaryText, mainWidth);
-    summaryLines.forEach((line: string) => {
-      checkPageBreak(5);
-      doc.text(line, mainMargin, yPos);
-      yPos += 5;
-    });
+    
+    // Check if summary has bullet points
+    const summaryBullets = extractBulletPoints(data.summary);
+    
+    if (summaryBullets.length > 1) {
+      // Has multiple bullet points - format as list
+      const firstParagraph = summaryBullets[0];
+      // First paragraph (before bullets)
+      if (firstParagraph && !firstParagraph.includes('–') && !firstParagraph.includes('-') && firstParagraph.length > 100) {
+        const introLines = doc.splitTextToSize(firstParagraph, mainWidth);
+        introLines.forEach((line: string) => {
+          checkPageBreak(5);
+          doc.text(line, mainMargin, yPos);
+          yPos += 5;
+        });
+        yPos += 1;
+      }
+      
+      // Bullet points
+      summaryBullets.forEach((bullet, idx) => {
+        // Skip first item if it was the intro paragraph
+        if (idx === 0 && firstParagraph === bullet && firstParagraph.length > 100) return;
+        
+        const cleanBullet = bullet.trim();
+        if (cleanBullet) {
+          doc.setFontSize(9);
+          const lines = doc.splitTextToSize(cleanBullet, mainWidth - 6);
+          const bulletHeight = (lines.length * 4.5) + 2;
+          
+          checkPageBreak(bulletHeight);
+          
+          doc.setFontSize(10);
+          doc.text('•', mainMargin + 1, yPos);
+          doc.setFontSize(9);
+          lines.forEach((line: string) => {
+            doc.text(line, mainMargin + 6, yPos);
+            yPos += 4.5;
+          });
+          yPos += 1;
+        }
+      });
+    } else {
+      // No bullet points - format as paragraph
+      const summaryText = stripHTML(data.summary);
+      const summaryLines = doc.splitTextToSize(summaryText, mainWidth);
+      summaryLines.forEach((line: string) => {
+        checkPageBreak(5);
+        doc.text(line, mainMargin, yPos);
+        yPos += 5;
+      });
+    }
     yPos += 4;
   }
 
