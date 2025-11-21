@@ -13,6 +13,8 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import ComparisonView from "./pages/ComparisonView";
 import CompanyProfile from "./pages/CompanyProfile";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +35,8 @@ const App = () => (
           <Route path="/comparison" element={<ComparisonView />} />
           <Route path="/company/:companyName" element={<CompanyProfile />} />
           <Route path="/application/:id" element={<ApplicationDetail />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <ChatAssistant />
