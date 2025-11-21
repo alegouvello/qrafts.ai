@@ -461,9 +461,13 @@ function generateSingleColumnPDF(data: ResumeData, preview: boolean = false): st
     yPos += 2;
   }
 
-  // Save PDF
-  const fileName = `${data.full_name || 'Resume'}_Resume.pdf`;
-  doc.save(fileName);
+  // Save or return PDF
+  if (preview) {
+    return doc.output('dataurlstring');
+  } else {
+    const fileName = `${data.full_name || 'Resume'}_Resume.pdf`;
+    doc.save(fileName);
+  }
 }
 
 function generateTwoColumnPDF(data: ResumeData, preview: boolean = false): string | void {
