@@ -76,6 +76,47 @@ export function EnhancementPreviewDialog({
     if (!hasContent && label !== "Experience" && label !== "Education") {
       return null;
     }
+
+    // Helper to format objects in a readable way
+    const formatItem = (item: any) => {
+      if (typeof item === 'string') return item;
+      
+      // Format experience/work items
+      if (item.title && item.company) {
+        return `${item.title} at ${item.company}${item.duration ? ` (${item.duration})` : item.start_date ? ` (${item.start_date} - ${item.end_date || 'Present'})` : ''}\n${item.description || ''}`;
+      }
+      
+      // Format education items
+      if (item.degree && (item.school || item.institution)) {
+        return `${item.degree}\n${item.school || item.institution}${item.year ? ` (${item.year})` : item.field ? `\nField: ${item.field}` : ''}`;
+      }
+      
+      // Format certification/publication/award items
+      if (item.name || item.title) {
+        let text = item.name || item.title;
+        if (item.issuer || item.publisher) text += `\n${item.issuer || item.publisher}`;
+        if (item.date) text += ` (${item.date})`;
+        return text;
+      }
+      
+      // Format project items
+      if (item.name && item.description) {
+        return `${item.name}\n${item.description}${item.url ? `\n${item.url}` : ''}`;
+      }
+      
+      // Format language items
+      if (item.language && item.proficiency) {
+        return `${item.language} (${item.proficiency})`;
+      }
+      
+      // Format volunteer work
+      if (item.role && item.organization) {
+        return `${item.role} at ${item.organization}${item.description ? `\n${item.description}` : ''}`;
+      }
+      
+      // Fallback to JSON for other objects
+      return JSON.stringify(item, null, 2);
+    };
     
     return (
       <div className="mb-6">
@@ -103,7 +144,7 @@ export function EnhancementPreviewDialog({
                 currentItems.map((item, idx) => (
                   <div key={idx} className="p-3 bg-muted/30 rounded text-xs">
                     <pre className="whitespace-pre-wrap font-sans">
-                      {typeof item === 'string' ? item : JSON.stringify(item, null, 2)}
+                      {formatItem(item)}
                     </pre>
                   </div>
                 ))
@@ -128,7 +169,7 @@ export function EnhancementPreviewDialog({
                     }`}
                   >
                     <pre className="whitespace-pre-wrap font-sans">
-                      {typeof item === 'string' ? item : JSON.stringify(item, null, 2)}
+                      {formatItem(item)}
                     </pre>
                   </div>
                 ))
