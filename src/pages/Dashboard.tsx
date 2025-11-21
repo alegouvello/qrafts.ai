@@ -356,12 +356,6 @@ const Dashboard = () => {
                   Profile
                 </Button>
               </Link>
-              <Link to="/analytics" className="flex-1 sm:flex-none">
-                <Button variant="ghost" className="w-full rounded-full hover:bg-primary/5 transition-all text-sm">
-                  <BarChart3 className="h-4 w-4 mr-2" />
-                  Analytics
-                </Button>
-              </Link>
               <Link to="/comparison" className="flex-1 sm:flex-none">
                 <Button variant="ghost" className="w-full rounded-full hover:bg-accent/5 transition-all text-sm">
                   <BarChart3 className="h-4 w-4 mr-2" />
