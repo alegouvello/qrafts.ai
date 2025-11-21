@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Crown, CreditCard, Calendar, Download, Settings as SettingsIcon, RefreshCw, Lock, Trash2, Eye, EyeOff, LogOut } from "lucide-react";
+import { ArrowLeft, Crown, CreditCard, Calendar, Download, Settings as SettingsIcon, RefreshCw, Lock, Trash2, Eye, EyeOff, LogOut, User, Shield, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import qraftLogo from "@/assets/qrafts-logo.png";
@@ -58,12 +58,10 @@ const Settings = () => {
     checkAuth();
     fetchUserProfile();
     
-    // Check for checkout success/cancel in URL
     const searchParams = new URLSearchParams(window.location.search);
     const checkoutStatus = searchParams.get('checkout');
     
     if (checkoutStatus === 'success') {
-      // Wait a moment for Stripe webhook to process, then refresh
       setTimeout(() => {
         checkSubscription();
         toast({
@@ -72,7 +70,6 @@ const Settings = () => {
         });
       }, 2000);
       
-      // Clean up URL
       window.history.replaceState({}, '', '/settings');
     } else if (checkoutStatus === 'canceled') {
       toast({
@@ -81,7 +78,6 @@ const Settings = () => {
         variant: "destructive",
       });
       
-      // Clean up URL
       window.history.replaceState({}, '', '/settings');
     } else {
       checkSubscription();
@@ -253,28 +249,11 @@ const Settings = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No user found");
 
-      // Delete user data (RLS policies will handle this automatically)
-      const { error: profileError } = await supabase
-        .from("user_profiles")
-        .delete()
-        .eq("user_id", user.id);
+      await supabase.from("user_profiles").delete().eq("user_id", user.id);
+      await supabase.from("applications").delete().eq("user_id", user.id);
+      await supabase.from("master_answers").delete().eq("user_id", user.id);
+      await supabase.from("answer_templates").delete().eq("user_id", user.id);
 
-      const { error: applicationsError } = await supabase
-        .from("applications")
-        .delete()
-        .eq("user_id", user.id);
-
-      const { error: answersError } = await supabase
-        .from("master_answers")
-        .delete()
-        .eq("user_id", user.id);
-
-      const { error: templatesError } = await supabase
-        .from("answer_templates")
-        .delete()
-        .eq("user_id", user.id);
-
-      // Sign out the user (account deletion would typically be handled by admin)
       await supabase.auth.signOut();
 
       toast({
@@ -305,430 +284,420 @@ const Settings = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      {/* Decorative Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute top-1/3 -left-40 w-80 h-80 bg-accent/5 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute bottom-20 right-1/4 w-60 h-60 bg-primary/5 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+      </div>
+
       {/* Header */}
-      <header className="border-b border-border/40 bg-background/80 backdrop-blur-xl sticky top-0 z-10">
-        <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-5">
-          <div className="flex items-center gap-4">
-            <Link to="/dashboard">
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
-            <img src={qraftLogo} alt="QRAFTS" className="h-20 transition-all duration-300 hover:scale-105 hover:drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.5)]" />
-            <div className="flex items-center gap-2 ml-auto">
-              <SettingsIcon className="h-5 w-5 text-muted-foreground" />
-              <h1 className="text-xl font-semibold">Settings</h1>
+      <header className="border-b border-border/40 bg-background/80 backdrop-blur-xl sticky top-0 z-10 shadow-sm">
+        <div className="container mx-auto px-4 sm:px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Link to="/dashboard">
+                <Button variant="ghost" size="icon" className="rounded-full hover:scale-105 transition-transform">
+                  <ArrowLeft className="h-5 w-5" />
+                </Button>
+              </Link>
+              <img 
+                src={qraftLogo} 
+                alt="QRAFTS" 
+                className="h-16 transition-all duration-300 hover:scale-105" 
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full border border-primary/20">
+                <SettingsIcon className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">Settings</span>
+              </div>
             </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 sm:px-6 py-8 max-w-4xl">
-        {/* Account Information */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Account Information</CardTitle>
-            <CardDescription>Your account details and preferences</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Email</label>
-              <p className="text-base mt-1">{userProfile?.email}</p>
-            </div>
-            {userProfile?.full_name && (
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Name</label>
-                <p className="text-base mt-1">{userProfile.full_name}</p>
-              </div>
-            )}
-            <Separator className="my-4" />
-            <Button
-              onClick={handleLogout}
-              variant="outline"
-              className="w-full rounded-full"
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
-          </CardContent>
-        </Card>
+      <main className="container mx-auto px-4 sm:px-6 py-12 max-w-5xl relative z-10">
+        <div className="mb-12 text-center animate-fade-in-down">
+          <h1 className="text-4xl sm:text-5xl font-bold mb-3 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+            Account Settings
+          </h1>
+          <p className="text-muted-foreground text-lg">Manage your profile, security, and subscription</p>
+        </div>
 
-        {/* Subscription Section */}
-        <Card className="mb-6">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Crown className="h-5 w-5 text-primary" />
-                  Subscription
-                </CardTitle>
-                <CardDescription>Manage your Qraft Pro subscription</CardDescription>
+        <div className="grid gap-8">
+          {/* Profile Section */}
+          <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm animate-fade-in-up">
+            <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-3xl"></div>
+            <CardHeader className="relative">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-3 rounded-full bg-primary/10 animate-glow-pulse">
+                  <User className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <CardTitle className="text-2xl">Profile Information</CardTitle>
+                  <CardDescription className="text-base">Your personal details</CardDescription>
+                </div>
               </div>
+            </CardHeader>
+            <CardContent className="space-y-6 relative">
+              <div className="grid sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary"></div>
+                    Email Address
+                  </label>
+                  <p className="text-lg font-medium">{userProfile?.email}</p>
+                </div>
+                {userProfile?.full_name && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      <div className="h-1.5 w-1.5 rounded-full bg-accent"></div>
+                      Full Name
+                    </label>
+                    <p className="text-lg font-medium">{userProfile.full_name}</p>
+                  </div>
+                )}
+              </div>
+              
+              <Separator className="my-6" />
+              
               <Button
-                onClick={checkSubscription}
+                onClick={handleLogout}
                 variant="outline"
-                size="sm"
-                disabled={loading}
-                className="rounded-full"
+                className="w-full sm:w-auto rounded-full group hover:border-primary/50 transition-all"
+                size="lg"
               >
-                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                Refresh Status
+                <LogOut className="h-4 w-4 mr-2 group-hover:translate-x-[-2px] transition-transform" />
+                Sign Out
               </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {subscriptionStatus.subscribed ? (
-              <div className="space-y-6">
-                {/* Current Plan */}
-                <div className="p-6 rounded-xl bg-gradient-to-r from-success/10 via-success/5 to-primary/10 border border-success/20">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="text-lg font-semibold">Qraft Pro</h3>
-                        {subscriptionStatus.is_trialing ? (
-                          <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30">
-                            Free Trial
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary" className="bg-success/20 text-success border-success/30">
-                            Active
-                          </Badge>
+            </CardContent>
+          </Card>
+
+          {/* Subscription Section */}
+          <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+            <div className="absolute top-0 left-0 w-40 h-40 bg-gradient-to-br from-accent/10 to-transparent rounded-full blur-3xl"></div>
+            <CardHeader className="relative">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 rounded-full bg-primary/10 animate-glow-pulse" style={{ animationDelay: '0.5s' }}>
+                    <Crown className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl">Subscription</CardTitle>
+                    <CardDescription className="text-base">Manage your Qraft Pro plan</CardDescription>
+                  </div>
+                </div>
+                <Button
+                  onClick={checkSubscription}
+                  variant="outline"
+                  size="sm"
+                  disabled={loading}
+                  className="rounded-full hover:border-primary/50 transition-all"
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="relative">
+              {subscriptionStatus.subscribed ? (
+                <div className="space-y-6">
+                  <div className="relative p-8 rounded-2xl bg-gradient-to-br from-success/10 via-primary/5 to-transparent border border-success/20 overflow-hidden group hover:border-success/40 transition-all">
+                    <div className="absolute top-0 right-0 opacity-10 group-hover:opacity-20 transition-opacity">
+                      <Sparkles className="h-32 w-32 text-success" />
+                    </div>
+                    <div className="relative z-10">
+                      <div className="flex items-start justify-between mb-6">
+                        <div>
+                          <div className="flex items-center gap-3 mb-3">
+                            <h3 className="text-2xl font-bold">Qraft Pro</h3>
+                            {subscriptionStatus.is_trialing ? (
+                              <Badge className="bg-primary text-primary-foreground border-0 shadow-lg shadow-primary/20">
+                                Free Trial Active
+                              </Badge>
+                            ) : (
+                              <Badge className="bg-success text-success-foreground border-0 shadow-lg shadow-success/20">
+                                Active
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-muted-foreground">$5 per month</p>
+                        </div>
+                        <div className="p-4 rounded-full bg-success/20 backdrop-blur-sm">
+                          <Crown className="h-8 w-8 text-success animate-float" />
+                        </div>
+                      </div>
+
+                      <div className="grid sm:grid-cols-2 gap-4 mb-6">
+                        <div className="p-4 rounded-xl bg-background/50 backdrop-blur-sm border border-border/50">
+                          <p className="text-sm text-muted-foreground mb-1">Status</p>
+                          <p className="text-lg font-semibold">
+                            {subscriptionStatus.is_trialing ? "Trial Active" : "Subscribed"}
+                          </p>
+                        </div>
+                        {((subscriptionStatus.is_trialing && subscriptionStatus.trial_end) || 
+                          (!subscriptionStatus.is_trialing && subscriptionStatus.subscription_end)) && (
+                          <div className="p-4 rounded-xl bg-background/50 backdrop-blur-sm border border-border/50">
+                            <p className="text-sm text-muted-foreground mb-1">
+                              {subscriptionStatus.is_trialing ? "Trial Ends" : "Next Billing"}
+                            </p>
+                            <p className="text-lg font-semibold flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-primary" />
+                              {new Date(
+                                subscriptionStatus.is_trialing 
+                                  ? subscriptionStatus.trial_end! 
+                                  : subscriptionStatus.subscription_end!
+                              ).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric'
+                              })}
+                            </p>
+                          </div>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground">$5/month</p>
-                    </div>
-                    <div className="p-3 rounded-full bg-success/20">
-                      <Crown className="h-6 w-6 text-success" />
-                    </div>
-                  </div>
 
-                  <Separator className="my-4" />
+                      <div className="space-y-3 mb-6">
+                        {[
+                          "Unlimited job applications",
+                          "AI-powered role fit analysis",
+                          "Advanced analytics and insights",
+                          "Priority support"
+                        ].map((feature, index) => (
+                          <div key={index} className="flex items-center gap-3 text-foreground">
+                            <div className="h-2 w-2 rounded-full bg-gradient-to-r from-primary to-accent"></div>
+                            <span>{feature}</span>
+                          </div>
+                        ))}
+                      </div>
 
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Status</span>
-                      <span className="font-medium">
-                        {subscriptionStatus.is_trialing ? "Trial Active" : "Subscribed"}
-                      </span>
+                      <Button 
+                        onClick={handleManageSubscription}
+                        className="w-full rounded-full shadow-lg shadow-primary/30 group"
+                        size="lg"
+                      >
+                        <CreditCard className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
+                        Manage Subscription & Billing
+                      </Button>
                     </div>
-                    {subscriptionStatus.is_trialing && subscriptionStatus.trial_end && (
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Trial Ends</span>
-                        <span className="font-medium flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {new Date(subscriptionStatus.trial_end).toLocaleDateString('en-US', {
-                            month: 'long',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
-                        </span>
-                      </div>
-                    )}
-                    {!subscriptionStatus.is_trialing && subscriptionStatus.subscription_end && (
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Next Billing Date</span>
-                        <span className="font-medium flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {new Date(subscriptionStatus.subscription_end).toLocaleDateString('en-US', {
-                            month: 'long',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
-                        </span>
-                      </div>
-                    )}
                   </div>
                 </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="relative p-8 rounded-2xl bg-gradient-to-br from-primary/5 via-accent/5 to-transparent border border-border/50 overflow-hidden group hover:border-primary/30 transition-all">
+                    <div className="absolute top-0 right-0 opacity-5 group-hover:opacity-10 transition-opacity">
+                      <Crown className="h-40 w-40 text-primary" />
+                    </div>
+                    <div className="relative z-10">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-3 rounded-full bg-gradient-to-br from-primary/20 to-accent/20">
+                          <Crown className="h-6 w-6 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="text-2xl font-bold">Upgrade to Qraft Pro</h3>
+                          <Badge className="mt-2 bg-success/20 text-success border-success/30">
+                            14-Day Free Trial
+                          </Badge>
+                        </div>
+                      </div>
+                      
+                      <p className="text-muted-foreground mb-6 text-lg">
+                        Try all Pro features free for 14 days. No credit card required during trial.
+                      </p>
 
-                {/* Features */}
+                      <div className="grid sm:grid-cols-2 gap-4 mb-6">
+                        {[
+                          "Unlimited job applications",
+                          "AI-powered role fit analysis",
+                          "Advanced analytics",
+                          "Priority support"
+                        ].map((feature, index) => (
+                          <div key={index} className="flex items-center gap-3 p-3 rounded-lg bg-background/50 border border-border/50">
+                            <div className="h-2 w-2 rounded-full bg-gradient-to-r from-primary to-accent"></div>
+                            <span className="text-sm font-medium">{feature}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <Button 
+                        onClick={handleUpgrade}
+                        size="lg"
+                        className="w-full rounded-full shadow-xl shadow-primary/30 bg-gradient-to-r from-primary to-accent hover:shadow-2xl hover:shadow-primary/40 transition-all group"
+                      >
+                        <Crown className="h-5 w-5 mr-2 group-hover:rotate-12 transition-transform" />
+                        Start Free Trial
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Security Section */}
+          <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+            <div className="absolute bottom-0 right-0 w-40 h-40 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-3xl"></div>
+            <CardHeader className="relative">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-3 rounded-full bg-primary/10 animate-glow-pulse" style={{ animationDelay: '1s' }}>
+                  <Shield className="h-6 w-6 text-primary" />
+                </div>
                 <div>
-                  <h4 className="font-medium mb-3">Your Pro Features</h4>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li className="flex items-center gap-2">
-                      <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                      Unlimited job applications
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                      AI-powered role fit analysis
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                      Advanced analytics and insights
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                      Priority support
-                    </li>
-                  </ul>
+                  <CardTitle className="text-2xl">Security</CardTitle>
+                  <CardDescription className="text-base">Manage your password and account security</CardDescription>
                 </div>
-
-                {/* Action Button */}
-                <Button 
-                  onClick={handleManageSubscription}
-                  className="w-full rounded-full"
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6 relative">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword" className="text-base">New Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="newPassword"
+                      type={showPassword ? "text" : "password"}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Enter new password"
+                      className="pr-12 h-12 rounded-full"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-1 top-1 h-10 px-3 hover:bg-transparent rounded-full"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword" className="text-base">Confirm New Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Confirm new password"
+                      className="pr-12 h-12 rounded-full"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-1 top-1 h-10 px-3 hover:bg-transparent rounded-full"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+                <Button
+                  onClick={handleChangePassword}
+                  disabled={!newPassword || !confirmPassword || changingPassword}
+                  className="w-full rounded-full group"
                   size="lg"
                 >
-                  <CreditCard className="h-4 w-4 mr-2" />
-                  Manage Subscription & Billing
-                </Button>
-                <p className="text-xs text-center text-muted-foreground">
-                  Update payment method, view invoices, or cancel subscription
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {/* Free Plan */}
-                <div className="p-6 rounded-xl border border-border/50 bg-card/50">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="text-lg font-semibold mb-2">Free Plan</h3>
-                      <p className="text-sm text-muted-foreground">$0/month</p>
-                    </div>
-                  </div>
-
-                  <Separator className="my-4" />
-
-                  <div>
-                    <h4 className="font-medium mb-3">Current Features</h4>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li className="flex items-center gap-2">
-                        <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
-                        Track up to 5 applications
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
-                        View all your existing data
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
-                        Calendar view
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
-                        Manual answer management
-                      </li>
-                    </ul>
-                    <p className="text-xs text-muted-foreground mt-4 p-3 rounded-lg bg-muted/30 border border-border/50">
-                      <strong>Your data is safe:</strong> All your applications and data remain accessible even if you don't upgrade. The 5 application limit only applies to adding new applications.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Upgrade CTA */}
-                <div className="p-6 rounded-xl bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 border border-primary/20">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Crown className="h-5 w-5 text-primary" />
-                    <h3 className="text-lg font-semibold">Upgrade to Qraft Pro</h3>
-                    <Badge variant="secondary" className="bg-success/20 text-success border-success/30">
-                      14-Day Free Trial
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Try all Pro features free for 14 days. No credit card required during trial.
-                  </p>
-                  <ul className="space-y-2 text-sm mb-6">
-                    <li className="flex items-center gap-2 text-foreground">
-                      <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                      Unlimited job applications
-                    </li>
-                    <li className="flex items-center gap-2 text-foreground">
-                      <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                      AI-powered role fit analysis
-                    </li>
-                    <li className="flex items-center gap-2 text-foreground">
-                      <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                      Advanced analytics
-                    </li>
-                    <li className="flex items-center gap-2 text-foreground">
-                      <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                      Priority support
-                    </li>
-                  </ul>
-                  <Button 
-                    onClick={handleUpgrade}
-                    size="lg"
-                    className="w-full rounded-full shadow-lg shadow-primary/30"
-                  >
-                    <Crown className="h-4 w-4 mr-2" />
-                    Start Free Trial
-                  </Button>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Payment History - Only show if subscribed */}
-        {subscriptionStatus.subscribed && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Download className="h-5 w-5" />
-                Payment History
-              </CardTitle>
-              <CardDescription>View and download your invoices</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <CreditCard className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-sm text-muted-foreground mb-4">
-                  Access your complete payment history and download invoices through the Stripe Customer Portal
-                </p>
-                <Button 
-                  onClick={handleManageSubscription}
-                  variant="outline"
-                  className="rounded-full"
-                >
-                  View Payment History
+                  <Lock className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
+                  {changingPassword ? "Updating..." : "Change Password"}
                 </Button>
               </div>
             </CardContent>
           </Card>
-        )}
 
-        {/* Security Section */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lock className="h-5 w-5" />
-              Security
-            </CardTitle>
-            <CardDescription>Manage your password and account security</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-3">
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
-                <div className="relative">
-                  <Input
-                    id="newPassword"
-                    type={showPassword ? "text" : "password"}
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Enter new password"
-                    className="pr-10"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4 text-muted-foreground" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-muted-foreground" />
-                    )}
-                  </Button>
+          {/* Danger Zone */}
+          <Card className="overflow-hidden border border-destructive/30 shadow-lg shadow-destructive/10 bg-gradient-to-br from-card to-destructive/5 backdrop-blur-sm animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+            <CardHeader>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-3 rounded-full bg-destructive/10">
+                  <Trash2 className="h-6 w-6 text-destructive" />
+                </div>
+                <div>
+                  <CardTitle className="text-2xl text-destructive">Danger Zone</CardTitle>
+                  <CardDescription className="text-base">Permanently delete your account and all data</CardDescription>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                <div className="relative">
-                  <Input
-                    id="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm new password"
-                    className="pr-10"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="h-4 w-4 text-muted-foreground" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-muted-foreground" />
-                    )}
-                  </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="p-6 rounded-xl bg-destructive/5 border border-destructive/20">
+                  <p className="text-sm mb-3">
+                    <strong className="text-destructive">Warning:</strong> This action cannot be undone. This will permanently delete:
+                  </p>
+                  <ul className="space-y-2">
+                    {[
+                      "All your job applications and answers",
+                      "Your profile and settings",
+                      "All timeline events and data",
+                      "Your subscription (if active)"
+                    ].map((item, index) => (
+                      <li key={index} className="flex items-center gap-3 text-sm text-muted-foreground">
+                        <div className="h-1.5 w-1.5 rounded-full bg-destructive"></div>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
+                <Button
+                  onClick={() => setShowDeleteDialog(true)}
+                  variant="destructive"
+                  className="w-full rounded-full group"
+                  size="lg"
+                >
+                  <Trash2 className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
+                  Delete Account
+                </Button>
               </div>
-              <Button
-                onClick={handleChangePassword}
-                disabled={!newPassword || !confirmPassword || changingPassword}
-                className="w-full rounded-full"
-              >
-                {changingPassword ? "Updating..." : "Change Password"}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Danger Zone */}
-        <Card className="border-destructive/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-destructive">
-              <Trash2 className="h-5 w-5" />
-              Danger Zone
-            </CardTitle>
-            <CardDescription>Permanently delete your account and all data</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20">
-                <p className="text-sm text-muted-foreground mb-2">
-                  <strong className="text-destructive">Warning:</strong> This action cannot be undone. This will permanently delete:
-                </p>
-                <ul className="text-sm text-muted-foreground space-y-1 ml-4 list-disc">
-                  <li>All your job applications and answers</li>
-                  <li>Your profile and settings</li>
-                  <li>All timeline events and data</li>
-                  <li>Your subscription (if active)</li>
-                </ul>
-              </div>
-              <Button
-                onClick={() => setShowDeleteDialog(true)}
-                variant="destructive"
-                className="w-full rounded-full"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete Account
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </main>
 
       {/* Delete Account Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription className="space-y-3">
+            <AlertDialogTitle className="text-2xl">Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4 text-base">
               <p>
                 This will permanently delete your account and remove all your data from our servers.
                 This action cannot be undone.
               </p>
-              <div className="space-y-2">
-                <Label htmlFor="deleteConfirm">
-                  Type <strong>delete my account</strong> to confirm:
+              <div className="space-y-3">
+                <Label htmlFor="deleteConfirm" className="text-base">
+                  Type <strong className="text-destructive">delete my account</strong> to confirm:
                 </Label>
                 <Input
                   id="deleteConfirm"
                   value={deleteConfirmText}
                   onChange={(e) => setDeleteConfirmText(e.target.value)}
                   placeholder="delete my account"
+                  className="h-12 rounded-full"
                 />
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setDeleteConfirmText("")}>
+            <AlertDialogCancel onClick={() => setDeleteConfirmText("")} className="rounded-full">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteAccount}
               disabled={deleteConfirmText.toLowerCase() !== "delete my account" || deletingAccount}
-              className="bg-destructive hover:bg-destructive/90"
+              className="bg-destructive hover:bg-destructive/90 rounded-full"
             >
               {deletingAccount ? "Deleting..." : "Delete Account"}
             </AlertDialogAction>
