@@ -429,7 +429,7 @@ export default function Profile() {
                 <ArrowLeft className="h-4 w-4" />
                 <span className="hidden sm:inline">Back</span>
               </Button>
-              <img src={qraftLogo} alt="QRAFTS" className="h-20 opacity-80 transition-all duration-300 hover:scale-105 hover:opacity-100 hover:drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.4)]" />
+              <img src={qraftLogo} alt="QRAFTS" className="h-20 opacity-80 transition-all duration-300 hover:scale-105 hover:opacity-100 hover:drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.4)] dark:invert" />
             </div>
             <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
               <Button
