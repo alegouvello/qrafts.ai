@@ -25,6 +25,7 @@ export const AddInterviewerDialog = ({ applicationId, applicationCompany, onInte
   const [company, setCompany] = useState(applicationCompany);
   const [email, setEmail] = useState("");
   const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [notes, setNotes] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,6 +51,7 @@ export const AddInterviewerDialog = ({ applicationId, applicationCompany, onInte
           company: company || null,
           email: email || null,
           linkedin_url: linkedinUrl || null,
+          notes: notes || null,
         })
         .select()
         .single();
@@ -93,6 +95,7 @@ export const AddInterviewerDialog = ({ applicationId, applicationCompany, onInte
       setCompany(applicationCompany);
       setEmail("");
       setLinkedinUrl("");
+      setNotes("");
       onInterviewerAdded();
     } catch (error: any) {
       console.error("Error adding interviewer:", error);
@@ -168,6 +171,19 @@ export const AddInterviewerDialog = ({ applicationId, applicationCompany, onInte
             />
             <p className="text-xs text-muted-foreground mt-1">
               LinkedIn profile reference (extraction may not be available)
+            </p>
+          </div>
+          <div>
+            <Label htmlFor="notes">Notes/Bio</Label>
+            <Textarea
+              id="notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Add relevant background, shared connections, conversation topics, or research notes..."
+              rows={4}
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Manually add information from LinkedIn, research, or prep notes
             </p>
           </div>
           <div className="flex justify-end gap-2">

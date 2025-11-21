@@ -200,6 +200,7 @@ export type Database = {
           interview_prep: Json | null
           linkedin_url: string | null
           name: string
+          notes: string | null
           role: string | null
           updated_at: string
           user_id: string
@@ -214,6 +215,7 @@ export type Database = {
           interview_prep?: Json | null
           linkedin_url?: string | null
           name: string
+          notes?: string | null
           role?: string | null
           updated_at?: string
           user_id: string
@@ -228,6 +230,7 @@ export type Database = {
           interview_prep?: Json | null
           linkedin_url?: string | null
           name?: string
+          notes?: string | null
           role?: string | null
           updated_at?: string
           user_id?: string

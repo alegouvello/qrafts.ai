@@ -15,6 +15,7 @@ interface Interviewer {
   company: string | null;
   email: string | null;
   linkedin_url: string | null;
+  notes: string | null;
   extracted_data: any;
   interview_prep: any;
 }
@@ -117,6 +118,12 @@ export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: In
                   </a>
                 )}
               </div>
+              {interviewer.notes && (
+                <div className="bg-muted/30 rounded-lg p-3 mt-3">
+                  <h4 className="font-semibold text-xs mb-1">Notes</h4>
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">{interviewer.notes}</p>
+                </div>
+              )}
             </div>
           </div>
           <AlertDialog>
