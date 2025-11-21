@@ -363,7 +363,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_company_stats: {
+        Args: { company_name: string }
+        Returns: {
+          acceptance_rate: number
+          accepted_count: number
+          avg_response_days: number
+          fastest_response_days: number
+          interview_count: number
+          interview_rate: number
+          rejected_count: number
+          rejection_rate: number
+          total_applications: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

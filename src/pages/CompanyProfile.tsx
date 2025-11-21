@@ -46,6 +46,18 @@ interface CompanyNote {
   updated_at: string;
 }
 
+interface CompanyStats {
+  total_applications: number;
+  avg_response_days: number | null;
+  fastest_response_days: number | null;
+  interview_rate: number;
+  acceptance_rate: number;
+  rejection_rate: number;
+  interview_count: number;
+  accepted_count: number;
+  rejected_count: number;
+}
+
 const statusConfig = {
   pending: { label: "Pending", variant: "secondary" as const, icon: Clock },
   interview: { label: "Interview", variant: "default" as const, icon: CheckCircle },
@@ -64,12 +76,14 @@ const CompanyProfile = () => {
   const [editingNotes, setEditingNotes] = useState(false);
   const [savingNotes, setSavingNotes] = useState(false);
   const [logoError, setLogoError] = useState(false);
+  const [communityStats, setCommunityStats] = useState<CompanyStats | null>(null);
 
   useEffect(() => {
     checkAuth();
     if (companyName) {
       fetchCompanyData();
       fetchCompanyNotes();
+      fetchCommunityStats();
     }
   }, [companyName]);
 
@@ -155,6 +169,27 @@ const CompanyProfile = () => {
       }
     } catch (error) {
       console.error("Error fetching company notes:", error);
+    }
+  };
+
+  const fetchCommunityStats = async () => {
+    try {
+      const decodedCompany = decodeURIComponent(companyName || "");
+      
+      const { data, error } = await supabase.rpc('get_company_stats', {
+        company_name: decodedCompany
+      });
+
+      if (error) {
+        console.error("Error fetching community stats:", error);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        setCommunityStats(data[0]);
+      }
+    } catch (error) {
+      console.error("Error fetching community stats:", error);
     }
   };
 
@@ -316,6 +351,11 @@ const CompanyProfile = () => {
               <p className="text-lg text-muted-foreground">
                 {metrics.totalApps} {metrics.totalApps === 1 ? 'Application' : 'Applications'} Tracked
               </p>
+              {communityStats && communityStats.total_applications > metrics.totalApps && (
+                <p className="text-sm text-muted-foreground">
+                  {communityStats.total_applications} total applications tracked across the community
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -323,8 +363,99 @@ const CompanyProfile = () => {
 
       <main className="container mx-auto px-4 py-12 space-y-12 max-w-7xl">
 
-        {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Key Metrics - Community Stats */}
+        <div>
+          <div className="mb-6">
+            <h2 className="text-2xl font-semibold mb-2">Community Insights</h2>
+            <p className="text-sm text-muted-foreground">Statistics from all applications to {decodedCompany}</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="group relative overflow-hidden border-border/40 bg-card/50 backdrop-blur-sm hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="relative p-8">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-primary/10 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <Clock className="h-6 w-6 text-primary" />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">Avg Response</p>
+                  <div className="text-4xl font-bold tracking-tight">
+                    {communityStats?.avg_response_days ? Math.round(communityStats.avg_response_days) : "—"}
+                    {communityStats?.avg_response_days && <span className="text-xl text-muted-foreground ml-1.5">days</span>}
+                  </div>
+                  {communityStats?.fastest_response_days && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Fastest: {communityStats.fastest_response_days} days
+                    </p>
+                  )}
+                </div>
+              </div>
+            </Card>
+
+            <Card className="group relative overflow-hidden border-border/40 bg-card/50 backdrop-blur-sm hover:border-green-500/40 hover:shadow-xl hover:shadow-green-500/5 transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="relative p-8">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-green-500/10 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <TrendingUp className="h-6 w-6 text-green-500" />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">Interview Rate</p>
+                  <div className="text-4xl font-bold tracking-tight">{communityStats?.interview_rate || 0}%</div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {communityStats?.interview_count || 0} of {communityStats?.total_applications || 0}
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="group relative overflow-hidden border-border/40 bg-card/50 backdrop-blur-sm hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="relative p-8">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-primary/10 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <Target className="h-6 w-6 text-primary" />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">Acceptance Rate</p>
+                  <div className="text-4xl font-bold tracking-tight">{communityStats?.acceptance_rate || 0}%</div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {communityStats?.accepted_count || 0} accepted
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="group relative overflow-hidden border-border/40 bg-card/50 backdrop-blur-sm hover:border-destructive/40 hover:shadow-xl hover:shadow-destructive/5 transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-destructive/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="relative p-8">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-destructive/10 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <XCircle className="h-6 w-6 text-destructive" />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">Rejection Rate</p>
+                  <div className="text-4xl font-bold tracking-tight">{communityStats?.rejection_rate || 0}%</div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {communityStats?.rejected_count || 0} rejected
+                  </p>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+
+        {/* Your Personal Stats */}
+        <div>
+          <div className="mb-6">
+            <h2 className="text-2xl font-semibold mb-2">Your Statistics</h2>
+            <p className="text-sm text-muted-foreground">Your personal metrics for {decodedCompany}</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="group relative overflow-hidden border-border/40 bg-card/50 backdrop-blur-sm hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <div className="relative p-8">
@@ -401,6 +532,7 @@ const CompanyProfile = () => {
               </div>
             </div>
           </Card>
+        </div>
         </div>
 
         {/* Company Notes */}
@@ -545,38 +677,40 @@ const CompanyProfile = () => {
         </Card>
 
         {/* Insights */}
-        {applications.length > 0 && (
+        {communityStats && (
           <Card className="border-border/40 bg-gradient-to-br from-primary/5 via-card/50 to-card/50 backdrop-blur-sm">
             <div className="p-8">
               <h2 className="text-2xl font-semibold mb-6 flex items-center gap-3">
                 <div className="p-2 bg-primary/10 rounded-lg">
                   <TrendingUp className="h-5 w-5 text-primary" />
                 </div>
-                Insights
+                Community Insights
               </h2>
               <div className="space-y-4">
-                {metrics.avgResponseDays !== null && (
+                {communityStats.avg_response_days && (
                   <p className="text-muted-foreground leading-relaxed flex gap-2">
                     <span className="text-primary mt-0.5">•</span>
                     <span>
-                      {decodedCompany} typically responds within <span className="font-semibold text-foreground">{metrics.avgResponseDays} days</span> of application submission.
+                      {decodedCompany} typically responds within <span className="font-semibold text-foreground">{Math.round(communityStats.avg_response_days)} days</span> based on {communityStats.total_applications} total applications across the community.
                     </span>
                   </p>
                 )}
-                {metrics.interviewRate > 0 && (
+                {communityStats.interview_rate > 0 && (
                   <p className="text-muted-foreground leading-relaxed flex gap-2">
                     <span className="text-primary mt-0.5">•</span>
                     <span>
-                      Your interview rate with {decodedCompany} is <span className="font-semibold text-foreground">{metrics.interviewRate}%</span>
-                      {metrics.interviewRate >= 30 ? ", which is excellent!" : metrics.interviewRate >= 15 ? ", which is good." : ". Consider tailoring your applications more."}
+                      The overall interview rate with {decodedCompany} is <span className="font-semibold text-foreground">{communityStats.interview_rate}%</span>
+                      {communityStats.interview_rate >= 30 ? ", which is excellent across the board!" : communityStats.interview_rate >= 15 ? ", which is a decent rate." : ", which suggests high selectivity."}
                     </span>
                   </p>
                 )}
-                {metrics.totalApps > 1 && (
+                {metrics.totalApps > 0 && (
                   <p className="text-muted-foreground leading-relaxed flex gap-2">
                     <span className="text-primary mt-0.5">•</span>
                     <span>
-                      You've applied to {metrics.totalApps} positions at {decodedCompany}. Consider diversifying to other companies as well.
+                      You've applied to {metrics.totalApps} position{metrics.totalApps > 1 ? 's' : ''} at {decodedCompany}. 
+                      {metrics.interviewRate > (communityStats.interview_rate || 0) && " Your interview rate is above the community average!"}
+                      {metrics.interviewRate < (communityStats.interview_rate || 0) && " Consider refining your approach based on community success patterns."}
                     </span>
                   </p>
                 )}
