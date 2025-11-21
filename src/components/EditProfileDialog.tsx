@@ -132,39 +132,12 @@ export function EditProfileDialog({ open, onOpenChange, onSaved }: EditProfileDi
       description: "Your profile has been updated successfully",
     });
 
-    // Trigger automatic profile enhancement if LinkedIn or website URL is provided
+    // Notify about manual enhancement option if URLs were added
     if (linkedinUrl || websiteUrl) {
       toast({
-        title: "Enhancing Profile",
-        description: "Extracting information from your links...",
+        title: "Enhancement Available",
+        description: "Click 'Enhance Profile' to extract information from your links",
       });
-
-      try {
-        const { data: enhanceData, error: enhanceError } = await supabase.functions.invoke('enhance-profile', {
-          body: { 
-            linkedinUrl: linkedinUrl || null, 
-            websiteUrl: websiteUrl || null 
-          }
-        });
-
-        if (enhanceError) {
-          console.error('Enhancement error:', enhanceError);
-          toast({
-            title: "Enhancement Note",
-            description: "Could not extract additional information from the provided links",
-            variant: "destructive",
-          });
-        } else if (enhanceData?.success) {
-          toast({
-            title: "Profile Enhanced!",
-            description: "Your profile has been automatically updated with information from your links",
-          });
-          // Refresh the profile to show updated data
-          await fetchProfile();
-        }
-      } catch (enhanceError) {
-        console.error('Error enhancing profile:', enhanceError);
-      }
     }
 
     setLoading(false);

@@ -8,6 +8,7 @@ import { UploadResumeDialog } from "@/components/UploadResumeDialog";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { ProfileReviewDialog } from "@/components/ProfileReviewDialog";
 import { MasterAnswersDialog } from "@/components/MasterAnswersDialog";
+import { EnhancementPreviewDialog } from "@/components/EnhancementPreviewDialog";
 import { Footer } from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -79,8 +80,11 @@ export default function Profile() {
   const [showReviewDialog, setShowReviewDialog] = useState(false);
   const [showMasterAnswersDialog, setShowMasterAnswersDialog] = useState(false);
   const [showAvatarDialog, setShowAvatarDialog] = useState(false);
+  const [showEnhancementPreview, setShowEnhancementPreview] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [enhancingProfile, setEnhancingProfile] = useState(false);
+  const [enhancedData, setEnhancedData] = useState<any>(null);
+  const [applyingEnhancement, setApplyingEnhancement] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState<{
@@ -187,13 +191,14 @@ export default function Profile() {
           description: "Could not extract additional information from the provided links",
           variant: "destructive",
         });
-      } else if (enhanceData?.success) {
+      } else if (enhanceData?.success && enhanceData?.enhancedResume) {
+        // Store enhanced data and show preview dialog
+        setEnhancedData(enhanceData.enhancedResume);
+        setShowEnhancementPreview(true);
         toast({
-          title: "Profile Enhanced!",
-          description: "Your profile has been automatically updated with information from your links",
+          title: "Enhancement Ready",
+          description: "Review the changes before applying them",
         });
-        // Refresh the profile to show updated data
-        await fetchProfile();
       } else {
         toast({
           title: "No Updates Found",
@@ -210,6 +215,55 @@ export default function Profile() {
     } finally {
       setEnhancingProfile(false);
     }
+  };
+
+  const handleApproveEnhancement = async () => {
+    if (!enhancedData) return;
+
+    setApplyingEnhancement(true);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("No user found");
+
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({
+          resume_text: JSON.stringify(enhancedData),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Enhancement Applied!",
+        description: "Your profile has been successfully updated",
+      });
+
+      // Refresh the profile to show updated data
+      await fetchProfile();
+      setShowEnhancementPreview(false);
+      setEnhancedData(null);
+    } catch (error) {
+      console.error('Error applying enhancement:', error);
+      toast({
+        title: "Failed to Apply",
+        description: "Could not save the enhanced profile",
+        variant: "destructive",
+      });
+    } finally {
+      setApplyingEnhancement(false);
+    }
+  };
+
+  const handleRejectEnhancement = () => {
+    setShowEnhancementPreview(false);
+    setEnhancedData(null);
+    toast({
+      title: "Changes Rejected",
+      description: "Your profile remains unchanged",
+    });
   };
 
   const handleUploadResume = async (file: File) => {
@@ -915,6 +969,16 @@ export default function Profile() {
       <MasterAnswersDialog
         open={showMasterAnswersDialog}
         onOpenChange={setShowMasterAnswersDialog}
+      />
+
+      <EnhancementPreviewDialog
+        open={showEnhancementPreview}
+        onOpenChange={setShowEnhancementPreview}
+        currentData={parsedData}
+        enhancedData={enhancedData}
+        onApprove={handleApproveEnhancement}
+        onReject={handleRejectEnhancement}
+        loading={applyingEnhancement}
       />
 
       {/* Avatar Upload Dialog */}
