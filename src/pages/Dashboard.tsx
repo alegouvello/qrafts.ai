@@ -488,9 +488,9 @@ const Dashboard = () => {
 
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="group relative bg-card p-6 rounded-3xl border border-border/40 hover:border-border transition-all hover:shadow-lg">
+          <div className="group relative bg-card p-6 rounded-3xl border border-border/40 hover:border-border transition-all hover:shadow-lg animate-fade-in" style={{ animationDelay: '0ms' }}>
             <div className="flex items-start justify-between mb-4">
-              <div className="p-3 rounded-2xl bg-primary/5">
+              <div className="p-3 rounded-2xl bg-primary/5 transition-transform group-hover:scale-110">
                 <Briefcase className="h-5 w-5 text-primary" />
               </div>
             </div>
@@ -500,9 +500,9 @@ const Dashboard = () => {
             </div>
           </div>
           
-          <div className="group relative bg-card p-6 rounded-3xl border border-border/40 hover:border-border transition-all hover:shadow-lg">
+          <div className="group relative bg-card p-6 rounded-3xl border border-border/40 hover:border-border transition-all hover:shadow-lg animate-fade-in" style={{ animationDelay: '100ms' }}>
             <div className="flex items-start justify-between mb-4">
-              <div className="p-3 rounded-2xl bg-warning/5">
+              <div className="p-3 rounded-2xl bg-warning/5 transition-transform group-hover:scale-110">
                 <Clock className="h-5 w-5 text-warning" />
               </div>
             </div>
@@ -512,9 +512,9 @@ const Dashboard = () => {
             </div>
           </div>
           
-          <div className="group relative bg-card p-6 rounded-3xl border border-border/40 hover:border-border transition-all hover:shadow-lg">
+          <div className="group relative bg-card p-6 rounded-3xl border border-border/40 hover:border-border transition-all hover:shadow-lg animate-fade-in" style={{ animationDelay: '200ms' }}>
             <div className="flex items-start justify-between mb-4">
-              <div className="p-3 rounded-2xl bg-primary/5">
+              <div className="p-3 rounded-2xl bg-primary/5 transition-transform group-hover:scale-110">
                 <Users className="h-5 w-5 text-primary" />
               </div>
             </div>
@@ -524,9 +524,9 @@ const Dashboard = () => {
             </div>
           </div>
           
-          <div className="group relative bg-card p-6 rounded-3xl border border-border/40 hover:border-border transition-all hover:shadow-lg">
+          <div className="group relative bg-card p-6 rounded-3xl border border-border/40 hover:border-border transition-all hover:shadow-lg animate-fade-in" style={{ animationDelay: '300ms' }}>
             <div className="flex items-start justify-between mb-4">
-              <div className="p-3 rounded-2xl bg-success/5">
+              <div className="p-3 rounded-2xl bg-success/5 transition-transform group-hover:scale-110">
                 <TrendingUp className="h-5 w-5 text-success" />
               </div>
             </div>
@@ -565,8 +565,8 @@ const Dashboard = () => {
           </div>
         ) : (
           <div className="space-y-10">
-            {Object.entries(groupedApplications).map(([company, companyApps]) => (
-              <div key={company} className="space-y-4">
+            {Object.entries(groupedApplications).map(([company, companyApps], groupIndex) => (
+              <div key={company} className="space-y-4 animate-fade-in" style={{ animationDelay: `${groupIndex * 100}ms` }}>
                 <div className="flex items-center gap-3">
                   <Link to={`/company/${encodeURIComponent(company)}`}>
                     <h2 className="text-xl font-semibold hover:text-primary transition-colors cursor-pointer">
@@ -578,8 +578,10 @@ const Dashboard = () => {
                   </span>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {companyApps.map((application) => (
-                    <ApplicationCard key={application.id} application={application} onDelete={handleDeleteApplication} />
+                  {companyApps.map((application, index) => (
+                    <div key={application.id} className="animate-fade-in" style={{ animationDelay: `${(groupIndex * 100) + (index * 50)}ms` }}>
+                      <ApplicationCard application={application} onDelete={handleDeleteApplication} />
+                    </div>
                   ))}
                 </div>
               </div>

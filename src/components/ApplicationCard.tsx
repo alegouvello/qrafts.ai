@@ -61,12 +61,12 @@ export const ApplicationCard = ({ application, onDelete }: ApplicationCardProps)
   };
 
   return (
-    <Card className="group relative overflow-hidden border-border/40 bg-card hover:border-border hover:shadow-md transition-all duration-300">
+    <Card className="group relative overflow-hidden border-border/40 bg-card hover:border-border hover:shadow-md hover:-translate-y-1 transition-all duration-300">
       <div className="p-5">
         {/* Company Logo */}
         <div className="mb-4">
           {!logoError ? (
-            <div className="w-14 h-14 rounded-2xl overflow-hidden bg-muted/20 flex items-center justify-center border border-border/30">
+            <div className="w-14 h-14 rounded-2xl overflow-hidden bg-muted/20 flex items-center justify-center border border-border/30 transition-transform group-hover:scale-105">
               <img 
                 src={getCompanyLogo(application.company)}
                 alt={application.company}
@@ -75,7 +75,7 @@ export const ApplicationCard = ({ application, onDelete }: ApplicationCardProps)
               />
             </div>
           ) : (
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center border border-border/30">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center border border-border/30 transition-transform group-hover:scale-105">
               <span className="text-xl font-bold text-primary">
                 {application.company.charAt(0).toUpperCase()}
               </span>
