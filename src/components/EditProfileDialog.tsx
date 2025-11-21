@@ -34,6 +34,7 @@ export function EditProfileDialog({ open, onOpenChange, onSaved }: EditProfileDi
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [websiteUrl, setWebsiteUrl] = useState("");
   const [location, setLocation] = useState("");
   const [summary, setSummary] = useState("");
   const [skills, setSkills] = useState<string[]>([]);
@@ -63,6 +64,7 @@ export function EditProfileDialog({ open, onOpenChange, onSaved }: EditProfileDi
       setEmail(data.email || "");
       setPhone(data.phone || "");
       setLinkedinUrl(data.linkedin_url || "");
+      setWebsiteUrl(data.website_url || "");
       setLocation(data.location || "");
       
       if (data.resume_text) {
@@ -92,6 +94,7 @@ export function EditProfileDialog({ open, onOpenChange, onSaved }: EditProfileDi
       email,
       phone,
       linkedin_url: linkedinUrl,
+      website_url: websiteUrl,
       location,
       summary,
       skills,
@@ -107,6 +110,7 @@ export function EditProfileDialog({ open, onOpenChange, onSaved }: EditProfileDi
         email,
         phone,
         linkedin_url: linkedinUrl,
+        website_url: websiteUrl,
         location,
         resume_text: JSON.stringify(resumeData),
       }, {
@@ -231,6 +235,16 @@ export function EditProfileDialog({ open, onOpenChange, onSaved }: EditProfileDi
                 value={linkedinUrl}
                 onChange={(e) => setLinkedinUrl(e.target.value)}
                 placeholder="https://linkedin.com/in/johndoe"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="website">Website URL</Label>
+              <Input
+                id="website"
+                value={websiteUrl}
+                onChange={(e) => setWebsiteUrl(e.target.value)}
+                placeholder="https://yourwebsite.com"
               />
             </div>
           </div>

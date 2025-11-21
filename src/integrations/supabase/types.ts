@@ -338,6 +338,7 @@ export type Database = {
           resume_text: string | null
           updated_at: string
           user_id: string
+          website_url: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -351,6 +352,7 @@ export type Database = {
           resume_text?: string | null
           updated_at?: string
           user_id: string
+          website_url?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -364,6 +366,7 @@ export type Database = {
           resume_text?: string | null
           updated_at?: string
           user_id?: string
+          website_url?: string | null
         }
         Relationships: []
       }
