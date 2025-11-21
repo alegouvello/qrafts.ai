@@ -156,20 +156,22 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden px-3 py-4 sm:p-4">
+    <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       {/* Background decoration */}
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/10 via-background to-background pointer-events-none" />
       <div className="fixed top-1/4 -right-32 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
       <div className="fixed bottom-1/4 -left-32 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
       
-      <Card className="relative w-full max-w-[95vw] sm:max-w-md p-5 sm:p-8 md:p-10 border-border/40 bg-card/80 backdrop-blur-xl shadow-2xl my-auto">
-        <div className="text-center mb-5 sm:mb-8 md:mb-10 space-y-2 sm:space-y-3 md:space-y-4">
-          <div className="inline-block px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium mb-2 sm:mb-4">
-            Welcome Back
+      {/* Main content - centered */}
+      <div className="flex-1 flex items-center justify-center px-3 py-4 sm:p-4">
+        <Card className="relative w-full max-w-[95vw] sm:max-w-md p-5 sm:p-8 md:p-10 border-border/40 bg-card/80 backdrop-blur-xl shadow-2xl">
+          <div className="text-center mb-5 sm:mb-8 md:mb-10 space-y-2 sm:space-y-3 md:space-y-4">
+            <div className="inline-block px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium mb-2 sm:mb-4">
+              Welcome Back
+            </div>
+            <img src={qraftLogo} alt="QRAFTS" className="h-14 sm:h-16 md:h-20 mx-auto dark:invert" />
+            <p className="text-xs sm:text-sm md:text-base text-muted-foreground">Your journey to success starts here</p>
           </div>
-          <img src={qraftLogo} alt="QRAFTS" className="h-14 sm:h-16 md:h-20 mx-auto dark:invert" />
-          <p className="text-xs sm:text-sm md:text-base text-muted-foreground">Your journey to success starts here</p>
-        </div>
 
         <Tabs defaultValue="signin" className="w-full">
           <TabsList className="grid w-full grid-cols-2 bg-muted/50 p-1 rounded-full text-sm">
@@ -350,8 +352,10 @@ const Auth = () => {
           </TabsContent>
         </Tabs>
       </Card>
+      </div>
       
-      <div className="hidden sm:block">
+      {/* Footer */}
+      <div className="hidden sm:block relative z-10">
         <Footer />
       </div>
     </div>
