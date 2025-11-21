@@ -195,15 +195,15 @@ export function EnhancementPreviewDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader>
+      <DialogContent className="max-w-5xl h-[90vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
             Review Profile Enhancements
           </DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 pr-4">
+        <ScrollArea className="flex-1 pr-4 min-h-0">
           <div className="space-y-6 py-4">
             <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-6">
               <p className="text-sm text-foreground/80">
@@ -234,7 +234,7 @@ export function EnhancementPreviewDialog({
           </div>
         </ScrollArea>
 
-        <DialogFooter className="flex gap-3">
+        <DialogFooter className="flex gap-3 flex-shrink-0 pt-4 border-t">
           <Button
             variant="outline"
             onClick={onReject}
