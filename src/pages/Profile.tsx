@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Mail, Phone, MapPin, Linkedin, Briefcase, GraduationCap, Award, ArrowLeft, Upload, Edit, Sparkles, BookOpen, Trophy, BookMarked, Lightbulb, Globe, Heart, Settings, Camera, Image as ImageIcon } from "lucide-react";
 import { UploadResumeDialog } from "@/components/UploadResumeDialog";
@@ -81,6 +82,7 @@ export default function Profile() {
   const [showMasterAnswersDialog, setShowMasterAnswersDialog] = useState(false);
   const [showAvatarDialog, setShowAvatarDialog] = useState(false);
   const [showEnhancementPreview, setShowEnhancementPreview] = useState(false);
+  const [showTargetRoleDialog, setShowTargetRoleDialog] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [enhancingProfile, setEnhancingProfile] = useState(false);
   const [enhancedData, setEnhancedData] = useState<any>(null);
@@ -160,7 +162,7 @@ export default function Profile() {
     await fetchProfile();
   };
 
-  const handleManualEnhancement = async () => {
+  const handleManualEnhancement = async (targetRole?: string) => {
     if (!profile?.linkedin_url && !profile?.website_url) {
       toast({
         title: "No URLs Found",
@@ -173,14 +175,17 @@ export default function Profile() {
     setEnhancingProfile(true);
     toast({
       title: "Enhancing Profile",
-      description: "Extracting information from your links...",
+      description: targetRole 
+        ? `Tailoring profile for ${targetRole} role...` 
+        : "Extracting information from your links...",
     });
 
     try {
       const { data: enhanceData, error: enhanceError } = await supabase.functions.invoke('enhance-profile', {
         body: { 
           linkedinUrl: profile.linkedin_url || null, 
-          websiteUrl: profile.website_url || null 
+          websiteUrl: profile.website_url || null,
+          targetRole: targetRole || null
         }
       });
 
@@ -436,7 +441,7 @@ export default function Profile() {
                 <span className="sm:hidden">Review</span>
               </Button>
               <Button
-                onClick={handleManualEnhancement}
+                onClick={() => setShowTargetRoleDialog(true)}
                 disabled={enhancingProfile}
                 variant="outline"
                 size="sm"
@@ -989,6 +994,52 @@ export default function Profile() {
         onReject={handleRejectEnhancement}
         loading={applyingEnhancement}
       />
+
+      {/* Target Role Dialog */}
+      <Dialog open={showTargetRoleDialog} onOpenChange={setShowTargetRoleDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Enhance Profile for Target Role</DialogTitle>
+            <DialogDescription>
+              Specify a target role to tailor your profile enhancement. For example: "Partner at Consulting Firm", "Senior Software Engineer", or "VP of Product". Leave empty for general enhancement.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget);
+            const targetRole = formData.get('targetRole') as string;
+            setShowTargetRoleDialog(false);
+            handleManualEnhancement(targetRole || undefined);
+          }}>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label htmlFor="targetRole" className="text-sm font-medium">
+                  Target Role
+                </label>
+                <Input
+                  id="targetRole"
+                  name="targetRole"
+                  type="text"
+                  placeholder="e.g., Partner at Consulting Firm"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowTargetRoleDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" className="gap-2">
+                <Sparkles className="h-4 w-4" />
+                Enhance Profile
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Avatar Upload Dialog */}
       <Dialog open={showAvatarDialog} onOpenChange={setShowAvatarDialog}>

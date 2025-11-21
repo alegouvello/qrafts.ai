@@ -28,7 +28,7 @@ serve(async (req) => {
       throw new Error('Invalid user token');
     }
 
-    const { linkedinUrl, websiteUrl } = await req.json();
+    const { linkedinUrl, websiteUrl, targetRole } = await req.json();
     
     if (!linkedinUrl && !websiteUrl) {
       return new Response(
@@ -38,6 +38,9 @@ serve(async (req) => {
     }
 
     console.log('Fetching profile data for user:', user.id);
+    if (targetRole) {
+      console.log('Target role specified:', targetRole);
+    }
     
     // Get current profile
     const { data: profile, error: profileError } = await supabase
@@ -138,7 +141,7 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    const systemPrompt = `You are a professional resume enhancement AI. Your task is to INTELLIGENTLY MERGE new information from scraped web content with an existing resume WITHOUT DUPLICATING any content.
+    const systemPrompt = `You are a professional resume enhancement AI. Your task is to INTELLIGENTLY MERGE new information from scraped web content with an existing resume WITHOUT DUPLICATING any content${targetRole ? ` AND OPTIMIZE IT FOR: ${targetRole}` : ''}.
 
 Current Resume Data:
 ${JSON.stringify(currentResume, null, 2)}
@@ -146,7 +149,16 @@ ${JSON.stringify(currentResume, null, 2)}
 Scraped Content:
 ${scrapedContent.map(s => `\n--- ${s.source} ---\n${s.content}`).join('\n')}
 
-CRITICAL MERGING RULES - READ CAREFULLY:
+${targetRole ? `TARGET ROLE: ${targetRole}
+
+ROLE-SPECIFIC OPTIMIZATION:
+- Prioritize and emphasize experiences, skills, and achievements most relevant to "${targetRole}"
+- Reorder sections to highlight the most pertinent qualifications first
+- Enhance descriptions to align with typical requirements for "${targetRole}"
+- Use industry-specific terminology relevant to this role
+- Emphasize leadership, strategy, client relations, or technical skills as appropriate for the role
+
+` : ''}CRITICAL MERGING RULES - READ CAREFULLY:
 
 1. **IDENTIFY WHAT EXISTS**: First, carefully read through the current resume to understand what information is ALREADY THERE
 2. **EXTRACT NEW ONLY**: From the scraped content, extract ONLY information that is NOT already in the current resume
@@ -211,7 +223,10 @@ Return ONLY valid JSON matching this exact structure:
         model: 'google/gemini-2.5-pro',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: 'Carefully read the current resume data first. Then extract ONLY new information from the scraped content that is not already present. Merge intelligently without duplicating any existing content. Remember: each fact should appear only once in the final output.' }
+          { role: 'user', content: targetRole 
+            ? `Carefully read the current resume data first. Then extract ONLY new information from the scraped content that is not already present. Merge intelligently without duplicating any existing content. MOST IMPORTANTLY: Optimize and tailor the enhanced profile for the "${targetRole}" role - emphasize relevant experience, reorder content to highlight pertinent skills first, and use appropriate industry terminology. Remember: each fact should appear only once in the final output.`
+            : 'Carefully read the current resume data first. Then extract ONLY new information from the scraped content that is not already present. Merge intelligently without duplicating any existing content. Remember: each fact should appear only once in the final output.' 
+          }
         ],
       }),
     });
