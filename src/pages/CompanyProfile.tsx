@@ -273,257 +273,314 @@ const CompanyProfile = () => {
   const decodedCompany = decodeURIComponent(companyName || "");
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur-md">
+      <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link to="/dashboard">
-                <Button variant="ghost" size="icon" className="rounded-full">
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
-              </Link>
-              <Link to="/dashboard" className="transition-all duration-300 hover:scale-105">
-                <img src={qraftLogo} alt="Qraft" className="h-20" />
-              </Link>
-            </div>
+          <div className="flex items-center gap-4">
+            <Link to="/dashboard">
+              <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/5">
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            </Link>
+            <Link to="/dashboard" className="transition-all duration-300 hover:scale-105">
+              <img src={qraftLogo} alt="Qraft" className="h-20" />
+            </Link>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 space-y-6">
-        {/* Company Header */}
-        <div className="flex items-center gap-4">
-          {!logoError ? (
-            <div className="w-20 h-20 rounded-xl overflow-hidden bg-muted/30 flex items-center justify-center border border-border/50 shrink-0">
-              <img 
-                src={getCompanyLogo(decodedCompany)}
-                alt={decodedCompany}
-                className="w-full h-full object-contain p-3"
-                onError={() => setLogoError(true)}
-              />
-            </div>
-          ) : (
-            <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center border border-border/50 shrink-0">
-              <span className="text-3xl font-bold text-primary">
-                {decodedCompany.charAt(0).toUpperCase()}
-              </span>
-            </div>
-          )}
-          <div>
-            <h1 className="text-3xl font-bold">{decodedCompany}</h1>
-            <p className="text-muted-foreground">{metrics.totalApps} application{metrics.totalApps !== 1 ? 's' : ''}</p>
-          </div>
-        </div>
-
-        {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Clock className="h-5 w-5 text-primary" />
+      {/* Hero Section */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-background border-b border-border/40">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
+        <div className="container mx-auto px-4 py-16 relative">
+          <div className="flex flex-col items-center text-center space-y-6 max-w-3xl mx-auto">
+            {!logoError ? (
+              <div className="w-32 h-32 rounded-2xl overflow-hidden bg-background/80 backdrop-blur-sm flex items-center justify-center border border-border/50 shadow-2xl shadow-primary/10 transition-all duration-300 hover:scale-105 hover:shadow-primary/20">
+                <img 
+                  src={getCompanyLogo(decodedCompany)}
+                  alt={decodedCompany}
+                  className="w-full h-full object-contain p-6"
+                  onError={() => setLogoError(true)}
+                />
               </div>
-              <div className="text-sm text-muted-foreground">Avg Response</div>
-            </div>
-            <div className="text-3xl font-bold">
-              {metrics.avgResponseDays !== null ? `${metrics.avgResponseDays}` : "—"}
-              {metrics.avgResponseDays !== null && <span className="text-lg text-muted-foreground ml-1">days</span>}
-            </div>
-            {metrics.fastestResponseDays !== null && (
-              <div className="text-xs text-muted-foreground mt-1">
-                Fastest: {metrics.fastestResponseDays} days
+            ) : (
+              <div className="w-32 h-32 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-border/50 shadow-2xl shadow-primary/10 backdrop-blur-sm">
+                <span className="text-6xl font-bold text-primary">
+                  {decodedCompany.charAt(0).toUpperCase()}
+                </span>
               </div>
             )}
+            <div className="space-y-2">
+              <h1 className="text-5xl font-bold tracking-tight">{decodedCompany}</h1>
+              <p className="text-lg text-muted-foreground">
+                {metrics.totalApps} {metrics.totalApps === 1 ? 'Application' : 'Applications'} Tracked
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <main className="container mx-auto px-4 py-12 space-y-12 max-w-7xl">
+
+        {/* Key Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="group relative overflow-hidden border-border/40 bg-card/50 backdrop-blur-sm hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative p-8">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 bg-primary/10 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                  <Clock className="h-6 w-6 text-primary" />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">Avg Response</p>
+                <div className="text-4xl font-bold tracking-tight">
+                  {metrics.avgResponseDays !== null ? `${metrics.avgResponseDays}` : "—"}
+                  {metrics.avgResponseDays !== null && <span className="text-xl text-muted-foreground ml-1.5">days</span>}
+                </div>
+                {metrics.fastestResponseDays !== null && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Fastest: {metrics.fastestResponseDays} days
+                  </p>
+                )}
+              </div>
+            </div>
           </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-green-500/10 rounded-lg">
-                <TrendingUp className="h-5 w-5 text-green-500" />
+          <Card className="group relative overflow-hidden border-border/40 bg-card/50 backdrop-blur-sm hover:border-green-500/40 hover:shadow-xl hover:shadow-green-500/5 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative p-8">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 bg-green-500/10 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                  <TrendingUp className="h-6 w-6 text-green-500" />
+                </div>
               </div>
-              <div className="text-sm text-muted-foreground">Interview Rate</div>
-            </div>
-            <div className="text-3xl font-bold">{metrics.interviewRate}%</div>
-            <div className="text-xs text-muted-foreground mt-1">
-              {applications.filter(a => a.status === "interview" || a.history.some(h => h.status === "interview")).length} of {metrics.totalApps}
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">Interview Rate</p>
+                <div className="text-4xl font-bold tracking-tight">{metrics.interviewRate}%</div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {applications.filter(a => a.status === "interview" || a.history.some(h => h.status === "interview")).length} of {metrics.totalApps}
+                </p>
+              </div>
             </div>
           </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Target className="h-5 w-5 text-primary" />
+          <Card className="group relative overflow-hidden border-border/40 bg-card/50 backdrop-blur-sm hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative p-8">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 bg-primary/10 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                  <Target className="h-6 w-6 text-primary" />
+                </div>
               </div>
-              <div className="text-sm text-muted-foreground">Acceptance Rate</div>
-            </div>
-            <div className="text-3xl font-bold">{metrics.acceptanceRate}%</div>
-            <div className="text-xs text-muted-foreground mt-1">
-              {applications.filter(a => a.status === "accepted").length} accepted
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">Acceptance Rate</p>
+                <div className="text-4xl font-bold tracking-tight">{metrics.acceptanceRate}%</div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {applications.filter(a => a.status === "accepted").length} accepted
+                </p>
+              </div>
             </div>
           </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-destructive/10 rounded-lg">
-                <XCircle className="h-5 w-5 text-destructive" />
+          <Card className="group relative overflow-hidden border-border/40 bg-card/50 backdrop-blur-sm hover:border-destructive/40 hover:shadow-xl hover:shadow-destructive/5 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-destructive/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative p-8">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 bg-destructive/10 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                  <XCircle className="h-6 w-6 text-destructive" />
+                </div>
               </div>
-              <div className="text-sm text-muted-foreground">Rejection Rate</div>
-            </div>
-            <div className="text-3xl font-bold">{metrics.rejectionRate}%</div>
-            <div className="text-xs text-muted-foreground mt-1">
-              {applications.filter(a => a.status === "rejected").length} rejected
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">Rejection Rate</p>
+                <div className="text-4xl font-bold tracking-tight">{metrics.rejectionRate}%</div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {applications.filter(a => a.status === "rejected").length} rejected
+                </p>
+              </div>
             </div>
           </Card>
         </div>
 
         {/* Company Notes */}
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold flex items-center gap-2">
-              <Edit className="h-5 w-5 text-primary" />
-              Company Notes
-            </h2>
-            {!editingNotes ? (
-              <Button
-                onClick={() => setEditingNotes(true)}
-                variant="outline"
-                size="sm"
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
-            ) : (
-              <div className="flex gap-2">
+        <Card className="border-border/40 bg-card/50 backdrop-blur-sm">
+          <div className="p-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-semibold flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Edit className="h-5 w-5 text-primary" />
+                </div>
+                Company Notes
+              </h2>
+              {!editingNotes ? (
                 <Button
-                  onClick={() => {
-                    setCompanyNotes(savedNotes);
-                    setEditingNotes(false);
-                  }}
+                  onClick={() => setEditingNotes(true)}
                   variant="outline"
                   size="sm"
+                  className="rounded-full"
                 >
-                  Cancel
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit
                 </Button>
-                <Button
-                  onClick={handleSaveNotes}
-                  disabled={savingNotes}
-                  size="sm"
-                >
-                  {savingNotes ? (
-                    <>Saving...</>
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4 mr-2" />
-                      Save
-                    </>
-                  )}
-                </Button>
+              ) : (
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => {
+                      setCompanyNotes(savedNotes);
+                      setEditingNotes(false);
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="rounded-full"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSaveNotes}
+                    disabled={savingNotes}
+                    size="sm"
+                    className="rounded-full"
+                  >
+                    {savingNotes ? (
+                      <>Saving...</>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4 mr-2" />
+                        Save
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+            </div>
+            {editingNotes ? (
+              <Textarea
+                value={companyNotes}
+                onChange={(e) => setCompanyNotes(e.target.value)}
+                placeholder="Add notes about this company (culture, contacts, interview insights, etc.)"
+                className="min-h-32 bg-background/50"
+              />
+            ) : (
+              <div className="text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                {companyNotes || "No notes yet. Click Edit to add notes about this company."}
               </div>
             )}
           </div>
-          {editingNotes ? (
-            <Textarea
-              value={companyNotes}
-              onChange={(e) => setCompanyNotes(e.target.value)}
-              placeholder="Add notes about this company (culture, contacts, interview insights, etc.)"
-              className="min-h-32"
-            />
-          ) : (
-            <div className="text-sm text-muted-foreground whitespace-pre-wrap">
-              {companyNotes || "No notes yet. Click Edit to add notes about this company."}
-            </div>
-          )}
         </Card>
 
         {/* Application History */}
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-primary" />
-            Application History
-          </h2>
-          <div className="space-y-4">
-            {applications.map((app) => {
-              const StatusIcon = statusConfig[app.status as keyof typeof statusConfig]?.icon || AlertCircle;
-              const responseTime = app.history.length > 0
-                ? differenceInDays(new Date(app.history[0].changed_at), new Date(app.applied_date))
-                : null;
+        <Card className="border-border/40 bg-card/50 backdrop-blur-sm">
+          <div className="p-8">
+            <h2 className="text-2xl font-semibold mb-8 flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <BarChart3 className="h-5 w-5 text-primary" />
+              </div>
+              Application History
+            </h2>
+            <div className="space-y-4">
+              {applications.map((app) => {
+                const StatusIcon = statusConfig[app.status as keyof typeof statusConfig]?.icon || AlertCircle;
+                const responseTime = app.history.length > 0
+                  ? differenceInDays(new Date(app.history[0].changed_at), new Date(app.applied_date))
+                  : null;
 
-              return (
-                <Card key={app.id} className="p-4 hover:border-primary/30 transition-colors">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-start gap-3 mb-2">
-                        <StatusIcon className="h-5 w-5 text-primary mt-0.5" />
-                        <div className="flex-1">
-                          <h3 className="font-semibold">{app.position}</h3>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge variant={statusConfig[app.status as keyof typeof statusConfig]?.variant || "secondary"}>
-                              {statusConfig[app.status as keyof typeof statusConfig]?.label || app.status}
-                            </Badge>
-                            {responseTime !== null && (
-                              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                Responded in {responseTime} days
-                              </span>
+                return (
+                  <Card key={app.id} className="group overflow-hidden border-border/40 bg-background/50 hover:border-primary/30 hover:shadow-lg transition-all duration-300">
+                    <div className="p-6">
+                      <div className="flex items-start justify-between gap-6">
+                        <div className="flex-1 space-y-3">
+                          <div className="flex items-start gap-4">
+                            <div className="p-2.5 bg-primary/10 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                              <StatusIcon className="h-5 w-5 text-primary" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">{app.position}</h3>
+                              <div className="flex flex-wrap items-center gap-3">
+                                <Badge 
+                                  variant={statusConfig[app.status as keyof typeof statusConfig]?.variant || "secondary"}
+                                  className="rounded-full"
+                                >
+                                  {statusConfig[app.status as keyof typeof statusConfig]?.label || app.status}
+                                </Badge>
+                                {responseTime !== null && (
+                                  <span className="text-sm text-muted-foreground flex items-center gap-1.5">
+                                    <Clock className="h-3.5 w-3.5" />
+                                    Responded in {responseTime} days
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground pl-14">
+                            <span className="flex items-center gap-1.5">
+                              <Calendar className="h-4 w-4" />
+                              Applied {format(new Date(app.applied_date), "MMM d, yyyy")}
+                            </span>
+                            {app.url && (
+                              <a
+                                href={app.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1.5 hover:text-primary transition-colors"
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                                Job Posting
+                              </a>
                             )}
                           </div>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          Applied {format(new Date(app.applied_date), "MMM d, yyyy")}
-                        </span>
-                        {app.url && (
-                          <a
-                            href={app.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 hover:text-primary transition-colors"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                            Job Posting
-                          </a>
-                        )}
+                        <Link to={`/application/${app.id}`}>
+                          <Button variant="outline" size="sm" className="rounded-full hover:bg-primary hover:text-primary-foreground transition-colors">
+                            View Details
+                          </Button>
+                        </Link>
                       </div>
                     </div>
-                    <Link to={`/application/${app.id}`}>
-                      <Button variant="outline" size="sm">
-                        View Details
-                      </Button>
-                    </Link>
-                  </div>
-                </Card>
-              );
-            })}
+                  </Card>
+                );
+              })}
+            </div>
           </div>
         </Card>
 
         {/* Insights */}
         {applications.length > 0 && (
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              Insights
-            </h2>
-            <div className="space-y-3 text-sm">
-              {metrics.avgResponseDays !== null && (
-                <p className="text-muted-foreground">
-                  • {decodedCompany} typically responds within <span className="font-semibold text-foreground">{metrics.avgResponseDays} days</span> of application submission.
-                </p>
-              )}
-              {metrics.interviewRate > 0 && (
-                <p className="text-muted-foreground">
-                  • Your interview rate with {decodedCompany} is <span className="font-semibold text-foreground">{metrics.interviewRate}%</span>
-                  {metrics.interviewRate >= 30 ? ", which is excellent!" : metrics.interviewRate >= 15 ? ", which is good." : ". Consider tailoring your applications more."}
-                </p>
-              )}
-              {metrics.totalApps > 1 && (
-                <p className="text-muted-foreground">
-                  • You've applied to {metrics.totalApps} positions at {decodedCompany}. Consider diversifying to other companies as well.
-                </p>
-              )}
+          <Card className="border-border/40 bg-gradient-to-br from-primary/5 via-card/50 to-card/50 backdrop-blur-sm">
+            <div className="p-8">
+              <h2 className="text-2xl font-semibold mb-6 flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                </div>
+                Insights
+              </h2>
+              <div className="space-y-4">
+                {metrics.avgResponseDays !== null && (
+                  <p className="text-muted-foreground leading-relaxed flex gap-2">
+                    <span className="text-primary mt-0.5">•</span>
+                    <span>
+                      {decodedCompany} typically responds within <span className="font-semibold text-foreground">{metrics.avgResponseDays} days</span> of application submission.
+                    </span>
+                  </p>
+                )}
+                {metrics.interviewRate > 0 && (
+                  <p className="text-muted-foreground leading-relaxed flex gap-2">
+                    <span className="text-primary mt-0.5">•</span>
+                    <span>
+                      Your interview rate with {decodedCompany} is <span className="font-semibold text-foreground">{metrics.interviewRate}%</span>
+                      {metrics.interviewRate >= 30 ? ", which is excellent!" : metrics.interviewRate >= 15 ? ", which is good." : ". Consider tailoring your applications more."}
+                    </span>
+                  </p>
+                )}
+                {metrics.totalApps > 1 && (
+                  <p className="text-muted-foreground leading-relaxed flex gap-2">
+                    <span className="text-primary mt-0.5">•</span>
+                    <span>
+                      You've applied to {metrics.totalApps} positions at {decodedCompany}. Consider diversifying to other companies as well.
+                    </span>
+                  </p>
+                )}
+              </div>
             </div>
           </Card>
         )}
