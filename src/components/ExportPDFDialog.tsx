@@ -18,8 +18,6 @@ export function ExportPDFDialog({ open, onOpenChange, onExport, profileData, gen
   const [loadingPreview, setLoadingPreview] = useState(false);
 
   useEffect(() => {
-    let blobUrl: string | null = null;
-    
     if (open && profileData) {
       setLoadingPreview(true);
       // Generate preview with a slight delay to ensure smooth UI
@@ -30,17 +28,7 @@ export function ExportPDFDialog({ open, onOpenChange, onExport, profileData, gen
           console.log('Generated preview URL:', dataUrl ? 'Success' : 'Empty');
           
           if (dataUrl) {
-            // Convert data URL to blob URL for better browser compatibility
-            const base64Data = dataUrl.split(',')[1];
-            const byteCharacters = atob(base64Data);
-            const byteNumbers = new Array(byteCharacters.length);
-            for (let i = 0; i < byteCharacters.length; i++) {
-              byteNumbers[i] = byteCharacters.charCodeAt(i);
-            }
-            const byteArray = new Uint8Array(byteNumbers);
-            const blob = new Blob([byteArray], { type: 'application/pdf' });
-            blobUrl = URL.createObjectURL(blob);
-            setPreviewUrl(blobUrl);
+            setPreviewUrl(dataUrl);
           } else {
             setPreviewUrl('');
           }
@@ -56,13 +44,6 @@ export function ExportPDFDialog({ open, onOpenChange, onExport, profileData, gen
       setPreviewUrl('');
       setLoadingPreview(false);
     }
-    
-    // Cleanup blob URL on unmount or when dependencies change
-    return () => {
-      if (blobUrl) {
-        URL.revokeObjectURL(blobUrl);
-      }
-    };
   }, [open, selectedLayout, profileData, generatePDFPreview]);
 
   const handleExport = () => {
@@ -170,18 +151,11 @@ export function ExportPDFDialog({ open, onOpenChange, onExport, profileData, gen
                   <p className="text-sm text-muted-foreground">Generating preview...</p>
                 </div>
               ) : previewUrl ? (
-                <object
-                  data={previewUrl}
-                  type="application/pdf"
-                  className="w-full h-full"
-                  aria-label="PDF Preview"
-                >
-                  <iframe
-                    src={previewUrl}
-                    className="w-full h-full"
-                    title="PDF Preview"
-                  />
-                </object>
+                <iframe
+                  src={previewUrl}
+                  className="w-full h-full border-0"
+                  title="PDF Preview"
+                />
               ) : (
                 <div className="flex flex-col items-center justify-center h-full gap-2 p-4">
                   <p className="text-sm text-muted-foreground">
