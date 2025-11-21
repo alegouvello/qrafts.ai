@@ -35,20 +35,42 @@ serve(async (req) => {
 
     const systemPrompt = `You are a LinkedIn profile information extractor. Extract ALL relevant professional information from this LinkedIn profile screenshot.
 
-Extract and return a comprehensive summary including:
-- Current role and company
-- Professional headline/title
-- Career history (all positions with companies and dates)
-- Education background
-- Key skills and specializations
-- Notable achievements or projects mentioned
-- Publications or articles
-- Certifications
-- Languages
-- Volunteer work
-- Any other relevant professional information visible
+Format your response with clear sections and bullet points for maximum readability:
 
-Format the response as a well-organized, detailed summary that captures all the professional information visible in the screenshot. Be thorough and include dates, company names, and specific details.`;
+## CURRENT ROLE
+• [Position] at [Company]
+• [Professional headline/bio]
+
+## EXPERIENCE
+• [Position] | [Company] | [Dates]
+  - Key responsibilities or achievements
+  
+• [Position] | [Company] | [Dates]
+  - Key responsibilities or achievements
+
+## EDUCATION
+• [Degree] - [School] ([Year])
+• [Degree] - [School] ([Year])
+
+## SKILLS
+• [Skill 1], [Skill 2], [Skill 3], etc.
+
+## CERTIFICATIONS
+• [Certification] - [Issuer] ([Date])
+
+## PUBLICATIONS
+• [Title] - [Publisher] ([Date])
+
+## LANGUAGES
+• [Language] - [Proficiency level]
+
+## VOLUNTEER WORK
+• [Role] at [Organization]
+
+## OTHER NOTABLE INFO
+• Any awards, projects, or other relevant details
+
+Use this exact structure with clear section headers (##), bullet points (•), and proper spacing. Be thorough but concise. Include all visible details with dates and company names.`;
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
