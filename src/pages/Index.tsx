@@ -10,6 +10,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import { Footer } from "@/components/Footer";
 import heroWorkspace from "@/assets/hero-workspace.jpg";
 import featureOrganize from "@/assets/feature-organize.jpg";
 import featureAutomate from "@/assets/feature-automate.jpg";
@@ -327,13 +328,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="relative border-t border-border/40 mt-12 sm:mt-20">
-        <div className="container mx-auto px-4 sm:px-6 py-10 sm:py-12 text-center space-y-4">
-          <img src={qraftLogo} alt="QRAFTS" className="h-8 sm:h-10 md:h-12 mx-auto opacity-60" loading="lazy" />
-          <p className="text-sm sm:text-base text-muted-foreground">© 2025 QRAFTS. Built for ambitious job seekers.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

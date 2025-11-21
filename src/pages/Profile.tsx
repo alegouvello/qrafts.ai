@@ -8,6 +8,7 @@ import { UploadResumeDialog } from "@/components/UploadResumeDialog";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { ProfileReviewDialog } from "@/components/ProfileReviewDialog";
 import { MasterAnswersDialog } from "@/components/MasterAnswersDialog";
+import { Footer } from "@/components/Footer";
 import qraftLogo from "@/assets/qrafts-logo.png";
 
 interface ProfileData {
@@ -679,6 +680,8 @@ export default function Profile() {
         open={showMasterAnswersDialog}
         onOpenChange={setShowMasterAnswersDialog}
       />
+      
+      <Footer />
     </div>
   );
 }

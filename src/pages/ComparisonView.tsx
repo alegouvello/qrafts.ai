@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Minus, ExternalLink, Sparkles, ChevronDown, ChevronUp, Settings, Crown } from "lucide-react";
+import { Footer } from "@/components/Footer";
 import qraftLogo from "@/assets/qrafts-logo.png";
 
 interface Application {
@@ -502,6 +503,8 @@ const ComparisonView = () => {
           )}
         </div>
       </div>
+      
+      <Footer />
     </div>
   );
 };
