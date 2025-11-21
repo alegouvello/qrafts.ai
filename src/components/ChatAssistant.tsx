@@ -56,6 +56,11 @@ export const ChatAssistant = () => {
           title: "Subscription Check Failed",
           description: "Unable to verify your subscription status. Some features may be unavailable.",
           variant: "destructive",
+          action: (
+            <Button onClick={checkSubscription} size="sm" variant="outline">
+              Retry
+            </Button>
+          ),
         });
       } else if (data) {
         setSubscriptionStatus(data);
@@ -66,6 +71,11 @@ export const ChatAssistant = () => {
         title: "Connection Error",
         description: "Failed to check subscription status. Please try again later.",
         variant: "destructive",
+        action: (
+          <Button onClick={checkSubscription} size="sm" variant="outline">
+            Retry
+          </Button>
+        ),
       });
     }
   };
