@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, UserPlus } from "lucide-react";
+import { Loader2, UserPlus, Upload, Image as ImageIcon } from "lucide-react";
 
 interface AddInterviewerDialogProps {
   applicationId: string;
@@ -18,14 +18,84 @@ interface AddInterviewerDialogProps {
 export const AddInterviewerDialog = ({ applicationId, applicationCompany, onInterviewerAdded }: AddInterviewerDialogProps) => {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [extractingScreenshot, setExtractingScreenshot] = useState(false);
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
   const [company, setCompany] = useState(applicationCompany);
   const [email, setEmail] = useState("");
   const [linkedinUrl, setLinkedinUrl] = useState("");
   const [notes, setNotes] = useState("");
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (20MB limit)
+    if (file.size > 20 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please upload an image smaller than 20MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setExtractingScreenshot(true);
+    toast({
+      title: "Processing Screenshot",
+      description: "Extracting LinkedIn profile information...",
+    });
+
+    try {
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64Data = reader.result as string;
+        setUploadedImage(base64Data);
+
+        // Call edge function to extract info
+        const { data, error } = await supabase.functions.invoke('extract-linkedin-screenshot', {
+          body: { imageData: base64Data }
+        });
+
+        if (error || data?.error) {
+          throw new Error(data?.error || error.message);
+        }
+
+        if (data?.success && data?.extractedInfo) {
+          setNotes(data.extractedInfo);
+          toast({
+            title: "Success",
+            description: "LinkedIn profile information extracted successfully",
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (error: any) {
+      console.error('Error extracting screenshot:', error);
+      toast({
+        title: "Extraction Failed",
+        description: error.message || "Could not extract information from the screenshot",
+        variant: "destructive",
+      });
+    } finally {
+      setExtractingScreenshot(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,6 +166,7 @@ export const AddInterviewerDialog = ({ applicationId, applicationCompany, onInte
       setEmail("");
       setLinkedinUrl("");
       setNotes("");
+      setUploadedImage(null);
       onInterviewerAdded();
     } catch (error: any) {
       console.error("Error adding interviewer:", error);
@@ -175,6 +246,52 @@ export const AddInterviewerDialog = ({ applicationId, applicationCompany, onInte
           </div>
           <div>
             <Label htmlFor="notes">Notes/Bio</Label>
+            <div className="mb-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={extractingScreenshot}
+                className="w-full mb-2"
+              >
+                {extractingScreenshot ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Extracting...
+                  </>
+                ) : (
+                  <>
+                    <ImageIcon className="h-4 w-4 mr-2" />
+                    Upload LinkedIn Screenshot
+                  </>
+                )}
+              </Button>
+              {uploadedImage && (
+                <div className="mt-2 p-2 bg-muted rounded-md flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground flex items-center">
+                    <ImageIcon className="h-3 w-3 mr-1" />
+                    Screenshot uploaded
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setUploadedImage(null)}
+                    className="h-6 px-2"
+                  >
+                    Clear
+                  </Button>
+                </div>
+              )}
+            </div>
             <Textarea
               id="notes"
               value={notes}
@@ -183,7 +300,7 @@ export const AddInterviewerDialog = ({ applicationId, applicationCompany, onInte
               rows={4}
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Manually add information from LinkedIn, research, or prep notes
+              Upload a LinkedIn screenshot or manually add information from LinkedIn, research, or prep notes
             </p>
           </div>
           <div className="flex justify-end gap-2">
