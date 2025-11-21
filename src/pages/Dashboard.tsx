@@ -536,52 +536,52 @@ const Dashboard = () => {
         )}
 
         {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="group relative bg-card p-6 rounded-3xl border border-border/40 hover:border-border transition-all hover:shadow-lg animate-fade-in" style={{ animationDelay: '0ms' }}>
-            <div className="flex items-start justify-between mb-4">
-              <div className="p-3 rounded-2xl bg-primary/5 transition-transform group-hover:scale-110">
-                <Briefcase className="h-5 w-5 text-primary" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
+          <div className="group relative bg-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-border/40 hover:border-border transition-all hover:shadow-lg animate-fade-in" style={{ animationDelay: '0ms' }}>
+            <div className="flex items-start justify-between mb-3 sm:mb-4">
+              <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-primary/5 transition-transform group-hover:scale-110">
+                <Briefcase className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               </div>
             </div>
             <div className="space-y-1">
-              <div className="text-3xl font-bold text-foreground">{stats.total}</div>
-              <div className="text-sm text-muted-foreground">Total Applications</div>
+              <div className="text-2xl sm:text-3xl font-bold text-foreground">{stats.total}</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">Total Applications</div>
             </div>
           </div>
           
-          <div className="group relative bg-card p-6 rounded-3xl border border-border/40 hover:border-border transition-all hover:shadow-lg animate-fade-in" style={{ animationDelay: '100ms' }}>
-            <div className="flex items-start justify-between mb-4">
-              <div className="p-3 rounded-2xl bg-warning/5 transition-transform group-hover:scale-110">
-                <Clock className="h-5 w-5 text-warning" />
+          <div className="group relative bg-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-border/40 hover:border-border transition-all hover:shadow-lg animate-fade-in" style={{ animationDelay: '100ms' }}>
+            <div className="flex items-start justify-between mb-3 sm:mb-4">
+              <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-warning/5 transition-transform group-hover:scale-110">
+                <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-warning" />
               </div>
             </div>
             <div className="space-y-1">
-              <div className="text-3xl font-bold text-foreground">{stats.pending}</div>
-              <div className="text-sm text-muted-foreground">Pending Review</div>
+              <div className="text-2xl sm:text-3xl font-bold text-foreground">{stats.pending}</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">Pending Review</div>
             </div>
           </div>
           
-          <div className="group relative bg-card p-6 rounded-3xl border border-border/40 hover:border-border transition-all hover:shadow-lg animate-fade-in" style={{ animationDelay: '200ms' }}>
-            <div className="flex items-start justify-between mb-4">
-              <div className="p-3 rounded-2xl bg-primary/5 transition-transform group-hover:scale-110">
-                <Users className="h-5 w-5 text-primary" />
+          <div className="group relative bg-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-border/40 hover:border-border transition-all hover:shadow-lg animate-fade-in" style={{ animationDelay: '200ms' }}>
+            <div className="flex items-start justify-between mb-3 sm:mb-4">
+              <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-primary/5 transition-transform group-hover:scale-110">
+                <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               </div>
             </div>
             <div className="space-y-1">
-              <div className="text-3xl font-bold text-foreground">{stats.interviews}</div>
-              <div className="text-sm text-muted-foreground">Interviews</div>
+              <div className="text-2xl sm:text-3xl font-bold text-foreground">{stats.interviews}</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">Interviews</div>
             </div>
           </div>
           
-          <div className="group relative bg-card p-6 rounded-3xl border border-border/40 hover:border-border transition-all hover:shadow-lg animate-fade-in" style={{ animationDelay: '300ms' }}>
-            <div className="flex items-start justify-between mb-4">
-              <div className="p-3 rounded-2xl bg-success/5 transition-transform group-hover:scale-110">
-                <TrendingUp className="h-5 w-5 text-success" />
+          <div className="group relative bg-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-border/40 hover:border-border transition-all hover:shadow-lg animate-fade-in" style={{ animationDelay: '300ms' }}>
+            <div className="flex items-start justify-between mb-3 sm:mb-4">
+              <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-success/5 transition-transform group-hover:scale-110">
+                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-success" />
               </div>
             </div>
             <div className="space-y-1">
-              <div className="text-3xl font-bold text-foreground">{stats.responseRate}%</div>
-              <div className="text-sm text-muted-foreground">Response Rate</div>
+              <div className="text-2xl sm:text-3xl font-bold text-foreground">{stats.responseRate}%</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">Response Rate</div>
             </div>
           </div>
         </div>
