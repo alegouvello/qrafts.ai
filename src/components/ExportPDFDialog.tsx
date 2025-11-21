@@ -18,15 +18,32 @@ export function ExportPDFDialog({ open, onOpenChange, onExport, profileData, gen
   const [loadingPreview, setLoadingPreview] = useState(false);
 
   useEffect(() => {
+    let blobUrl: string | null = null;
+    
     if (open && profileData) {
       setLoadingPreview(true);
       // Generate preview with a slight delay to ensure smooth UI
       setTimeout(() => {
         try {
           console.log('Generating PDF preview with data:', profileData);
-          const url = generatePDFPreview(profileData, selectedLayout);
-          console.log('Generated preview URL:', url ? 'Success' : 'Empty');
-          setPreviewUrl(url);
+          const dataUrl = generatePDFPreview(profileData, selectedLayout);
+          console.log('Generated preview URL:', dataUrl ? 'Success' : 'Empty');
+          
+          if (dataUrl) {
+            // Convert data URL to blob URL for better browser compatibility
+            const base64Data = dataUrl.split(',')[1];
+            const byteCharacters = atob(base64Data);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+              byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: 'application/pdf' });
+            blobUrl = URL.createObjectURL(blob);
+            setPreviewUrl(blobUrl);
+          } else {
+            setPreviewUrl('');
+          }
         } catch (error) {
           console.error('Error generating PDF preview:', error);
           setPreviewUrl('');
@@ -39,6 +56,13 @@ export function ExportPDFDialog({ open, onOpenChange, onExport, profileData, gen
       setPreviewUrl('');
       setLoadingPreview(false);
     }
+    
+    // Cleanup blob URL on unmount or when dependencies change
+    return () => {
+      if (blobUrl) {
+        URL.revokeObjectURL(blobUrl);
+      }
+    };
   }, [open, selectedLayout, profileData, generatePDFPreview]);
 
   const handleExport = () => {
@@ -139,20 +163,21 @@ export function ExportPDFDialog({ open, onOpenChange, onExport, profileData, gen
           {/* Right side - PDF Preview */}
           <div className="space-y-2">
             <p className="text-sm font-medium">Preview:</p>
-            <div className="border rounded-lg overflow-hidden bg-muted/30 flex items-center justify-center" style={{ height: '500px' }}>
+            <div className="border rounded-lg overflow-hidden bg-muted/30" style={{ height: '500px' }}>
               {loadingPreview ? (
-                <div className="flex flex-col items-center gap-2">
+                <div className="flex flex-col items-center justify-center h-full gap-2">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   <p className="text-sm text-muted-foreground">Generating preview...</p>
                 </div>
               ) : previewUrl ? (
-                <iframe
+                <embed
                   src={previewUrl}
+                  type="application/pdf"
                   className="w-full h-full"
                   title="PDF Preview"
                 />
               ) : (
-                <div className="flex flex-col items-center gap-2 p-4">
+                <div className="flex flex-col items-center justify-center h-full gap-2 p-4">
                   <p className="text-sm text-muted-foreground">
                     {!profileData ? 'Please complete your profile to generate a preview' : 'Unable to generate preview'}
                   </p>
