@@ -42,11 +42,26 @@
   "landing": {
     "hero": {
       "title": "Track Your Job Applications with AI-Powered Insights",
+      "tagline": "Stay Organized. Get Better.",
+      "stayOrganized": "Stay Organized.",
+      "getBetter": "Get Better.",
       "subtitle": "Never lose track of an opportunity again. Qrafts helps you organize, track, and optimize your job search with intelligent insights.",
       "cta": "Get Started Free",
-      "demo": "Watch Demo"
+      "demo": "Watch Demo",
+      "assistant": "Your Job Application Assistant"
+    },
+    "video": {
+      "badge": "See It In Action",
+      "title": "Watch QRAFTS in Action",
+      "description": "See how QRAFTS helps organize job applications and streamline your job search"
+    },
+    "cta": {
+      "title": "Ready to Transform Your Job Search?",
+      "description": "Join thousands of professionals who landed their dream jobs with QRAFTS",
+      "button": "Start Tracking for Free"
     },
     "features": {
+      "badge": "Everything You Need",
       "title": "Everything You Need to Land Your Dream Job",
       "organize": {
         "title": "Organize Applications",

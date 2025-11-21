@@ -42,11 +42,26 @@
   "landing": {
     "hero": {
       "title": "Suivez vos candidatures avec des insights alimentés par l'IA",
+      "tagline": "Restez Organisé. Soyez Meilleur.",
+      "stayOrganized": "Restez Organisé.",
+      "getBetter": "Soyez Meilleur.",
       "subtitle": "Ne perdez plus jamais une opportunité. Qrafts vous aide à organiser, suivre et optimiser votre recherche d'emploi avec des insights intelligents.",
       "cta": "Commencer gratuitement",
-      "demo": "Voir la démo"
+      "demo": "Voir la démo",
+      "assistant": "Votre Assistant de Candidatures"
+    },
+    "video": {
+      "badge": "Voir en Action",
+      "title": "Regardez QRAFTS en Action",
+      "description": "Découvrez comment QRAFTS vous aide à organiser vos candidatures et à simplifier votre recherche d'emploi"
+    },
+    "cta": {
+      "title": "Prêt à Transformer Votre Recherche d'Emploi?",
+      "description": "Rejoignez des milliers de professionnels qui ont décroché leur emploi de rêve avec QRAFTS",
+      "button": "Commencer Gratuitement"
     },
     "features": {
+      "badge": "Tout Ce Dont Vous Avez Besoin",
       "title": "Tout ce dont vous avez besoin pour décrocher votre emploi de rêve",
       "organize": {
         "title": "Organiser les candidatures",
