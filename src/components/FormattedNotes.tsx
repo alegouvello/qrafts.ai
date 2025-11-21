@@ -9,30 +9,30 @@ export const FormattedNotes = ({ notes }: FormattedNotesProps) => {
   const sections = parseNotes(notes);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {sections.map((section, index) => (
-        <div key={index} className="space-y-2">
+        <div key={index} className="space-y-2.5">
           {section.title && (
-            <div className="flex items-center gap-2 border-b border-border/50 pb-1.5">
-              <Badge variant="outline" className="text-xs font-semibold">
+            <div className="mb-3">
+              <Badge variant="secondary" className="text-xs font-bold tracking-wide">
                 {section.title}
               </Badge>
             </div>
           )}
-          <div className="space-y-2 pl-1">
+          <div className="space-y-2.5">
             {section.items.map((item, itemIndex) => (
               <div key={itemIndex} className="text-sm text-muted-foreground">
                 {item.isMainPoint ? (
-                  <div className="space-y-1">
-                    <p className="font-medium text-foreground">{item.text}</p>
+                  <div className="space-y-1 mb-2">
+                    <p className="font-semibold text-foreground text-[15px]">{item.text}</p>
                   </div>
                 ) : item.isBullet ? (
-                  <div className="flex gap-2 items-start">
-                    <span className="text-primary mt-1">•</span>
+                  <div className="flex gap-2.5 items-start">
+                    <span className="text-primary mt-1 text-base">•</span>
                     <p className="flex-1 leading-relaxed">{item.text}</p>
                   </div>
                 ) : (
-                  <p className="leading-relaxed text-muted-foreground/80">{item.text}</p>
+                  <p className="leading-relaxed text-muted-foreground/90">{item.text}</p>
                 )}
               </div>
             ))}
