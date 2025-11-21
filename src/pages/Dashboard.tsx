@@ -195,6 +195,15 @@ const Dashboard = () => {
   };
 
   const handleAddApplication = async (data: { company?: string; position?: string; url: string }) => {
+    // Check if user has reached application limit (free users: 5 apps)
+    if (!subscriptionStatus.subscribed && applications.length >= 5) {
+      toast({
+        title: "Application Limit Reached",
+        description: "Free users can track up to 5 applications. Upgrade to Pro for unlimited tracking.",
+        variant: "destructive",
+      });
+      return;
+    }
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
@@ -347,7 +356,20 @@ const Dashboard = () => {
               <img src={qraftLogo} alt="QRAFTS" className="h-20 transition-all duration-300 hover:scale-105 hover:drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.5)]" />
             </div>
             <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto">
-              <Button onClick={() => setShowAddDialog(true)} className="flex-1 sm:flex-none rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all text-sm">
+              <Button 
+                onClick={() => {
+                  if (!subscriptionStatus.subscribed && applications.length >= 5) {
+                    toast({
+                      title: "Application Limit Reached",
+                      description: "Free users can track up to 5 applications. Upgrade to Pro for unlimited tracking.",
+                      variant: "destructive",
+                    });
+                  } else {
+                    setShowAddDialog(true);
+                  }
+                }}
+                className="flex-1 sm:flex-none rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all text-sm"
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Add
               </Button>
@@ -429,6 +451,36 @@ const Dashboard = () => {
                 <Crown className="h-4 w-4 mr-2" />
                 Start Free Trial
               </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Free tier limit warning */}
+        {!subscriptionStatus.subscribed && applications.length >= 4 && (
+          <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-warning/10 via-warning/5 to-primary/10 border border-warning/20 backdrop-blur-sm">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-full bg-warning/20 flex-shrink-0">
+                <Sparkles className="h-4 w-4 text-warning" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-warning mb-1">
+                  {applications.length >= 5 ? 'Application Limit Reached' : 'Almost at Your Limit'}
+                </h3>
+                <p className="text-xs text-muted-foreground mb-3">
+                  {applications.length >= 5 
+                    ? 'You\'ve reached the free tier limit of 5 applications. Upgrade to Pro for unlimited tracking and AI-powered features.'
+                    : `You're using ${applications.length} of 5 free applications. Upgrade to Pro for unlimited tracking and AI-powered features.`
+                  }
+                </p>
+                <Button 
+                  onClick={handleUpgrade}
+                  size="sm" 
+                  className="rounded-full"
+                >
+                  <Crown className="h-3.5 w-3.5 mr-1.5" />
+                  Upgrade to Pro
+                </Button>
+              </div>
             </div>
           </div>
         )}
