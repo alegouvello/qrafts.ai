@@ -486,7 +486,7 @@ const Dashboard = () => {
       >
         <main className="relative container mx-auto px-4 py-6 sm:py-8">
         {/* Subscription Banner */}
-        {!subscriptionStatus.subscribed && (
+        {!checkingSubscription && !loading && !subscriptionStatus.subscribed && (
           <div className="mb-6 sm:mb-8 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 border border-primary/20 backdrop-blur-sm">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex-1">
@@ -524,7 +524,7 @@ const Dashboard = () => {
         )}
 
         {/* Free tier limit warning */}
-        {!subscriptionStatus.subscribed && applications.length >= 4 && (
+        {!checkingSubscription && !loading && !subscriptionStatus.subscribed && applications.length >= 4 && (
           <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-warning/10 via-warning/5 to-primary/10 border border-warning/20 backdrop-blur-sm">
             <div className="flex items-start gap-3">
               <div className="p-2 rounded-full bg-warning/20 flex-shrink-0">
