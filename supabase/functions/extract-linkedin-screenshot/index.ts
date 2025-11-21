@@ -35,42 +35,51 @@ serve(async (req) => {
 
     const systemPrompt = `You are a LinkedIn profile information extractor. Extract ALL relevant professional information from this LinkedIn profile screenshot.
 
-Format your response with clear sections and bullet points for maximum readability:
+Format your response as clean, well-structured plain text with clear sections and spacing. Do NOT use markdown symbols like **, ##, or •. Use this format:
 
-## CURRENT ROLE
-• [Position] at [Company]
-• [Professional headline/bio]
+CURRENT ROLE
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+[Position] at [Company]
+[Professional headline/bio]
 
-## EXPERIENCE
-• [Position] | [Company] | [Dates]
-  - Key responsibilities or achievements
-  
-• [Position] | [Company] | [Dates]
-  - Key responsibilities or achievements
+EXPERIENCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+[Position] | [Company] | [Dates]
+- Key responsibilities or achievements
 
-## EDUCATION
-• [Degree] - [School] ([Year])
-• [Degree] - [School] ([Year])
+[Position] | [Company] | [Dates]
+- Key responsibilities or achievements
 
-## SKILLS
-• [Skill 1], [Skill 2], [Skill 3], etc.
+EDUCATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+[Degree] - [School] ([Year])
+[Degree] - [School] ([Year])
 
-## CERTIFICATIONS
-• [Certification] - [Issuer] ([Date])
+SKILLS
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+[Skill 1], [Skill 2], [Skill 3], etc.
 
-## PUBLICATIONS
-• [Title] - [Publisher] ([Date])
+CERTIFICATIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+[Certification] - [Issuer] ([Date])
 
-## LANGUAGES
-• [Language] - [Proficiency level]
+PUBLICATIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+[Title] - [Publisher] ([Date])
 
-## VOLUNTEER WORK
-• [Role] at [Organization]
+LANGUAGES
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+[Language] - [Proficiency level]
 
-## OTHER NOTABLE INFO
-• Any awards, projects, or other relevant details
+VOLUNTEER WORK
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+[Role] at [Organization]
 
-Use this exact structure with clear section headers (##), bullet points (•), and proper spacing. Be thorough but concise. Include all visible details with dates and company names.`;
+OTHER NOTABLE INFO
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+Any awards, projects, or other relevant details
+
+Use plain text with section headers in CAPS, underlines made with ━ characters, and simple dashes (-) for bullet points. Include blank lines between sections for readability. Be thorough and include all visible details with dates and company names.`;
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
