@@ -482,10 +482,10 @@ const Settings = () => {
 
                       <div className="space-y-3 mb-6">
                         {[
-                          "Unlimited job applications",
-                          "AI-powered role fit analysis",
-                          "Advanced analytics and insights",
-                          "Priority support"
+                          t('settings.proFeature1'),
+                          t('settings.proFeature2'),
+                          t('settings.proFeature3'),
+                          t('settings.proFeature4')
                         ].map((feature, index) => (
                           <div key={index} className="flex items-center gap-3 text-foreground">
                             <div className="h-2 w-2 rounded-full bg-gradient-to-r from-primary to-accent"></div>
@@ -500,7 +500,7 @@ const Settings = () => {
                         size="lg"
                       >
                         <CreditCard className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
-                        Manage Subscription & Billing
+                        {t('settings.manageSubscriptionBilling')}
                       </Button>
                     </div>
                   </div>
@@ -530,10 +530,10 @@ const Settings = () => {
 
                       <div className="grid sm:grid-cols-2 gap-4 mb-6">
                         {[
-                          "Unlimited job applications",
-                          "AI-powered role fit analysis",
-                          "Advanced analytics",
-                          "Priority support"
+                          t('settings.proFeature1'),
+                          t('settings.proFeature2'),
+                          t('settings.proFeature3'),
+                          t('settings.proFeature4')
                         ].map((feature, index) => (
                           <div key={index} className="flex items-center gap-3 p-3 rounded-lg bg-background/50 border border-border/50">
                             <div className="h-2 w-2 rounded-full bg-gradient-to-r from-primary to-accent"></div>
@@ -655,14 +655,14 @@ const Settings = () => {
               <div className="space-y-4">
                 <div className="p-6 rounded-xl bg-destructive/5 border border-destructive/20">
                   <p className="text-sm mb-3">
-                    <strong className="text-destructive">Warning:</strong> This action cannot be undone. This will permanently delete:
+                    <strong className="text-destructive">Warning:</strong> {t('settings.deleteWarningText')}
                   </p>
                   <ul className="space-y-2">
                     {[
-                      "All your job applications and answers",
-                      "Your profile and settings",
-                      "All timeline events and data",
-                      "Your subscription (if active)"
+                      t('settings.deleteItem1'),
+                      t('settings.deleteItem2'),
+                      t('settings.deleteItem3'),
+                      t('settings.deleteItem4')
                     ].map((item, index) => (
                       <li key={index} className="flex items-center gap-3 text-sm text-muted-foreground">
                         <div className="h-1.5 w-1.5 rounded-full bg-destructive"></div>
