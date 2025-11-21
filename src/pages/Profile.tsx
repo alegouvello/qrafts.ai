@@ -79,6 +79,7 @@ export default function Profile() {
   const [showMasterAnswersDialog, setShowMasterAnswersDialog] = useState(false);
   const [showAvatarDialog, setShowAvatarDialog] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [enhancingProfile, setEnhancingProfile] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState<{
@@ -152,6 +153,62 @@ export default function Profile() {
 
   const handleResumeUpdate = async () => {
     await fetchProfile();
+  };
+
+  const handleManualEnhancement = async () => {
+    if (!profile?.linkedin_url && !profile?.website_url) {
+      toast({
+        title: "No URLs Found",
+        description: "Please add a LinkedIn or website URL to your profile first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setEnhancingProfile(true);
+    toast({
+      title: "Enhancing Profile",
+      description: "Extracting information from your links...",
+    });
+
+    try {
+      const { data: enhanceData, error: enhanceError } = await supabase.functions.invoke('enhance-profile', {
+        body: { 
+          linkedinUrl: profile.linkedin_url || null, 
+          websiteUrl: profile.website_url || null 
+        }
+      });
+
+      if (enhanceError) {
+        console.error('Enhancement error:', enhanceError);
+        toast({
+          title: "Enhancement Failed",
+          description: "Could not extract additional information from the provided links",
+          variant: "destructive",
+        });
+      } else if (enhanceData?.success) {
+        toast({
+          title: "Profile Enhanced!",
+          description: "Your profile has been automatically updated with information from your links",
+        });
+        // Refresh the profile to show updated data
+        await fetchProfile();
+      } else {
+        toast({
+          title: "No Updates Found",
+          description: enhanceData?.message || "No additional information could be extracted",
+        });
+      }
+    } catch (enhanceError) {
+      console.error('Error enhancing profile:', enhanceError);
+      toast({
+        title: "Enhancement Error",
+        description: "An unexpected error occurred while enhancing your profile",
+        variant: "destructive",
+      });
+    } finally {
+      setEnhancingProfile(false);
+    }
   };
 
   const handleUploadResume = async (file: File) => {
@@ -313,6 +370,17 @@ export default function Profile() {
                 <Sparkles className="h-4 w-4" />
                 <span className="hidden sm:inline">AI Review</span>
                 <span className="sm:hidden">Review</span>
+              </Button>
+              <Button
+                onClick={handleManualEnhancement}
+                disabled={enhancingProfile}
+                variant="outline"
+                size="sm"
+                className="gap-2 bg-background/50 backdrop-blur-sm flex-1 sm:flex-none"
+              >
+                <Sparkles className="h-4 w-4" />
+                <span className="hidden md:inline">{enhancingProfile ? "Enhancing..." : "Enhance Profile"}</span>
+                <span className="md:hidden">{enhancingProfile ? "..." : "Enhance"}</span>
               </Button>
               <Button
                 onClick={() => setShowUploadDialog(true)}
