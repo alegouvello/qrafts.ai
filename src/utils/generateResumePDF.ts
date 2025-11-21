@@ -72,6 +72,37 @@ function generateSingleColumnPDF(data: ResumeData) {
   const contentWidth = pageWidth - (2 * margin);
   let yPos = margin;
 
+  // Helper function to extract bullet points from HTML
+  const extractBulletPoints = (html: string = ''): string[] => {
+    // First try to extract <li> items
+    const liMatches = html.match(/<li[^>]*>(.*?)<\/li>/gi);
+    if (liMatches && liMatches.length > 0) {
+      return liMatches.map(li => 
+        li.replace(/<[^>]*>/g, '')
+          .replace(/&nbsp;/g, ' ')
+          .replace(/&amp;/g, '&')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&quot;/g, '"')
+          .trim()
+      ).filter(text => text.length > 0);
+    }
+    
+    // If no <li> tags, strip HTML and split by bullets or newlines
+    const stripped = html
+      .replace(/<[^>]*>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .trim();
+    
+    // Split by bullet character or newlines
+    const points = stripped.split(/[•\n]/);
+    return points.map(p => p.trim()).filter(p => p.length > 0);
+  };
+
   // Helper function to strip HTML tags
   const stripHTML = (html: string = ''): string => {
     return html
@@ -210,10 +241,9 @@ function generateSingleColumnPDF(data: ResumeData) {
       // Description with bullet points
       if (exp.description) {
         doc.setFont('helvetica', 'normal');
-        const descText = stripHTML(exp.description);
         
-        // Split by bullet points or periods to create better readability
-        const bulletPoints = descText.split(/[•\n]/).filter(text => text.trim().length > 0);
+        // Extract bullet points from HTML properly
+        const bulletPoints = extractBulletPoints(exp.description);
         
         bulletPoints.forEach((point, idx) => {
           const cleanPoint = point.trim();
@@ -452,6 +482,37 @@ function generateTwoColumnPDF(data: ResumeData) {
   let yPos = margin;
   let sidebarY = margin;
 
+  // Helper function to extract bullet points from HTML
+  const extractBulletPoints = (html: string = ''): string[] => {
+    // First try to extract <li> items
+    const liMatches = html.match(/<li[^>]*>(.*?)<\/li>/gi);
+    if (liMatches && liMatches.length > 0) {
+      return liMatches.map(li => 
+        li.replace(/<[^>]*>/g, '')
+          .replace(/&nbsp;/g, ' ')
+          .replace(/&amp;/g, '&')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&quot;/g, '"')
+          .trim()
+      ).filter(text => text.length > 0);
+    }
+    
+    // If no <li> tags, strip HTML and split by bullets or newlines
+    const stripped = html
+      .replace(/<[^>]*>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .trim();
+    
+    // Split by bullet character or newlines
+    const points = stripped.split(/[•\n]/);
+    return points.map(p => p.trim()).filter(p => p.length > 0);
+  };
+
   // Helper function to strip HTML tags
   const stripHTML = (html: string = ''): string => {
     return html
@@ -660,8 +721,7 @@ function generateTwoColumnPDF(data: ResumeData) {
       if (exp.description) {
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(9);
-        const descText = stripHTML(exp.description);
-        const bulletPoints = descText.split(/[•\n]/).filter(text => text.trim().length > 0);
+        const bulletPoints = extractBulletPoints(exp.description);
 
         bulletPoints.forEach((point) => {
           const cleanPoint = point.trim();
