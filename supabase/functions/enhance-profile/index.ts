@@ -28,11 +28,11 @@ serve(async (req) => {
       throw new Error('Invalid user token');
     }
 
-    const { linkedinUrl, websiteUrl, targetRole } = await req.json();
+    const { linkedinUrl, websiteUrl, targetRole, manualContent } = await req.json();
     
-    if (!linkedinUrl && !websiteUrl) {
+    if (!linkedinUrl && !websiteUrl && !manualContent) {
       return new Response(
-        JSON.stringify({ error: 'No URLs provided' }),
+        JSON.stringify({ error: 'No URLs or content provided' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -63,9 +63,18 @@ serve(async (req) => {
       }
     }
 
-    // Scrape URLs using Firecrawl
+    // Handle manual content or scrape URLs using Firecrawl
     const firecrawlKey = Deno.env.get('FIRECRAWL_API_KEY');
     const scrapedContent: { source: string; content: string }[] = [];
+
+    // If manual content is provided, use it directly
+    if (manualContent) {
+      scrapedContent.push({
+        source: 'Manual Input',
+        content: manualContent
+      });
+      console.log('Using manually provided content');
+    }
 
     if (linkedinUrl && firecrawlKey) {
       try {

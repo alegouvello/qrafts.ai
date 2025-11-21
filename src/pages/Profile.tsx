@@ -10,6 +10,7 @@ import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { ProfileReviewDialog } from "@/components/ProfileReviewDialog";
 import { MasterAnswersDialog } from "@/components/MasterAnswersDialog";
 import { EnhancementPreviewDialog } from "@/components/EnhancementPreviewDialog";
+import { ManualEnhancementDialog } from "@/components/ManualEnhancementDialog";
 import { ExportPDFDialog } from "@/components/ExportPDFDialog";
 import { Footer } from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
@@ -91,6 +92,7 @@ export default function Profile() {
   const [showMasterAnswersDialog, setShowMasterAnswersDialog] = useState(false);
   const [showAvatarDialog, setShowAvatarDialog] = useState(false);
   const [showEnhancementPreview, setShowEnhancementPreview] = useState(false);
+  const [showManualEnhancementDialog, setShowManualEnhancementDialog] = useState(false);
   const [showTargetRoleDialog, setShowTargetRoleDialog] = useState(false);
   const [showExportPDFDialog, setShowExportPDFDialog] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -200,29 +202,20 @@ export default function Profile() {
     await fetchProfile();
   };
 
-  const handleManualEnhancement = async (targetRole?: string) => {
-    if (!profile?.linkedin_url && !profile?.website_url) {
-      toast({
-        title: "No URLs Found",
-        description: "Please add a LinkedIn or website URL to your profile first",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  const handleManualEnhancement = async (content: string, targetRole?: string) => {
     setEnhancingProfile(true);
+    setShowManualEnhancementDialog(false);
     toast({
       title: "Enhancing Profile",
       description: targetRole 
         ? `Tailoring profile for ${targetRole} role...` 
-        : "Extracting information from your links...",
+        : "Processing your content...",
     });
 
     try {
       const { data: enhanceData, error: enhanceError } = await supabase.functions.invoke('enhance-profile', {
         body: { 
-          linkedinUrl: profile.linkedin_url || null, 
-          websiteUrl: profile.website_url || null,
+          manualContent: content,
           targetRole: targetRole || null
         }
       });
@@ -231,11 +224,10 @@ export default function Profile() {
         console.error('Enhancement error:', enhanceError);
         toast({
           title: "Enhancement Failed",
-          description: "Could not extract additional information from the provided links",
+          description: "Could not process the provided content",
           variant: "destructive",
         });
       } else if (enhanceData?.success && enhanceData?.enhancedResume) {
-        // Store enhanced data and show preview dialog
         setEnhancedData(enhanceData.enhancedResume);
         setShowEnhancementPreview(true);
         toast({
@@ -505,7 +497,7 @@ export default function Profile() {
                 <span className="sm:hidden">Review</span>
               </Button>
               <Button
-                onClick={() => setShowTargetRoleDialog(true)}
+                onClick={() => setShowManualEnhancementDialog(true)}
                 disabled={enhancingProfile}
                 variant="outline"
                 size="sm"
@@ -1121,7 +1113,14 @@ export default function Profile() {
         onExport={handleExportPDF}
       />
 
-      {/* Target Role Dialog */}
+      <ManualEnhancementDialog
+        open={showManualEnhancementDialog}
+        onOpenChange={setShowManualEnhancementDialog}
+        onSubmit={handleManualEnhancement}
+        isLoading={enhancingProfile}
+      />
+
+      {/* Target Role Dialog - Kept for backward compatibility */}
       <Dialog open={showTargetRoleDialog} onOpenChange={setShowTargetRoleDialog}>
         <DialogContent>
           <DialogHeader>
