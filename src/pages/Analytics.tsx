@@ -285,13 +285,17 @@ const Analytics = () => {
                   </div>
                   <div className="text-sm text-muted-foreground">Fastest Company</div>
                 </div>
-                <div className="text-xl font-bold truncate">
-                  {fastestCompany ? fastestCompany.company : "—"}
-                </div>
-                {fastestCompany && (
-                  <div className="text-sm text-muted-foreground mt-1">
-                    {fastestCompany.fastestResponseDays} days
-                  </div>
+                {fastestCompany ? (
+                  <Link to={`/company/${encodeURIComponent(fastestCompany.company)}`}>
+                    <div className="text-xl font-bold truncate hover:text-primary transition-colors">
+                      {fastestCompany.company}
+                    </div>
+                    <div className="text-sm text-muted-foreground mt-1">
+                      {fastestCompany.fastestResponseDays} days
+                    </div>
+                  </Link>
+                ) : (
+                  <div className="text-xl font-bold">—</div>
                 )}
               </Card>
 
@@ -302,13 +306,17 @@ const Analytics = () => {
                   </div>
                   <div className="text-sm text-muted-foreground">Slowest Company</div>
                 </div>
-                <div className="text-xl font-bold truncate">
-                  {slowestCompany ? slowestCompany.company : "—"}
-                </div>
-                {slowestCompany && (
-                  <div className="text-sm text-muted-foreground mt-1">
-                    {slowestCompany.avgResponseDays} days avg
-                  </div>
+                {slowestCompany ? (
+                  <Link to={`/company/${encodeURIComponent(slowestCompany.company)}`}>
+                    <div className="text-xl font-bold truncate hover:text-primary transition-colors">
+                      {slowestCompany.company}
+                    </div>
+                    <div className="text-sm text-muted-foreground mt-1">
+                      {slowestCompany.avgResponseDays} days avg
+                    </div>
+                  </Link>
+                ) : (
+                  <div className="text-xl font-bold">—</div>
                 )}
               </Card>
 

@@ -156,6 +156,33 @@ export type Database = {
         }
         Relationships: []
       }
+      company_notes: {
+        Row: {
+          company_name: string
+          created_at: string
+          id: string
+          notes: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_name: string
+          created_at?: string
+          id?: string
+          notes: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_name?: string
+          created_at?: string
+          id?: string
+          notes?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       master_answers: {
         Row: {
           answer_text: string
