@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Save, X, Plus } from "lucide-react";
 import { RichTextEditor } from "@/components/RichTextEditor";
+import { convertBulletsToHTML } from "@/utils/bulletFormatter";
 
 interface EditProfileDialogProps {
   open: boolean;
@@ -78,12 +79,7 @@ export function EditProfileDialog({ open, onOpenChange, onSaved }: EditProfileDi
           // Convert plain text with bullet points to proper HTML for summary
           let processedSummary = parsed.summary || "";
           if (processedSummary && !processedSummary.includes('<')) {
-            const parts = processedSummary.split('•').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-            if (parts.length > 1) {
-              processedSummary = '<ul>' + parts.map((point: string) => `<li>${point}</li>`).join('') + '</ul>';
-            } else if (processedSummary.trim()) {
-              processedSummary = `<p>${processedSummary}</p>`;
-            }
+            processedSummary = convertBulletsToHTML(processedSummary);
           }
           setSummary(processedSummary);
           setSkills(parsed.skills || []);
@@ -91,17 +87,7 @@ export function EditProfileDialog({ open, onOpenChange, onSaved }: EditProfileDi
           // Convert plain text with bullet points to proper HTML for experience
           const processedExperience = (parsed.experience || []).map((exp: any) => {
             if (exp.description && !exp.description.includes('<')) {
-              // Plain text format - convert bullet points to HTML list
-              const parts = exp.description.split('•').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-              
-              if (parts.length > 1) {
-                // Multiple bullet points - create HTML list
-                const htmlList = '<ul>' + parts.map((point: string) => `<li>${point}</li>`).join('') + '</ul>';
-                return { ...exp, description: htmlList };
-              } else if (exp.description.trim()) {
-                // Single paragraph - wrap in <p> tag
-                return { ...exp, description: `<p>${exp.description}</p>` };
-              }
+              exp.description = convertBulletsToHTML(exp.description);
             }
             return exp;
           });
