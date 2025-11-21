@@ -187,25 +187,64 @@ CORRECT OUTPUT: "Previously at Kearney, launched Baret, a $10.6M generative-AI p
 ENHANCEMENT SECTIONS:
 Extract and merge information about:
 - Professional summary/bio (combine roles, specializations, key achievements)
-- Work experience (merge entries from same company)
+- Work experience (merge entries from same company, include location if available)
 - Education
 - Skills (add new skills not already listed)
 - Certifications
 - Projects
-- Publications
+- Publications (CRITICAL: Extract ALL metadata including URLs)
 - Awards
 - Languages
 - Volunteer work
+
+PUBLICATIONS EXTRACTION GUIDELINES (CRITICAL IMPORTANCE):
+LinkedIn publications typically appear in a "Publications" section. Pay VERY CLOSE ATTENTION to extracting complete metadata:
+
+Required Fields:
+1. **Title**: The full article/paper/publication title
+2. **Publisher**: Where it was published (e.g., "LinkedIn", "Medium", "AI Journal", "Kearney", company name, academic journal)
+3. **Date**: Publication date - extract month and year if available, or just year
+4. **URL**: The direct link to the publication (MOST IMPORTANT)
+
+Where to Find URLs in Scraped Content:
+- Markdown link syntax: [Title](https://url-here)
+- LinkedIn Pulse articles: linkedin.com/pulse/...
+- External links to Medium, company blogs, journals
+- URLs following publication titles
+- References or links section at the bottom
+- DOI links for academic papers
+
+Common LinkedIn Publication Formats:
+- "Article Title | Publisher • Month Year [link]"
+- "[Title](url) - Publisher, Month Year"
+- "Title (Publisher) - Date - url"
+- "Title\nPublisher\nDate\nurl" (multi-line format)
+
+Examples of Good Extraction:
+✅ "Widening AI Value Gap: Lessons from 2025 | LinkedIn • 2025"
+   → {"title": "Widening AI Value Gap: Lessons from 2025", "publisher": "LinkedIn", "date": "2025", "url": "https://linkedin.com/pulse/..."}
+
+✅ "[How This Non-Developer Built an App](https://medium.com/...) - AI Journal, 2025"
+   → {"title": "How This Non-Developer Built an App", "publisher": "AI Journal", "date": "2025", "url": "https://medium.com/..."}
+
+CRITICAL RULES FOR PUBLICATIONS:
+- If you find a publication title, search the ENTIRE scraped content for its corresponding URL
+- Look for patterns like: title followed by publisher, date, and link
+- Check for markdown links containing the title
+- If no URL is found after thorough search, use empty string ""
+- NEVER invent or fabricate URLs
+- Extract publisher name from context (company name, platform name, journal name)
+- If only year is available for date, that's acceptable
 
 Return ONLY valid JSON matching this exact structure:
 {
   "summary": "string",
   "skills": ["string"],
-  "experience": [{"company": "string", "position": "string", "start_date": "string", "end_date": "string", "description": "string"}],
+  "experience": [{"company": "string", "position": "string", "start_date": "string", "end_date": "string", "location": "string (optional)", "description": "string"}],
   "education": [{"institution": "string", "degree": "string", "field": "string", "start_date": "string", "end_date": "string"}],
   "certifications": [{"name": "string", "issuer": "string", "date": "string"}],
   "projects": [{"name": "string", "description": "string", "url": "string"}],
-  "publications": [{"title": "string", "publisher": "string", "date": "string"}],
+  "publications": [{"title": "string", "publisher": "string", "date": "string", "url": "string (extract if found, use empty string if not)"}],
   "awards": [{"title": "string", "issuer": "string", "date": "string"}],
   "languages": [{"language": "string", "proficiency": "string"}],
   "volunteer": [{"organization": "string", "role": "string", "start_date": "string", "end_date": "string"}]
@@ -224,8 +263,8 @@ Return ONLY valid JSON matching this exact structure:
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: targetRole 
-            ? `Carefully read the current resume data first. Then extract ONLY new information from the scraped content that is not already present. Merge intelligently without duplicating any existing content. MOST IMPORTANTLY: Optimize and tailor the enhanced profile for the "${targetRole}" role - emphasize relevant experience, reorder content to highlight pertinent skills first, and use appropriate industry terminology. Remember: each fact should appear only once in the final output.`
-            : 'Carefully read the current resume data first. Then extract ONLY new information from the scraped content that is not already present. Merge intelligently without duplicating any existing content. Remember: each fact should appear only once in the final output.' 
+            ? `Carefully read the current resume data first. Then extract ONLY new information from the scraped content that is not already present. Pay SPECIAL ATTENTION to publications - extract the title, publisher, date, AND most importantly the URL for each publication. Search thoroughly through the scraped content for publication links. Merge intelligently without duplicating any existing content. MOST IMPORTANTLY: Optimize and tailor the enhanced profile for the "${targetRole}" role - emphasize relevant experience, reorder content to highlight pertinent skills first, and use appropriate industry terminology. Remember: each fact should appear only once in the final output.`
+            : 'Carefully read the current resume data first. Then extract ONLY new information from the scraped content that is not already present. Pay SPECIAL ATTENTION to publications - extract the title, publisher, date, AND most importantly the URL for each publication. Search thoroughly through the scraped content for publication links in markdown format [title](url) or as plain URLs. Merge intelligently without duplicating any existing content. Remember: each fact should appear only once in the final output.' 
           }
         ],
       }),
