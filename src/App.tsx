@@ -12,6 +12,7 @@ import Calendar from "./pages/Calendar";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import ComparisonView from "./pages/ComparisonView";
+import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/comparison" element={<ComparisonView />} />
+          <Route path="/analytics" element={<Analytics />} />
           <Route path="/application/:id" element={<ApplicationDetail />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
