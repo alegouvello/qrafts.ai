@@ -176,12 +176,23 @@ export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: In
                   <h4 className="font-bold text-base text-foreground">Key Talking Points</h4>
                 </div>
                 <ul className="space-y-4">
-                  {prep.talkingPoints.map((point: string, idx: number) => (
-                    <li key={idx} className="flex gap-3 items-start group">
-                      <div className="mt-1.5 h-2 w-2 rounded-full bg-primary flex-shrink-0 group-hover:scale-125 transition-transform" />
-                      <p className="text-base leading-relaxed text-foreground/90">{point}</p>
-                    </li>
-                  ))}
+                  {prep.talkingPoints.map((point: string, idx: number) => {
+                    const parts = point.split(':');
+                    const hasLabel = parts.length > 1 && parts[0].length < 50;
+                    return (
+                      <li key={idx} className="flex gap-3 items-start group">
+                        <div className="mt-1.5 h-2 w-2 rounded-full bg-primary flex-shrink-0 group-hover:scale-125 transition-transform" />
+                        <p className="text-base leading-relaxed text-foreground/90">
+                          {hasLabel ? (
+                            <>
+                              <span className="font-bold text-foreground">{parts[0]}:</span>
+                              {parts.slice(1).join(':')}
+                            </>
+                          ) : point}
+                        </p>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             )}
@@ -193,12 +204,23 @@ export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: In
                   <h4 className="font-bold text-base text-foreground">Common Ground</h4>
                 </div>
                 <ul className="space-y-4">
-                  {prep.commonGround.map((point: string, idx: number) => (
-                    <li key={idx} className="flex gap-3 items-start group">
-                      <div className="mt-1.5 h-2 w-2 rounded-full bg-accent flex-shrink-0 group-hover:scale-125 transition-transform" />
-                      <p className="text-base leading-relaxed text-foreground/90">{point}</p>
-                    </li>
-                  ))}
+                  {prep.commonGround.map((point: string, idx: number) => {
+                    const parts = point.split(':');
+                    const hasLabel = parts.length > 1 && parts[0].length < 50;
+                    return (
+                      <li key={idx} className="flex gap-3 items-start group">
+                        <div className="mt-1.5 h-2 w-2 rounded-full bg-accent flex-shrink-0 group-hover:scale-125 transition-transform" />
+                        <p className="text-base leading-relaxed text-foreground/90">
+                          {hasLabel ? (
+                            <>
+                              <span className="font-bold text-foreground">{parts[0]}:</span>
+                              {parts.slice(1).join(':')}
+                            </>
+                          ) : point}
+                        </p>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             )}
@@ -227,12 +249,23 @@ export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: In
                   <h4 className="font-bold text-base text-foreground">Areas to Emphasize</h4>
                 </div>
                 <ul className="space-y-4">
-                  {prep.areasToEmphasize.map((area: string, idx: number) => (
-                    <li key={idx} className="flex gap-3 items-start group">
-                      <div className="mt-1.5 h-2 w-2 rounded-full bg-success flex-shrink-0 group-hover:scale-125 transition-transform" />
-                      <p className="text-base leading-relaxed text-foreground/90">{area}</p>
-                    </li>
-                  ))}
+                  {prep.areasToEmphasize.map((area: string, idx: number) => {
+                    const parts = area.split(':');
+                    const hasLabel = parts.length > 1 && parts[0].length < 50;
+                    return (
+                      <li key={idx} className="flex gap-3 items-start group">
+                        <div className="mt-1.5 h-2 w-2 rounded-full bg-success flex-shrink-0 group-hover:scale-125 transition-transform" />
+                        <p className="text-base leading-relaxed text-foreground/90">
+                          {hasLabel ? (
+                            <>
+                              <span className="font-bold text-foreground">{parts[0]}:</span>
+                              {parts.slice(1).join(':')}
+                            </>
+                          ) : area}
+                        </p>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             )}
@@ -244,12 +277,23 @@ export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: In
                   <h4 className="font-bold text-base text-foreground">Potential Concerns</h4>
                 </div>
                 <ul className="space-y-4">
-                  {prep.potentialConcerns.map((concern: string, idx: number) => (
-                    <li key={idx} className="flex gap-3 items-start group">
-                      <div className="mt-1.5 h-2 w-2 rounded-full bg-warning flex-shrink-0 group-hover:scale-125 transition-transform" />
-                      <p className="text-base leading-relaxed text-foreground/90">{concern}</p>
-                    </li>
-                  ))}
+                  {prep.potentialConcerns.map((concern: string, idx: number) => {
+                    const parts = concern.split(':');
+                    const hasLabel = parts.length > 1 && parts[0].length < 50;
+                    return (
+                      <li key={idx} className="flex gap-3 items-start group">
+                        <div className="mt-1.5 h-2 w-2 rounded-full bg-warning flex-shrink-0 group-hover:scale-125 transition-transform" />
+                        <p className="text-base leading-relaxed text-foreground/90">
+                          {hasLabel ? (
+                            <>
+                              <span className="font-bold text-foreground">{parts[0]}:</span>
+                              {parts.slice(1).join(':')}
+                            </>
+                          ) : concern}
+                        </p>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             )}
