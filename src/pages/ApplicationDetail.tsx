@@ -12,6 +12,7 @@ import { BrowseTemplatesDialog } from "@/components/BrowseTemplatesDialog";
 import { AddTimelineEventDialog } from "@/components/AddTimelineEventDialog";
 import { TimelineView } from "@/components/TimelineView";
 import { RoleFitAnalysis } from "@/components/RoleFitAnalysis";
+import { StatusHistoryTimeline } from "@/components/StatusHistoryTimeline";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
@@ -97,6 +98,7 @@ const ApplicationDetail = () => {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [savedAnswers, setSavedAnswers] = useState<Record<string, string>>({});
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
+  const [statusHistory, setStatusHistory] = useState<{ id: string; status: string; changed_at: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [suggesting, setSuggesting] = useState<Record<string, boolean>>({});
@@ -140,6 +142,7 @@ const ApplicationDetail = () => {
       fetchUserProfile();
       fetchApplicationData();
       fetchTimelineEvents();
+      fetchStatusHistory();
     }
   }, [id]);
 
@@ -369,6 +372,20 @@ const ApplicationDetail = () => {
       console.error("Error fetching timeline events:", error);
     } else {
       setTimelineEvents(data || []);
+    }
+  };
+
+  const fetchStatusHistory = async () => {
+    const { data, error } = await supabase
+      .from("application_status_history")
+      .select("id, status, changed_at")
+      .eq("application_id", id)
+      .order("changed_at", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching status history:", error);
+    } else {
+      setStatusHistory(data || []);
     }
   };
 
@@ -831,6 +848,9 @@ const ApplicationDetail = () => {
   };
 
   const handleStatusChange = async (newStatus: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || !id) return;
+
     const { error } = await supabase
       .from("applications")
       .update({ status: newStatus })
@@ -842,13 +862,27 @@ const ApplicationDetail = () => {
         description: "Failed to update status",
         variant: "destructive",
       });
-    } else {
-      setApplication((prev) => (prev ? { ...prev, status: newStatus } : null));
-      toast({
-        title: "Status Updated",
-        description: `Application status changed to ${statusConfig[newStatus as keyof typeof statusConfig]?.label}`,
-      });
+      return;
     }
+
+    // Record status change in history
+    await supabase
+      .from("application_status_history")
+      .insert({
+        application_id: id,
+        status: newStatus,
+        user_id: user.id,
+      });
+
+    setApplication((prev) => (prev ? { ...prev, status: newStatus } : null));
+    
+    // Refresh status history
+    fetchStatusHistory();
+    
+    toast({
+      title: "Status Updated",
+      description: `Application status changed to ${statusConfig[newStatus as keyof typeof statusConfig]?.label}`,
+    });
   };
 
   const handleReextractQuestions = async () => {
@@ -1661,6 +1695,14 @@ const ApplicationDetail = () => {
                 Add Event
               </Button>
             </div>
+
+          {/* Status History Timeline */}
+          {application && statusHistory.length > 0 && (
+            <StatusHistoryTimeline 
+              history={statusHistory}
+              appliedDate={application.applied_date}
+            />
+          )}
 
           <TimelineView
             events={timelineEvents}
