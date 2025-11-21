@@ -122,6 +122,8 @@ export type Database = {
           applied_date: string
           company: string
           created_at: string
+          fit_analysis: Json | null
+          fit_analyzed_at: string | null
           id: string
           position: string
           role_summary: Json | null
@@ -134,6 +136,8 @@ export type Database = {
           applied_date?: string
           company: string
           created_at?: string
+          fit_analysis?: Json | null
+          fit_analyzed_at?: string | null
           id?: string
           position: string
           role_summary?: Json | null
@@ -146,6 +150,8 @@ export type Database = {
           applied_date?: string
           company?: string
           created_at?: string
+          fit_analysis?: Json | null
+          fit_analyzed_at?: string | null
           id?: string
           position?: string
           role_summary?: Json | null
