@@ -52,11 +52,21 @@ export const ChatAssistant = () => {
       
       if (error) {
         console.error('Error checking subscription:', error);
+        toast({
+          title: "Subscription Check Failed",
+          description: "Unable to verify your subscription status. Some features may be unavailable.",
+          variant: "destructive",
+        });
       } else if (data) {
         setSubscriptionStatus(data);
       }
     } catch (error) {
       console.error('Error checking subscription:', error);
+      toast({
+        title: "Connection Error",
+        description: "Failed to check subscription status. Please try again later.",
+        variant: "destructive",
+      });
     }
   };
 
