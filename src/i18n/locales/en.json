@@ -74,18 +74,33 @@
     "recent": "Recent Applications",
     "addApplication": "Add Application",
     "noApplications": "No applications yet",
-    "getStarted": "Get started by adding your first job application"
+    "getStarted": "Get started by adding your first job application",
+    "refreshing": "Refreshing...",
+    "upgrade": "Upgrade to Pro",
+    "freeTrial": "14-Day Free Trial",
+    "proFeatures": "Unlock AI-powered features",
+    "viewAll": "View All"
   },
   "application": {
     "add": "Add Application",
+    "addNew": "Add New Application",
     "edit": "Edit Application",
     "delete": "Delete Application",
+    "deleteConfirm": "Delete Application?",
+    "deleteMessage": "Are you sure you want to delete this application for {{position}} at {{company}}? This will also delete all associated questions, answers, and timeline events. This action cannot be undone.",
     "company": "Company Name",
     "position": "Position",
     "url": "Job URL",
+    "jobPostingUrl": "Job Posting URL",
+    "urlPlaceholder": "https://company.com/careers/job-id",
+    "urlDescription": "We'll extract the company, position, application questions, and key details automatically",
+    "invalidUrl": "Invalid URL",
     "appliedDate": "Applied Date",
+    "answeredCount": "{{completed}}/{{total}} answered",
+    "viewDetails": "View Details",
     "status": {
       "wishlist": "Wishlist",
+      "pending": "Pending",
       "applied": "Applied",
       "interview": "Interview",
       "accepted": "Accepted",
@@ -93,6 +108,8 @@
     },
     "details": "Application Details",
     "timeline": "Timeline",
+    "timelineAdd": "Add Timeline Event",
+    "timelineDescription": "Track interviews, follow-ups, notes, and important dates",
     "notes": "Notes",
     "questions": "Questions",
     "analysis": "Role Fit Analysis",
@@ -118,11 +135,24 @@
   "calendar": {
     "title": "Calendar",
     "addEvent": "Add Event",
+    "eventType": "Event Type",
+    "eventTitle": "Title",
+    "eventDescription": "Description (optional)",
+    "eventDescriptionPlaceholder": "Add notes, details, or reminders...",
+    "eventDate": "Date & Time",
+    "eventTitlePlaceholder": "e.g., Phone interview with HR",
+    "pickDate": "Pick a date",
+    "time": "Time",
     "eventTypes": {
+      "note": "Note",
       "interview": "Interview",
       "followup": "Follow-up",
+      "follow_up": "Follow-up",
       "deadline": "Deadline",
-      "networking": "Networking"
+      "networking": "Networking",
+      "offer": "Offer",
+      "rejection": "Rejection",
+      "other": "Other"
     },
     "noEvents": "No events scheduled"
   },
@@ -161,6 +191,11 @@
     "success": "Success",
     "error": "Error",
     "warning": "Warning",
-    "info": "Info"
+    "info": "Info",
+    "applicationAdded": "Application added successfully",
+    "applicationDeleted": "Application deleted successfully",
+    "eventAdded": "Event added successfully",
+    "saved": "Saved successfully",
+    "copied": "Copied to clipboard"
   }
 }

@@ -16,6 +16,7 @@ import {
 import { Calendar, ExternalLink, MessageSquare, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 type ApplicationStatus = "pending" | "interview" | "rejected" | "accepted";
 
@@ -41,7 +42,13 @@ const statusConfig = {
 };
 
 export const ApplicationCard = ({ application, onDelete }: ApplicationCardProps) => {
-  const statusInfo = statusConfig[application.status];
+  const { t } = useTranslation();
+  const statusInfo = {
+    pending: { label: t('application.status.pending'), variant: "secondary" as const },
+    interview: { label: t('application.status.interview'), variant: "default" as const },
+    rejected: { label: t('application.status.rejected'), variant: "destructive" as const },
+    accepted: { label: t('application.status.accepted'), variant: "outline" as const },
+  }[application.status];
   const progress = application.questions > 0 
     ? (application.answersCompleted / application.questions) * 100 
     : 0;
@@ -106,7 +113,7 @@ export const ApplicationCard = ({ application, onDelete }: ApplicationCardProps)
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground flex items-center gap-1.5">
                   <MessageSquare className="h-3.5 w-3.5" />
-                  {application.answersCompleted}/{application.questions} answered
+                  {t('application.answeredCount', { completed: application.answersCompleted, total: application.questions })}
                 </span>
                 <span className="font-medium text-foreground">{Math.round(progress)}%</span>
               </div>
@@ -118,7 +125,7 @@ export const ApplicationCard = ({ application, onDelete }: ApplicationCardProps)
           <div className="flex items-center gap-2 pt-2">
             <Link to={`/application/${application.id}`} className="flex-1">
               <Button variant="default" size="sm" className="w-full rounded-full text-xs h-8">
-                View Details
+                {t('application.viewDetails')}
               </Button>
             </Link>
             <Button 
@@ -142,15 +149,15 @@ export const ApplicationCard = ({ application, onDelete }: ApplicationCardProps)
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Application?</AlertDialogTitle>
+                  <AlertDialogTitle>{t('application.deleteConfirm')}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to delete this application for {application.position} at {application.company}? This will also delete all associated questions, answers, and timeline events. This action cannot be undone.
+                    {t('application.deleteMessage', { position: application.position, company: application.company })}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                   <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                    Delete
+                    {t('common.delete')}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
