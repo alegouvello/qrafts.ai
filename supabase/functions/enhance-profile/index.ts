@@ -158,12 +158,26 @@ Extract and enhance the resume with:
 - Languages
 - Volunteer work
 
-Rules:
-1. Only add NEW information not already present
-2. Preserve all existing information
-3. Merge similar entries intelligently
-4. Format dates consistently (YYYY-MM or YYYY)
-5. Return ONLY valid JSON matching this exact structure:
+CRITICAL RULES FOR CLEANING AND ENHANCEMENT:
+1. REMOVE ALL REDUNDANCIES: If information appears multiple times in the same entry, consolidate it into a single, clear statement
+2. DEDUPLICATE CONTENT: Merge duplicate mentions of the same company, role, or achievement
+3. Only add NEW information not already present in the existing resume
+4. Preserve all existing unique information
+5. Merge similar entries intelligently by combining descriptions without repeating facts
+6. Make descriptions concise and professional - remove repetitive phrases
+7. Format dates consistently (YYYY-MM or YYYY)
+8. If the same company appears multiple times, consolidate into one entry with combined achievements
+9. Remove filler words and redundant statements like "Co-founded X. Co-founded X again."
+10. Return ONLY valid JSON matching this exact structure:
+
+EXAMPLE OF PROPER DEDUPLICATION:
+BAD (Redundant):
+"Co-founded Lucenn.ai: Provide tailored AI solutions to Fortune 500. Co-founded Lucenn, an applied-AI venture within super{set}, building enterprise AI adoption solutions."
+
+GOOD (Cleaned):
+"Co-founded Lucenn (Lucenn.ai), an applied-AI venture within super{set}, providing tailored AI solutions to Fortune 500 companies and building enterprise AI adoption solutions with active pipeline development."
+
+Return ONLY valid JSON matching this exact structure:
 {
   "summary": "string",
   "skills": ["string"],
