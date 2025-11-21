@@ -232,33 +232,33 @@ const Auth = () => {
 
             <form onSubmit={handleSignIn} className="space-y-4 sm:space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="signin-email" className="text-sm font-medium">{t('common.email')}</Label>
+                <Label htmlFor="signin-email" className="text-sm font-medium transition-colors duration-200">{t('common.email')}</Label>
                 <Input
                   id="signin-email"
                   type="email"
                   placeholder={t('auth.emailPlaceholder')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="h-11 rounded-xl border-border/60 focus:border-primary/50 transition-all"
+                  className={`h-11 rounded-xl border-border/60 transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:scale-[1.01] ${errors.email ? 'border-destructive animate-[shake_0.3s_ease-in-out]' : ''}`}
                   required
                 />
                 {errors.email && (
-                  <p className="text-xs text-destructive">{errors.email}</p>
+                  <p className="text-xs text-destructive animate-fade-in">{errors.email}</p>
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="signin-password" className="text-sm font-medium">{t('common.password')}</Label>
+                <Label htmlFor="signin-password" className="text-sm font-medium transition-colors duration-200">{t('common.password')}</Label>
                 <Input
                   id="signin-password"
                   type="password"
                   placeholder={t('auth.passwordPlaceholder')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="h-11 rounded-xl border-border/60 focus:border-primary/50 transition-all"
+                  className={`h-11 rounded-xl border-border/60 transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:scale-[1.01] ${errors.password ? 'border-destructive animate-[shake_0.3s_ease-in-out]' : ''}`}
                   required
                 />
                 {errors.password && (
-                  <p className="text-xs text-destructive">{errors.password}</p>
+                  <p className="text-xs text-destructive animate-fade-in">{errors.password}</p>
                 )}
               </div>
               <Button 
@@ -316,36 +316,36 @@ const Auth = () => {
 
             <form onSubmit={handleSignUp} className="space-y-4 sm:space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="signup-email" className="text-sm font-medium">Email</Label>
+                <Label htmlFor="signup-email" className="text-sm font-medium transition-colors duration-200">Email</Label>
                 <Input
                   id="signup-email"
                   type="email"
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="h-11 rounded-xl border-border/60 focus:border-primary/50 transition-all"
+                  className={`h-11 rounded-xl border-border/60 transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:scale-[1.01] ${errors.email ? 'border-destructive animate-[shake_0.3s_ease-in-out]' : ''}`}
                   required
                 />
                 {errors.email && (
-                  <p className="text-xs text-destructive">{errors.email}</p>
+                  <p className="text-xs text-destructive animate-fade-in">{errors.email}</p>
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="signup-password" className="text-sm font-medium">Password</Label>
+                <Label htmlFor="signup-password" className="text-sm font-medium transition-colors duration-200">Password</Label>
                 <Input
                   id="signup-password"
                   type="password"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="h-11 rounded-xl border-border/60 focus:border-primary/50 transition-all"
+                  className={`h-11 rounded-xl border-border/60 transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:scale-[1.01] ${errors.password ? 'border-destructive animate-[shake_0.3s_ease-in-out]' : ''}`}
                   required
                   minLength={8}
                 />
                 {errors.password && (
-                  <p className="text-xs text-destructive">{errors.password}</p>
+                  <p className="text-xs text-destructive animate-fade-in">{errors.password}</p>
                 )}
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground transition-opacity duration-200">
                   Password must be 8+ characters with uppercase and number
                 </p>
               </div>
