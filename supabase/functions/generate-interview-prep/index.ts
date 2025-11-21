@@ -91,15 +91,17 @@ ${userResume}
 
 Based on this information, provide comprehensive interview preparation advice in the following categories:
 
-1. KEY TALKING POINTS: 3-5 specific experiences from the candidate's background that are most relevant for this interviewer and role.
+1. KEY TALKING POINTS: 3-5 specific experiences from the candidate's background that are most relevant for this interviewer and role. Start each point with the key topic/skill in ALL CAPS followed by a colon, then the explanation.
 
-2. COMMON GROUND: 2-3 potential connection points between the candidate and interviewer (shared experiences, interests, or background).
+2. COMMON GROUND: 2-3 potential connection points between the candidate and interviewer (shared experiences, interests, or background). Start each point with the connection type in ALL CAPS followed by a colon.
 
-3. QUESTIONS TO ASK: 3-5 thoughtful questions the candidate should ask the interviewer based on their background and the role.
+3. QUESTIONS TO ASK: 3-5 thoughtful questions the candidate should ask the interviewer based on their background and the role. Write clear, direct questions.
 
-4. AREAS TO EMPHASIZE: 3-4 key skills or experiences from the candidate's background that align with what this interviewer/company likely values.
+4. AREAS TO EMPHASIZE: 3-4 key skills or experiences from the candidate's background that align with what this interviewer/company likely values. Start each point with the skill/area in ALL CAPS followed by a colon.
 
-5. POTENTIAL CONCERNS: 1-2 potential gaps or concerns that might come up, with suggested ways to address them.
+5. POTENTIAL CONCERNS: 1-2 potential gaps or concerns that might come up, with suggested ways to address them. Start each point with the concern type in ALL CAPS followed by a colon.
+
+IMPORTANT: Do NOT use HTML tags like <b> or <br>. Use plain text only with ALL CAPS for emphasis.
 
 Format your response as JSON with these exact keys: talkingPoints, commonGround, questionsToAsk, areasToEmphasize, potentialConcerns. Each should be an array of strings.`;
 
