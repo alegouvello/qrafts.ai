@@ -319,7 +319,7 @@ const Settings = () => {
               <img 
                 src={qraftLogo} 
                 alt="QRAFTS" 
-                className="h-16 transition-all duration-300 hover:scale-105" 
+                className="h-16 transition-all duration-300 hover:scale-105 dark:invert" 
               />
             </div>
             <div className="flex items-center gap-3">

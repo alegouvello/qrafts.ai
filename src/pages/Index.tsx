@@ -47,7 +47,7 @@ const Index = () => {
       <header className="relative border-b border-border/40 bg-background/80 backdrop-blur-xl sticky top-0 z-50">
         <nav className="container mx-auto px-4 sm:px-6 py-0 flex items-center justify-between" aria-label="Main navigation">
           <div className="flex items-center gap-2 sm:gap-3">
-            <img src={qraftLogo} alt="QRAFTS logo" className="h-24 sm:h-28 md:h-32" />
+            <img src={qraftLogo} alt="QRAFTS logo" className="h-24 sm:h-28 md:h-32 dark:invert" />
           </div>
           
           {/* Desktop Navigation */}
@@ -72,7 +72,7 @@ const Index = () => {
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
               <SheetHeader>
                 <SheetTitle className="flex items-center gap-2">
-                  <img src={qraftLogo} alt="QRAFTS logo" className="h-8" />
+                  <img src={qraftLogo} alt="QRAFTS logo" className="h-8 dark:invert" />
                 </SheetTitle>
               </SheetHeader>
               <div className="flex flex-col gap-4 mt-8">

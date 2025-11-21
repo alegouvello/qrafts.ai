@@ -320,7 +320,7 @@ const CompanyProfile = () => {
               </Button>
             </Link>
             <Link to="/dashboard" className="transition-all duration-300 hover:scale-105">
-              <img src={qraftLogo} alt="Qraft" className="h-20" />
+              <img src={qraftLogo} alt="Qraft" className="h-20 dark:invert" />
             </Link>
           </div>
         </div>
