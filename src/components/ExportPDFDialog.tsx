@@ -1,50 +1,16 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { FileDown, Columns2, Rows3, Loader2 } from "lucide-react";
-import { useState, useEffect } from "react";
-import jsPDF from 'jspdf';
+import { FileDown, Columns2, Rows3 } from "lucide-react";
+import { useState } from "react";
 
 interface ExportPDFDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onExport: (layout: 'single' | 'two-column') => void;
-  profileData: any;
-  generatePDFPreview: (data: any, layout: 'single' | 'two-column') => string;
 }
 
-export function ExportPDFDialog({ open, onOpenChange, onExport, profileData, generatePDFPreview }: ExportPDFDialogProps) {
+export function ExportPDFDialog({ open, onOpenChange, onExport }: ExportPDFDialogProps) {
   const [selectedLayout, setSelectedLayout] = useState<'single' | 'two-column'>('single');
-  const [previewUrl, setPreviewUrl] = useState<string>('');
-  const [loadingPreview, setLoadingPreview] = useState(false);
-
-  useEffect(() => {
-    if (open && profileData) {
-      setLoadingPreview(true);
-      // Generate preview with a slight delay to ensure smooth UI
-      setTimeout(() => {
-        try {
-          console.log('Generating PDF preview with data:', profileData);
-          const dataUrl = generatePDFPreview(profileData, selectedLayout);
-          console.log('Generated preview URL:', dataUrl ? 'Success' : 'Empty');
-          
-          if (dataUrl) {
-            setPreviewUrl(dataUrl);
-          } else {
-            setPreviewUrl('');
-          }
-        } catch (error) {
-          console.error('Error generating PDF preview:', error);
-          setPreviewUrl('');
-        } finally {
-          setLoadingPreview(false);
-        }
-      }, 100);
-    } else if (open && !profileData) {
-      console.warn('Cannot generate preview: profileData is null');
-      setPreviewUrl('');
-      setLoadingPreview(false);
-    }
-  }, [open, selectedLayout, profileData, generatePDFPreview]);
 
   const handleExport = () => {
     onExport(selectedLayout);
@@ -61,9 +27,9 @@ export function ExportPDFDialog({ open, onOpenChange, onExport, profileData, gen
           </DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 py-4">
-          {/* Left side - Layout selection */}
-          <div className="space-y-4">
+        <div className="py-4">
+          {/* Layout selection */}
+          <div className="space-y-4 max-w-xl mx-auto">
             <p className="text-sm text-muted-foreground">
               Choose a layout style for your resume PDF:
             </p>
@@ -138,41 +104,6 @@ export function ExportPDFDialog({ open, onOpenChange, onExport, profileData, gen
                   </>
                 )}
               </p>
-            </div>
-          </div>
-
-          {/* Right side - PDF Preview */}
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Preview:</p>
-            <div className="border rounded-lg overflow-hidden bg-white" style={{ height: '500px' }}>
-              {loadingPreview ? (
-                <div className="flex flex-col items-center justify-center h-full gap-2">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  <p className="text-sm text-muted-foreground">Generating preview...</p>
-                </div>
-              ) : previewUrl ? (
-                <div className="flex flex-col items-center justify-center h-full gap-4 p-8">
-                  <FileDown className="h-16 w-16 text-primary" />
-                  <p className="text-sm text-center text-muted-foreground">
-                    Preview ready! Click below to open in a new tab
-                  </p>
-                  <a
-                    href={previewUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-                  >
-                    <FileDown className="h-4 w-4" />
-                    Open Preview
-                  </a>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center h-full gap-2 p-4">
-                  <p className="text-sm text-muted-foreground">
-                    {!profileData ? 'Please complete your profile to generate a preview' : 'Unable to generate preview'}
-                  </p>
-                </div>
-              )}
             </div>
           </div>
         </div>
