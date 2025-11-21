@@ -164,14 +164,24 @@ export default function Profile() {
         try {
           const parsed = JSON.parse(data.resume_text);
           
-          // Convert plain text bullet points to HTML if needed
+          // Convert plain text bullet points to HTML if needed for summary
+          if (parsed.summary && !parsed.summary.includes('<')) {
+            const parts = parsed.summary.split('•').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+            if (parts.length > 1) {
+              parsed.summary = '<ul>' + parts.map((point: string) => `<li>${point}</li>`).join('') + '</ul>';
+            } else if (parsed.summary.trim()) {
+              parsed.summary = `<p>${parsed.summary}</p>`;
+            }
+          }
+          
+          // Convert plain text bullet points to HTML if needed for experience
           if (parsed.experience) {
             parsed.experience = parsed.experience.map((exp: any) => {
-              if (exp.description && !exp.description.startsWith('<')) {
+              if (exp.description && !exp.description.includes('<')) {
                 const parts = exp.description.split('•').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
                 if (parts.length > 1) {
                   exp.description = '<ul>' + parts.map((point: string) => `<li>${point}</li>`).join('') + '</ul>';
-                } else {
+                } else if (exp.description.trim()) {
                   exp.description = `<p>${exp.description}</p>`;
                 }
               }
@@ -657,7 +667,10 @@ export default function Profile() {
                   </div>
                   <h2 className="text-xl sm:text-2xl font-semibold">Professional Summary</h2>
                 </div>
-                <p className="text-sm sm:text-base text-foreground/80 leading-relaxed">{parsedData.summary}</p>
+                <div 
+                  className="prose prose-sm max-w-none text-foreground/80 [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:space-y-1 [&_li]:leading-relaxed [&_strong]:font-semibold [&_strong]:text-foreground [&_a]:text-primary [&_a]:underline [&_a]:hover:text-primary/80 [&_p]:leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: parsedData.summary }}
+                />
               </CardContent>
             </Card>
           )}
