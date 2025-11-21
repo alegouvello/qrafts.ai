@@ -95,6 +95,7 @@ interface Interviewer {
   company: string | null;
   email: string | null;
   linkedin_url: string | null;
+  notes: string | null;
   extracted_data: any;
   interview_prep: any;
 }
