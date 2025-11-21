@@ -187,7 +187,9 @@ function generateSingleColumnPDF(data: ResumeData) {
     addSectionHeader('PROFESSIONAL EXPERIENCE');
     
     data.experience.forEach((exp, index) => {
-      checkPageBreak(30);
+      // Calculate minimum space needed for job header (title + company + at least one bullet)
+      const minJobSpace = 30;
+      checkPageBreak(minJobSpace);
       
       // Position
       doc.setFont('helvetica', 'bold');
@@ -214,18 +216,23 @@ function generateSingleColumnPDF(data: ResumeData) {
         const bulletPoints = descText.split(/[•\n]/).filter(text => text.trim().length > 0);
         
         bulletPoints.forEach((point, idx) => {
-          checkPageBreak(8);
           const cleanPoint = point.trim();
           if (cleanPoint) {
+            // Calculate how much space this bullet point will need
+            doc.setFontSize(9.5);
+            const lines = doc.splitTextToSize(cleanPoint, contentWidth - 8);
+            const bulletHeight = (lines.length * 5) + 2; // 5mm per line + 2mm gap
+            
+            // Check if entire bullet point fits, if not start new page
+            checkPageBreak(bulletHeight);
+            
             // Add bullet
             doc.setFontSize(12);
             doc.text('•', margin + 2, yPos);
             
             // Add text
             doc.setFontSize(9.5);
-            const lines = doc.splitTextToSize(cleanPoint, contentWidth - 8);
-            lines.forEach((line: string, lineIdx: number) => {
-              if (lineIdx > 0) checkPageBreak(5);
+            lines.forEach((line: string) => {
               doc.text(line, margin + 8, yPos);
               yPos += 5;
             });
@@ -246,7 +253,9 @@ function generateSingleColumnPDF(data: ResumeData) {
     addSectionHeader('EDUCATION');
     
     data.education.forEach((edu, index) => {
-      checkPageBreak(18);
+      // Ensure we have enough space for the entire education entry
+      const minEduSpace = 18;
+      checkPageBreak(minEduSpace);
       
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(11);
@@ -311,7 +320,15 @@ function generateSingleColumnPDF(data: ResumeData) {
     addSectionHeader('PROJECTS');
     
     data.projects.forEach((project) => {
-      checkPageBreak(15);
+      // Calculate total space needed for project
+      if (project.description) {
+        doc.setFontSize(9.5);
+        const lines = doc.splitTextToSize(stripHTML(project.description), contentWidth - 8);
+        const projectHeight = 5.5 + (lines.length * 5) + 2; // title + description lines + gap
+        checkPageBreak(projectHeight);
+      } else {
+        checkPageBreak(8);
+      }
       
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10.5);
@@ -324,7 +341,6 @@ function generateSingleColumnPDF(data: ResumeData) {
         doc.setFontSize(9.5);
         const lines = doc.splitTextToSize(stripHTML(project.description), contentWidth - 8);
         lines.forEach((line: string) => {
-          checkPageBreak(5);
           doc.text(line, margin + 8, yPos);
           yPos += 5;
         });
@@ -619,7 +635,9 @@ function generateTwoColumnPDF(data: ResumeData) {
     yPos += 5;
 
     data.experience.forEach((exp, index) => {
-      checkPageBreak(25);
+      // Calculate minimum space needed for job header (title + company + at least one bullet)
+      const minJobSpace = 30;
+      checkPageBreak(minJobSpace);
 
       // Position
       doc.setFont('helvetica', 'bold');
@@ -646,15 +664,20 @@ function generateTwoColumnPDF(data: ResumeData) {
         const bulletPoints = descText.split(/[•\n]/).filter(text => text.trim().length > 0);
 
         bulletPoints.forEach((point) => {
-          checkPageBreak(7);
           const cleanPoint = point.trim();
           if (cleanPoint) {
+            // Calculate how much space this bullet point will need
+            doc.setFontSize(9);
+            const lines = doc.splitTextToSize(cleanPoint, mainWidth - 6);
+            const bulletHeight = (lines.length * 4.5) + 2; // 4.5mm per line + 2mm gap
+            
+            // Check if entire bullet point fits, if not start new page
+            checkPageBreak(bulletHeight);
+            
             doc.setFontSize(10);
             doc.text('•', mainMargin + 1, yPos);
             doc.setFontSize(9);
-            const lines = doc.splitTextToSize(cleanPoint, mainWidth - 6);
-            lines.forEach((line: string, lineIdx: number) => {
-              if (lineIdx > 0) checkPageBreak(4.5);
+            lines.forEach((line: string) => {
               doc.text(line, mainMargin + 6, yPos);
               yPos += 4.5;
             });
@@ -683,7 +706,9 @@ function generateTwoColumnPDF(data: ResumeData) {
     yPos += 5;
 
     data.education.forEach((edu, index) => {
-      checkPageBreak(15);
+      // Ensure we have enough space for the entire education entry
+      const minEduSpace = 18;
+      checkPageBreak(minEduSpace);
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10.5);
@@ -727,7 +752,15 @@ function generateTwoColumnPDF(data: ResumeData) {
     yPos += 5;
 
     data.projects.forEach((project) => {
-      checkPageBreak(12);
+      // Calculate total space needed for project
+      if (project.description) {
+        doc.setFontSize(9);
+        const lines = doc.splitTextToSize(stripHTML(project.description), mainWidth - 6);
+        const projectHeight = 4.5 + (lines.length * 4.5) + 1; // title + description lines + gap
+        checkPageBreak(projectHeight);
+      } else {
+        checkPageBreak(8);
+      }
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10);
@@ -740,7 +773,6 @@ function generateTwoColumnPDF(data: ResumeData) {
         doc.setFontSize(9);
         const lines = doc.splitTextToSize(stripHTML(project.description), mainWidth - 6);
         lines.forEach((line: string) => {
-          checkPageBreak(4.5);
           doc.text(line, mainMargin + 6, yPos);
           yPos += 4.5;
         });
