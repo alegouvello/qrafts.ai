@@ -134,8 +134,9 @@ const CompanyProfile = () => {
 
       const decodedCompany = decodeURIComponent(companyName || "");
 
-      const { data, error } = await supabase
-        .from("company_notes" as any)
+      // Use rpc or direct query to bypass type checking
+      const { data, error } = await (supabase as any)
+        .from("company_notes")
         .select("*")
         .eq("user_id", user.id)
         .eq("company_name", decodedCompany)
@@ -146,8 +147,8 @@ const CompanyProfile = () => {
       }
 
       if (data) {
-        setCompanyNotes((data as any).notes);
-        setSavedNotes((data as any).notes);
+        setCompanyNotes(data.notes || "");
+        setSavedNotes(data.notes || "");
       }
     } catch (error) {
       console.error("Error fetching company notes:", error);
@@ -163,8 +164,8 @@ const CompanyProfile = () => {
       const decodedCompany = decodeURIComponent(companyName || "");
 
       // Check if notes exist
-      const { data: existing } = await supabase
-        .from("company_notes" as any)
+      const { data: existing } = await (supabase as any)
+        .from("company_notes")
         .select("id")
         .eq("user_id", user.id)
         .eq("company_name", decodedCompany)
@@ -172,16 +173,16 @@ const CompanyProfile = () => {
 
       if (existing) {
         // Update existing notes
-        const { error } = await supabase
-          .from("company_notes" as any)
+        const { error } = await (supabase as any)
+          .from("company_notes")
           .update({ notes: companyNotes })
-          .eq("id", (existing as any).id);
+          .eq("id", existing.id);
 
         if (error) throw error;
       } else {
         // Insert new notes
-        const { error } = await supabase
-          .from("company_notes" as any)
+        const { error } = await (supabase as any)
+          .from("company_notes")
           .insert({
             user_id: user.id,
             company_name: decodedCompany,
