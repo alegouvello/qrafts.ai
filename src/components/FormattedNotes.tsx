@@ -1,16 +1,40 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { useState } from "react";
 
 interface FormattedNotesProps {
   notes: string;
 }
 
 export const FormattedNotes = ({ notes }: FormattedNotesProps) => {
-  // Parse notes into sections
+  const [isExpanded, setIsExpanded] = useState(false);
   const sections = parseNotes(notes);
 
   return (
-    <div className="space-y-5">
-      {sections.map((section, index) => (
+    <Collapsible open={isExpanded} onOpenChange={setIsExpanded} className="space-y-3">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium text-muted-foreground">Notes</span>
+        <CollapsibleTrigger asChild>
+          <Button variant="ghost" size="sm" className="h-8 px-2">
+            {isExpanded ? (
+              <>
+                <ChevronUp className="h-4 w-4 mr-1" />
+                <span className="text-xs">Collapse</span>
+              </>
+            ) : (
+              <>
+                <ChevronDown className="h-4 w-4 mr-1" />
+                <span className="text-xs">Expand</span>
+              </>
+            )}
+          </Button>
+        </CollapsibleTrigger>
+      </div>
+      
+      <CollapsibleContent className="space-y-5">
+        {sections.map((section, index) => (
         <div key={index} className="space-y-2.5">
           {section.title && (
             <div className="mb-3">
@@ -39,7 +63,8 @@ export const FormattedNotes = ({ notes }: FormattedNotesProps) => {
           </div>
         </div>
       ))}
-    </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 };
 
