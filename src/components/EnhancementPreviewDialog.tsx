@@ -86,7 +86,11 @@ export function EnhancementPreviewDialog({
         const jobTitle = item.title || item.position;
         const duration = item.duration || 
           (item.start_date ? `${item.start_date} - ${item.end_date || 'Present'}` : '');
-        return `${jobTitle} at ${item.company}${duration ? ` (${duration})` : ''}\n${item.description || ''}`;
+        return {
+          title: `${jobTitle} at ${item.company}${duration ? ` (${duration})` : ''}`,
+          description: item.description || '',
+          isHTML: item.description?.includes('<ul>') || item.description?.includes('<li>')
+        };
       }
       
       // Format education items (handle both school/institution fields)
@@ -150,13 +154,30 @@ export function EnhancementPreviewDialog({
               {currentItems.length === 0 ? (
                 <p className="text-muted-foreground italic p-2">No items</p>
               ) : (
-                currentItems.map((item, idx) => (
-                  <div key={idx} className="p-3 bg-muted/30 rounded text-xs">
-                    <pre className="whitespace-pre-wrap font-sans">
-                      {formatItem(item)}
-                    </pre>
-                  </div>
-                ))
+                currentItems.map((item, idx) => {
+                  const formatted = formatItem(item);
+                  const isComplex = typeof formatted === 'object' && formatted.title;
+                  
+                  return (
+                    <div key={idx} className="p-3 bg-muted/30 rounded text-xs">
+                      {isComplex ? (
+                        <>
+                          <div className="font-semibold mb-2">{formatted.title}</div>
+                          {formatted.isHTML ? (
+                            <div 
+                              className="prose prose-sm max-w-none [&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-2 [&_li]:my-1 [&_ul_ul]:list-circle [&_ul_ul]:ml-6"
+                              dangerouslySetInnerHTML={{ __html: formatted.description }}
+                            />
+                          ) : (
+                            <pre className="whitespace-pre-wrap font-sans">{formatted.description}</pre>
+                          )}
+                        </>
+                      ) : (
+                        <pre className="whitespace-pre-wrap font-sans">{formatted}</pre>
+                      )}
+                    </div>
+                  );
+                })
               )}
             </div>
           </div>
@@ -168,20 +189,37 @@ export function EnhancementPreviewDialog({
               {enhancedItems.length === 0 ? (
                 <p className="text-muted-foreground italic p-2">No items</p>
               ) : (
-                enhancedItems.map((item, idx) => (
-                  <div 
-                    key={idx} 
-                    className={`p-3 rounded border text-xs ${
-                      selectedSections.has(sectionKey) 
-                        ? 'bg-primary/10 border-primary/20' 
-                        : 'bg-muted/30 border-muted'
-                    }`}
-                  >
-                    <pre className="whitespace-pre-wrap font-sans">
-                      {formatItem(item)}
-                    </pre>
-                  </div>
-                ))
+                enhancedItems.map((item, idx) => {
+                  const formatted = formatItem(item);
+                  const isComplex = typeof formatted === 'object' && formatted.title;
+                  
+                  return (
+                    <div 
+                      key={idx} 
+                      className={`p-3 rounded border text-xs ${
+                        selectedSections.has(sectionKey) 
+                          ? 'bg-primary/10 border-primary/20' 
+                          : 'bg-muted/30 border-muted'
+                      }`}
+                    >
+                      {isComplex ? (
+                        <>
+                          <div className="font-semibold mb-2">{formatted.title}</div>
+                          {formatted.isHTML ? (
+                            <div 
+                              className="prose prose-sm max-w-none [&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-2 [&_li]:my-1 [&_ul_ul]:list-circle [&_ul_ul]:ml-6"
+                              dangerouslySetInnerHTML={{ __html: formatted.description }}
+                            />
+                          ) : (
+                            <pre className="whitespace-pre-wrap font-sans">{formatted.description}</pre>
+                          )}
+                        </>
+                      ) : (
+                        <pre className="whitespace-pre-wrap font-sans">{formatted}</pre>
+                      )}
+                    </div>
+                  );
+                })
               )}
             </div>
           </div>
@@ -196,6 +234,10 @@ export function EnhancementPreviewDialog({
     
     // Always show Professional Summary
     if (!hasContent && label !== "Professional Summary") return null;
+    
+    // Check if content contains HTML
+    const currentIsHTML = current?.includes('<ul>') || current?.includes('<li>') || current?.includes('<p>');
+    const enhancedIsHTML = enhanced?.includes('<ul>') || enhanced?.includes('<li>') || enhanced?.includes('<p>');
     
     return (
       <div className="mb-6">
@@ -217,9 +259,18 @@ export function EnhancementPreviewDialog({
           <div>
             <p className="text-sm text-muted-foreground mb-2">Current</p>
             <div className="text-sm p-3 bg-muted/30 rounded max-h-96 overflow-y-auto">
-              <pre className="whitespace-pre-wrap font-sans">
-                {current || <span className="text-muted-foreground italic">No content</span>}
-              </pre>
+              {current ? (
+                currentIsHTML ? (
+                  <div 
+                    className="prose prose-sm max-w-none [&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-2 [&_li]:my-1 [&_ul_ul]:list-circle [&_ul_ul]:ml-6 [&_p]:my-2"
+                    dangerouslySetInnerHTML={{ __html: current }}
+                  />
+                ) : (
+                  <pre className="whitespace-pre-wrap font-sans">{current}</pre>
+                )
+              ) : (
+                <span className="text-muted-foreground italic">No content</span>
+              )}
             </div>
           </div>
           
@@ -233,9 +284,18 @@ export function EnhancementPreviewDialog({
                   : 'bg-muted/30 border-muted'
               }`}
             >
-              <pre className="whitespace-pre-wrap font-sans">
-                {enhanced || <span className="text-muted-foreground italic">No content</span>}
-              </pre>
+              {enhanced ? (
+                enhancedIsHTML ? (
+                  <div 
+                    className="prose prose-sm max-w-none [&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-2 [&_li]:my-1 [&_ul_ul]:list-circle [&_ul_ul]:ml-6 [&_p]:my-2"
+                    dangerouslySetInnerHTML={{ __html: enhanced }}
+                  />
+                ) : (
+                  <pre className="whitespace-pre-wrap font-sans">{enhanced}</pre>
+                )
+              ) : (
+                <span className="text-muted-foreground italic">No content</span>
+              )}
             </div>
           </div>
         </div>
