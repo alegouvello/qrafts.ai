@@ -11,10 +11,6 @@ interface FormattedNotesProps {
 export const FormattedNotes = ({ notes }: FormattedNotesProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const sections = parseNotes(notes);
-  
-  // Debug: log the notes to see what we're dealing with
-  console.log('Raw notes:', notes);
-  console.log('Parsed sections:', sections);
 
   return (
     <Collapsible open={isExpanded} onOpenChange={setIsExpanded} className="space-y-3">
