@@ -227,7 +227,7 @@ const Dashboard = () => {
     }
 
     // Record initial status in history
-    await supabase
+    await (supabase as any)
       .from("application_status_history")
       .insert({
         application_id: newApp.id,

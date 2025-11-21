@@ -96,13 +96,15 @@ const Analytics = () => {
       if (appsError) throw appsError;
 
       // Fetch status history for all applications
-      const { data: history, error: historyError } = await supabase
+      const { data: history, error: historyError } = await (supabase as any)
         .from("application_status_history")
         .select("application_id, status, changed_at")
         .eq("user_id", user.id)
         .order("changed_at", { ascending: true });
 
-      if (historyError) throw historyError;
+      if (historyError) {
+        console.error("Error fetching status history:", historyError);
+      }
 
       // Combine data
       const appsWithHistory: ApplicationWithHistory[] = (apps || []).map(app => ({
