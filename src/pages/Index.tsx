@@ -20,8 +20,19 @@ import qraftLogo from "@/assets/qrafts-logo.png";
 
 
 const Index = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Get the appropriate video based on current language
+  const getVideoSource = () => {
+    switch (i18n.language) {
+      case 'fr':
+        return '/qrafts-demo-fr.mp4';
+      case 'en':
+      default:
+        return '/qrafts-demo.mp4';
+    }
+  };
   
   // Scroll animations for different sections
   const videoSection = useScrollAnimation({ threshold: 0.2 });
@@ -181,7 +192,8 @@ const Index = () => {
           <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-border/50 bg-card hover:shadow-primary/20 hover:shadow-3xl transition-shadow duration-500">
             <div className="aspect-video bg-black">
               <video
-                src="/qrafts-demo.mp4"
+                key={i18n.language}
+                src={getVideoSource()}
                 className="w-full h-full object-contain"
                 controls
                 muted
