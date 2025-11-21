@@ -156,39 +156,39 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden p-2 sm:p-4">
       {/* Background decoration */}
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/10 via-background to-background pointer-events-none" />
       <div className="fixed top-1/4 -right-32 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
       <div className="fixed bottom-1/4 -left-32 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
       
-      <Card className="relative w-full max-w-md p-10 border-border/40 bg-card/80 backdrop-blur-xl shadow-2xl">
-        <div className="text-center mb-10 space-y-4">
-          <div className="inline-block px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-4">
+      <Card className="relative w-full max-w-md p-6 sm:p-10 border-border/40 bg-card/80 backdrop-blur-xl shadow-2xl">
+        <div className="text-center mb-6 sm:mb-10 space-y-3 sm:space-y-4">
+          <div className="inline-block px-3 sm:px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium mb-2 sm:mb-4">
             Welcome Back
           </div>
-          <img src={qraftLogo} alt="QRAFTS" className="h-20 mx-auto dark:invert" />
-          <p className="text-muted-foreground">Your journey to success starts here</p>
+          <img src={qraftLogo} alt="QRAFTS" className="h-16 sm:h-20 mx-auto dark:invert" />
+          <p className="text-sm sm:text-base text-muted-foreground">Your journey to success starts here</p>
         </div>
 
         <Tabs defaultValue="signin" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-muted/50 p-1 rounded-full">
+          <TabsList className="grid w-full grid-cols-2 bg-muted/50 p-1 rounded-full text-sm">
             <TabsTrigger value="signin" className="rounded-full data-[state=active]:shadow-md">Sign In</TabsTrigger>
             <TabsTrigger value="signup" className="rounded-full data-[state=active]:shadow-md">Sign Up</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="signin" className="mt-6">
+          <TabsContent value="signin" className="mt-4 sm:mt-6">
             <Button
               type="button"
               onClick={handleGoogleSignIn}
               disabled={googleLoading}
               variant="outline"
-              className="w-full h-11 rounded-full mb-6 border-border/60"
+              className="w-full h-11 rounded-full mb-4 sm:mb-6 border-border/60 text-sm"
             >
               {googleLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
-                <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24">
+                <svg className="mr-2 h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 24 24">
                   <path
                     fill="currentColor"
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -210,7 +210,7 @@ const Auth = () => {
               Continue with Google
             </Button>
 
-            <div className="relative mb-6">
+            <div className="relative mb-4 sm:mb-6">
               <div className="absolute inset-0 flex items-center">
                 <Separator />
               </div>
@@ -219,7 +219,7 @@ const Auth = () => {
               </div>
             </div>
 
-            <form onSubmit={handleSignIn} className="space-y-5">
+            <form onSubmit={handleSignIn} className="space-y-4 sm:space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="signin-email" className="text-sm font-medium">{t('common.email')}</Label>
                 <Input
@@ -261,13 +261,13 @@ const Auth = () => {
             </form>
           </TabsContent>
 
-          <TabsContent value="signup" className="mt-6">
+          <TabsContent value="signup" className="mt-4 sm:mt-6">
             <Button
               type="button"
               onClick={handleGoogleSignIn}
               disabled={googleLoading}
               variant="outline"
-              className="w-full h-11 rounded-full mb-6 border-border/60"
+              className="w-full h-11 rounded-full mb-4 sm:mb-6 border-border/60 text-sm"
             >
               {googleLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -294,7 +294,7 @@ const Auth = () => {
               Continue with Google
             </Button>
 
-            <div className="relative mb-6">
+            <div className="relative mb-4 sm:mb-6">
               <div className="absolute inset-0 flex items-center">
                 <Separator />
               </div>
@@ -303,7 +303,7 @@ const Auth = () => {
               </div>
             </div>
 
-            <form onSubmit={handleSignUp} className="space-y-5">
+            <form onSubmit={handleSignUp} className="space-y-4 sm:space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="signup-email" className="text-sm font-medium">Email</Label>
                 <Input
