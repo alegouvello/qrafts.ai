@@ -1014,11 +1014,17 @@ function generateTwoColumnPDF(data: ResumeData, preview: boolean = false): strin
       doc.setTextColor(...TEXT_COLOR);
       
       if (typeof pub === 'string') {
-        doc.text(`• ${pub}`, mainMargin, yPos);
-        yPos += 4.5;
+        const titleLines = doc.splitTextToSize(`• ${pub}`, mainWidth - 3);
+        titleLines.forEach((line: string, index: number) => {
+          doc.text(index === 0 ? line : `  ${line.trim()}`, mainMargin, yPos);
+          yPos += 4.5;
+        });
       } else {
-        doc.text(`• ${pub.title}`, mainMargin, yPos);
-        yPos += 4.5;
+        const titleLines = doc.splitTextToSize(`• ${pub.title}`, mainWidth - 3);
+        titleLines.forEach((line: string, index: number) => {
+          doc.text(index === 0 ? line : `  ${line.trim()}`, mainMargin, yPos);
+          yPos += 4.5;
+        });
         
         if (pub.publisher || pub.date) {
           doc.setFont('helvetica', 'normal');
@@ -1052,11 +1058,17 @@ function generateTwoColumnPDF(data: ResumeData, preview: boolean = false): strin
       doc.setTextColor(...TEXT_COLOR);
       
       if (typeof cert === 'string') {
-        doc.text(`• ${cert}`, mainMargin, yPos);
-        yPos += 4.5;
+        const certLines = doc.splitTextToSize(`• ${cert}`, mainWidth - 3);
+        certLines.forEach((line: string, index: number) => {
+          doc.text(index === 0 ? line : `  ${line.trim()}`, mainMargin, yPos);
+          yPos += 4.5;
+        });
       } else {
-        doc.text(`• ${cert.name}`, mainMargin, yPos);
-        yPos += 4.5;
+        const certLines = doc.splitTextToSize(`• ${cert.name}`, mainWidth - 3);
+        certLines.forEach((line: string, index: number) => {
+          doc.text(index === 0 ? line : `  ${line.trim()}`, mainMargin, yPos);
+          yPos += 4.5;
+        });
         
         if (cert.issuer || cert.date) {
           doc.setFont('helvetica', 'normal');
@@ -1090,12 +1102,18 @@ function generateTwoColumnPDF(data: ResumeData, preview: boolean = false): strin
       doc.setTextColor(...TEXT_COLOR);
       
       if (typeof award === 'string') {
-        doc.text(`• ${award}`, mainMargin, yPos);
-        yPos += 4.5;
+        const awardLines = doc.splitTextToSize(`• ${award}`, mainWidth - 3);
+        awardLines.forEach((line: string, index: number) => {
+          doc.text(index === 0 ? line : `  ${line.trim()}`, mainMargin, yPos);
+          yPos += 4.5;
+        });
       } else {
         const awardTitle = award.title || award.name || 'Award';
-        doc.text(`• ${awardTitle}`, mainMargin, yPos);
-        yPos += 4.5;
+        const awardLines = doc.splitTextToSize(`• ${awardTitle}`, mainWidth - 3);
+        awardLines.forEach((line: string, index: number) => {
+          doc.text(index === 0 ? line : `  ${line.trim()}`, mainMargin, yPos);
+          yPos += 4.5;
+        });
         
         if (award.issuer || award.date) {
           doc.setFont('helvetica', 'normal');
@@ -1134,8 +1152,11 @@ function generateTwoColumnPDF(data: ResumeData, preview: boolean = false): strin
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10);
       doc.setTextColor(...TEXT_COLOR);
-      doc.text(`• ${vol.organization}`, mainMargin, yPos);
-      yPos += 4.5;
+      const orgLines = doc.splitTextToSize(`• ${vol.organization}`, mainWidth - 3);
+      orgLines.forEach((line: string, index: number) => {
+        doc.text(index === 0 ? line : `  ${line.trim()}`, mainMargin, yPos);
+        yPos += 4.5;
+      });
 
       if (vol.role) {
         doc.setFont('helvetica', 'italic');
