@@ -192,20 +192,23 @@ CRITICAL RULES:
 1. Extract EVERY piece of information - do not skip any sections
 2. Preserve dates, locations, and time periods exactly as written
 3. For publications, extract title, publisher/platform, date, and URL (if present in markdown links)
-4. For experience, include: company, position, location, start_date, end_date, and full description
+4. For experience, include: company, position, location, start_date, end_date, and FULL description
 5. For education, include: institution, degree, field, and dates
 6. Identify and extract: skills, certifications, projects, awards, languages, volunteer work, interests
+
+EXPERIENCE DESCRIPTION FORMATTING:
+- Convert bullet points to proper HTML format
+- Split descriptions by bullet character (•) or newline-separated points
+- Wrap multiple bullet points in <ul><li> tags
+- Preserve the exact text of each bullet point
+- Example: "• Point 1 • Point 2" becomes "<ul><li>Point 1</li><li>Point 2</li></ul>"
+- If no bullets, wrap in <p> tags
 
 PUBLICATION EXTRACTION:
 - Look for sections titled "Publications", "Articles", "Writing", "Papers"
 - Extract URLs from markdown links: [Title](URL)
 - Parse formats like "Title | Publisher • Date" or "Title - Publisher, Date"
 - Capture all metadata: title, publisher, date, url
-
-EXPERIENCE EXTRACTION:
-- Include position/title, company name, location (city/state), dates (start and end)
-- Preserve full job descriptions including achievements and responsibilities
-- Look for formats like "Position | Company | Location | Dates"
 
 Return ONLY valid JSON with this structure:
 {
@@ -224,7 +227,7 @@ Return ONLY valid JSON with this structure:
       "location": "string",
       "start_date": "string",
       "end_date": "string",
-      "description": "string"
+      "description": "string (HTML formatted with <ul><li> tags)"
     }
   ],
   "education": [
