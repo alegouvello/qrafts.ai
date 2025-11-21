@@ -682,12 +682,6 @@ export default function Profile() {
                 </div>
                 <div className="space-y-8">
                   {parsedData.experience.map((exp, index) => {
-                    // Parse bullet points from description
-                    const bulletPoints = exp.description
-                      .split(/•/)
-                      .map(point => point.trim())
-                      .filter(point => point.length > 0);
-
                     return (
                       <div key={index} className="relative pl-8 before:absolute before:left-0 before:top-2 before:bottom-0 before:w-0.5 before:bg-gradient-to-b before:from-primary before:to-transparent">
                         <div className="absolute left-0 top-1 w-2 h-2 bg-primary rounded-full -translate-x-[3px]" />
@@ -708,17 +702,10 @@ export default function Profile() {
                               </span>
                             )}
                           </div>
-                          {bulletPoints.length > 1 ? (
-                            <ul className="space-y-2 mt-3">
-                              {bulletPoints.map((point, i) => (
-                                <li key={i} className="text-foreground/80 leading-relaxed pl-4 relative before:absolute before:left-0 before:top-2 before:w-1.5 before:h-1.5 before:bg-primary/60 before:rounded-full">
-                                  {point}
-                                </li>
-                              ))}
-                            </ul>
-                          ) : (
-                            <p className="text-foreground/80 leading-relaxed mt-3">{exp.description}</p>
-                          )}
+                          <div 
+                            className="prose prose-sm max-w-none text-foreground/80 [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:space-y-1 [&_li]:leading-relaxed [&_strong]:font-semibold [&_strong]:text-foreground [&_a]:text-primary [&_a]:underline [&_a]:hover:text-primary/80"
+                            dangerouslySetInnerHTML={{ __html: exp.description }}
+                          />
                         </div>
                       </div>
                     );

@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Save, X, Plus } from "lucide-react";
+import { RichTextEditor } from "@/components/RichTextEditor";
 
 interface EditProfileDialogProps {
   open: boolean;
@@ -72,10 +73,28 @@ export function EditProfileDialog({ open, onOpenChange, onSaved }: EditProfileDi
       if (data.resume_text) {
         try {
           const parsed = JSON.parse(data.resume_text);
-          setExistingResumeData(parsed); // Store all existing data
+          setExistingResumeData(parsed);
           setSummary(parsed.summary || "");
           setSkills(parsed.skills || []);
-          setExperience(parsed.experience || []);
+          
+          // Convert old plain text bullet points to HTML if needed
+          const processedExperience = (parsed.experience || []).map((exp: any) => {
+            if (exp.description && !exp.description.includes('<')) {
+              // Plain text format - convert to HTML
+              const bulletPoints = exp.description
+                .split(/•/)
+                .map((point: string) => point.trim())
+                .filter((point: string) => point.length > 0);
+              
+              if (bulletPoints.length > 1) {
+                const htmlList = '<ul>' + bulletPoints.map((point: string) => `<li>${point}</li>`).join('') + '</ul>';
+                return { ...exp, description: htmlList };
+              }
+            }
+            return exp;
+          });
+          
+          setExperience(processedExperience);
           setEducation(parsed.education || []);
         } catch (e) {
           console.error("Error parsing resume data:", e);
@@ -355,12 +374,14 @@ export function EditProfileDialog({ open, onOpenChange, onSaved }: EditProfileDi
                     placeholder="End Date (e.g., Dec 2023)"
                   />
                 </div>
-                <Textarea
-                  value={exp.description}
-                  onChange={(e) => updateExperience(index, 'description', e.target.value)}
-                  placeholder="Job description..."
-                  rows={3}
-                />
+                <div>
+                  <Label className="text-sm text-muted-foreground mb-2">Description</Label>
+                  <RichTextEditor
+                    content={exp.description}
+                    onChange={(content) => updateExperience(index, 'description', content)}
+                    placeholder="Describe your role and achievements..."
+                  />
+                </div>
               </div>
             ))}
           </div>
