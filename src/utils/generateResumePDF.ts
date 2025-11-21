@@ -201,16 +201,19 @@ function generateSingleColumnPDF(data: ResumeData, preview: boolean = false): st
     if (summaryBullets.length > 1) {
       // Has multiple bullet points - format as list
       const firstParagraph = summaryBullets[0];
-      // First paragraph (before bullets)
+      let hasIntroParagraph = false;
+      
+      // Check if first item is an intro paragraph (no bullet label and reasonably long)
       if (firstParagraph && !firstParagraph.includes('–') && !firstParagraph.includes('-') && firstParagraph.length > 100) {
         addWrappedText(firstParagraph, 10, contentWidth, 5.5);
         yPos += 2;
+        hasIntroParagraph = true;
       }
       
       // Bullet points
       summaryBullets.forEach((bullet, idx) => {
-        // Skip first item if it was the intro paragraph
-        if (idx === 0 && firstParagraph === bullet && firstParagraph.length > 100) return;
+        // Skip first item only if it was printed as intro paragraph
+        if (idx === 0 && hasIntroParagraph) return;
         
         const cleanBullet = bullet.trim();
         if (cleanBullet) {
@@ -722,7 +725,9 @@ function generateTwoColumnPDF(data: ResumeData, preview: boolean = false): strin
     if (summaryBullets.length > 1) {
       // Has multiple bullet points - format as list
       const firstParagraph = summaryBullets[0];
-      // First paragraph (before bullets)
+      let hasIntroParagraph = false;
+      
+      // Check if first item is an intro paragraph (no bullet label and reasonably long)
       if (firstParagraph && !firstParagraph.includes('–') && !firstParagraph.includes('-') && firstParagraph.length > 100) {
         const introLines = doc.splitTextToSize(firstParagraph, mainWidth);
         introLines.forEach((line: string) => {
@@ -731,12 +736,13 @@ function generateTwoColumnPDF(data: ResumeData, preview: boolean = false): strin
           yPos += 5;
         });
         yPos += 1;
+        hasIntroParagraph = true;
       }
       
       // Bullet points
       summaryBullets.forEach((bullet, idx) => {
-        // Skip first item if it was the intro paragraph
-        if (idx === 0 && firstParagraph === bullet && firstParagraph.length > 100) return;
+        // Skip first item only if it was printed as intro paragraph
+        if (idx === 0 && hasIntroParagraph) return;
         
         const cleanBullet = bullet.trim();
         if (cleanBullet) {
