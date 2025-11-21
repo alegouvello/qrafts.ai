@@ -74,18 +74,33 @@
     "recent": "Candidatures récentes",
     "addApplication": "Ajouter une candidature",
     "noApplications": "Aucune candidature pour le moment",
-    "getStarted": "Commencez en ajoutant votre première candidature"
+    "getStarted": "Commencez en ajoutant votre première candidature",
+    "refreshing": "Actualisation...",
+    "upgrade": "Passer à Pro",
+    "freeTrial": "Essai gratuit de 14 jours",
+    "proFeatures": "Débloquez les fonctionnalités IA",
+    "viewAll": "Voir tout"
   },
   "application": {
     "add": "Ajouter une candidature",
+    "addNew": "Ajouter une nouvelle candidature",
     "edit": "Modifier la candidature",
     "delete": "Supprimer la candidature",
+    "deleteConfirm": "Supprimer la candidature?",
+    "deleteMessage": "Êtes-vous sûr de vouloir supprimer cette candidature pour {{position}} chez {{company}}? Cela supprimera également toutes les questions, réponses et événements associés. Cette action est irréversible.",
     "company": "Nom de l'entreprise",
     "position": "Poste",
     "url": "URL de l'offre",
+    "jobPostingUrl": "URL de l'offre d'emploi",
+    "urlPlaceholder": "https://entreprise.com/carrieres/poste-id",
+    "urlDescription": "Nous extrairons automatiquement l'entreprise, le poste, les questions de candidature et les détails clés",
+    "invalidUrl": "URL invalide",
     "appliedDate": "Date de candidature",
+    "answeredCount": "{{completed}}/{{total}} répondues",
+    "viewDetails": "Voir les détails",
     "status": {
       "wishlist": "Liste de souhaits",
+      "pending": "En attente",
       "applied": "Candidature envoyée",
       "interview": "Entretien",
       "accepted": "Acceptée",
@@ -93,6 +108,8 @@
     },
     "details": "Détails de la candidature",
     "timeline": "Chronologie",
+    "timelineAdd": "Ajouter un événement",
+    "timelineDescription": "Suivez les entretiens, les relances, les notes et les dates importantes",
     "notes": "Notes",
     "questions": "Questions",
     "analysis": "Analyse d'adéquation",
@@ -118,11 +135,24 @@
   "calendar": {
     "title": "Calendrier",
     "addEvent": "Ajouter un événement",
+    "eventType": "Type d'événement",
+    "eventTitle": "Titre",
+    "eventDescription": "Description (optionnelle)",
+    "eventDescriptionPlaceholder": "Ajoutez des notes, détails ou rappels...",
+    "eventDate": "Date et heure",
+    "eventTitlePlaceholder": "ex: Entretien téléphonique avec RH",
+    "pickDate": "Choisir une date",
+    "time": "Heure",
     "eventTypes": {
+      "note": "Note",
       "interview": "Entretien",
       "followup": "Relance",
+      "follow_up": "Relance",
       "deadline": "Date limite",
-      "networking": "Réseautage"
+      "networking": "Réseautage",
+      "offer": "Offre",
+      "rejection": "Refus",
+      "other": "Autre"
     },
     "noEvents": "Aucun événement prévu"
   },
@@ -161,6 +191,11 @@
     "success": "Succès",
     "error": "Erreur",
     "warning": "Avertissement",
-    "info": "Info"
+    "info": "Info",
+    "applicationAdded": "Candidature ajoutée avec succès",
+    "applicationDeleted": "Candidature supprimée avec succès",
+    "eventAdded": "Événement ajouté avec succès",
+    "saved": "Enregistré avec succès",
+    "copied": "Copié dans le presse-papiers"
   }
 }

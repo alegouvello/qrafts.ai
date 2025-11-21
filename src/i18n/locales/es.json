@@ -74,18 +74,33 @@
     "recent": "Solicitudes recientes",
     "addApplication": "Añadir solicitud",
     "noApplications": "No hay solicitudes aún",
-    "getStarted": "Comienza añadiendo tu primera solicitud de empleo"
+    "getStarted": "Comienza añadiendo tu primera solicitud de empleo",
+    "refreshing": "Actualizando...",
+    "upgrade": "Actualizar a Pro",
+    "freeTrial": "Prueba gratuita de 14 días",
+    "proFeatures": "Desbloquear funciones con IA",
+    "viewAll": "Ver todo"
   },
   "application": {
     "add": "Añadir solicitud",
+    "addNew": "Añadir nueva solicitud",
     "edit": "Editar solicitud",
     "delete": "Eliminar solicitud",
+    "deleteConfirm": "¿Eliminar solicitud?",
+    "deleteMessage": "¿Estás seguro de que deseas eliminar esta solicitud para {{position}} en {{company}}? Esto también eliminará todas las preguntas, respuestas y eventos asociados. Esta acción no se puede deshacer.",
     "company": "Nombre de la empresa",
     "position": "Puesto",
     "url": "URL de la oferta",
+    "jobPostingUrl": "URL de la oferta de trabajo",
+    "urlPlaceholder": "https://empresa.com/carreras/trabajo-id",
+    "urlDescription": "Extraeremos automáticamente la empresa, el puesto, las preguntas de la solicitud y los detalles clave",
+    "invalidUrl": "URL inválida",
     "appliedDate": "Fecha de solicitud",
+    "answeredCount": "{{completed}}/{{total}} respondidas",
+    "viewDetails": "Ver detalles",
     "status": {
       "wishlist": "Lista de deseos",
+      "pending": "Pendiente",
       "applied": "Solicitado",
       "interview": "Entrevista",
       "accepted": "Aceptada",
@@ -93,6 +108,8 @@
     },
     "details": "Detalles de la solicitud",
     "timeline": "Línea de tiempo",
+    "timelineAdd": "Añadir evento",
+    "timelineDescription": "Rastrea entrevistas, seguimientos, notas y fechas importantes",
     "notes": "Notas",
     "questions": "Preguntas",
     "analysis": "Análisis de adecuación",
@@ -118,11 +135,24 @@
   "calendar": {
     "title": "Calendario",
     "addEvent": "Añadir evento",
+    "eventType": "Tipo de evento",
+    "eventTitle": "Título",
+    "eventDescription": "Descripción (opcional)",
+    "eventDescriptionPlaceholder": "Agrega notas, detalles o recordatorios...",
+    "eventDate": "Fecha y hora",
+    "eventTitlePlaceholder": "ej: Entrevista telefónica con RRHH",
+    "pickDate": "Elegir una fecha",
+    "time": "Hora",
     "eventTypes": {
+      "note": "Nota",
       "interview": "Entrevista",
       "followup": "Seguimiento",
+      "follow_up": "Seguimiento",
       "deadline": "Fecha límite",
-      "networking": "Networking"
+      "networking": "Networking",
+      "offer": "Oferta",
+      "rejection": "Rechazo",
+      "other": "Otro"
     },
     "noEvents": "No hay eventos programados"
   },
@@ -161,6 +191,11 @@
     "success": "Éxito",
     "error": "Error",
     "warning": "Advertencia",
-    "info": "Info"
+    "info": "Info",
+    "applicationAdded": "Solicitud añadida con éxito",
+    "applicationDeleted": "Solicitud eliminada con éxito",
+    "eventAdded": "Evento añadido con éxito",
+    "saved": "Guardado con éxito",
+    "copied": "Copiado al portapapeles"
   }
 }

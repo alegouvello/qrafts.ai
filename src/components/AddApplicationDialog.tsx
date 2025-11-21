@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 const urlSchema = z.object({
   url: z.string()
@@ -43,6 +44,7 @@ export const AddApplicationDialog = ({
   onOpenChange,
   onAdd,
 }: AddApplicationDialogProps) => {
+  const { t } = useTranslation();
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
@@ -55,9 +57,9 @@ export const AddApplicationDialog = ({
     // Validate URL
     const result = urlSchema.safeParse({ url });
     if (!result.success) {
-      setError(result.error.errors[0]?.message || "Invalid URL");
+      setError(result.error.errors[0]?.message || t('application.invalidUrl'));
       toast({
-        title: "Invalid URL",
+        title: t('application.invalidUrl'),
         description: result.error.errors[0]?.message,
         variant: "destructive",
       });
@@ -77,19 +79,19 @@ export const AddApplicationDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add New Application</DialogTitle>
+          <DialogTitle>{t('application.addNew')}</DialogTitle>
           <DialogDescription>
-            Paste the job posting URL and we'll automatically extract all the details for you.
+            {t('application.urlDescription')}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="url">Job Posting URL</Label>
+              <Label htmlFor="url">{t('application.jobPostingUrl')}</Label>
               <Input
                 id="url"
                 type="url"
-                placeholder="https://company.com/careers/job-id"
+                placeholder={t('application.urlPlaceholder')}
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 required
@@ -98,17 +100,17 @@ export const AddApplicationDialog = ({
                 <p className="text-xs text-destructive">{error}</p>
               )}
               <p className="text-sm text-muted-foreground">
-                We'll extract the company, position, application questions, and key details automatically
+                {t('application.urlDescription')}
               </p>
             </div>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Add Application
+              {t('application.add')}
             </Button>
           </DialogFooter>
         </form>

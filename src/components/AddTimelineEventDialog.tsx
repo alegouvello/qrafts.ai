@@ -27,6 +27,7 @@ import {
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface AddTimelineEventDialogProps {
   open: boolean;
@@ -54,11 +55,22 @@ export const AddTimelineEventDialog = ({
   onOpenChange,
   onAdd,
 }: AddTimelineEventDialogProps) => {
+  const { t } = useTranslation();
   const [eventType, setEventType] = useState("note");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [eventDate, setEventDate] = useState<Date>(new Date());
   const [loading, setLoading] = useState(false);
+  
+  const eventTypes = [
+    { value: "note", label: t('calendar.eventTypes.note') },
+    { value: "interview", label: t('calendar.eventTypes.interview') },
+    { value: "follow_up", label: t('calendar.eventTypes.follow_up') },
+    { value: "deadline", label: t('calendar.eventTypes.deadline') },
+    { value: "offer", label: t('calendar.eventTypes.offer') },
+    { value: "rejection", label: t('calendar.eventTypes.rejection') },
+    { value: "other", label: t('calendar.eventTypes.other') },
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,15 +96,15 @@ export const AddTimelineEventDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add Timeline Event</DialogTitle>
+          <DialogTitle>{t('calendar.addEvent')}</DialogTitle>
           <DialogDescription>
-            Track interviews, follow-ups, notes, and important dates
+            {t('application.timelineDescription')}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="eventType">Event Type</Label>
+              <Label htmlFor="eventType">{t('calendar.eventType')}</Label>
               <Select value={eventType} onValueChange={setEventType}>
                 <SelectTrigger>
                   <SelectValue />
@@ -107,27 +119,27 @@ export const AddTimelineEventDialog = ({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
+              <Label htmlFor="title">{t('calendar.eventTitle')}</Label>
               <Input
                 id="title"
-                placeholder="e.g., Phone interview with HR"
+                placeholder={t('calendar.eventTitlePlaceholder')}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="description">Description (optional)</Label>
+              <Label htmlFor="description">{t('calendar.eventDescription')}</Label>
               <Textarea
                 id="description"
-                placeholder="Add notes, details, or reminders..."
+                placeholder={t('calendar.eventDescriptionPlaceholder')}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="min-h-[100px]"
               />
             </div>
             <div className="space-y-2">
-              <Label>Date & Time</Label>
+              <Label>{t('calendar.eventDate')}</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -138,7 +150,7 @@ export const AddTimelineEventDialog = ({
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {eventDate ? format(eventDate, "PPP p") : <span>Pick a date</span>}
+                    {eventDate ? format(eventDate, "PPP p") : <span>{t('calendar.pickDate')}</span>}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -150,7 +162,7 @@ export const AddTimelineEventDialog = ({
                     className={cn("p-3 pointer-events-auto")}
                   />
                   <div className="p-3 border-t">
-                    <Label className="text-xs">Time</Label>
+                    <Label className="text-xs">{t('calendar.time')}</Label>
                     <Input
                       type="time"
                       value={format(eventDate, "HH:mm")}
@@ -173,11 +185,11 @@ export const AddTimelineEventDialog = ({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Add Event
+              {t('calendar.addEvent')}
             </Button>
           </DialogFooter>
         </form>
