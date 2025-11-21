@@ -123,7 +123,25 @@ const ComparisonView = () => {
         variant: "destructive",
       });
     } else {
-      setApplications(data || []);
+      // Map saved analysis data to component state format
+      const appsWithAnalysis = (data || []).map(app => {
+        const analysis = app.fit_analysis as any;
+        return {
+          id: app.id,
+          company: app.company,
+          position: app.position,
+          status: app.status,
+          applied_date: app.applied_date,
+          url: app.url,
+          role_summary: app.role_summary,
+          fitScore: analysis?.fitScore,
+          overallFit: analysis?.overallFit,
+          strengths: analysis?.strengths,
+          gaps: analysis?.gaps,
+          suggestions: analysis?.suggestions,
+        } as ApplicationWithScore;
+      });
+      setApplications(appsWithAnalysis);
     }
     setLoading(false);
   };
@@ -181,6 +199,27 @@ const ComparisonView = () => {
 
       if (error) throw error;
 
+      // Save analysis results to database
+      const analysisData = {
+        fitScore: data.confidenceScore,
+        overallFit: data.overallFit,
+        strengths: data.strengths,
+        gaps: data.gaps,
+        suggestions: data.suggestions,
+      };
+
+      const { error: updateError } = await supabase
+        .from("applications")
+        .update({
+          fit_analysis: analysisData,
+          fit_analyzed_at: new Date().toISOString(),
+        })
+        .eq("id", app.id);
+
+      if (updateError) {
+        console.error("Failed to save analysis:", updateError);
+      }
+
       setApplications(apps =>
         apps.map(a => a.id === app.id ? { 
           ...a, 
@@ -195,7 +234,7 @@ const ComparisonView = () => {
 
       toast({
         title: "Analysis complete",
-        description: `Fit score: ${data.confidenceScore}%`,
+        description: `Fit score: ${data.confidenceScore}% (saved)`,
       });
     } catch (error: any) {
       console.error('Error analyzing application:', error);
