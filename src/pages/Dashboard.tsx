@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Footer } from "@/components/Footer";
 import { Plus, ArrowLeft, LogOut, BarChart3, Crown, Sparkles, Settings } from "lucide-react";
 import { ApplicationCard } from "@/components/ApplicationCard";
 import { AddApplicationDialog } from "@/components/AddApplicationDialog";
@@ -561,6 +562,8 @@ const Dashboard = () => {
         onOpenChange={setShowAddDialog}
         onAdd={handleAddApplication}
       />
+      
+      <Footer />
     </div>
   );
 };

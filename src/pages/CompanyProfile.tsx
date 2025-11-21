@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Footer } from "@/components/Footer";
 import {
   ArrowLeft,
   Building2,
@@ -719,6 +720,8 @@ const CompanyProfile = () => {
           </Card>
         )}
       </main>
+      
+      <Footer />
     </div>
   );
 };

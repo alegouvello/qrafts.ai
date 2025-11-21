@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Footer } from "@/components/Footer";
 import { Loader2 } from "lucide-react";
 import qraftLogo from "@/assets/qrafts-logo.png";
 import { z } from "zod";
@@ -346,6 +347,8 @@ const Auth = () => {
           </TabsContent>
         </Tabs>
       </Card>
+      
+      <Footer />
     </div>
   );
 };

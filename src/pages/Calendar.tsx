@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, LogOut, Calendar as CalendarIcon, Filter, Search, Grid, List } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { Calendar } from "@/components/ui/calendar";
 import { Card } from "@/components/ui/card";
@@ -688,6 +689,8 @@ const CalendarPage = () => {
           )}
         </Card>
       </main>
+      
+      <Footer />
     </div>
   );
 };

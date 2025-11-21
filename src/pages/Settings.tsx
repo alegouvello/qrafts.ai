@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Crown, CreditCard, Calendar, Download, Settings as SettingsIcon, RefreshCw, Lock, Trash2, Eye, EyeOff, LogOut, User, Shield, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Footer } from "@/components/Footer";
 import qraftLogo from "@/assets/qrafts-logo.png";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -704,6 +705,8 @@ const Settings = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      
+      <Footer />
     </div>
   );
 };

@@ -16,6 +16,7 @@ import { StatusHistoryTimeline } from "@/components/StatusHistoryTimeline";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
+import { Footer } from "@/components/Footer";
 import {
   ArrowLeft,
   Calendar,
@@ -1842,6 +1843,8 @@ const ApplicationDetail = () => {
         onOpenChange={setShowAddTimelineDialog}
         onAdd={handleAddTimelineEvent}
       />
+      
+      <Footer />
     </div>
   );
 };
