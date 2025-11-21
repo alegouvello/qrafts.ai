@@ -232,25 +232,12 @@ Return ONLY valid JSON matching this exact structure:
     }
 
     // Update the profile with enhanced resume
-    const { error: updateError } = await supabase
-      .from('user_profiles')
-      .update({
-        resume_text: JSON.stringify(enhancedResume),
-        updated_at: new Date().toISOString(),
-      })
-      .eq('user_id', user.id);
-
-    if (updateError) {
-      console.error('Error updating profile:', updateError);
-      throw updateError;
-    }
-
-    console.log('Profile enhanced successfully');
+    console.log('Returning enhanced resume for user approval');
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: 'Profile enhanced successfully',
+        message: 'Profile enhancement ready for review',
         enhancedResume
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
