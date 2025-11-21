@@ -203,8 +203,9 @@ function generateSingleColumnPDF(data: ResumeData, preview: boolean = false): st
       const firstParagraph = summaryBullets[0];
       let hasIntroParagraph = false;
       
-      // Check if first item is an intro paragraph (no bullet label and reasonably long)
-      if (firstParagraph && !firstParagraph.includes('–') && !firstParagraph.includes('-') && firstParagraph.length > 100) {
+      // Check if first item is an intro paragraph (doesn't start with bold label like "AI Venture Building –")
+      // and is reasonably long (intro paragraphs are usually substantial)
+      if (firstParagraph && firstParagraph.length > 100 && !(/^[A-Z][A-Za-z\s&]+\s*[–-]\s/.test(firstParagraph))) {
         addWrappedText(firstParagraph, 10, contentWidth, 5.5);
         yPos += 2;
         hasIntroParagraph = true;
@@ -727,8 +728,9 @@ function generateTwoColumnPDF(data: ResumeData, preview: boolean = false): strin
       const firstParagraph = summaryBullets[0];
       let hasIntroParagraph = false;
       
-      // Check if first item is an intro paragraph (no bullet label and reasonably long)
-      if (firstParagraph && !firstParagraph.includes('–') && !firstParagraph.includes('-') && firstParagraph.length > 100) {
+      // Check if first item is an intro paragraph (doesn't start with bold label like "AI Venture Building –")
+      // and is reasonably long (intro paragraphs are usually substantial)
+      if (firstParagraph && firstParagraph.length > 100 && !(/^[A-Z][A-Za-z\s&]+\s*[–-]\s/.test(firstParagraph))) {
         const introLines = doc.splitTextToSize(firstParagraph, mainWidth);
         introLines.forEach((line: string) => {
           checkPageBreak(5);
