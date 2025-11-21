@@ -14,7 +14,7 @@ import { ExportPDFDialog } from "@/components/ExportPDFDialog";
 import { Footer } from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 import { convertBulletsToHTML } from "@/utils/bulletFormatter";
-import { generateResumePDF } from "@/utils/generateResumePDF";
+import { generateResumePDF, generatePDFPreview } from "@/utils/generateResumePDF";
 import {
   Dialog,
   DialogContent,
@@ -1115,6 +1115,8 @@ export default function Profile() {
         open={showExportPDFDialog}
         onOpenChange={setShowExportPDFDialog}
         onExport={handleExportPDF}
+        profileData={parsedData}
+        generatePDFPreview={generatePDFPreview}
       />
 
       {/* Target Role Dialog */}
