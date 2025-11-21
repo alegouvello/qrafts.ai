@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 type Message = {
   role: "user" | "assistant";
@@ -14,11 +15,12 @@ type Message = {
 };
 
 export const ChatAssistant = () => {
+  const { t, i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hi! I'm your QRAFTS assistant. I'm here to help you with your job search. How can I assist you today?",
+      content: t('chat.title'),
     },
   ]);
   const [input, setInput] = useState("");
@@ -126,7 +128,10 @@ export const ChatAssistant = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({ messages: newMessages }),
+        body: JSON.stringify({ 
+          messages: newMessages,
+          language: i18n.language 
+        }),
       });
 
       if (!response.ok || !response.body) {
@@ -174,7 +179,7 @@ export const ChatAssistant = () => {
         ...newMessages,
         {
           role: "assistant",
-          content: "Sorry, I encountered an error. Please try again.",
+          content: t('chat.error'),
         },
       ]);
     } finally {
@@ -301,7 +306,7 @@ export const ChatAssistant = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Ask me anything..."
+                placeholder={t('chat.placeholder')}
                 disabled={isLoading}
                 className="flex-1"
               />

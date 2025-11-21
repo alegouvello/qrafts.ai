@@ -12,6 +12,8 @@ import { Footer } from "@/components/Footer";
 import { Loader2 } from "lucide-react";
 import qraftLogo from "@/assets/qrafts-logo.png";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 const authSchema = z.object({
   email: z.string().trim().email("Invalid email address").max(255, "Email too long"),
@@ -22,6 +24,7 @@ const authSchema = z.object({
 });
 
 const Auth = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -218,11 +221,11 @@ const Auth = () => {
 
             <form onSubmit={handleSignIn} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="signin-email" className="text-sm font-medium">Email</Label>
+                <Label htmlFor="signin-email" className="text-sm font-medium">{t('common.email')}</Label>
                 <Input
                   id="signin-email"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder={t('auth.emailPlaceholder')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="h-11 rounded-xl border-border/60 focus:border-primary/50 transition-all"
@@ -233,11 +236,11 @@ const Auth = () => {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="signin-password" className="text-sm font-medium">Password</Label>
+                <Label htmlFor="signin-password" className="text-sm font-medium">{t('common.password')}</Label>
                 <Input
                   id="signin-password"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder={t('auth.passwordPlaceholder')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="h-11 rounded-xl border-border/60 focus:border-primary/50 transition-all"
@@ -253,7 +256,7 @@ const Auth = () => {
                 disabled={loading}
               >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Sign In
+                {t('auth.signIn')}
               </Button>
             </form>
           </TabsContent>

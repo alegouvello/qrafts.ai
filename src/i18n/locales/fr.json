@@ -1,0 +1,166 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "close": "Fermer",
+    "confirm": "Confirmer",
+    "back": "Retour",
+    "next": "Suivant",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "export": "Exporter",
+    "import": "Importer",
+    "upload": "Télécharger",
+    "download": "Télécharger",
+    "view": "Voir",
+    "settings": "Paramètres",
+    "profile": "Profil",
+    "logout": "Déconnexion",
+    "login": "Connexion",
+    "signup": "S'inscrire",
+    "email": "Email",
+    "password": "Mot de passe",
+    "name": "Nom",
+    "company": "Entreprise",
+    "position": "Poste",
+    "status": "Statut",
+    "date": "Date",
+    "actions": "Actions",
+    "welcome": "Bienvenue"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "calendar": "Calendrier",
+    "profile": "Profil",
+    "settings": "Paramètres",
+    "logout": "Déconnexion"
+  },
+  "landing": {
+    "hero": {
+      "title": "Suivez vos candidatures avec des insights alimentés par l'IA",
+      "subtitle": "Ne perdez plus jamais une opportunité. Qrafts vous aide à organiser, suivre et optimiser votre recherche d'emploi avec des insights intelligents.",
+      "cta": "Commencer gratuitement",
+      "demo": "Voir la démo"
+    },
+    "features": {
+      "title": "Tout ce dont vous avez besoin pour décrocher votre emploi de rêve",
+      "organize": {
+        "title": "Organiser les candidatures",
+        "description": "Gardez toutes vos candidatures au même endroit avec suivi du statut et vues chronologiques"
+      },
+      "analyze": {
+        "title": "Analyse alimentée par l'IA",
+        "description": "Obtenez des insights intelligents sur l'adéquation du poste, la culture d'entreprise et l'optimisation des candidatures"
+      },
+      "automate": {
+        "title": "Automatiser les relances",
+        "description": "Ne manquez jamais une relance avec des rappels intelligents et mises à jour automatiques du statut"
+      }
+    }
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "overview": "Aperçu des candidatures",
+    "stats": {
+      "total": "Total des candidatures",
+      "pending": "En attente",
+      "interview": "Entretiens",
+      "accepted": "Acceptées"
+    },
+    "recent": "Candidatures récentes",
+    "addApplication": "Ajouter une candidature",
+    "noApplications": "Aucune candidature pour le moment",
+    "getStarted": "Commencez en ajoutant votre première candidature"
+  },
+  "application": {
+    "add": "Ajouter une candidature",
+    "edit": "Modifier la candidature",
+    "delete": "Supprimer la candidature",
+    "company": "Nom de l'entreprise",
+    "position": "Poste",
+    "url": "URL de l'offre",
+    "appliedDate": "Date de candidature",
+    "status": {
+      "wishlist": "Liste de souhaits",
+      "applied": "Candidature envoyée",
+      "interview": "Entretien",
+      "accepted": "Acceptée",
+      "rejected": "Rejetée"
+    },
+    "details": "Détails de la candidature",
+    "timeline": "Chronologie",
+    "notes": "Notes",
+    "questions": "Questions",
+    "analysis": "Analyse d'adéquation",
+    "addQuestion": "Ajouter une question",
+    "saveAnswer": "Enregistrer la réponse",
+    "improveAnswer": "Améliorer la réponse",
+    "exportPDF": "Exporter en PDF"
+  },
+  "profile": {
+    "title": "Profil",
+    "edit": "Modifier le profil",
+    "uploadResume": "Télécharger le CV",
+    "fullName": "Nom complet",
+    "email": "Email",
+    "phone": "Téléphone",
+    "location": "Localisation",
+    "linkedin": "URL LinkedIn",
+    "website": "URL du site web",
+    "resumeText": "CV/Curriculum Vitae",
+    "saved": "Profil enregistré avec succès",
+    "error": "Erreur lors de l'enregistrement du profil"
+  },
+  "calendar": {
+    "title": "Calendrier",
+    "addEvent": "Ajouter un événement",
+    "eventTypes": {
+      "interview": "Entretien",
+      "followup": "Relance",
+      "deadline": "Date limite",
+      "networking": "Réseautage"
+    },
+    "noEvents": "Aucun événement prévu"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "account": "Paramètres du compte",
+    "language": "Langue",
+    "theme": "Thème",
+    "notifications": "Notifications",
+    "privacy": "Confidentialité",
+    "terms": "Conditions d'utilisation"
+  },
+  "auth": {
+    "signIn": "Se connecter",
+    "signUp": "S'inscrire",
+    "signOut": "Se déconnecter",
+    "forgotPassword": "Mot de passe oublié?",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "emailPlaceholder": "Entrez votre email",
+    "passwordPlaceholder": "Entrez votre mot de passe",
+    "rememberMe": "Se souvenir de moi",
+    "noAccount": "Pas encore de compte?",
+    "hasAccount": "Vous avez déjà un compte?",
+    "signInSuccess": "Connexion réussie",
+    "signUpSuccess": "Compte créé avec succès",
+    "signOutSuccess": "Déconnexion réussie",
+    "error": "Erreur d'authentification"
+  },
+  "chat": {
+    "title": "Assistant IA",
+    "placeholder": "Posez-moi n'importe quelle question sur votre recherche d'emploi...",
+    "thinking": "Réflexion en cours...",
+    "error": "Désolé, j'ai rencontré une erreur. Veuillez réessayer."
+  },
+  "toast": {
+    "success": "Succès",
+    "error": "Erreur",
+    "warning": "Avertissement",
+    "info": "Info"
+  }
+}
