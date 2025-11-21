@@ -33,6 +33,7 @@ import {
   Info,
   Copy,
   Check,
+  Crown,
 } from "lucide-react";
 import {
   Select,
@@ -135,6 +136,10 @@ const ApplicationDetail = () => {
     resume_text?: string;
   } | null>(null);
   const [autoPopulatedAnswers, setAutoPopulatedAnswers] = useState<Set<string>>(new Set());
+  const [subscriptionStatus, setSubscriptionStatus] = useState<{
+    subscribed: boolean;
+    product_id: string | null;
+  }>({ subscribed: false, product_id: null });
 
   useEffect(() => {
     checkAuth();
@@ -143,6 +148,7 @@ const ApplicationDetail = () => {
       fetchApplicationData();
       fetchTimelineEvents();
       fetchStatusHistory();
+      checkSubscription();
     }
   }, [id]);
 
@@ -150,6 +156,40 @@ const ApplicationDetail = () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       navigate("/auth");
+    }
+  };
+
+  const checkSubscription = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('check-subscription');
+      if (error) {
+        console.error('Error checking subscription:', error);
+      } else if (data) {
+        setSubscriptionStatus(data);
+      }
+    } catch (error) {
+      console.error('Error checking subscription:', error);
+    }
+  };
+
+  const handleUpgrade = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout');
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to create checkout session",
+          variant: "destructive",
+        });
+      } else if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to start checkout process",
+        variant: "destructive",
+      });
     }
   };
 
@@ -457,6 +497,21 @@ const ApplicationDetail = () => {
   const handleGetSuggestion = async (questionId: string, questionText: string) => {
     if (!application) return;
     
+    // Check subscription status
+    if (!subscriptionStatus.subscribed) {
+      toast({
+        title: "Pro Feature",
+        description: "AI answer suggestions are available with Qraft Pro. Upgrade to get AI-powered answer suggestions.",
+        variant: "destructive",
+        action: (
+          <Button onClick={handleUpgrade} size="sm" className="ml-auto">
+            Upgrade to Pro
+          </Button>
+        ),
+      });
+      return;
+    }
+    
     setSuggesting((prev) => ({ ...prev, [questionId]: true }));
 
     try {
@@ -502,6 +557,21 @@ const ApplicationDetail = () => {
 
   const handleImproveAnswer = async (questionId: string, questionText: string, userInstructions?: string) => {
     if (!application) return;
+
+    // Check subscription status
+    if (!subscriptionStatus.subscribed) {
+      toast({
+        title: "Pro Feature",
+        description: "AI answer improvements are available with Qraft Pro. Upgrade to enhance your answers with AI.",
+        variant: "destructive",
+        action: (
+          <Button onClick={handleUpgrade} size="sm" className="ml-auto">
+            Upgrade to Pro
+          </Button>
+        ),
+      });
+      return;
+    }
 
     const currentAnswer = answers[questionId];
     if (!currentAnswer || currentAnswer.trim().length < 10) {
@@ -570,6 +640,21 @@ const ApplicationDetail = () => {
 
   const handleCalculateConfidence = async (questionId: string, questionText: string) => {
     if (!application) return;
+
+    // Check subscription status
+    if (!subscriptionStatus.subscribed) {
+      toast({
+        title: "Pro Feature",
+        description: "AI answer confidence scoring is available with Qraft Pro. Upgrade to evaluate your answers.",
+        variant: "destructive",
+        action: (
+          <Button onClick={handleUpgrade} size="sm" className="ml-auto">
+            Upgrade to Pro
+          </Button>
+        ),
+      });
+      return;
+    }
 
     const currentAnswer = answers[questionId];
     if (!currentAnswer || currentAnswer.trim().length < 10) {
@@ -1339,6 +1424,8 @@ const ApplicationDetail = () => {
               position={application.position}
               roleDetails={application.role_summary} 
               resumeText={userProfile?.resume_text || null}
+              subscribed={subscriptionStatus.subscribed}
+              onUpgrade={handleUpgrade}
             />
           )}
         </div>

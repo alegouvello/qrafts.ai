@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Minus, ExternalLink, Sparkles, ChevronDown, ChevronUp, Settings } from "lucide-react";
+import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Minus, ExternalLink, Sparkles, ChevronDown, ChevronUp, Settings, Crown } from "lucide-react";
 import qraftLogo from "@/assets/qrafts-logo.png";
 
 interface Application {
@@ -36,17 +36,56 @@ const ComparisonView = () => {
   const [analyzingAll, setAnalyzingAll] = useState(false);
   const [resumeText, setResumeText] = useState<string | null>(null);
   const [expandedReasons, setExpandedReasons] = useState<Record<string, boolean>>({});
+  const [subscriptionStatus, setSubscriptionStatus] = useState<{
+    subscribed: boolean;
+    product_id: string | null;
+  }>({ subscribed: false, product_id: null });
 
   useEffect(() => {
     checkAuth();
     fetchUserProfile();
     fetchApplications();
+    checkSubscription();
   }, []);
 
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       navigate("/auth");
+    }
+  };
+
+  const checkSubscription = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('check-subscription');
+      if (error) {
+        console.error('Error checking subscription:', error);
+      } else if (data) {
+        setSubscriptionStatus(data);
+      }
+    } catch (error) {
+      console.error('Error checking subscription:', error);
+    }
+  };
+
+  const handleUpgrade = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout');
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to create checkout session",
+          variant: "destructive",
+        });
+      } else if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to start checkout process",
+        variant: "destructive",
+      });
     }
   };
 
@@ -89,6 +128,21 @@ const ComparisonView = () => {
   };
 
   const analyzeApplication = async (app: ApplicationWithScore) => {
+    // Check subscription status
+    if (!subscriptionStatus.subscribed) {
+      toast({
+        title: "Pro Feature",
+        description: "AI role fit comparison is available with Qraft Pro. Upgrade to compare opportunities.",
+        variant: "destructive",
+        action: (
+          <Button onClick={handleUpgrade} size="sm" className="ml-auto">
+            Upgrade to Pro
+          </Button>
+        ),
+      });
+      return;
+    }
+
     if (!resumeText) {
       toast({
         title: "No resume found",

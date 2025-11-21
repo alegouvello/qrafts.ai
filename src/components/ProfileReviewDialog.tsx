@@ -10,6 +10,8 @@ interface ProfileReviewDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onProfileUpdate?: () => void;
+  subscribed: boolean;
+  onUpgrade: () => void;
 }
 
 interface Review {
@@ -23,7 +25,7 @@ interface Review {
   quick_wins: string[];
 }
 
-export function ProfileReviewDialog({ open, onOpenChange, onProfileUpdate }: ProfileReviewDialogProps) {
+export function ProfileReviewDialog({ open, onOpenChange, onProfileUpdate, subscribed, onUpgrade }: ProfileReviewDialogProps) {
   const [loading, setLoading] = useState(false);
   const [review, setReview] = useState<Review | null>(null);
   const [applyingIndex, setApplyingIndex] = useState<number | null>(null);
@@ -36,6 +38,22 @@ export function ProfileReviewDialog({ open, onOpenChange, onProfileUpdate }: Pro
   }, [open]);
 
   const fetchReview = async () => {
+    // Check subscription status
+    if (!subscribed) {
+      toast({
+        title: "Pro Feature",
+        description: "AI profile review is available with Qraft Pro. Upgrade to get personalized improvement suggestions.",
+        variant: "destructive",
+        action: (
+          <Button onClick={onUpgrade} size="sm" className="ml-auto">
+            Upgrade to Pro
+          </Button>
+        ),
+      });
+      onOpenChange(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();

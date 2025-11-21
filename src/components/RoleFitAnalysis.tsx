@@ -12,6 +12,8 @@ interface RoleFitAnalysisProps {
   position: string;
   roleDetails: any;
   resumeText: string | null;
+  subscribed: boolean;
+  onUpgrade: () => void;
 }
 
 interface Analysis {
@@ -22,12 +24,27 @@ interface Analysis {
   suggestions: string[];
 }
 
-export const RoleFitAnalysis = ({ company, position, roleDetails, resumeText }: RoleFitAnalysisProps) => {
+export const RoleFitAnalysis = ({ company, position, roleDetails, resumeText, subscribed, onUpgrade }: RoleFitAnalysisProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
 
   const analyzeRoleFit = async () => {
+    // Check subscription status
+    if (!subscribed) {
+      toast({
+        title: "Pro Feature",
+        description: "AI role fit analysis is available with Qraft Pro. Upgrade to get detailed compatibility insights.",
+        variant: "destructive",
+        action: (
+          <Button onClick={onUpgrade} size="sm" className="ml-auto">
+            Upgrade to Pro
+          </Button>
+        ),
+      });
+      return;
+    }
+
     if (!resumeText) {
       toast({
         title: "No resume found",

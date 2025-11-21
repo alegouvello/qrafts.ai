@@ -64,16 +64,47 @@ export default function Profile() {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showReviewDialog, setShowReviewDialog] = useState(false);
   const [showMasterAnswersDialog, setShowMasterAnswersDialog] = useState(false);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<{
+    subscribed: boolean;
+    product_id: string | null;
+  }>({ subscribed: false, product_id: null });
 
   useEffect(() => {
     checkAuth();
     fetchProfile();
+    checkSubscription();
   }, []);
 
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       navigate("/auth");
+    }
+  };
+
+  const checkSubscription = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('check-subscription');
+      if (error) {
+        console.error('Error checking subscription:', error);
+      } else if (data) {
+        setSubscriptionStatus(data);
+      }
+    } catch (error) {
+      console.error('Error checking subscription:', error);
+    }
+  };
+
+  const handleUpgrade = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout');
+      if (error) {
+        console.error('Error creating checkout:', error);
+      } else if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (error) {
+      console.error('Error starting checkout:', error);
     }
   };
 
@@ -640,6 +671,8 @@ export default function Profile() {
         open={showReviewDialog} 
         onOpenChange={setShowReviewDialog}
         onProfileUpdate={fetchProfile}
+        subscribed={subscriptionStatus.subscribed}
+        onUpgrade={handleUpgrade}
       />
 
       <MasterAnswersDialog
