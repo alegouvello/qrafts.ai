@@ -11,6 +11,10 @@ interface FormattedNotesProps {
 export const FormattedNotes = ({ notes }: FormattedNotesProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const sections = parseNotes(notes);
+  
+  // Debug: log the notes to see what we're dealing with
+  console.log('Raw notes:', notes);
+  console.log('Parsed sections:', sections);
 
   return (
     <Collapsible open={isExpanded} onOpenChange={setIsExpanded} className="space-y-3">
@@ -33,12 +37,12 @@ export const FormattedNotes = ({ notes }: FormattedNotesProps) => {
         </CollapsibleTrigger>
       </div>
       
-      <CollapsibleContent className="space-y-6 [&_hr]:hidden [&_*]:border-0">
+      <CollapsibleContent className="space-y-6">
         {sections.map((section, index) => (
-        <div key={index} className="space-y-3">
+        <div key={index} className="space-y-3 [&>*]:!border-0 [&>*]:!border-b-0">
           {section.title && (
-            <div className="mb-4">
-              <Badge variant="secondary" className="text-xs font-bold tracking-wide !border-0">
+            <div className="mb-4 !border-0 !border-b-0 pb-0">
+              <Badge variant="secondary" className="text-xs font-bold tracking-wide !border-0 !border-b-0">
                 {section.title}
               </Badge>
             </div>
