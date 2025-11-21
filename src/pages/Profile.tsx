@@ -1,14 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Mail, Phone, MapPin, Linkedin, Briefcase, GraduationCap, Award, ArrowLeft, Upload, Edit, Sparkles, BookOpen, Trophy, BookMarked, Lightbulb, Globe, Heart, Settings } from "lucide-react";
+import { User, Mail, Phone, MapPin, Linkedin, Briefcase, GraduationCap, Award, ArrowLeft, Upload, Edit, Sparkles, BookOpen, Trophy, BookMarked, Lightbulb, Globe, Heart, Settings, Camera, Image as ImageIcon } from "lucide-react";
 import { UploadResumeDialog } from "@/components/UploadResumeDialog";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { ProfileReviewDialog } from "@/components/ProfileReviewDialog";
 import { MasterAnswersDialog } from "@/components/MasterAnswersDialog";
 import { Footer } from "@/components/Footer";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import qraftLogo from "@/assets/qrafts-logo.png";
 
 interface ProfileData {
@@ -18,6 +26,7 @@ interface ProfileData {
   linkedin_url: string | null;
   location: string | null;
   resume_text: string | null;
+  avatar_url: string | null;
 }
 
 interface ParsedResume {
@@ -58,6 +67,7 @@ interface ParsedResume {
 
 export default function Profile() {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [parsedData, setParsedData] = useState<ParsedResume | null>(null);
   const [loading, setLoading] = useState(true);
@@ -65,6 +75,10 @@ export default function Profile() {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showReviewDialog, setShowReviewDialog] = useState(false);
   const [showMasterAnswersDialog, setShowMasterAnswersDialog] = useState(false);
+  const [showAvatarDialog, setShowAvatarDialog] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState<{
     subscribed: boolean;
     product_id: string | null;
@@ -170,6 +184,86 @@ export default function Profile() {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
+  const handleAvatarUpload = async (file: File) => {
+    setUploadingAvatar(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to upload an avatar",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Delete old avatar if exists
+      if (profile?.avatar_url) {
+        const oldPath = profile.avatar_url.split('/').pop();
+        if (oldPath) {
+          await supabase.storage
+            .from('avatars')
+            .remove([`${user.id}/${oldPath}`]);
+        }
+      }
+
+      // Upload new avatar
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user.id}/avatar.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Update profile with new avatar URL
+      const { error: updateError } = await supabase
+        .from('user_profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('user_id', user.id);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Success",
+        description: "Profile picture updated successfully",
+      });
+
+      await fetchProfile();
+      setShowAvatarDialog(false);
+    } catch (error: any) {
+      console.error('Error uploading avatar:', error);
+      toast({
+        title: "Upload Failed",
+        description: error.message || "Failed to upload profile picture",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid File",
+          description: "Please select an image file",
+          variant: "destructive",
+        });
+        return;
+      }
+      handleAvatarUpload(file);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -259,12 +353,28 @@ export default function Profile() {
             <CardContent className="relative pt-0 pb-6 sm:pb-8">
               <div className="flex flex-col md:flex-row items-center md:items-end gap-4 sm:gap-6 -mt-12 sm:-mt-16 md:-mt-12">
                 {/* Avatar */}
-                <div className="relative">
-                  <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-xl border-4 border-background">
-                    <span className="text-3xl sm:text-4xl font-bold text-primary-foreground">
-                      {getInitials()}
-                    </span>
+                <div className="relative group">
+                  <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-xl border-4 border-background overflow-hidden">
+                    {profile?.avatar_url ? (
+                      <img 
+                        src={profile.avatar_url} 
+                        alt="Profile" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-3xl sm:text-4xl font-bold text-primary-foreground">
+                        {getInitials()}
+                      </span>
+                    )}
                   </div>
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className="absolute bottom-0 right-0 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => setShowAvatarDialog(true)}
+                  >
+                    <Camera className="h-4 w-4" />
+                  </Button>
                 </div>
                 
                 {/* Name and Location */}
@@ -680,6 +790,71 @@ export default function Profile() {
         open={showMasterAnswersDialog}
         onOpenChange={setShowMasterAnswersDialog}
       />
+
+      {/* Avatar Upload Dialog */}
+      <Dialog open={showAvatarDialog} onOpenChange={setShowAvatarDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Update Profile Picture</DialogTitle>
+            <DialogDescription>
+              Choose a photo from your device or take a new one with your camera.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {/* Hidden file inputs */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="user"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+
+            {/* Upload Options */}
+            <div className="grid gap-3">
+              <Button
+                variant="outline"
+                className="h-auto py-4 justify-start"
+                onClick={() => cameraInputRef.current?.click()}
+                disabled={uploadingAvatar}
+              >
+                <Camera className="h-5 w-5 mr-3" />
+                <div className="text-left">
+                  <div className="font-medium">Take Photo</div>
+                  <div className="text-xs text-muted-foreground">Use your camera</div>
+                </div>
+              </Button>
+              
+              <Button
+                variant="outline"
+                className="h-auto py-4 justify-start"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingAvatar}
+              >
+                <ImageIcon className="h-5 w-5 mr-3" />
+                <div className="text-left">
+                  <div className="font-medium">Choose from Gallery</div>
+                  <div className="text-xs text-muted-foreground">Select an existing photo</div>
+                </div>
+              </Button>
+            </div>
+
+            {uploadingAvatar && (
+              <div className="text-center text-sm text-muted-foreground py-2">
+                Uploading...
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
       
       <Footer />
     </div>
