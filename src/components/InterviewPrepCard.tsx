@@ -84,70 +84,87 @@ export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: In
   const prep = interviewer.interview_prep;
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-3">
-            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <User className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <CardTitle className="text-lg">{interviewer.name}</CardTitle>
-              <CardDescription>
-                {interviewer.role && <span>{interviewer.role}</span>}
-                {interviewer.role && interviewer.company && <span> • </span>}
-                {interviewer.company && <span>{interviewer.company}</span>}
-              </CardDescription>
-              <div className="flex flex-wrap gap-2 mt-1">
-                {interviewer.email && (
-                  <a
-                    href={`mailto:${interviewer.email}`}
-                    className="text-xs text-primary hover:underline"
-                  >
-                    {interviewer.email}
-                  </a>
-                )}
-                {interviewer.linkedin_url && (
-                  <a
-                    href={interviewer.linkedin_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-primary hover:underline"
-                  >
-                    LinkedIn Profile
-                  </a>
-                )}
+    <div className="space-y-4">
+      {/* Interviewer Info & Notes Card */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-start justify-between">
+            <div className="flex items-start gap-3">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <User className="h-5 w-5 text-primary" />
               </div>
-              {interviewer.notes && (
-                <div className="bg-muted/30 rounded-lg p-3 mt-3">
-                  <h4 className="font-semibold text-xs mb-1">Notes</h4>
-                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">{interviewer.notes}</p>
+              <div>
+                <CardTitle className="text-lg">{interviewer.name}</CardTitle>
+                <CardDescription>
+                  {interviewer.role && <span>{interviewer.role}</span>}
+                  {interviewer.role && interviewer.company && <span> • </span>}
+                  {interviewer.company && <span>{interviewer.company}</span>}
+                </CardDescription>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {interviewer.email && (
+                    <a
+                      href={`mailto:${interviewer.email}`}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      {interviewer.email}
+                    </a>
+                  )}
+                  {interviewer.linkedin_url && (
+                    <a
+                      href={interviewer.linkedin_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-primary hover:underline"
+                    >
+                      LinkedIn Profile
+                    </a>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Interviewer?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will delete {interviewer.name} and all associated interview preparation data.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete}>{t("common.delete")}</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete Interviewer?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will delete {interviewer.name} and all associated interview preparation data.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete}>{t("common.delete")}</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-      </CardHeader>
-      <CardContent>
+        </CardHeader>
+        {interviewer.notes && (
+          <CardContent>
+            <div className="bg-muted/30 rounded-lg p-4">
+              <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                <Badge variant="outline">Notes</Badge>
+              </h4>
+              <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{interviewer.notes}</p>
+            </div>
+          </CardContent>
+        )}
+      </Card>
+
+      {/* Interview Prep Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            Interview Preparation
+          </CardTitle>
+          <CardDescription>AI-generated insights and talking points</CardDescription>
+        </CardHeader>
+        <CardContent>
         {!prep ? (
           <div className="text-center py-6">
             <p className="text-sm text-muted-foreground mb-4">
@@ -313,7 +330,8 @@ export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: In
             </Button>
           </div>
         )}
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
