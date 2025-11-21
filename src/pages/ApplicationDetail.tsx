@@ -376,7 +376,7 @@ const ApplicationDetail = () => {
   };
 
   const fetchStatusHistory = async () => {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("application_status_history")
       .select("id, status, changed_at")
       .eq("application_id", id)
@@ -866,7 +866,7 @@ const ApplicationDetail = () => {
     }
 
     // Record status change in history
-    await supabase
+    await (supabase as any)
       .from("application_status_history")
       .insert({
         application_id: id,
