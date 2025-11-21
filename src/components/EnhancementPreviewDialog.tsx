@@ -28,28 +28,36 @@ export function EnhancementPreviewDialog({
     const currentItems = current || [];
     const enhancedItems = enhanced || [];
     
-    if (currentItems.length === 0 && enhancedItems.length === 0) return null;
-    
+    // Always show section if either has content OR if both are empty (to show no changes)
     const hasChanges = JSON.stringify(currentItems) !== JSON.stringify(enhancedItems);
+    const hasContent = currentItems.length > 0 || enhancedItems.length > 0;
+    
+    // Only hide if both sides are completely empty in a way that suggests the section doesn't apply
+    if (!hasContent && label !== "Experience" && label !== "Education") {
+      return null;
+    }
     
     return (
       <div className="mb-6">
         <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
           {label}
           {hasChanges && <Badge variant="secondary" className="text-xs">Updated</Badge>}
+          {!hasChanges && hasContent && <Badge variant="outline" className="text-xs">No Changes</Badge>}
         </h3>
         
         <div className="grid grid-cols-2 gap-4">
           {/* Current */}
           <div>
             <p className="text-sm text-muted-foreground mb-2">Current</p>
-            <div className="space-y-2 text-sm">
+            <div className="space-y-2 text-sm max-h-96 overflow-y-auto">
               {currentItems.length === 0 ? (
-                <p className="text-muted-foreground italic">No items</p>
+                <p className="text-muted-foreground italic p-2">No items</p>
               ) : (
                 currentItems.map((item, idx) => (
-                  <div key={idx} className="p-2 bg-muted/30 rounded">
-                    {typeof item === 'string' ? item : JSON.stringify(item, null, 2)}
+                  <div key={idx} className="p-3 bg-muted/30 rounded text-xs">
+                    <pre className="whitespace-pre-wrap font-sans">
+                      {typeof item === 'string' ? item : JSON.stringify(item, null, 2)}
+                    </pre>
                   </div>
                 ))
               )}
@@ -59,13 +67,15 @@ export function EnhancementPreviewDialog({
           {/* Enhanced */}
           <div>
             <p className="text-sm text-muted-foreground mb-2">Enhanced</p>
-            <div className="space-y-2 text-sm">
+            <div className="space-y-2 text-sm max-h-96 overflow-y-auto">
               {enhancedItems.length === 0 ? (
-                <p className="text-muted-foreground italic">No items</p>
+                <p className="text-muted-foreground italic p-2">No items</p>
               ) : (
                 enhancedItems.map((item, idx) => (
-                  <div key={idx} className="p-2 bg-primary/10 rounded border border-primary/20">
-                    {typeof item === 'string' ? item : JSON.stringify(item, null, 2)}
+                  <div key={idx} className="p-3 bg-primary/10 rounded border border-primary/20 text-xs">
+                    <pre className="whitespace-pre-wrap font-sans">
+                      {typeof item === 'string' ? item : JSON.stringify(item, null, 2)}
+                    </pre>
                   </div>
                 ))
               )}
@@ -77,31 +87,38 @@ export function EnhancementPreviewDialog({
   };
 
   const renderTextComparison = (label: string, current: string, enhanced: string) => {
-    if (!current && !enhanced) return null;
-    
     const hasChanges = current !== enhanced;
+    const hasContent = current || enhanced;
+    
+    // Always show Professional Summary
+    if (!hasContent && label !== "Professional Summary") return null;
     
     return (
       <div className="mb-6">
         <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
           {label}
           {hasChanges && <Badge variant="secondary" className="text-xs">Updated</Badge>}
+          {!hasChanges && hasContent && <Badge variant="outline" className="text-xs">No Changes</Badge>}
         </h3>
         
         <div className="grid grid-cols-2 gap-4">
           {/* Current */}
           <div>
             <p className="text-sm text-muted-foreground mb-2">Current</p>
-            <div className="text-sm p-3 bg-muted/30 rounded">
-              {current || <span className="text-muted-foreground italic">No content</span>}
+            <div className="text-sm p-3 bg-muted/30 rounded max-h-96 overflow-y-auto">
+              <pre className="whitespace-pre-wrap font-sans">
+                {current || <span className="text-muted-foreground italic">No content</span>}
+              </pre>
             </div>
           </div>
           
           {/* Enhanced */}
           <div>
             <p className="text-sm text-muted-foreground mb-2">Enhanced</p>
-            <div className="text-sm p-3 bg-primary/10 rounded border border-primary/20">
-              {enhanced || <span className="text-muted-foreground italic">No content</span>}
+            <div className="text-sm p-3 bg-primary/10 rounded border border-primary/20 max-h-96 overflow-y-auto">
+              <pre className="whitespace-pre-wrap font-sans">
+                {enhanced || <span className="text-muted-foreground italic">No content</span>}
+              </pre>
             </div>
           </div>
         </div>
