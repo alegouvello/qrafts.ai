@@ -194,6 +194,7 @@ export type Database = {
           application_id: string
           company: string | null
           created_at: string
+          email: string | null
           extracted_data: Json | null
           id: string
           interview_prep: Json | null
@@ -207,6 +208,7 @@ export type Database = {
           application_id: string
           company?: string | null
           created_at?: string
+          email?: string | null
           extracted_data?: Json | null
           id?: string
           interview_prep?: Json | null
@@ -220,6 +222,7 @@ export type Database = {
           application_id?: string
           company?: string | null
           created_at?: string
+          email?: string | null
           extracted_data?: Json | null
           id?: string
           interview_prep?: Json | null
