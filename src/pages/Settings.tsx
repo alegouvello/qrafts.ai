@@ -470,7 +470,11 @@ const Settings = () => {
                     <ul className="space-y-2 text-sm text-muted-foreground">
                       <li className="flex items-center gap-2">
                         <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
-                        Basic application tracking
+                        Track up to 5 applications
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
+                        View all your existing data
                       </li>
                       <li className="flex items-center gap-2">
                         <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
@@ -481,6 +485,9 @@ const Settings = () => {
                         Manual answer management
                       </li>
                     </ul>
+                    <p className="text-xs text-muted-foreground mt-4 p-3 rounded-lg bg-muted/30 border border-border/50">
+                      <strong>Your data is safe:</strong> All your applications and data remain accessible even if you don't upgrade. The 5 application limit only applies to adding new applications.
+                    </p>
                   </div>
                 </div>
 
