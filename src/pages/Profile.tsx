@@ -10,6 +10,7 @@ import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { ProfileReviewDialog } from "@/components/ProfileReviewDialog";
 import { MasterAnswersDialog } from "@/components/MasterAnswersDialog";
 import { EnhancementPreviewDialog } from "@/components/EnhancementPreviewDialog";
+import { ExportPDFDialog } from "@/components/ExportPDFDialog";
 import { Footer } from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 import { convertBulletsToHTML } from "@/utils/bulletFormatter";
@@ -87,6 +88,7 @@ export default function Profile() {
   const [showAvatarDialog, setShowAvatarDialog] = useState(false);
   const [showEnhancementPreview, setShowEnhancementPreview] = useState(false);
   const [showTargetRoleDialog, setShowTargetRoleDialog] = useState(false);
+  const [showExportPDFDialog, setShowExportPDFDialog] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [enhancingProfile, setEnhancingProfile] = useState(false);
   const [enhancedData, setEnhancedData] = useState<any>(null);
@@ -424,7 +426,7 @@ export default function Profile() {
     }
   };
 
-  const handleExportPDF = () => {
+  const handleExportPDF = (layout: 'single' | 'two-column') => {
     if (!parsedData) {
       toast({
         title: "No Profile Data",
@@ -435,10 +437,10 @@ export default function Profile() {
     }
 
     try {
-      generateResumePDF(parsedData);
+      generateResumePDF(parsedData, layout);
       toast({
         title: "PDF Generated",
-        description: "Your professional resume has been downloaded",
+        description: `Your professional ${layout === 'two-column' ? 'two-column' : 'single-column'} resume has been downloaded`,
       });
     } catch (error: any) {
       console.error('Error generating PDF:', error);
@@ -529,7 +531,7 @@ export default function Profile() {
                 <span className="sm:hidden">Edit</span>
               </Button>
               <Button
-                onClick={handleExportPDF}
+                onClick={() => setShowExportPDFDialog(true)}
                 variant="outline"
                 size="sm"
                 className="gap-2 bg-background/50 backdrop-blur-sm flex-1 sm:flex-none"
@@ -1107,6 +1109,12 @@ export default function Profile() {
         onApprove={handleApproveEnhancement}
         onReject={handleRejectEnhancement}
         loading={applyingEnhancement}
+      />
+
+      <ExportPDFDialog
+        open={showExportPDFDialog}
+        onOpenChange={setShowExportPDFDialog}
+        onExport={handleExportPDF}
       />
 
       {/* Target Role Dialog */}
