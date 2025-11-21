@@ -185,7 +185,7 @@ const Auth = () => {
               onClick={handleGoogleSignIn}
               disabled={googleLoading}
               variant="outline"
-              className="w-full h-11 rounded-full mb-4 sm:mb-6 border-border/60 text-sm"
+              className="w-full h-11 rounded-full mb-4 sm:mb-6 border-border/60 text-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:border-primary/30"
             >
               {googleLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -254,7 +254,7 @@ const Auth = () => {
               </div>
               <Button 
                 type="submit" 
-                className="w-full h-11 rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all" 
+                className="w-full h-11 rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 hover:scale-[1.02]" 
                 disabled={loading}
               >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -269,7 +269,7 @@ const Auth = () => {
               onClick={handleGoogleSignIn}
               disabled={googleLoading}
               variant="outline"
-              className="w-full h-11 rounded-full mb-4 sm:mb-6 border-border/60 text-sm"
+              className="w-full h-11 rounded-full mb-4 sm:mb-6 border-border/60 text-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:border-primary/30"
             >
               {googleLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -342,7 +342,7 @@ const Auth = () => {
               </div>
               <Button 
                 type="submit" 
-                className="w-full h-11 rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all" 
+                className="w-full h-11 rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 hover:scale-[1.02]" 
                 disabled={loading}
               >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
