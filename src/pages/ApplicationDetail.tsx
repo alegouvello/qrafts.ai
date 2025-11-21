@@ -44,6 +44,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import qraftLogo from "@/assets/qrafts-logo.png";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface Application {
   id: string;
@@ -91,6 +94,7 @@ const statusConfig = {
 };
 
 const ApplicationDetail = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
