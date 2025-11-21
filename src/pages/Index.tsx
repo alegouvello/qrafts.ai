@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, FileText, Sparkles, TrendingUp, Menu } from "lucide-react";
@@ -22,6 +22,7 @@ import qraftLogo from "@/assets/qrafts-logo.png";
 const Index = () => {
   const { t, i18n } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
   
   // Get the appropriate video based on current language
   const getVideoSource = () => {
@@ -56,6 +57,15 @@ const Index = () => {
     document.getElementById('cta')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     setMobileMenuOpen(false);
   };
+
+  // Autoplay video when it comes into view
+  useEffect(() => {
+    if (videoSection.isVisible && videoRef.current) {
+      videoRef.current.play().catch(() => {
+        // Autoplay was prevented, user needs to interact first
+      });
+    }
+  }, [videoSection.isVisible]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -198,6 +208,7 @@ const Index = () => {
           <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-border/50 bg-card hover:shadow-primary/20 hover:shadow-3xl transition-shadow duration-500">
             <div className="aspect-video bg-black">
               <video
+                ref={videoRef}
                 key={i18n.language}
                 src={getVideoSource()}
                 className="w-full h-full object-contain"
