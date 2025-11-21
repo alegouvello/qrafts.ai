@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Footer } from "@/components/Footer";
 import { Plus, ArrowLeft, LogOut, BarChart3, Crown, Sparkles, Settings, Briefcase, Clock, Users, TrendingUp } from "lucide-react";
@@ -25,6 +26,10 @@ const Dashboard = () => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [userProfile, setUserProfile] = useState<{
+    full_name: string | null;
+    avatar_url: string | null;
+  } | null>(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState<{
     subscribed: boolean;
     product_id: string | null;
@@ -40,6 +45,7 @@ const Dashboard = () => {
   useEffect(() => {
     checkAuth();
     fetchApplications();
+    fetchUserProfile();
     checkSubscription();
     
     // Check for checkout success/cancel
@@ -67,6 +73,25 @@ const Dashboard = () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       navigate("/auth");
+    }
+  };
+
+  const fetchUserProfile = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("user_profiles")
+        .select("full_name, avatar_url")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!error && data) {
+        setUserProfile(data);
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
     }
   };
 
@@ -376,8 +401,17 @@ const Dashboard = () => {
                 Add
               </Button>
               <Link to="/profile" className="flex-1 sm:flex-none">
-                <Button variant="ghost" className="w-full rounded-full hover:bg-primary/5 transition-all text-sm">
-                  Profile
+                <Button variant="ghost" className="w-full rounded-full hover:bg-primary/5 transition-all text-sm flex items-center justify-center gap-2">
+                  {userProfile?.avatar_url ? (
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={userProfile.avatar_url} alt={userProfile.full_name || "Profile"} />
+                      <AvatarFallback>
+                        {userProfile.full_name?.[0]?.toUpperCase() || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                  ) : (
+                    "Profile"
+                  )}
                 </Button>
               </Link>
               <Link to="/comparison" className="flex-1 sm:flex-none">
