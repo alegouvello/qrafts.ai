@@ -993,6 +993,198 @@ function generateTwoColumnPDF(data: ResumeData, preview: boolean = false): strin
     });
   }
 
+  // Publications
+  if (data.publications && data.publications.length > 0) {
+    checkPageBreak(30);
+    yPos += 2;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(...PRIMARY_COLOR);
+    doc.text('PUBLICATIONS', mainMargin, yPos);
+    yPos += 2;
+    doc.setLineWidth(0.4);
+    doc.line(mainMargin, yPos, pageWidth - margin, yPos);
+    yPos += 5;
+
+    data.publications.forEach((pub) => {
+      checkPageBreak(15);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(...TEXT_COLOR);
+      
+      if (typeof pub === 'string') {
+        doc.text(`• ${pub}`, mainMargin, yPos);
+        yPos += 4.5;
+      } else {
+        doc.text(`• ${pub.title}`, mainMargin, yPos);
+        yPos += 4.5;
+        
+        if (pub.publisher || pub.date) {
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(9);
+          doc.text(`  ${pub.publisher || ''}${pub.date ? ` | ${pub.date}` : ''}`, mainMargin + 6, yPos);
+          yPos += 4.5;
+        }
+      }
+    });
+    yPos += 4;
+  }
+
+  // Certifications
+  if (data.certifications && data.certifications.length > 0) {
+    checkPageBreak(30);
+    yPos += 2;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(...PRIMARY_COLOR);
+    doc.text('CERTIFICATIONS', mainMargin, yPos);
+    yPos += 2;
+    doc.setLineWidth(0.4);
+    doc.line(mainMargin, yPos, pageWidth - margin, yPos);
+    yPos += 5;
+
+    data.certifications.forEach((cert) => {
+      checkPageBreak(15);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(...TEXT_COLOR);
+      
+      if (typeof cert === 'string') {
+        doc.text(`• ${cert}`, mainMargin, yPos);
+        yPos += 4.5;
+      } else {
+        doc.text(`• ${cert.name}`, mainMargin, yPos);
+        yPos += 4.5;
+        
+        if (cert.issuer || cert.date) {
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(9);
+          doc.text(`  ${cert.issuer || ''}${cert.date ? ` | ${cert.date}` : ''}`, mainMargin + 6, yPos);
+          yPos += 4.5;
+        }
+      }
+    });
+    yPos += 4;
+  }
+
+  // Awards
+  if (data.awards && data.awards.length > 0) {
+    checkPageBreak(30);
+    yPos += 2;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(...PRIMARY_COLOR);
+    doc.text('AWARDS & HONORS', mainMargin, yPos);
+    yPos += 2;
+    doc.setLineWidth(0.4);
+    doc.line(mainMargin, yPos, pageWidth - margin, yPos);
+    yPos += 5;
+
+    data.awards.forEach((award) => {
+      checkPageBreak(15);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(...TEXT_COLOR);
+      
+      if (typeof award === 'string') {
+        doc.text(`• ${award}`, mainMargin, yPos);
+        yPos += 4.5;
+      } else {
+        const awardTitle = award.title || award.name || 'Award';
+        doc.text(`• ${awardTitle}`, mainMargin, yPos);
+        yPos += 4.5;
+        
+        if (award.issuer || award.date) {
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(9);
+          doc.text(`  ${award.issuer || ''}${award.date ? ` | ${award.date}` : ''}`, mainMargin + 6, yPos);
+          yPos += 4.5;
+        }
+      }
+    });
+    yPos += 4;
+  }
+
+  // Volunteer Work
+  if (data.volunteer_work && data.volunteer_work.length > 0) {
+    checkPageBreak(30);
+    yPos += 2;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(...PRIMARY_COLOR);
+    doc.text('VOLUNTEER WORK', mainMargin, yPos);
+    yPos += 2;
+    doc.setLineWidth(0.4);
+    doc.line(mainMargin, yPos, pageWidth - margin, yPos);
+    yPos += 5;
+
+    data.volunteer_work.forEach((vol) => {
+      if (vol.description) {
+        doc.setFontSize(9);
+        const lines = doc.splitTextToSize(stripHTML(vol.description), mainWidth - 6);
+        const volHeight = 4.5 + (lines.length * 4.5) + 1;
+        checkPageBreak(volHeight);
+      } else {
+        checkPageBreak(10);
+      }
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(...TEXT_COLOR);
+      doc.text(`• ${vol.organization}`, mainMargin, yPos);
+      yPos += 4.5;
+
+      if (vol.role) {
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(9);
+        doc.text(vol.role, mainMargin + 6, yPos);
+        yPos += 4.5;
+      }
+
+      if (vol.description) {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        const lines = doc.splitTextToSize(stripHTML(vol.description), mainWidth - 6);
+        lines.forEach((line: string) => {
+          doc.text(line, mainMargin + 6, yPos);
+          yPos += 4.5;
+        });
+        yPos += 1;
+      }
+    });
+    yPos += 4;
+  }
+
+  // Interests
+  if (data.interests && data.interests.length > 0) {
+    checkPageBreak(25);
+    yPos += 2;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(...PRIMARY_COLOR);
+    doc.text('INTERESTS', mainMargin, yPos);
+    yPos += 2;
+    doc.setLineWidth(0.4);
+    doc.line(mainMargin, yPos, pageWidth - margin, yPos);
+    yPos += 5;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(...TEXT_COLOR);
+    
+    const interestsText = data.interests.join('  •  ');
+    const lines = doc.splitTextToSize(interestsText, mainWidth);
+    lines.forEach((line: string) => {
+      checkPageBreak(5);
+      doc.text(line, mainMargin, yPos);
+      yPos += 4.5;
+    });
+    yPos += 4;
+  }
+
   // Save or return PDF
   if (preview) {
     return doc.output('dataurlstring');
