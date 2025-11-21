@@ -81,14 +81,23 @@ export function EnhancementPreviewDialog({
     const formatItem = (item: any) => {
       if (typeof item === 'string') return item;
       
-      // Format experience/work items
-      if (item.title && item.company) {
-        return `${item.title} at ${item.company}${item.duration ? ` (${item.duration})` : item.start_date ? ` (${item.start_date} - ${item.end_date || 'Present'})` : ''}\n${item.description || ''}`;
+      // Format experience/work items (handle both title/position fields)
+      if ((item.title || item.position) && item.company) {
+        const jobTitle = item.title || item.position;
+        const duration = item.duration || 
+          (item.start_date ? `${item.start_date} - ${item.end_date || 'Present'}` : '');
+        return `${jobTitle} at ${item.company}${duration ? ` (${duration})` : ''}\n${item.description || ''}`;
       }
       
-      // Format education items
+      // Format education items (handle both school/institution fields)
       if (item.degree && (item.school || item.institution)) {
-        return `${item.degree}\n${item.school || item.institution}${item.year ? ` (${item.year})` : item.field ? `\nField: ${item.field}` : ''}`;
+        const schoolName = item.school || item.institution;
+        const yearInfo = item.year || 
+          (item.start_date && item.end_date ? `${item.start_date} - ${item.end_date}` : '');
+        let text = `${item.degree}\n${schoolName}`;
+        if (yearInfo) text += ` (${yearInfo})`;
+        if (item.field) text += `\nField: ${item.field}`;
+        return text;
       }
       
       // Format certification/publication/award items
