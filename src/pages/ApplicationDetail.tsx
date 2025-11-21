@@ -93,6 +93,7 @@ interface Interviewer {
   name: string;
   role: string | null;
   company: string | null;
+  email: string | null;
   linkedin_url: string | null;
   extracted_data: any;
   interview_prep: any;
@@ -1829,7 +1830,8 @@ const ApplicationDetail = () => {
               <h2 className="text-2xl font-semibold">Interview Preparation</h2>
               {application && (
                 <AddInterviewerDialog 
-                  applicationId={application.id} 
+                  applicationId={application.id}
+                  applicationCompany={application.company}
                   onInterviewerAdded={fetchInterviewers}
                 />
               )}

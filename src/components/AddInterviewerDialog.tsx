@@ -11,17 +11,19 @@ import { Loader2, UserPlus } from "lucide-react";
 
 interface AddInterviewerDialogProps {
   applicationId: string;
+  applicationCompany: string;
   onInterviewerAdded: () => void;
 }
 
-export const AddInterviewerDialog = ({ applicationId, onInterviewerAdded }: AddInterviewerDialogProps) => {
+export const AddInterviewerDialog = ({ applicationId, applicationCompany, onInterviewerAdded }: AddInterviewerDialogProps) => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
-  const [company, setCompany] = useState("");
+  const [company, setCompany] = useState(applicationCompany);
+  const [email, setEmail] = useState("");
   const [linkedinUrl, setLinkedinUrl] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,6 +34,11 @@ export const AddInterviewerDialog = ({ applicationId, onInterviewerAdded }: AddI
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // Validate email if provided
+      if (email && !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+        throw new Error("Invalid email address");
+      }
+
       // Create interviewer record
       const { data: interviewer, error: insertError } = await supabase
         .from("interviewers")
@@ -41,6 +48,7 @@ export const AddInterviewerDialog = ({ applicationId, onInterviewerAdded }: AddI
           name,
           role: role || null,
           company: company || null,
+          email: email || null,
           linkedin_url: linkedinUrl || null,
         })
         .select()
@@ -85,7 +93,8 @@ export const AddInterviewerDialog = ({ applicationId, onInterviewerAdded }: AddI
       setOpen(false);
       setName("");
       setRole("");
-      setCompany("");
+      setCompany(applicationCompany);
+      setEmail("");
       setLinkedinUrl("");
       onInterviewerAdded();
     } catch (error: any) {
@@ -139,6 +148,16 @@ export const AddInterviewerDialog = ({ applicationId, onInterviewerAdded }: AddI
               value={company}
               onChange={(e) => setCompany(e.target.value)}
               placeholder="Acme Inc."
+            />
+          </div>
+          <div>
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="interviewer@company.com"
             />
           </div>
           <div>

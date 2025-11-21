@@ -13,6 +13,7 @@ interface Interviewer {
   name: string;
   role: string | null;
   company: string | null;
+  email: string | null;
   linkedin_url: string | null;
   extracted_data: any;
   interview_prep: any;
@@ -96,16 +97,26 @@ export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: In
                 {interviewer.role && interviewer.company && <span> • </span>}
                 {interviewer.company && <span>{interviewer.company}</span>}
               </CardDescription>
-              {interviewer.linkedin_url && (
-                <a
-                  href={interviewer.linkedin_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-primary hover:underline mt-1 inline-block"
-                >
-                  View LinkedIn Profile
-                </a>
-              )}
+              <div className="flex flex-wrap gap-2 mt-1">
+                {interviewer.email && (
+                  <a
+                    href={`mailto:${interviewer.email}`}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    {interviewer.email}
+                  </a>
+                )}
+                {interviewer.linkedin_url && (
+                  <a
+                    href={interviewer.linkedin_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-primary hover:underline"
+                  >
+                    LinkedIn Profile
+                  </a>
+                )}
+              </div>
             </div>
           </div>
           <AlertDialog>
