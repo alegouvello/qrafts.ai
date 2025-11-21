@@ -42,6 +42,11 @@ const Index = () => {
   const feature3 = useScrollAnimation({ threshold: 0.3 });
   const ctaSection = useScrollAnimation({ threshold: 0.3 });
 
+  const scrollToVideo = () => {
+    document.getElementById('video')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setMobileMenuOpen(false);
+  };
+
   const scrollToFeatures = () => {
     document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     setMobileMenuOpen(false);
@@ -150,7 +155,7 @@ const Index = () => {
                 size="lg" 
                 variant="outline" 
                 className="w-full sm:w-auto rounded-full border-border/60 hover:border-primary/50 hover:scale-105 transition-all duration-300 min-h-[48px]"
-                onClick={scrollToFeatures}
+                onClick={scrollToVideo}
               >
                 {t('landing.hero.demo')}
               </Button>
@@ -170,6 +175,7 @@ const Index = () => {
 
       {/* Video Demo Section */}
       <section 
+        id="video"
         ref={videoSection.ref}
         className="relative container mx-auto px-4 sm:px-6 py-16 sm:py-24" 
         aria-labelledby="video-heading"
