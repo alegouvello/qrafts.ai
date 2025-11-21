@@ -112,7 +112,20 @@ const Settings = () => {
   const checkSubscription = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('check-subscription');
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        console.log('No active session, skipping subscription check');
+        setLoading(false);
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke('check-subscription', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
+      
       if (error) {
         console.error('Error checking subscription:', error);
         toast({
