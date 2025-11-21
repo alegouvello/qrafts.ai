@@ -2,14 +2,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { CheckCircle2, XCircle, Sparkles } from "lucide-react";
+import { useState, useEffect } from "react";
 
 interface EnhancementPreviewDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   currentData: any;
   enhancedData: any;
-  onApprove: () => void;
+  onApprove: (selectedSections: string[]) => void;
   onReject: () => void;
   loading?: boolean;
 }
@@ -23,8 +25,46 @@ export function EnhancementPreviewDialog({
   onReject,
   loading = false
 }: EnhancementPreviewDialogProps) {
+  const [selectedSections, setSelectedSections] = useState<Set<string>>(new Set());
+
+  // Auto-select sections with changes when dialog opens
+  useEffect(() => {
+    if (open && currentData && enhancedData) {
+      const sectionsWithChanges = new Set<string>();
+      
+      // Check each section for changes
+      if (currentData?.summary !== enhancedData?.summary) sectionsWithChanges.add('summary');
+      if (JSON.stringify(currentData?.skills) !== JSON.stringify(enhancedData?.skills)) sectionsWithChanges.add('skills');
+      if (JSON.stringify(currentData?.experience) !== JSON.stringify(enhancedData?.experience)) sectionsWithChanges.add('experience');
+      if (JSON.stringify(currentData?.education) !== JSON.stringify(enhancedData?.education)) sectionsWithChanges.add('education');
+      if (JSON.stringify(currentData?.certifications) !== JSON.stringify(enhancedData?.certifications)) sectionsWithChanges.add('certifications');
+      if (JSON.stringify(currentData?.projects) !== JSON.stringify(enhancedData?.projects)) sectionsWithChanges.add('projects');
+      if (JSON.stringify(currentData?.publications) !== JSON.stringify(enhancedData?.publications)) sectionsWithChanges.add('publications');
+      if (JSON.stringify(currentData?.awards) !== JSON.stringify(enhancedData?.awards)) sectionsWithChanges.add('awards');
+      if (JSON.stringify(currentData?.languages) !== JSON.stringify(enhancedData?.languages)) sectionsWithChanges.add('languages');
+      if (JSON.stringify(currentData?.volunteer_work) !== JSON.stringify(enhancedData?.volunteer_work)) sectionsWithChanges.add('volunteer_work');
+      
+      setSelectedSections(sectionsWithChanges);
+    }
+  }, [open, currentData, enhancedData]);
+
+  const toggleSection = (section: string) => {
+    setSelectedSections(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(section)) {
+        newSet.delete(section);
+      } else {
+        newSet.add(section);
+      }
+      return newSet;
+    });
+  };
+
+  const handleApprove = () => {
+    onApprove(Array.from(selectedSections));
+  };
   
-  const renderArrayComparison = (label: string, current: any[], enhanced: any[]) => {
+  const renderArrayComparison = (label: string, sectionKey: string, current: any[], enhanced: any[]) => {
     const currentItems = current || [];
     const enhancedItems = enhanced || [];
     
@@ -39,11 +79,18 @@ export function EnhancementPreviewDialog({
     
     return (
       <div className="mb-6">
-        <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-          {label}
-          {hasChanges && <Badge variant="secondary" className="text-xs">Updated</Badge>}
-          {!hasChanges && hasContent && <Badge variant="outline" className="text-xs">No Changes</Badge>}
-        </h3>
+        <div className="flex items-center gap-3 mb-3">
+          <Checkbox
+            checked={selectedSections.has(sectionKey)}
+            onCheckedChange={() => toggleSection(sectionKey)}
+            disabled={!hasChanges}
+          />
+          <h3 className="font-semibold text-lg flex items-center gap-2">
+            {label}
+            {hasChanges && <Badge variant="secondary" className="text-xs">Updated</Badge>}
+            {!hasChanges && hasContent && <Badge variant="outline" className="text-xs">No Changes</Badge>}
+          </h3>
+        </div>
         
         <div className="grid grid-cols-2 gap-4">
           {/* Current */}
@@ -72,7 +119,14 @@ export function EnhancementPreviewDialog({
                 <p className="text-muted-foreground italic p-2">No items</p>
               ) : (
                 enhancedItems.map((item, idx) => (
-                  <div key={idx} className="p-3 bg-primary/10 rounded border border-primary/20 text-xs">
+                  <div 
+                    key={idx} 
+                    className={`p-3 rounded border text-xs ${
+                      selectedSections.has(sectionKey) 
+                        ? 'bg-primary/10 border-primary/20' 
+                        : 'bg-muted/30 border-muted'
+                    }`}
+                  >
                     <pre className="whitespace-pre-wrap font-sans">
                       {typeof item === 'string' ? item : JSON.stringify(item, null, 2)}
                     </pre>
@@ -86,7 +140,7 @@ export function EnhancementPreviewDialog({
     );
   };
 
-  const renderTextComparison = (label: string, current: string, enhanced: string) => {
+  const renderTextComparison = (label: string, sectionKey: string, current: string, enhanced: string) => {
     const hasChanges = current !== enhanced;
     const hasContent = current || enhanced;
     
@@ -95,11 +149,18 @@ export function EnhancementPreviewDialog({
     
     return (
       <div className="mb-6">
-        <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-          {label}
-          {hasChanges && <Badge variant="secondary" className="text-xs">Updated</Badge>}
-          {!hasChanges && hasContent && <Badge variant="outline" className="text-xs">No Changes</Badge>}
-        </h3>
+        <div className="flex items-center gap-3 mb-3">
+          <Checkbox
+            checked={selectedSections.has(sectionKey)}
+            onCheckedChange={() => toggleSection(sectionKey)}
+            disabled={!hasChanges}
+          />
+          <h3 className="font-semibold text-lg flex items-center gap-2">
+            {label}
+            {hasChanges && <Badge variant="secondary" className="text-xs">Updated</Badge>}
+            {!hasChanges && hasContent && <Badge variant="outline" className="text-xs">No Changes</Badge>}
+          </h3>
+        </div>
         
         <div className="grid grid-cols-2 gap-4">
           {/* Current */}
@@ -115,7 +176,13 @@ export function EnhancementPreviewDialog({
           {/* Enhanced */}
           <div>
             <p className="text-sm text-muted-foreground mb-2">Enhanced</p>
-            <div className="text-sm p-3 bg-primary/10 rounded border border-primary/20 max-h-96 overflow-y-auto">
+            <div 
+              className={`text-sm p-3 rounded border max-h-96 overflow-y-auto ${
+                selectedSections.has(sectionKey) 
+                  ? 'bg-primary/10 border-primary/20' 
+                  : 'bg-muted/30 border-muted'
+              }`}
+            >
               <pre className="whitespace-pre-wrap font-sans">
                 {enhanced || <span className="text-muted-foreground italic">No content</span>}
               </pre>
@@ -145,25 +212,25 @@ export function EnhancementPreviewDialog({
               </p>
             </div>
 
-            {renderTextComparison("Professional Summary", currentData?.summary || "", enhancedData?.summary || "")}
+            {renderTextComparison("Professional Summary", "summary", currentData?.summary || "", enhancedData?.summary || "")}
             
-            {renderArrayComparison("Skills", currentData?.skills || [], enhancedData?.skills || [])}
+            {renderArrayComparison("Skills", "skills", currentData?.skills || [], enhancedData?.skills || [])}
             
-            {renderArrayComparison("Experience", currentData?.experience || [], enhancedData?.experience || [])}
+            {renderArrayComparison("Experience", "experience", currentData?.experience || [], enhancedData?.experience || [])}
             
-            {renderArrayComparison("Education", currentData?.education || [], enhancedData?.education || [])}
+            {renderArrayComparison("Education", "education", currentData?.education || [], enhancedData?.education || [])}
             
-            {renderArrayComparison("Certifications", currentData?.certifications || [], enhancedData?.certifications || [])}
+            {renderArrayComparison("Certifications", "certifications", currentData?.certifications || [], enhancedData?.certifications || [])}
             
-            {renderArrayComparison("Projects", currentData?.projects || [], enhancedData?.projects || [])}
+            {renderArrayComparison("Projects", "projects", currentData?.projects || [], enhancedData?.projects || [])}
             
-            {renderArrayComparison("Publications", currentData?.publications || [], enhancedData?.publications || [])}
+            {renderArrayComparison("Publications", "publications", currentData?.publications || [], enhancedData?.publications || [])}
             
-            {renderArrayComparison("Awards", currentData?.awards || [], enhancedData?.awards || [])}
+            {renderArrayComparison("Awards", "awards", currentData?.awards || [], enhancedData?.awards || [])}
             
-            {renderArrayComparison("Languages", currentData?.languages || [], enhancedData?.languages || [])}
+            {renderArrayComparison("Languages", "languages", currentData?.languages || [], enhancedData?.languages || [])}
             
-            {renderArrayComparison("Volunteer Work", currentData?.volunteer || [], enhancedData?.volunteer || [])}
+            {renderArrayComparison("Volunteer Work", "volunteer_work", currentData?.volunteer || [], enhancedData?.volunteer || [])}
           </div>
         </ScrollArea>
 
@@ -178,12 +245,12 @@ export function EnhancementPreviewDialog({
             Reject Changes
           </Button>
           <Button
-            onClick={onApprove}
-            disabled={loading}
+            onClick={handleApprove}
+            disabled={loading || selectedSections.size === 0}
             className="gap-2"
           >
             <CheckCircle2 className="h-4 w-4" />
-            {loading ? "Applying..." : "Approve & Apply"}
+            {loading ? "Applying..." : `Apply ${selectedSections.size} Section${selectedSections.size !== 1 ? 's' : ''}`}
           </Button>
         </DialogFooter>
       </DialogContent>
