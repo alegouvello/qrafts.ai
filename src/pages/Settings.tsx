@@ -298,7 +298,7 @@ const Settings = () => {
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>
-            <img src={qraftLogo} alt="QRAFTS" className="h-20" />
+            <img src={qraftLogo} alt="QRAFTS" className="h-20 transition-all duration-300 hover:scale-105 hover:drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.5)]" />
             <div className="flex items-center gap-2 ml-auto">
               <SettingsIcon className="h-5 w-5 text-muted-foreground" />
               <h1 className="text-xl font-semibold">Settings</h1>

@@ -284,7 +284,7 @@ const CompanyProfile = () => {
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
               </Link>
-              <Link to="/dashboard">
+              <Link to="/dashboard" className="transition-all duration-300 hover:scale-105">
                 <img src={qraftLogo} alt="Qraft" className="h-20" />
               </Link>
             </div>
