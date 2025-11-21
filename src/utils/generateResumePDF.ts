@@ -168,7 +168,7 @@ function generateSingleColumnPDF(data: ResumeData, preview: boolean = false): st
 
   // Helper to add section header
   const addSectionHeader = (title: string) => {
-    checkPageBreak(15);
+    checkPageBreak(25);
     yPos += 2; // Extra space before section
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(13);
@@ -290,7 +290,7 @@ function generateSingleColumnPDF(data: ResumeData, preview: boolean = false): st
     
     data.experience.forEach((exp, index) => {
       // Calculate minimum space needed for job header (title + company + at least one bullet)
-      const minJobSpace = 30;
+      const minJobSpace = 35;
       checkPageBreak(minJobSpace);
       
       // Position
@@ -343,10 +343,10 @@ function generateSingleColumnPDF(data: ResumeData, preview: boolean = false): st
       }
       
       if (index < data.experience.length - 1) {
-        yPos += 4;
+        yPos += 5;
       }
     });
-    yPos += 4;
+    yPos += 6;
   }
 
   // Education
@@ -355,7 +355,7 @@ function generateSingleColumnPDF(data: ResumeData, preview: boolean = false): st
     
     data.education.forEach((edu, index) => {
       // Ensure we have enough space for the entire education entry
-      const minEduSpace = 18;
+      const minEduSpace = 22;
       checkPageBreak(minEduSpace);
       
       doc.setFont('helvetica', 'bold');
@@ -634,11 +634,12 @@ function generateTwoColumnPDF(data: ResumeData, preview: boolean = false): strin
     const currentY = inSidebar ? sidebarY : yPos;
     if (currentY + requiredSpace > pageHeight - margin) {
       doc.addPage();
+      // Always draw sidebar background on new pages
+      doc.setFillColor(...LIGHT_GRAY);
+      doc.rect(0, 0, sidebarWidth, pageHeight, 'F');
+      
       if (inSidebar) {
         sidebarY = margin;
-        // Redraw sidebar background
-        doc.setFillColor(...LIGHT_GRAY);
-        doc.rect(0, 0, sidebarWidth, pageHeight, 'F');
       } else {
         yPos = margin;
       }
@@ -835,7 +836,7 @@ function generateTwoColumnPDF(data: ResumeData, preview: boolean = false): strin
 
   // Experience
   if (data.experience && data.experience.length > 0) {
-    checkPageBreak(25);
+    checkPageBreak(35);
     yPos += 2;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
@@ -848,7 +849,7 @@ function generateTwoColumnPDF(data: ResumeData, preview: boolean = false): strin
 
     data.experience.forEach((exp, index) => {
       // Calculate minimum space needed for job header (title + company + at least one bullet)
-      const minJobSpace = 30;
+      const minJobSpace = 35;
       checkPageBreak(minJobSpace);
 
       // Position
@@ -897,15 +898,15 @@ function generateTwoColumnPDF(data: ResumeData, preview: boolean = false): strin
       }
 
       if (index < data.experience.length - 1) {
-        yPos += 3;
+        yPos += 5;
       }
     });
-    yPos += 4;
+    yPos += 6;
   }
 
   // Education
   if (data.education && data.education.length > 0) {
-    checkPageBreak(20);
+    checkPageBreak(30);
     yPos += 2;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
@@ -918,7 +919,7 @@ function generateTwoColumnPDF(data: ResumeData, preview: boolean = false): strin
 
     data.education.forEach((edu, index) => {
       // Ensure we have enough space for the entire education entry
-      const minEduSpace = 18;
+      const minEduSpace = 22;
       checkPageBreak(minEduSpace);
 
       doc.setFont('helvetica', 'bold');
@@ -951,7 +952,7 @@ function generateTwoColumnPDF(data: ResumeData, preview: boolean = false): strin
 
   // Projects
   if (data.projects && data.projects.length > 0) {
-    checkPageBreak(20);
+    checkPageBreak(30);
     yPos += 2;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
@@ -970,7 +971,7 @@ function generateTwoColumnPDF(data: ResumeData, preview: boolean = false): strin
         const projectHeight = 4.5 + (lines.length * 4.5) + 1; // title + description lines + gap
         checkPageBreak(projectHeight);
       } else {
-        checkPageBreak(8);
+        checkPageBreak(10);
       }
 
       doc.setFont('helvetica', 'bold');
