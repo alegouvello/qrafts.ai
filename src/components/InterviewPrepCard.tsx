@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Sparkles, User, Trash2 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { FormattedNotes } from "@/components/FormattedNotes";
 
 interface Interviewer {
   id: string;
@@ -164,10 +165,10 @@ export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: In
         <CardContent className="space-y-6" onClick={(e) => e.stopPropagation()}>
           {interviewer.notes && (
             <div className="bg-muted/30 rounded-lg p-4">
-              <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+              <h4 className="font-semibold text-sm mb-4 flex items-center gap-2">
                 <Badge variant="outline">Notes</Badge>
               </h4>
-              <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{interviewer.notes}</p>
+              <FormattedNotes notes={interviewer.notes} />
             </div>
           )}
 
