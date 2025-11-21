@@ -27,6 +27,11 @@ interface InterviewPrepCardProps {
   onPrepGenerated: () => void;
 }
 
+// Helper function to strip HTML tags from text
+const stripHtmlTags = (text: string): string => {
+  return text.replace(/<\/?[^>]+(>|$)/g, "");
+};
+
 export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: InterviewPrepCardProps) => {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -207,7 +212,8 @@ export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: In
                     </div>
                     <ul className="space-y-4">
                       {prep.talkingPoints.map((point: string, idx: number) => {
-                        const parts = point.split(':');
+                        const cleanPoint = stripHtmlTags(point);
+                        const parts = cleanPoint.split(':');
                         const hasLabel = parts.length > 1 && parts[0].length < 50;
                         return (
                           <li key={idx} className="flex gap-3 items-start group">
@@ -218,7 +224,7 @@ export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: In
                                   <span className="font-bold text-foreground">{parts[0]}:</span>
                                   {parts.slice(1).join(':')}
                                 </>
-                              ) : point}
+                              ) : cleanPoint}
                             </p>
                           </li>
                         );
@@ -235,7 +241,8 @@ export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: In
                     </div>
                     <ul className="space-y-4">
                       {prep.commonGround.map((point: string, idx: number) => {
-                        const parts = point.split(':');
+                        const cleanPoint = stripHtmlTags(point);
+                        const parts = cleanPoint.split(':');
                         const hasLabel = parts.length > 1 && parts[0].length < 50;
                         return (
                           <li key={idx} className="flex gap-3 items-start group">
@@ -246,7 +253,7 @@ export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: In
                                   <span className="font-bold text-foreground">{parts[0]}:</span>
                                   {parts.slice(1).join(':')}
                                 </>
-                              ) : point}
+                              ) : cleanPoint}
                             </p>
                           </li>
                         );
@@ -265,7 +272,7 @@ export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: In
                       {prep.questionsToAsk.map((question: string, idx: number) => (
                         <li key={idx} className="flex gap-3 items-start group">
                           <div className="mt-1.5 h-2 w-2 rounded-full bg-primary flex-shrink-0 group-hover:scale-125 transition-transform" />
-                          <p className="text-base leading-relaxed text-foreground/90">{question}</p>
+                          <p className="text-base leading-relaxed text-foreground/90">{stripHtmlTags(question)}</p>
                         </li>
                       ))}
                     </ul>
@@ -280,7 +287,8 @@ export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: In
                     </div>
                     <ul className="space-y-4">
                       {prep.areasToEmphasize.map((area: string, idx: number) => {
-                        const parts = area.split(':');
+                        const cleanArea = stripHtmlTags(area);
+                        const parts = cleanArea.split(':');
                         const hasLabel = parts.length > 1 && parts[0].length < 50;
                         return (
                           <li key={idx} className="flex gap-3 items-start group">
@@ -291,7 +299,7 @@ export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: In
                                   <span className="font-bold text-foreground">{parts[0]}:</span>
                                   {parts.slice(1).join(':')}
                                 </>
-                              ) : area}
+                              ) : cleanArea}
                             </p>
                           </li>
                         );
@@ -308,7 +316,8 @@ export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: In
                     </div>
                     <ul className="space-y-4">
                       {prep.potentialConcerns.map((concern: string, idx: number) => {
-                        const parts = concern.split(':');
+                        const cleanConcern = stripHtmlTags(concern);
+                        const parts = cleanConcern.split(':');
                         const hasLabel = parts.length > 1 && parts[0].length < 50;
                         return (
                           <li key={idx} className="flex gap-3 items-start group">
@@ -319,7 +328,7 @@ export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: In
                                   <span className="font-bold text-foreground">{parts[0]}:</span>
                                   {parts.slice(1).join(':')}
                                 </>
-                              ) : concern}
+                              ) : cleanConcern}
                             </p>
                           </li>
                         );
