@@ -82,6 +82,41 @@ export type Database = {
           },
         ]
       }
+      application_status_history: {
+        Row: {
+          application_id: string
+          changed_at: string
+          created_at: string
+          id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          application_id: string
+          changed_at?: string
+          created_at?: string
+          id?: string
+          status: string
+          user_id: string
+        }
+        Update: {
+          application_id?: string
+          changed_at?: string
+          created_at?: string
+          id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_application"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       applications: {
         Row: {
           applied_date: string

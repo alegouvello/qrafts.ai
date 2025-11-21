@@ -226,6 +226,15 @@ const Dashboard = () => {
       return;
     }
 
+    // Record initial status in history
+    await supabase
+      .from("application_status_history")
+      .insert({
+        application_id: newApp.id,
+        status: newApp.status,
+        user_id: user.id,
+      });
+
     toast({
       title: "Application Added",
       description: "Extracting job details and questions...",
