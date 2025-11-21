@@ -28,7 +28,7 @@ export const AddInterviewerDialog = ({ applicationId, applicationCompany, onInte
   const [email, setEmail] = useState("");
   const [linkedinUrl, setLinkedinUrl] = useState("");
   const [notes, setNotes] = useState("");
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -54,22 +54,47 @@ export const AddInterviewerDialog = ({ applicationId, applicationCompany, onInte
       return;
     }
 
+    // Convert to base64 and add to list
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64Data = reader.result as string;
+      setUploadedImages(prev => [...prev, base64Data]);
+      toast({
+        title: "Screenshot Added",
+        description: `${uploadedImages.length + 1} screenshot(s) uploaded. Click "Extract Info" when done.`,
+      });
+    };
+    reader.readAsDataURL(file);
+    
+    // Reset file input to allow uploading the same file again
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleExtractAll = async () => {
+    if (uploadedImages.length === 0) {
+      toast({
+        title: "No Screenshots",
+        description: "Please upload at least one screenshot first",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setExtractingScreenshot(true);
     toast({
-      title: "Processing Screenshot",
-      description: "Extracting LinkedIn profile information...",
+      title: "Processing Screenshots",
+      description: `Extracting information from ${uploadedImages.length} screenshot(s)...`,
     });
 
     try {
-      // Convert to base64
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64Data = reader.result as string;
-        setUploadedImage(base64Data);
+      let combinedInfo = "";
 
-        // Call edge function to extract info
+      // Process each image sequentially
+      for (let i = 0; i < uploadedImages.length; i++) {
         const { data, error } = await supabase.functions.invoke('extract-linkedin-screenshot', {
-          body: { imageData: base64Data }
+          body: { imageData: uploadedImages[i] }
         });
 
         if (error || data?.error) {
@@ -77,24 +102,32 @@ export const AddInterviewerDialog = ({ applicationId, applicationCompany, onInte
         }
 
         if (data?.success && data?.extractedInfo) {
-          setNotes(data.extractedInfo);
-          toast({
-            title: "Success",
-            description: "LinkedIn profile information extracted successfully",
-          });
+          if (i > 0) combinedInfo += "\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
+          combinedInfo += data.extractedInfo;
         }
-      };
-      reader.readAsDataURL(file);
+      }
+
+      if (combinedInfo) {
+        setNotes(combinedInfo);
+        toast({
+          title: "Success",
+          description: `Information extracted from ${uploadedImages.length} screenshot(s)`,
+        });
+      }
     } catch (error: any) {
-      console.error('Error extracting screenshot:', error);
+      console.error('Error extracting screenshots:', error);
       toast({
         title: "Extraction Failed",
-        description: error.message || "Could not extract information from the screenshot",
+        description: error.message || "Could not extract information from the screenshots",
         variant: "destructive",
       });
     } finally {
       setExtractingScreenshot(false);
     }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setUploadedImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -166,7 +199,7 @@ export const AddInterviewerDialog = ({ applicationId, applicationCompany, onInte
       setEmail("");
       setLinkedinUrl("");
       setNotes("");
-      setUploadedImage(null);
+      setUploadedImages([]);
       onInterviewerAdded();
     } catch (error: any) {
       console.error("Error adding interviewer:", error);
@@ -246,7 +279,7 @@ export const AddInterviewerDialog = ({ applicationId, applicationCompany, onInte
           </div>
           <div>
             <Label htmlFor="notes">Notes/Bio</Label>
-            <div className="mb-2">
+            <div className="mb-2 space-y-2">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -254,41 +287,60 @@ export const AddInterviewerDialog = ({ applicationId, applicationCompany, onInte
                 onChange={handleImageUpload}
                 className="hidden"
               />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={extractingScreenshot}
-                className="w-full mb-2"
-              >
-                {extractingScreenshot ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Extracting...
-                  </>
-                ) : (
-                  <>
-                    <ImageIcon className="h-4 w-4 mr-2" />
-                    Upload LinkedIn Screenshot
-                  </>
-                )}
-              </Button>
-              {uploadedImage && (
-                <div className="mt-2 p-2 bg-muted rounded-md flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground flex items-center">
-                    <ImageIcon className="h-3 w-3 mr-1" />
-                    Screenshot uploaded
-                  </span>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={extractingScreenshot}
+                  className="flex-1"
+                >
+                  <ImageIcon className="h-4 w-4 mr-2" />
+                  Add Screenshot
+                </Button>
+                {uploadedImages.length > 0 && (
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="default"
                     size="sm"
-                    onClick={() => setUploadedImage(null)}
-                    className="h-6 px-2"
+                    onClick={handleExtractAll}
+                    disabled={extractingScreenshot}
+                    className="flex-1"
                   >
-                    Clear
+                    {extractingScreenshot ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Extracting...
+                      </>
+                    ) : (
+                      <>
+                        <ImageIcon className="h-4 w-4 mr-2" />
+                        Extract Info ({uploadedImages.length})
+                      </>
+                    )}
                   </Button>
+                )}
+              </div>
+              {uploadedImages.length > 0 && (
+                <div className="space-y-1">
+                  {uploadedImages.map((_, index) => (
+                    <div key={index} className="p-2 bg-muted rounded-md flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground flex items-center">
+                        <ImageIcon className="h-3 w-3 mr-1" />
+                        Screenshot {index + 1}
+                      </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveImage(index)}
+                        className="h-6 px-2"
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -301,7 +353,7 @@ export const AddInterviewerDialog = ({ applicationId, applicationCompany, onInte
               className="text-base leading-relaxed font-mono"
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Upload a LinkedIn screenshot or manually add information from LinkedIn, research, or prep notes
+              Upload LinkedIn screenshots and click &quot;Extract Info&quot;, or manually add information
             </p>
           </div>
           <div className="flex justify-end gap-2">
