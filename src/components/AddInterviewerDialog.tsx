@@ -297,7 +297,8 @@ export const AddInterviewerDialog = ({ applicationId, applicationCompany, onInte
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Add relevant background, shared connections, conversation topics, or research notes..."
-              rows={4}
+              rows={12}
+              className="text-base leading-relaxed font-mono"
             />
             <p className="text-xs text-muted-foreground mt-1">
               Upload a LinkedIn screenshot or manually add information from LinkedIn, research, or prep notes
