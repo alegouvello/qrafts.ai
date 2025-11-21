@@ -50,14 +50,15 @@ interface ParsedResume {
     school: string;
     year: string;
   }>;
-  certifications?: string[];
-  publications?: string[];
+  certifications?: (string | { name: string; issuer: string; date: string })[];
+  publications?: (string | { title: string; publisher: string; date: string })[];
   projects?: Array<{
     name: string;
     description: string;
+    url?: string;
   }>;
-  awards?: string[];
-  languages?: string[];
+  awards?: (string | { title: string; issuer: string; date: string })[];
+  languages?: (string | { language: string; proficiency: string })[];
   volunteer_work?: Array<{
     role: string;
     organization: string;
@@ -627,7 +628,12 @@ export default function Profile() {
                 <ul className="space-y-3">
                   {parsedData.publications.map((pub, index) => (
                     <li key={index} className="text-foreground/80 leading-relaxed pl-6 relative before:absolute before:left-0 before:top-2 before:w-2 before:h-2 before:bg-primary before:rounded-full">
-                      {pub}
+                      {typeof pub === 'string' ? pub : (
+                        <div>
+                          <div className="font-medium">{pub.title}</div>
+                          <div className="text-sm text-muted-foreground">{pub.publisher} • {pub.date}</div>
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -651,7 +657,12 @@ export default function Profile() {
                       key={index}
                       className="px-4 py-2 bg-gradient-to-r from-primary/10 to-accent/10 text-foreground rounded-full text-sm font-medium border border-primary/20 hover:border-primary/40 transition-colors"
                     >
-                      {cert}
+                      {typeof cert === 'string' ? cert : (
+                        <span>
+                          <span className="font-medium">{cert.name}</span>
+                          <span className="text-xs text-muted-foreground ml-2">({cert.issuer}, {cert.date})</span>
+                        </span>
+                      )}
                     </span>
                   ))}
                 </div>
@@ -672,7 +683,12 @@ export default function Profile() {
                 <ul className="space-y-3">
                   {parsedData.awards.map((award, index) => (
                     <li key={index} className="text-foreground/80 leading-relaxed pl-6 relative before:absolute before:left-0 before:top-2 before:w-2 before:h-2 before:bg-primary before:rounded-full">
-                      {award}
+                      {typeof award === 'string' ? award : (
+                        <div>
+                          <div className="font-medium">{award.title}</div>
+                          <div className="text-sm text-muted-foreground">{award.issuer} • {award.date}</div>
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -694,7 +710,19 @@ export default function Profile() {
                   {parsedData.projects.map((project, index) => (
                     <div key={index} className="relative pl-8 before:absolute before:left-0 before:top-2 before:w-0.5 before:h-full before:bg-gradient-to-b before:from-primary before:to-transparent">
                       <div className="absolute left-0 top-1 w-2 h-2 bg-primary rounded-full -translate-x-[3px]" />
-                      <h3 className="text-lg font-semibold mb-2">{project.name}</h3>
+                      <h3 className="text-lg font-semibold mb-2">
+                        {project.name}
+                        {project.url && (
+                          <a 
+                            href={project.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="ml-2 text-sm text-primary hover:underline"
+                          >
+                            (View)
+                          </a>
+                        )}
+                      </h3>
                       <p className="text-foreground/80 leading-relaxed">{project.description}</p>
                     </div>
                   ))}
@@ -719,7 +747,12 @@ export default function Profile() {
                       key={index}
                       className="px-4 py-2 bg-gradient-to-r from-primary/10 to-accent/10 text-foreground rounded-full text-sm font-medium border border-primary/20 hover:border-primary/40 transition-colors"
                     >
-                      {lang}
+                      {typeof lang === 'string' ? lang : (
+                        <span>
+                          <span className="font-medium">{lang.language}</span>
+                          <span className="text-xs text-muted-foreground ml-2">({lang.proficiency})</span>
+                        </span>
+                      )}
                     </span>
                   ))}
                 </div>
