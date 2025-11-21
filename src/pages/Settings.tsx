@@ -22,6 +22,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const passwordSchema = z.object({
   newPassword: z.string().min(6, "Password must be at least 6 characters"),
@@ -32,6 +35,7 @@ const passwordSchema = z.object({
 });
 
 const Settings = () => {
+  const { t } = useTranslation();
   const [subscriptionStatus, setSubscriptionStatus] = useState<{
     subscribed: boolean;
     product_id: string | null;
@@ -291,7 +295,7 @@ const Settings = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading settings...</p>
+          <p className="text-muted-foreground">{t('settings.loading')}</p>
         </div>
       </div>
     );
@@ -325,8 +329,10 @@ const Settings = () => {
             <div className="flex items-center gap-3">
               <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full border border-primary/20">
                 <SettingsIcon className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium">Settings</span>
+                <span className="text-sm font-medium">{t('settings.title')}</span>
               </div>
+              <LanguageSwitcher />
+              <ThemeToggle />
             </div>
           </div>
         </div>
@@ -336,9 +342,9 @@ const Settings = () => {
       <main className="container mx-auto px-4 sm:px-6 py-12 max-w-5xl relative z-10">
         <div className="mb-12 text-center animate-fade-in-down">
           <h1 className="text-4xl sm:text-5xl font-bold mb-3 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-            Account Settings
+            {t('settings.account')}
           </h1>
-          <p className="text-muted-foreground text-lg">Manage your profile, security, and subscription</p>
+          <p className="text-muted-foreground text-lg">{t('settings.personalDetails')}</p>
         </div>
 
         <div className="grid gap-8">
@@ -351,8 +357,8 @@ const Settings = () => {
                   <User className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl">Profile Information</CardTitle>
-                  <CardDescription className="text-base">Your personal details</CardDescription>
+                  <CardTitle className="text-2xl">{t('settings.profileInfo')}</CardTitle>
+                  <CardDescription className="text-base">{t('settings.personalDetails')}</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -361,7 +367,7 @@ const Settings = () => {
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                     <div className="h-1.5 w-1.5 rounded-full bg-primary"></div>
-                    Email Address
+                    {t('settings.emailAddress')}
                   </label>
                   <p className="text-lg font-medium">{userProfile?.email}</p>
                 </div>
@@ -369,7 +375,7 @@ const Settings = () => {
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                       <div className="h-1.5 w-1.5 rounded-full bg-accent"></div>
-                      Full Name
+                      {t('profile.fullName')}
                     </label>
                     <p className="text-lg font-medium">{userProfile.full_name}</p>
                   </div>
@@ -385,7 +391,7 @@ const Settings = () => {
                 size="lg"
               >
                 <LogOut className="h-4 w-4 mr-2 group-hover:translate-x-[-2px] transition-transform" />
-                Sign Out
+                {t('settings.signOut')}
               </Button>
             </CardContent>
           </Card>
@@ -400,8 +406,8 @@ const Settings = () => {
                     <Crown className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-2xl">Subscription</CardTitle>
-                    <CardDescription className="text-base">Manage your Qraft Pro plan</CardDescription>
+                    <CardTitle className="text-2xl">{t('settings.subscription')}</CardTitle>
+                    <CardDescription className="text-base">{t('settings.proPlan')}</CardDescription>
                   </div>
                 </div>
                 <Button
@@ -412,7 +418,7 @@ const Settings = () => {
                   className="rounded-full hover:border-primary/50 transition-all"
                 >
                   <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                  Refresh
+                  {t('settings.refresh')}
                 </Button>
               </div>
             </CardHeader>
@@ -427,14 +433,14 @@ const Settings = () => {
                       <div className="flex items-start justify-between mb-6">
                         <div>
                           <div className="flex items-center gap-3 mb-3">
-                            <h3 className="text-2xl font-bold">Qraft Pro</h3>
+                            <h3 className="text-2xl font-bold">{t('settings.pro')}</h3>
                             {subscriptionStatus.is_trialing ? (
                               <Badge className="bg-primary text-primary-foreground border-0 shadow-lg shadow-primary/20">
-                                Free Trial Active
+                                {t('settings.freeTrial')}
                               </Badge>
                             ) : (
                               <Badge className="bg-success text-success-foreground border-0 shadow-lg shadow-success/20">
-                                Active
+                                {t('settings.active')}
                               </Badge>
                             )}
                           </div>
@@ -447,16 +453,16 @@ const Settings = () => {
 
                       <div className="grid sm:grid-cols-2 gap-4 mb-6">
                         <div className="p-4 rounded-xl bg-background/50 backdrop-blur-sm border border-border/50">
-                          <p className="text-sm text-muted-foreground mb-1">Status</p>
+                          <p className="text-sm text-muted-foreground mb-1">{t('settings.status')}</p>
                           <p className="text-lg font-semibold">
-                            {subscriptionStatus.is_trialing ? "Trial Active" : "Subscribed"}
+                            {subscriptionStatus.is_trialing ? t('settings.freeTrial') : t('settings.subscribed')}
                           </p>
                         </div>
                         {((subscriptionStatus.is_trialing && subscriptionStatus.trial_end) || 
                           (!subscriptionStatus.is_trialing && subscriptionStatus.subscription_end)) && (
                           <div className="p-4 rounded-xl bg-background/50 backdrop-blur-sm border border-border/50">
                             <p className="text-sm text-muted-foreground mb-1">
-                              {subscriptionStatus.is_trialing ? "Trial Ends" : "Next Billing"}
+                              {subscriptionStatus.is_trialing ? t('settings.trialEnds') : t('settings.renewsOn')}
                             </p>
                             <p className="text-lg font-semibold flex items-center gap-2">
                               <Calendar className="h-4 w-4 text-primary" />
@@ -560,22 +566,22 @@ const Settings = () => {
                   <Shield className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl">Security</CardTitle>
-                  <CardDescription className="text-base">Manage your password and account security</CardDescription>
+                  <CardTitle className="text-2xl">{t('settings.security')}</CardTitle>
+                  <CardDescription className="text-base">{t('settings.securitySettings')}</CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-6 relative">
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="newPassword" className="text-base">New Password</Label>
+                  <Label htmlFor="newPassword" className="text-base">{t('settings.newPassword')}</Label>
                   <div className="relative">
                     <Input
                       id="newPassword"
                       type={showPassword ? "text" : "password"}
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="Enter new password"
+                      placeholder={t('settings.newPassword')}
                       className="pr-12 h-12 rounded-full"
                     />
                     <Button
@@ -594,14 +600,14 @@ const Settings = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-base">Confirm New Password</Label>
+                  <Label htmlFor="confirmPassword" className="text-base">{t('settings.confirmPassword')}</Label>
                   <div className="relative">
                     <Input
                       id="confirmPassword"
                       type={showConfirmPassword ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Confirm new password"
+                      placeholder={t('settings.confirmPassword')}
                       className="pr-12 h-12 rounded-full"
                     />
                     <Button
@@ -626,7 +632,7 @@ const Settings = () => {
                   size="lg"
                 >
                   <Lock className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
-                  {changingPassword ? "Updating..." : "Change Password"}
+                  {changingPassword ? t('common.loading') : t('settings.changePassword')}
                 </Button>
               </div>
             </CardContent>
@@ -640,8 +646,8 @@ const Settings = () => {
                   <Trash2 className="h-6 w-6 text-destructive" />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl text-destructive">Danger Zone</CardTitle>
-                  <CardDescription className="text-base">Permanently delete your account and all data</CardDescription>
+                  <CardTitle className="text-2xl text-destructive">{t('settings.dangerZone')}</CardTitle>
+                  <CardDescription className="text-base">{t('settings.dangerWarning')}</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -672,7 +678,7 @@ const Settings = () => {
                   size="lg"
                 >
                   <Trash2 className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
-                  Delete Account
+                  {t('settings.deleteAccount')}
                 </Button>
               </div>
             </CardContent>
