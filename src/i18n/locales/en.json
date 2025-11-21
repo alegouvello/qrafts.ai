@@ -83,8 +83,10 @@
     "stats": {
       "total": "Total Applications",
       "pending": "Pending",
+      "pendingReview": "Pending Review",
       "interview": "Interviews",
-      "accepted": "Accepted"
+      "accepted": "Accepted",
+      "responseRate": "Response Rate"
     },
     "recent": "Recent Applications",
     "addApplication": "Add Application",

@@ -567,7 +567,7 @@ const Dashboard = () => {
             </div>
             <div className="space-y-1">
               <div className="text-2xl sm:text-3xl font-bold text-foreground">{stats.total}</div>
-              <div className="text-xs sm:text-sm text-muted-foreground">Total Applications</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">{t('dashboard.stats.total')}</div>
             </div>
           </div>
           
@@ -579,7 +579,7 @@ const Dashboard = () => {
             </div>
             <div className="space-y-1">
               <div className="text-2xl sm:text-3xl font-bold text-foreground">{stats.pending}</div>
-              <div className="text-xs sm:text-sm text-muted-foreground">Pending Review</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">{t('dashboard.stats.pendingReview')}</div>
             </div>
           </div>
           
@@ -591,7 +591,7 @@ const Dashboard = () => {
             </div>
             <div className="space-y-1">
               <div className="text-2xl sm:text-3xl font-bold text-foreground">{stats.interviews}</div>
-              <div className="text-xs sm:text-sm text-muted-foreground">Interviews</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">{t('dashboard.stats.interview')}</div>
             </div>
           </div>
           
@@ -603,7 +603,7 @@ const Dashboard = () => {
             </div>
             <div className="space-y-1">
               <div className="text-2xl sm:text-3xl font-bold text-foreground">{stats.responseRate}%</div>
-              <div className="text-xs sm:text-sm text-muted-foreground">Response Rate</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">{t('dashboard.stats.responseRate')}</div>
             </div>
           </div>
         </div>

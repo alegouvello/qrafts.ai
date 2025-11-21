@@ -83,8 +83,10 @@
     "stats": {
       "total": "Total de solicitudes",
       "pending": "Pendientes",
+      "pendingReview": "Pendiente de revisión",
       "interview": "Entrevistas",
-      "accepted": "Aceptadas"
+      "accepted": "Aceptadas",
+      "responseRate": "Tasa de respuesta"
     },
     "recent": "Solicitudes recientes",
     "addApplication": "Añadir solicitud",

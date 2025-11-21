@@ -83,8 +83,10 @@
     "stats": {
       "total": "Total des candidatures",
       "pending": "En attente",
+      "pendingReview": "En attente de révision",
       "interview": "Entretiens",
-      "accepted": "Acceptées"
+      "accepted": "Acceptées",
+      "responseRate": "Taux de réponse"
     },
     "recent": "Candidatures récentes",
     "addApplication": "Ajouter une candidature",
