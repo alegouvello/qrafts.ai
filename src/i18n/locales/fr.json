@@ -335,5 +335,68 @@
     "suggestions": "Suggestions",
     "backToDashboard": "Retour au tableau de bord",
     "back": "Retour"
+  },
+  "footer": {
+    "allRightsReserved": "Tous droits réservés",
+    "privacyPolicy": "Politique de confidentialité",
+    "termsOfService": "Conditions d'utilisation"
+  },
+  "notFound": {
+    "title": "404",
+    "message": "Page introuvable",
+    "returnHome": "Retour à l'accueil"
+  },
+  "company": {
+    "communityInsights": "Statistiques de la communauté",
+    "statsDescription": "Statistiques de toutes les candidatures à {{company}}",
+    "avgResponse": "Réponse moyenne",
+    "days": "jours",
+    "fastest": "Plus rapide",
+    "interviewRate": "Taux d'entretien",
+    "acceptanceRate": "Taux d'acceptation",
+    "accepted": "acceptées",
+    "rejectionRate": "Taux de rejet",
+    "rejected": "rejetées",
+    "yourStats": "Vos statistiques personnelles",
+    "yourStatsDescription": "Vos performances avec {{company}}",
+    "applicationsTracked": "Candidatures suivies",
+    "application": "Candidature",
+    "applications": "Candidatures",
+    "totalAppsAcrossCommunity": "{{total}} candidatures totales suivies dans la communauté",
+    "companyNotes": "Notes sur l'entreprise",
+    "notesDescription": "Vos notes privées sur {{company}}",
+    "addNotes": "Ajoutez des notes sur la culture d'entreprise, le processus d'entretien, les contacts ou toute information utile...",
+    "saveNotes": "Enregistrer les notes",
+    "editNotes": "Modifier les notes",
+    "notesSaved": "Notes enregistrées",
+    "notesSavedDescription": "Vos notes sur l'entreprise ont été enregistrées",
+    "recentApplications": "Candidatures récentes",
+    "viewApplication": "Voir la candidature",
+    "loading": "Chargement du profil de l'entreprise..."
+  },
+  "interviewer": {
+    "addInterviewer": "Ajouter un intervieweur",
+    "namePlaceholder": "Jean Dupont",
+    "rolePlaceholder": "Responsable du recrutement",
+    "companyPlaceholder": "Acme Inc.",
+    "emailPlaceholder": "intervieweur@entreprise.com",
+    "linkedinPlaceholder": "https://linkedin.com/in/jeandupont",
+    "addScreenshot": "Ajouter une capture d'écran",
+    "extractInfo": "Extraire les infos",
+    "extractingInfo": "Extraction en cours...",
+    "remove": "Supprimer",
+    "notesPlaceholder": "Ajoutez des informations sur le parcours, les contacts communs, les sujets de conversation ou vos recherches...",
+    "screenshotHelp": "Téléchargez des captures d'écran LinkedIn et cliquez sur \"Extraire les infos\", ou ajoutez manuellement les informations",
+    "screenshotAdded": "Capture d'écran ajoutée",
+    "screenshotsUploaded": "{{count}} capture(s) d'écran téléchargée(s). Cliquez sur \"Extraire les infos\" quand c'est prêt.",
+    "invalidEmail": "Adresse e-mail invalide",
+    "interviewerAdded": "Intervieweur ajouté avec succès"
+  },
+  "answer": {
+    "reviewFeedback": "Examinez les commentaires et appliquez la version améliorée à votre réponse",
+    "wantChanges": "Vous voulez des modifications spécifiques ? Ajoutez des instructions",
+    "instructionsPlaceholder": "Ex : 'Rendre plus concis', 'Ajouter plus de détails techniques', 'Se concentrer sur l'expérience de leadership'...",
+    "regenerate": "Régénérer",
+    "applyChanges": "Appliquer les modifications"
   }
 }

@@ -335,5 +335,68 @@
     "suggestions": "Suggestions",
     "backToDashboard": "Back to Dashboard",
     "back": "Back"
+  },
+  "footer": {
+    "allRightsReserved": "All rights reserved",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service"
+  },
+  "notFound": {
+    "title": "404",
+    "message": "Page not found",
+    "returnHome": "Return Home"
+  },
+  "company": {
+    "communityInsights": "Community Insights",
+    "statsDescription": "Statistics from all applications to {{company}}",
+    "avgResponse": "Avg Response",
+    "days": "days",
+    "fastest": "Fastest",
+    "interviewRate": "Interview Rate",
+    "acceptanceRate": "Acceptance Rate",
+    "accepted": "accepted",
+    "rejectionRate": "Rejection Rate",
+    "rejected": "rejected",
+    "yourStats": "Your Personal Stats",
+    "yourStatsDescription": "Your performance with {{company}}",
+    "applicationsTracked": "Applications Tracked",
+    "application": "Application",
+    "applications": "Applications",
+    "totalAppsAcrossCommunity": "{{total}} total applications tracked across the community",
+    "companyNotes": "Company Notes",
+    "notesDescription": "Your private notes about {{company}}",
+    "addNotes": "Add notes about company culture, interview process, connections, or anything useful...",
+    "saveNotes": "Save Notes",
+    "editNotes": "Edit Notes",
+    "notesSaved": "Notes Saved",
+    "notesSavedDescription": "Your company notes have been saved",
+    "recentApplications": "Recent Applications",
+    "viewApplication": "View Application",
+    "loading": "Loading company profile..."
+  },
+  "interviewer": {
+    "addInterviewer": "Add Interviewer",
+    "namePlaceholder": "John Doe",
+    "rolePlaceholder": "Hiring Manager",
+    "companyPlaceholder": "Acme Inc.",
+    "emailPlaceholder": "interviewer@company.com",
+    "linkedinPlaceholder": "https://linkedin.com/in/johndoe",
+    "addScreenshot": "Add Screenshot",
+    "extractInfo": "Extract Info",
+    "extractingInfo": "Extracting...",
+    "remove": "Remove",
+    "notesPlaceholder": "Add relevant background, shared connections, conversation topics, or research notes...",
+    "screenshotHelp": "Upload LinkedIn screenshots and click \"Extract Info\", or manually add information",
+    "screenshotAdded": "Screenshot Added",
+    "screenshotsUploaded": "{{count}} screenshot(s) uploaded. Click \"Extract Info\" when done.",
+    "invalidEmail": "Invalid email address",
+    "interviewerAdded": "Interviewer added successfully"
+  },
+  "answer": {
+    "reviewFeedback": "Review the feedback and apply the improved version to your answer",
+    "wantChanges": "Want specific changes? Add instructions",
+    "instructionsPlaceholder": "E.g., 'Make it more concise', 'Add more technical details', 'Focus on leadership experience'...",
+    "regenerate": "Regenerate",
+    "applyChanges": "Apply Changes"
   }
 }
