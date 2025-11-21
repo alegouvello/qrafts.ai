@@ -11,14 +11,20 @@ serve(async (req) => {
   }
 
   try {
-    const { messages } = await req.json();
+    const { messages, language = 'en' } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const systemPrompt = `You are the QRAFTS AI Assistant, a helpful companion for job seekers using the QRAFTS platform. 
+    const languageInstructions = {
+      en: "Respond in English.",
+      fr: "Réponds en français.",
+      es: "Responde en español."
+    };
+
+    const systemPrompt = `You are the QRAFTS AI Assistant, a helpful companion for job seekers using the QRAFTS platform. ${languageInstructions[language as keyof typeof languageInstructions] || languageInstructions.en}
 
 Your role is to help users with:
 - Understanding how to use QRAFTS features (application tracking, answer management, timeline events, role-fit analysis)

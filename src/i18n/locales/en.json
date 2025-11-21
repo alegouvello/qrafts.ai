@@ -1,0 +1,166 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "close": "Close",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import",
+    "upload": "Upload",
+    "download": "Download",
+    "view": "View",
+    "settings": "Settings",
+    "profile": "Profile",
+    "logout": "Logout",
+    "login": "Login",
+    "signup": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "company": "Company",
+    "position": "Position",
+    "status": "Status",
+    "date": "Date",
+    "actions": "Actions",
+    "welcome": "Welcome"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "calendar": "Calendar",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "landing": {
+    "hero": {
+      "title": "Track Your Job Applications with AI-Powered Insights",
+      "subtitle": "Never lose track of an opportunity again. Qrafts helps you organize, track, and optimize your job search with intelligent insights.",
+      "cta": "Get Started Free",
+      "demo": "Watch Demo"
+    },
+    "features": {
+      "title": "Everything You Need to Land Your Dream Job",
+      "organize": {
+        "title": "Organize Applications",
+        "description": "Keep all your job applications in one place with status tracking and timeline views"
+      },
+      "analyze": {
+        "title": "AI-Powered Analysis",
+        "description": "Get intelligent insights on role fit, company culture, and application optimization"
+      },
+      "automate": {
+        "title": "Automate Follow-ups",
+        "description": "Never miss a follow-up with smart reminders and automated status updates"
+      }
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "overview": "Application Overview",
+    "stats": {
+      "total": "Total Applications",
+      "pending": "Pending",
+      "interview": "Interviews",
+      "accepted": "Accepted"
+    },
+    "recent": "Recent Applications",
+    "addApplication": "Add Application",
+    "noApplications": "No applications yet",
+    "getStarted": "Get started by adding your first job application"
+  },
+  "application": {
+    "add": "Add Application",
+    "edit": "Edit Application",
+    "delete": "Delete Application",
+    "company": "Company Name",
+    "position": "Position",
+    "url": "Job URL",
+    "appliedDate": "Applied Date",
+    "status": {
+      "wishlist": "Wishlist",
+      "applied": "Applied",
+      "interview": "Interview",
+      "accepted": "Accepted",
+      "rejected": "Rejected"
+    },
+    "details": "Application Details",
+    "timeline": "Timeline",
+    "notes": "Notes",
+    "questions": "Questions",
+    "analysis": "Role Fit Analysis",
+    "addQuestion": "Add Question",
+    "saveAnswer": "Save Answer",
+    "improveAnswer": "Improve Answer",
+    "exportPDF": "Export as PDF"
+  },
+  "profile": {
+    "title": "Profile",
+    "edit": "Edit Profile",
+    "uploadResume": "Upload Resume",
+    "fullName": "Full Name",
+    "email": "Email",
+    "phone": "Phone",
+    "location": "Location",
+    "linkedin": "LinkedIn URL",
+    "website": "Website URL",
+    "resumeText": "Resume/CV",
+    "saved": "Profile saved successfully",
+    "error": "Error saving profile"
+  },
+  "calendar": {
+    "title": "Calendar",
+    "addEvent": "Add Event",
+    "eventTypes": {
+      "interview": "Interview",
+      "followup": "Follow-up",
+      "deadline": "Deadline",
+      "networking": "Networking"
+    },
+    "noEvents": "No events scheduled"
+  },
+  "settings": {
+    "title": "Settings",
+    "account": "Account Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "notifications": "Notifications",
+    "privacy": "Privacy",
+    "terms": "Terms of Service"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "forgotPassword": "Forgot Password?",
+    "resetPassword": "Reset Password",
+    "emailPlaceholder": "Enter your email",
+    "passwordPlaceholder": "Enter your password",
+    "rememberMe": "Remember me",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "signInSuccess": "Signed in successfully",
+    "signUpSuccess": "Account created successfully",
+    "signOutSuccess": "Signed out successfully",
+    "error": "Authentication error"
+  },
+  "chat": {
+    "title": "AI Assistant",
+    "placeholder": "Ask me anything about your job search...",
+    "thinking": "Thinking...",
+    "error": "Sorry, I encountered an error. Please try again."
+  },
+  "toast": {
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Info"
+  }
+}

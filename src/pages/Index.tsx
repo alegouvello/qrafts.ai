@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight, FileText, Sparkles, TrendingUp, CheckCircle2, Menu } from "lucide-react";
+import { ArrowRight, FileText, Sparkles, TrendingUp, Menu } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import {
   Sheet,
   SheetContent,
@@ -18,6 +20,7 @@ import qraftLogo from "@/assets/qrafts-logo.png";
 
 
 const Index = () => {
+  const { t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Scroll animations for different sections
@@ -53,11 +56,12 @@ const Index = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-4">
             <Button variant="ghost" onClick={scrollToFeatures} className="rounded-full min-h-[44px]">
-              Features
+              {t('landing.features.title')}
             </Button>
+            <LanguageSwitcher />
             <Link to="/auth">
               <Button variant="outline" size="sm" className="rounded-full border-border/60 hover:border-primary/50 transition-all min-h-[44px]">
-                Sign In
+                {t('auth.signIn')}
               </Button>
             </Link>
           </div>
@@ -82,7 +86,7 @@ const Index = () => {
                   className="w-full justify-start text-lg rounded-full min-h-[48px]"
                 >
                   <Sparkles className="h-5 w-5 mr-3" />
-                  Features
+                  {t('landing.features.title')}
                 </Button>
                 <Button 
                   variant="ghost" 
@@ -90,12 +94,12 @@ const Index = () => {
                   className="w-full justify-start text-lg rounded-full min-h-[48px]"
                 >
                   <ArrowRight className="h-5 w-5 mr-3" />
-                  Get Started
+                  {t('landing.hero.cta')}
                 </Button>
                 <div className="h-px bg-border my-2" />
                 <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
                   <Button className="w-full rounded-full shadow-lg shadow-primary/20 min-h-[48px]">
-                    Sign In
+                    {t('auth.signIn')}
                   </Button>
                 </Link>
               </div>
@@ -122,13 +126,12 @@ const Index = () => {
               </span>
             </h2>
             <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-lg mx-auto md:mx-0 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-              Keep all your applications organized in one place. Build a library of your best answers 
-              and improve them over time. Learn what works and refine your approach with every application.
+              {t('landing.hero.subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 pt-4 justify-center md:justify-start animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
               <Link to="/auth" className="w-full sm:w-auto">
                 <Button size="lg" className="w-full sm:w-auto rounded-full group shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:scale-105 transition-all duration-300 min-h-[48px]">
-                  Get Started Free
+                  {t('landing.hero.cta')}
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
@@ -138,7 +141,7 @@ const Index = () => {
                 className="w-full sm:w-auto rounded-full border-border/60 hover:border-primary/50 hover:scale-105 transition-all duration-300 min-h-[48px]"
                 onClick={scrollToFeatures}
               >
-                See How It Works
+                {t('landing.hero.demo')}
               </Button>
             </div>
           </div>
@@ -206,9 +209,9 @@ const Index = () => {
           <div className="inline-block px-3 sm:px-4 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs sm:text-sm font-medium mb-4">
             Everything You Need
           </div>
-          <h3 id="features-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">Organize. Learn. Improve.</h3>
+          <h3 id="features-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">{t('landing.features.title')}</h3>
           <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
-            Manage all your applications and answers in one place, then get better with every submission
+            {t('landing.hero.subtitle')}
           </p>
         </div>
 
@@ -234,10 +237,9 @@ const Index = () => {
                 <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
               </div>
               <div className="space-y-3">
-                <h4 className="text-xl sm:text-2xl font-bold">Stay Organized</h4>
+                <h4 className="text-xl sm:text-2xl font-bold">{t('landing.features.organize.title')}</h4>
                 <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                  Track all your applications in one dashboard. Keep every question, answer, 
-                  and deadline organized so you never lose track of where you stand.
+                  {t('landing.features.organize.description')}
                 </p>
               </div>
             </div>
@@ -264,10 +266,9 @@ const Index = () => {
                 <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-accent" />
               </div>
               <div className="space-y-3">
-                <h4 className="text-xl sm:text-2xl font-bold">Save Your Best Answers</h4>
+                <h4 className="text-xl sm:text-2xl font-bold">{t('landing.features.analyze.title')}</h4>
                 <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                  Build a library of your strongest responses. Save answers that work well 
-                  and reuse them across applications to maintain consistency and quality.
+                  {t('landing.features.analyze.description')}
                 </p>
               </div>
             </div>
@@ -289,10 +290,9 @@ const Index = () => {
                 <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-success" />
               </div>
               <div className="space-y-3">
-                <h4 className="text-xl sm:text-2xl font-bold">Learn and Improve</h4>
+                <h4 className="text-xl sm:text-2xl font-bold">{t('landing.features.automate.title')}</h4>
                 <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                  See what works across your applications. Refine your answers over time, 
-                  track patterns, and continuously improve your response quality.
+                  {t('landing.features.automate.description')}
                 </p>
               </div>
             </div>

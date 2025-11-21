@@ -332,6 +332,7 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          language: string | null
           linkedin_url: string | null
           location: string | null
           phone: string | null
@@ -346,6 +347,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          language?: string | null
           linkedin_url?: string | null
           location?: string | null
           phone?: string | null
@@ -360,6 +362,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          language?: string | null
           linkedin_url?: string | null
           location?: string | null
           phone?: string | null

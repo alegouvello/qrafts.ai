@@ -1,0 +1,166 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "add": "Añadir",
+    "close": "Cerrar",
+    "confirm": "Confirmar",
+    "back": "Volver",
+    "next": "Siguiente",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "import": "Importar",
+    "upload": "Subir",
+    "download": "Descargar",
+    "view": "Ver",
+    "settings": "Configuración",
+    "profile": "Perfil",
+    "logout": "Cerrar sesión",
+    "login": "Iniciar sesión",
+    "signup": "Registrarse",
+    "email": "Email",
+    "password": "Contraseña",
+    "name": "Nombre",
+    "company": "Empresa",
+    "position": "Puesto",
+    "status": "Estado",
+    "date": "Fecha",
+    "actions": "Acciones",
+    "welcome": "Bienvenido"
+  },
+  "nav": {
+    "dashboard": "Panel de control",
+    "calendar": "Calendario",
+    "profile": "Perfil",
+    "settings": "Configuración",
+    "logout": "Cerrar sesión"
+  },
+  "landing": {
+    "hero": {
+      "title": "Rastrea tus solicitudes de empleo con insights impulsados por IA",
+      "subtitle": "Nunca más pierdas una oportunidad. Qrafts te ayuda a organizar, rastrear y optimizar tu búsqueda de empleo con insights inteligentes.",
+      "cta": "Comenzar gratis",
+      "demo": "Ver demo"
+    },
+    "features": {
+      "title": "Todo lo que necesitas para conseguir el trabajo de tus sueños",
+      "organize": {
+        "title": "Organizar solicitudes",
+        "description": "Mantén todas tus solicitudes de empleo en un solo lugar con seguimiento de estado y vistas de línea de tiempo"
+      },
+      "analyze": {
+        "title": "Análisis impulsado por IA",
+        "description": "Obtén insights inteligentes sobre la adecuación del puesto, cultura empresarial y optimización de solicitudes"
+      },
+      "automate": {
+        "title": "Automatizar seguimientos",
+        "description": "Nunca pierdas un seguimiento con recordatorios inteligentes y actualizaciones automáticas de estado"
+      }
+    }
+  },
+  "dashboard": {
+    "title": "Panel de control",
+    "overview": "Resumen de solicitudes",
+    "stats": {
+      "total": "Total de solicitudes",
+      "pending": "Pendientes",
+      "interview": "Entrevistas",
+      "accepted": "Aceptadas"
+    },
+    "recent": "Solicitudes recientes",
+    "addApplication": "Añadir solicitud",
+    "noApplications": "No hay solicitudes aún",
+    "getStarted": "Comienza añadiendo tu primera solicitud de empleo"
+  },
+  "application": {
+    "add": "Añadir solicitud",
+    "edit": "Editar solicitud",
+    "delete": "Eliminar solicitud",
+    "company": "Nombre de la empresa",
+    "position": "Puesto",
+    "url": "URL de la oferta",
+    "appliedDate": "Fecha de solicitud",
+    "status": {
+      "wishlist": "Lista de deseos",
+      "applied": "Solicitado",
+      "interview": "Entrevista",
+      "accepted": "Aceptada",
+      "rejected": "Rechazada"
+    },
+    "details": "Detalles de la solicitud",
+    "timeline": "Línea de tiempo",
+    "notes": "Notas",
+    "questions": "Preguntas",
+    "analysis": "Análisis de adecuación",
+    "addQuestion": "Añadir pregunta",
+    "saveAnswer": "Guardar respuesta",
+    "improveAnswer": "Mejorar respuesta",
+    "exportPDF": "Exportar como PDF"
+  },
+  "profile": {
+    "title": "Perfil",
+    "edit": "Editar perfil",
+    "uploadResume": "Subir currículum",
+    "fullName": "Nombre completo",
+    "email": "Email",
+    "phone": "Teléfono",
+    "location": "Ubicación",
+    "linkedin": "URL de LinkedIn",
+    "website": "URL del sitio web",
+    "resumeText": "Currículum/CV",
+    "saved": "Perfil guardado con éxito",
+    "error": "Error al guardar el perfil"
+  },
+  "calendar": {
+    "title": "Calendario",
+    "addEvent": "Añadir evento",
+    "eventTypes": {
+      "interview": "Entrevista",
+      "followup": "Seguimiento",
+      "deadline": "Fecha límite",
+      "networking": "Networking"
+    },
+    "noEvents": "No hay eventos programados"
+  },
+  "settings": {
+    "title": "Configuración",
+    "account": "Configuración de cuenta",
+    "language": "Idioma",
+    "theme": "Tema",
+    "notifications": "Notificaciones",
+    "privacy": "Privacidad",
+    "terms": "Términos de servicio"
+  },
+  "auth": {
+    "signIn": "Iniciar sesión",
+    "signUp": "Registrarse",
+    "signOut": "Cerrar sesión",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "resetPassword": "Restablecer contraseña",
+    "emailPlaceholder": "Ingresa tu email",
+    "passwordPlaceholder": "Ingresa tu contraseña",
+    "rememberMe": "Recuérdame",
+    "noAccount": "¿No tienes cuenta?",
+    "hasAccount": "¿Ya tienes cuenta?",
+    "signInSuccess": "Sesión iniciada con éxito",
+    "signUpSuccess": "Cuenta creada con éxito",
+    "signOutSuccess": "Sesión cerrada con éxito",
+    "error": "Error de autenticación"
+  },
+  "chat": {
+    "title": "Asistente IA",
+    "placeholder": "Pregúntame lo que quieras sobre tu búsqueda de empleo...",
+    "thinking": "Pensando...",
+    "error": "Lo siento, encontré un error. Por favor intenta de nuevo."
+  },
+  "toast": {
+    "success": "Éxito",
+    "error": "Error",
+    "warning": "Advertencia",
+    "info": "Info"
+  }
+}

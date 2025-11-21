@@ -7,10 +7,12 @@ import { Plus, ArrowLeft, LogOut, BarChart3, Crown, Sparkles, Settings, Briefcas
 import { ApplicationCard } from "@/components/ApplicationCard";
 import { AddApplicationDialog } from "@/components/AddApplicationDialog";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import qraftLogo from "@/assets/qrafts-logo.png";
 import PullToRefresh from "react-simple-pull-to-refresh";
+import { useTranslation } from "react-i18next";
 
 interface Application {
   id: string;
@@ -24,6 +26,7 @@ interface Application {
 }
 
 const Dashboard = () => {
+  const { t } = useTranslation();
   const [applications, setApplications] = useState<Application[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -460,6 +463,7 @@ const Dashboard = () => {
                   </Button>
                 </Link>
               )}
+              <LanguageSwitcher />
               <ThemeToggle />
               <Link to="/settings">
                 <Button variant="ghost" className="rounded-full hover:bg-primary/5 transition-all" size="icon">
