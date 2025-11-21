@@ -33,19 +33,19 @@ export const FormattedNotes = ({ notes }: FormattedNotesProps) => {
         </CollapsibleTrigger>
       </div>
       
-      <CollapsibleContent className="space-y-5">
+      <CollapsibleContent className="space-y-6">
         {sections.map((section, index) => (
-        <div key={index} className="space-y-2.5">
+        <div key={index} className="space-y-3">
           {section.title && (
             <div className="mb-3">
-              <Badge variant="secondary" className="text-xs font-bold tracking-wide">
+              <Badge variant="secondary" className="text-xs font-bold tracking-wide border-0">
                 {section.title}
               </Badge>
             </div>
           )}
-          <div className="space-y-2.5">
+          <div className="space-y-2.5 pl-0">
             {section.items.map((item, itemIndex) => (
-              <div key={itemIndex} className="text-sm text-muted-foreground">
+              <div key={itemIndex} className="text-sm text-muted-foreground border-0">
                 {item.isMainPoint ? (
                   <div className="space-y-1 mb-2">
                     <p className="font-semibold text-foreground text-[15px]">{item.text}</p>
