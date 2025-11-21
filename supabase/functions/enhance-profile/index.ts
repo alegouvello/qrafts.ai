@@ -138,7 +138,7 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    const systemPrompt = `You are a professional resume enhancement AI. Your task is to extract professional information from scraped web content and intelligently merge it with an existing resume.
+    const systemPrompt = `You are a professional resume enhancement AI. Your task is to INTELLIGENTLY MERGE new information from scraped web content with an existing resume WITHOUT DUPLICATING any content.
 
 Current Resume Data:
 ${JSON.stringify(currentResume, null, 2)}
@@ -146,36 +146,44 @@ ${JSON.stringify(currentResume, null, 2)}
 Scraped Content:
 ${scrapedContent.map(s => `\n--- ${s.source} ---\n${s.content}`).join('\n')}
 
-Extract and enhance the resume with:
-- Professional summary/bio
-- Work experience (company, position, dates, description)
-- Education (institution, degree, field, dates)
-- Skills (technical and soft skills)
+CRITICAL MERGING RULES - READ CAREFULLY:
+
+1. **IDENTIFY WHAT EXISTS**: First, carefully read through the current resume to understand what information is ALREADY THERE
+2. **EXTRACT NEW ONLY**: From the scraped content, extract ONLY information that is NOT already in the current resume
+3. **MERGE INTELLIGENTLY**: If scraped content adds details to existing entries, ENHANCE the existing entry rather than creating duplicates
+4. **NEVER COPY-PASTE**: Do NOT copy any text from the current resume and paste it at the end - only add genuinely NEW information
+5. **ONE MENTION RULE**: Each fact, achievement, or role should appear EXACTLY ONCE in the final output
+
+SPECIFIC EXAMPLES OF WHAT NOT TO DO:
+
+❌ BAD - Duplicating existing content:
+Current: "Founded a Generative AI platform (Baret) to improve market research resulting in $10.6M in bookings in 2023."
+Scraped: "Previously at Kearney, launched Baret, a $10.6M generative-AI platform"
+WRONG OUTPUT: "[new stuff]... Founded a Generative AI platform (Baret) to improve market research resulting in $10.6M in bookings in 2023."
+(This just copied the existing content!)
+
+✅ GOOD - Properly merged:
+CORRECT OUTPUT: "Previously at Kearney, launched Baret, a $10.6M generative-AI platform that transformed consultant workflows and improved market research."
+(Combined both sources into ONE statement without duplication)
+
+❌ BAD - Listing the same company twice:
+"Co-founded Lucenn.ai: Provide tailored AI solutions. Co-founded Lucenn, an applied-AI venture within super{set}."
+
+✅ GOOD - Merged into one:
+"Co-founded Lucenn (Lucenn.ai), an applied-AI venture within super{set}, providing tailored AI solutions to Fortune 500 companies."
+
+ENHANCEMENT SECTIONS:
+Extract and merge information about:
+- Professional summary/bio (combine roles, specializations, key achievements)
+- Work experience (merge entries from same company)
+- Education
+- Skills (add new skills not already listed)
 - Certifications
 - Projects
 - Publications
 - Awards
 - Languages
 - Volunteer work
-
-CRITICAL RULES FOR CLEANING AND ENHANCEMENT:
-1. REMOVE ALL REDUNDANCIES: If information appears multiple times in the same entry, consolidate it into a single, clear statement
-2. DEDUPLICATE CONTENT: Merge duplicate mentions of the same company, role, or achievement
-3. Only add NEW information not already present in the existing resume
-4. Preserve all existing unique information
-5. Merge similar entries intelligently by combining descriptions without repeating facts
-6. Make descriptions concise and professional - remove repetitive phrases
-7. Format dates consistently (YYYY-MM or YYYY)
-8. If the same company appears multiple times, consolidate into one entry with combined achievements
-9. Remove filler words and redundant statements like "Co-founded X. Co-founded X again."
-10. Return ONLY valid JSON matching this exact structure:
-
-EXAMPLE OF PROPER DEDUPLICATION:
-BAD (Redundant):
-"Co-founded Lucenn.ai: Provide tailored AI solutions to Fortune 500. Co-founded Lucenn, an applied-AI venture within super{set}, building enterprise AI adoption solutions."
-
-GOOD (Cleaned):
-"Co-founded Lucenn (Lucenn.ai), an applied-AI venture within super{set}, providing tailored AI solutions to Fortune 500 companies and building enterprise AI adoption solutions with active pipeline development."
 
 Return ONLY valid JSON matching this exact structure:
 {
@@ -200,10 +208,10 @@ Return ONLY valid JSON matching this exact structure:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'google/gemini-2.5-pro',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: 'Extract and merge the professional information.' }
+          { role: 'user', content: 'Carefully read the current resume data first. Then extract ONLY new information from the scraped content that is not already present. Merge intelligently without duplicating any existing content. Remember: each fact should appear only once in the final output.' }
         ],
       }),
     });
