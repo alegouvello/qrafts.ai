@@ -13,6 +13,8 @@ import { AddTimelineEventDialog } from "@/components/AddTimelineEventDialog";
 import { TimelineView } from "@/components/TimelineView";
 import { RoleFitAnalysis } from "@/components/RoleFitAnalysis";
 import { StatusHistoryTimeline } from "@/components/StatusHistoryTimeline";
+import { AddInterviewerDialog } from "@/components/AddInterviewerDialog";
+import { InterviewPrepCard } from "@/components/InterviewPrepCard";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
@@ -86,6 +88,16 @@ interface TimelineEvent {
   created_at: string;
 }
 
+interface Interviewer {
+  id: string;
+  name: string;
+  role: string | null;
+  company: string | null;
+  linkedin_url: string | null;
+  extracted_data: any;
+  interview_prep: any;
+}
+
 const statusConfig = {
   pending: { label: "Pending", variant: "secondary" as const },
   interview: { label: "Interview", variant: "default" as const },
@@ -145,6 +157,7 @@ const ApplicationDetail = () => {
     subscribed: boolean;
     product_id: string | null;
   }>({ subscribed: false, product_id: null });
+  const [interviewers, setInterviewers] = useState<Interviewer[]>([]);
 
   useEffect(() => {
     checkAuth();
@@ -153,6 +166,7 @@ const ApplicationDetail = () => {
       fetchApplicationData();
       fetchTimelineEvents();
       fetchStatusHistory();
+      fetchInterviewers();
       checkSubscription();
     }
   }, [id]);
@@ -443,6 +457,20 @@ const ApplicationDetail = () => {
       console.error("Error fetching status history:", error);
     } else {
       setStatusHistory(data || []);
+    }
+  };
+
+  const fetchInterviewers = async () => {
+    const { data, error } = await supabase
+      .from("interviewers")
+      .select("*")
+      .eq("application_id", id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching interviewers:", error);
+    } else {
+      setInterviewers(data || []);
     }
   };
 
@@ -1451,6 +1479,7 @@ const ApplicationDetail = () => {
         <Tabs defaultValue="questions" className="space-y-6">
           <TabsList className="bg-muted/30">
             <TabsTrigger value="questions">Questions</TabsTrigger>
+            <TabsTrigger value="interviewers">Interviewers</TabsTrigger>
             <TabsTrigger value="timeline">
               <Clock className="h-4 w-4 mr-2" />
               Timeline
@@ -1793,6 +1822,41 @@ const ApplicationDetail = () => {
             </div>
           )}
         </TabsContent>
+
+          {/* Interviewers Tab */}
+          <TabsContent value="interviewers" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-semibold">Interview Preparation</h2>
+              {application && (
+                <AddInterviewerDialog 
+                  applicationId={application.id} 
+                  onInterviewerAdded={fetchInterviewers}
+                />
+              )}
+            </div>
+
+            {interviewers.length === 0 ? (
+              <Card className="p-8 text-center">
+                <p className="text-muted-foreground text-lg mb-2">
+                  No interviewers added yet
+                </p>
+                <p className="text-muted-foreground text-sm">
+                  Add interviewers to get AI-powered interview prep based on their background and your resume
+                </p>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {interviewers.map((interviewer) => (
+                  <InterviewPrepCard
+                    key={interviewer.id}
+                    interviewer={interviewer}
+                    onDelete={fetchInterviewers}
+                    onPrepGenerated={fetchInterviewers}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
 
           {/* Timeline Tab */}
           <TabsContent value="timeline" className="space-y-6">

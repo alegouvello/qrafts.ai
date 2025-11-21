@@ -189,6 +189,56 @@ export type Database = {
         }
         Relationships: []
       }
+      interviewers: {
+        Row: {
+          application_id: string
+          company: string | null
+          created_at: string
+          extracted_data: Json | null
+          id: string
+          interview_prep: Json | null
+          linkedin_url: string | null
+          name: string
+          role: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          application_id: string
+          company?: string | null
+          created_at?: string
+          extracted_data?: Json | null
+          id?: string
+          interview_prep?: Json | null
+          linkedin_url?: string | null
+          name: string
+          role?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          application_id?: string
+          company?: string | null
+          created_at?: string
+          extracted_data?: Json | null
+          id?: string
+          interview_prep?: Json | null
+          linkedin_url?: string | null
+          name?: string
+          role?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interviewers_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       master_answers: {
         Row: {
           answer_text: string

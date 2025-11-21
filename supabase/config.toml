@@ -29,3 +29,9 @@ verify_jwt = false
 
 [functions.chat-assistant]
 verify_jwt = true
+
+[functions.extract-linkedin-profile]
+verify_jwt = true
+
+[functions.generate-interview-prep]
+verify_jwt = true
