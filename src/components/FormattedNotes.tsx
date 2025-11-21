@@ -33,12 +33,12 @@ export const FormattedNotes = ({ notes }: FormattedNotesProps) => {
         </CollapsibleTrigger>
       </div>
       
-      <CollapsibleContent className="space-y-6">
+      <CollapsibleContent className="space-y-6 [&_hr]:hidden [&_*]:border-0">
         {sections.map((section, index) => (
         <div key={index} className="space-y-3">
           {section.title && (
-            <div className="mb-3 border-0">
-              <Badge variant="secondary" className="text-xs font-bold tracking-wide">
+            <div className="mb-4">
+              <Badge variant="secondary" className="text-xs font-bold tracking-wide !border-0">
                 {section.title}
               </Badge>
             </div>
@@ -72,8 +72,10 @@ export const FormattedNotes = ({ notes }: FormattedNotesProps) => {
 function parseNotes(notes: string) {
   const lines = notes.split('\n').filter(line => {
     const trimmed = line.trim();
-    // Filter out separator lines (---, ___, ===, etc.)
-    if (/^[-_=]{3,}$/.test(trimmed)) return false;
+    // Filter out separator lines (---, ___, ===, or any line that's mostly separators)
+    if (/^[-_=\s]{2,}$/.test(trimmed)) return false;
+    // Filter out lines that are just repeated dashes, underscores, or equals signs
+    if (trimmed.length > 0 && /^[-_=]+$/.test(trimmed.replace(/\s/g, ''))) return false;
     return trimmed.length > 0;
   });
   const sections: Array<{ title: string | null; items: Array<{ text: string; isMainPoint: boolean; isBullet: boolean }> }> = [];
