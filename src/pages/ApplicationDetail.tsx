@@ -1097,7 +1097,7 @@ const ApplicationDetail = () => {
                   <span className="hidden sm:inline">Back</span>
                 </Button>
               </Link>
-              <img src={qraftLogo} alt="QRAFTS" className="h-10 sm:h-16 md:h-20 opacity-70" />
+              <img src={qraftLogo} alt="QRAFTS" className="h-12 opacity-70" />
             </div>
             <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
               {editingUrl ? (
