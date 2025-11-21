@@ -29,6 +29,8 @@ const Index = () => {
     switch (i18n.language) {
       case 'fr':
         return '/qrafts-demo-fr.mp4';
+      case 'es':
+        return '/qrafts-demo-es.mp4';
       case 'en':
       default:
         return '/qrafts-demo.mp4';
