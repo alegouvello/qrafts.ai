@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Mail, Phone, MapPin, Linkedin, Briefcase, GraduationCap, Award, ArrowLeft, Upload, Edit, Sparkles, BookOpen, Trophy, BookMarked, Lightbulb, Globe, Heart, Settings, Camera, Image as ImageIcon } from "lucide-react";
+import { User, Mail, Phone, MapPin, Linkedin, Briefcase, GraduationCap, Award, ArrowLeft, Upload, Edit, Sparkles, BookOpen, Trophy, BookMarked, Lightbulb, Globe, Heart, Settings, Camera, Image as ImageIcon, ExternalLink } from "lucide-react";
 import { UploadResumeDialog } from "@/components/UploadResumeDialog";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { ProfileReviewDialog } from "@/components/ProfileReviewDialog";
@@ -53,7 +53,7 @@ interface ParsedResume {
     year: string;
   }>;
   certifications?: (string | { name: string; issuer: string; date: string })[];
-  publications?: (string | { title: string; publisher: string; date: string })[];
+  publications?: (string | { title: string; publisher: string; date: string; url?: string })[];
   projects?: Array<{
     name: string;
     description: string;
@@ -705,18 +705,43 @@ export default function Profile() {
                   </div>
                   <h2 className="text-2xl font-semibold">Publications</h2>
                 </div>
-                <ul className="space-y-3">
-                  {parsedData.publications.map((pub, index) => (
-                    <li key={index} className="text-foreground/80 leading-relaxed pl-6 relative before:absolute before:left-0 before:top-2 before:w-2 before:h-2 before:bg-primary before:rounded-full">
-                      {typeof pub === 'string' ? pub : (
-                        <div>
-                          <div className="font-medium">{pub.title}</div>
-                          <div className="text-sm text-muted-foreground">{pub.publisher} • {pub.date}</div>
+                <div className="grid gap-4">
+                  {parsedData.publications.map((pub, index) => {
+                    const pubData = typeof pub === 'string' ? { title: pub } : pub;
+                    return (
+                      <div 
+                        key={index} 
+                        className="group relative p-5 rounded-xl border border-border/40 bg-background/50 hover:bg-background/80 hover:border-primary/20 transition-all duration-300 hover:shadow-md"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 space-y-2">
+                            <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                              {pubData.title}
+                            </h3>
+                            {typeof pub !== 'string' && (pub.publisher || pub.date) && (
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                {pub.publisher && <span>{pub.publisher}</span>}
+                                {pub.publisher && pub.date && <span>•</span>}
+                                {pub.date && <span>{pub.date}</span>}
+                              </div>
+                            )}
+                          </div>
+                          {typeof pub !== 'string' && pub.url && (
+                            <a
+                              href={pub.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex-shrink-0 p-2 rounded-lg hover:bg-primary/10 transition-colors group/link"
+                              aria-label={`View ${pubData.title}`}
+                            >
+                              <ExternalLink className="h-4 w-4 text-muted-foreground group-hover/link:text-primary transition-colors" />
+                            </a>
+                          )}
                         </div>
-                      )}
-                    </li>
-                  ))}
-                </ul>
+                      </div>
+                    );
+                  })}
+                </div>
               </CardContent>
             </Card>
           )}
