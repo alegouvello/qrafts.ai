@@ -168,16 +168,18 @@ export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: In
             </Button>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-8">
             {prep.talkingPoints && prep.talkingPoints.length > 0 && (
-              <div>
-                <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                  <Badge variant="secondary">Key Talking Points</Badge>
-                </h4>
-                <ul className="space-y-2">
+              <div className="bg-gradient-to-br from-primary/5 via-primary/3 to-transparent rounded-xl p-6 border border-primary/10">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="h-8 w-1 bg-primary rounded-full" />
+                  <h4 className="font-bold text-base text-foreground">Key Talking Points</h4>
+                </div>
+                <ul className="space-y-4">
                   {prep.talkingPoints.map((point: string, idx: number) => (
-                    <li key={idx} className="text-sm pl-4 border-l-2 border-primary/30">
-                      {point}
+                    <li key={idx} className="flex gap-3 items-start group">
+                      <div className="mt-1.5 h-2 w-2 rounded-full bg-primary flex-shrink-0 group-hover:scale-125 transition-transform" />
+                      <p className="text-base leading-relaxed text-foreground/90">{point}</p>
                     </li>
                   ))}
                 </ul>
@@ -185,14 +187,16 @@ export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: In
             )}
 
             {prep.commonGround && prep.commonGround.length > 0 && (
-              <div>
-                <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                  <Badge variant="secondary">Common Ground</Badge>
-                </h4>
-                <ul className="space-y-2">
+              <div className="bg-gradient-to-br from-accent/5 via-accent/3 to-transparent rounded-xl p-6 border border-accent/10">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="h-8 w-1 bg-accent rounded-full" />
+                  <h4 className="font-bold text-base text-foreground">Common Ground</h4>
+                </div>
+                <ul className="space-y-4">
                   {prep.commonGround.map((point: string, idx: number) => (
-                    <li key={idx} className="text-sm pl-4 border-l-2 border-primary/30">
-                      {point}
+                    <li key={idx} className="flex gap-3 items-start group">
+                      <div className="mt-1.5 h-2 w-2 rounded-full bg-accent flex-shrink-0 group-hover:scale-125 transition-transform" />
+                      <p className="text-base leading-relaxed text-foreground/90">{point}</p>
                     </li>
                   ))}
                 </ul>
@@ -200,14 +204,16 @@ export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: In
             )}
 
             {prep.questionsToAsk && prep.questionsToAsk.length > 0 && (
-              <div>
-                <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                  <Badge variant="secondary">Questions to Ask</Badge>
-                </h4>
-                <ul className="space-y-2">
+              <div className="bg-gradient-to-br from-primary/5 via-primary/3 to-transparent rounded-xl p-6 border border-primary/10">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="h-8 w-1 bg-primary rounded-full" />
+                  <h4 className="font-bold text-base text-foreground">Questions to Ask</h4>
+                </div>
+                <ul className="space-y-4">
                   {prep.questionsToAsk.map((question: string, idx: number) => (
-                    <li key={idx} className="text-sm pl-4 border-l-2 border-primary/30">
-                      {question}
+                    <li key={idx} className="flex gap-3 items-start group">
+                      <div className="mt-1.5 h-2 w-2 rounded-full bg-primary flex-shrink-0 group-hover:scale-125 transition-transform" />
+                      <p className="text-base leading-relaxed text-foreground/90">{question}</p>
                     </li>
                   ))}
                 </ul>
@@ -215,14 +221,16 @@ export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: In
             )}
 
             {prep.areasToEmphasize && prep.areasToEmphasize.length > 0 && (
-              <div>
-                <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                  <Badge variant="secondary">Areas to Emphasize</Badge>
-                </h4>
-                <ul className="space-y-2">
+              <div className="bg-gradient-to-br from-success/5 via-success/3 to-transparent rounded-xl p-6 border border-success/10">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="h-8 w-1 bg-success rounded-full" />
+                  <h4 className="font-bold text-base text-foreground">Areas to Emphasize</h4>
+                </div>
+                <ul className="space-y-4">
                   {prep.areasToEmphasize.map((area: string, idx: number) => (
-                    <li key={idx} className="text-sm pl-4 border-l-2 border-primary/30">
-                      {area}
+                    <li key={idx} className="flex gap-3 items-start group">
+                      <div className="mt-1.5 h-2 w-2 rounded-full bg-success flex-shrink-0 group-hover:scale-125 transition-transform" />
+                      <p className="text-base leading-relaxed text-foreground/90">{area}</p>
                     </li>
                   ))}
                 </ul>
@@ -230,14 +238,16 @@ export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: In
             )}
 
             {prep.potentialConcerns && prep.potentialConcerns.length > 0 && (
-              <div>
-                <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                  <Badge variant="secondary">Potential Concerns</Badge>
-                </h4>
-                <ul className="space-y-2">
+              <div className="bg-gradient-to-br from-warning/5 via-warning/3 to-transparent rounded-xl p-6 border border-warning/10">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="h-8 w-1 bg-warning rounded-full" />
+                  <h4 className="font-bold text-base text-foreground">Potential Concerns</h4>
+                </div>
+                <ul className="space-y-4">
                   {prep.potentialConcerns.map((concern: string, idx: number) => (
-                    <li key={idx} className="text-sm pl-4 border-l-2 border-destructive/30">
-                      {concern}
+                    <li key={idx} className="flex gap-3 items-start group">
+                      <div className="mt-1.5 h-2 w-2 rounded-full bg-warning flex-shrink-0 group-hover:scale-125 transition-transform" />
+                      <p className="text-base leading-relaxed text-foreground/90">{concern}</p>
                     </li>
                   ))}
                 </ul>
