@@ -163,6 +163,22 @@ export default function Profile() {
       if (data.resume_text) {
         try {
           const parsed = JSON.parse(data.resume_text);
+          
+          // Convert plain text bullet points to HTML if needed
+          if (parsed.experience) {
+            parsed.experience = parsed.experience.map((exp: any) => {
+              if (exp.description && !exp.description.startsWith('<')) {
+                const parts = exp.description.split('•').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+                if (parts.length > 1) {
+                  exp.description = '<ul>' + parts.map((point: string) => `<li>${point}</li>`).join('') + '</ul>';
+                } else {
+                  exp.description = `<p>${exp.description}</p>`;
+                }
+              }
+              return exp;
+            });
+          }
+          
           setParsedData(parsed);
         } catch (e) {
           console.error("Error parsing resume data:", e);

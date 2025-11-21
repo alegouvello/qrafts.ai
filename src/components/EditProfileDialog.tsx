@@ -77,18 +77,23 @@ export function EditProfileDialog({ open, onOpenChange, onSaved }: EditProfileDi
           setSummary(parsed.summary || "");
           setSkills(parsed.skills || []);
           
-          // Convert old plain text bullet points to HTML if needed
+          // Convert plain text with bullet points to proper HTML
           const processedExperience = (parsed.experience || []).map((exp: any) => {
-            if (exp.description && !exp.description.includes('<')) {
-              // Plain text format - convert to HTML
-              const bulletPoints = exp.description
-                .split(/•/)
-                .map((point: string) => point.trim())
-                .filter((point: string) => point.length > 0);
+            if (exp.description && !exp.description.startsWith('<')) {
+              // Plain text format - convert bullet points to HTML list
+              // Handle both newline-separated bullets and inline bullets
+              let desc = exp.description;
               
-              if (bulletPoints.length > 1) {
-                const htmlList = '<ul>' + bulletPoints.map((point: string) => `<li>${point}</li>`).join('') + '</ul>';
+              // Split by bullet character
+              const parts = desc.split('•').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+              
+              if (parts.length > 1) {
+                // Multiple bullet points - create HTML list
+                const htmlList = '<ul>' + parts.map((point: string) => `<li>${point}</li>`).join('') + '</ul>';
                 return { ...exp, description: htmlList };
+              } else {
+                // Single paragraph - wrap in <p> tag
+                return { ...exp, description: `<p>${desc}</p>` };
               }
             }
             return exp;
