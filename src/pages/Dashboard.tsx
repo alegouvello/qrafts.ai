@@ -363,6 +363,23 @@ const Dashboard = () => {
                   <span className="sm:hidden">Stats</span>
                 </Button>
               </Link>
+              {subscriptionStatus.subscribed && (
+                <Link to="/settings">
+                  <Button 
+                    variant="ghost" 
+                    className="rounded-full hover:bg-success/10 transition-all px-3 border border-success/20 bg-success/5"
+                    size="sm"
+                  >
+                    <Crown className="h-3.5 w-3.5 mr-1.5 text-success" />
+                    <span className="text-xs font-medium text-success">Pro</span>
+                    {subscriptionStatus.is_trialing && (
+                      <span className="ml-1.5 px-1.5 py-0.5 text-[10px] rounded-full bg-primary/20 text-primary border border-primary/30">
+                        Trial
+                      </span>
+                    )}
+                  </Button>
+                </Link>
+              )}
               <Link to="/settings">
                 <Button variant="ghost" className="rounded-full hover:bg-primary/5 transition-all" size="icon">
                   <Settings className="h-4 w-4" />
