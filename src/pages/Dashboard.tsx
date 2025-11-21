@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Footer } from "@/components/Footer";
-import { Plus, ArrowLeft, LogOut, BarChart3, Crown, Sparkles, Settings } from "lucide-react";
+import { Plus, ArrowLeft, LogOut, BarChart3, Crown, Sparkles, Settings, Briefcase, Clock, Users, TrendingUp } from "lucide-react";
 import { ApplicationCard } from "@/components/ApplicationCard";
 import { AddApplicationDialog } from "@/components/AddApplicationDialog";
 import { useToast } from "@/hooks/use-toast";
@@ -487,22 +487,53 @@ const Dashboard = () => {
         )}
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
-          <div className="group relative bg-gradient-to-br from-card to-card/50 backdrop-blur-sm p-4 sm:p-6 rounded-2xl border border-border/50 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/5">
-            <div className="text-3xl sm:text-4xl font-bold mb-2 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{stats.total}</div>
-            <div className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Total Applications</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="group relative bg-card p-6 rounded-3xl border border-border/40 hover:border-border transition-all hover:shadow-lg">
+            <div className="flex items-start justify-between mb-4">
+              <div className="p-3 rounded-2xl bg-primary/5">
+                <Briefcase className="h-5 w-5 text-primary" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-3xl font-bold text-foreground">{stats.total}</div>
+              <div className="text-sm text-muted-foreground">Total Applications</div>
+            </div>
           </div>
-          <div className="group relative bg-gradient-to-br from-card to-card/50 backdrop-blur-sm p-4 sm:p-6 rounded-2xl border border-border/50 hover:border-warning/30 transition-all hover:shadow-lg hover:shadow-warning/5">
-            <div className="text-3xl sm:text-4xl font-bold mb-2 text-warning">{stats.pending}</div>
-            <div className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Pending Review</div>
+          
+          <div className="group relative bg-card p-6 rounded-3xl border border-border/40 hover:border-border transition-all hover:shadow-lg">
+            <div className="flex items-start justify-between mb-4">
+              <div className="p-3 rounded-2xl bg-warning/5">
+                <Clock className="h-5 w-5 text-warning" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-3xl font-bold text-foreground">{stats.pending}</div>
+              <div className="text-sm text-muted-foreground">Pending Review</div>
+            </div>
           </div>
-          <div className="group relative bg-gradient-to-br from-card to-card/50 backdrop-blur-sm p-4 sm:p-6 rounded-2xl border border-border/50 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/5">
-            <div className="text-3xl sm:text-4xl font-bold mb-2 text-primary">{stats.interviews}</div>
-            <div className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Interviews</div>
+          
+          <div className="group relative bg-card p-6 rounded-3xl border border-border/40 hover:border-border transition-all hover:shadow-lg">
+            <div className="flex items-start justify-between mb-4">
+              <div className="p-3 rounded-2xl bg-primary/5">
+                <Users className="h-5 w-5 text-primary" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-3xl font-bold text-foreground">{stats.interviews}</div>
+              <div className="text-sm text-muted-foreground">Interviews</div>
+            </div>
           </div>
-          <div className="group relative bg-gradient-to-br from-card to-card/50 backdrop-blur-sm p-4 sm:p-6 rounded-2xl border border-border/50 hover:border-success/30 transition-all hover:shadow-lg hover:shadow-success/5">
-            <div className="text-3xl sm:text-4xl font-bold mb-2 text-success">{stats.responseRate}%</div>
-            <div className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Response Rate</div>
+          
+          <div className="group relative bg-card p-6 rounded-3xl border border-border/40 hover:border-border transition-all hover:shadow-lg">
+            <div className="flex items-start justify-between mb-4">
+              <div className="p-3 rounded-2xl bg-success/5">
+                <TrendingUp className="h-5 w-5 text-success" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-3xl font-bold text-foreground">{stats.responseRate}%</div>
+              <div className="text-sm text-muted-foreground">Response Rate</div>
+            </div>
           </div>
         </div>
 
@@ -533,20 +564,20 @@ const Dashboard = () => {
             </div>
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-10">
             {Object.entries(groupedApplications).map(([company, companyApps]) => (
-              <div key={company} className="space-y-3">
-                <div className="flex items-center gap-3 px-2">
+              <div key={company} className="space-y-4">
+                <div className="flex items-center gap-3">
                   <Link to={`/company/${encodeURIComponent(company)}`}>
-                    <h2 className="text-lg font-semibold hover:text-primary transition-colors cursor-pointer">
+                    <h2 className="text-xl font-semibold hover:text-primary transition-colors cursor-pointer">
                       {company}
                     </h2>
                   </Link>
-                  <span className="text-xs text-muted-foreground bg-muted/30 px-2 py-1 rounded-full">
+                  <span className="text-xs text-muted-foreground bg-muted/50 px-3 py-1 rounded-full">
                     {companyApps.length} {companyApps.length === 1 ? 'role' : 'roles'}
                   </span>
                 </div>
-                <div className="space-y-3">
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                   {companyApps.map((application) => (
                     <ApplicationCard key={application.id} application={application} onDelete={handleDeleteApplication} />
                   ))}
