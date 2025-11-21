@@ -681,30 +681,48 @@ export default function Profile() {
                   <h2 className="text-2xl font-semibold">Experience</h2>
                 </div>
                 <div className="space-y-8">
-                  {parsedData.experience.map((exp, index) => (
-                    <div key={index} className="relative pl-8 before:absolute before:left-0 before:top-2 before:bottom-0 before:w-0.5 before:bg-gradient-to-b before:from-primary before:to-transparent">
-                      <div className="absolute left-0 top-1 w-2 h-2 bg-primary rounded-full -translate-x-[3px]" />
-                      <div className="space-y-2">
-                        <h3 className="text-xl font-semibold text-foreground">{exp.position}</h3>
-                        <p className="text-primary font-medium">{exp.company}</p>
-                        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                          {(exp.start_date || exp.end_date) && (
-                            <span>
-                              {exp.start_date} {exp.start_date && exp.end_date && '- '} {exp.end_date}
-                            </span>
-                          )}
-                          {(exp.start_date || exp.end_date) && exp.location && <span>•</span>}
-                          {exp.location && (
-                            <span className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              {exp.location}
-                            </span>
+                  {parsedData.experience.map((exp, index) => {
+                    // Parse bullet points from description
+                    const bulletPoints = exp.description
+                      .split(/•/)
+                      .map(point => point.trim())
+                      .filter(point => point.length > 0);
+
+                    return (
+                      <div key={index} className="relative pl-8 before:absolute before:left-0 before:top-2 before:bottom-0 before:w-0.5 before:bg-gradient-to-b before:from-primary before:to-transparent">
+                        <div className="absolute left-0 top-1 w-2 h-2 bg-primary rounded-full -translate-x-[3px]" />
+                        <div className="space-y-3">
+                          <h3 className="text-xl font-semibold text-foreground">{exp.position}</h3>
+                          <p className="text-primary font-medium">{exp.company}</p>
+                          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                            {(exp.start_date || exp.end_date) && (
+                              <span>
+                                {exp.start_date} {exp.start_date && exp.end_date && '- '} {exp.end_date}
+                              </span>
+                            )}
+                            {(exp.start_date || exp.end_date) && exp.location && <span>•</span>}
+                            {exp.location && (
+                              <span className="flex items-center gap-1">
+                                <MapPin className="h-3 w-3" />
+                                {exp.location}
+                              </span>
+                            )}
+                          </div>
+                          {bulletPoints.length > 1 ? (
+                            <ul className="space-y-2 mt-3">
+                              {bulletPoints.map((point, i) => (
+                                <li key={i} className="text-foreground/80 leading-relaxed pl-4 relative before:absolute before:left-0 before:top-2 before:w-1.5 before:h-1.5 before:bg-primary/60 before:rounded-full">
+                                  {point}
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-foreground/80 leading-relaxed mt-3">{exp.description}</p>
                           )}
                         </div>
-                        <p className="text-foreground/80 leading-relaxed mt-3">{exp.description}</p>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
