@@ -22,10 +22,22 @@ export function ExportPDFDialog({ open, onOpenChange, onExport, profileData, gen
       setLoadingPreview(true);
       // Generate preview with a slight delay to ensure smooth UI
       setTimeout(() => {
-        const url = generatePDFPreview(profileData, selectedLayout);
-        setPreviewUrl(url);
-        setLoadingPreview(false);
+        try {
+          console.log('Generating PDF preview with data:', profileData);
+          const url = generatePDFPreview(profileData, selectedLayout);
+          console.log('Generated preview URL:', url ? 'Success' : 'Empty');
+          setPreviewUrl(url);
+        } catch (error) {
+          console.error('Error generating PDF preview:', error);
+          setPreviewUrl('');
+        } finally {
+          setLoadingPreview(false);
+        }
       }, 100);
+    } else if (open && !profileData) {
+      console.warn('Cannot generate preview: profileData is null');
+      setPreviewUrl('');
+      setLoadingPreview(false);
     }
   }, [open, selectedLayout, profileData, generatePDFPreview]);
 
@@ -140,7 +152,11 @@ export function ExportPDFDialog({ open, onOpenChange, onExport, profileData, gen
                   title="PDF Preview"
                 />
               ) : (
-                <p className="text-sm text-muted-foreground">No preview available</p>
+                <div className="flex flex-col items-center gap-2 p-4">
+                  <p className="text-sm text-muted-foreground">
+                    {!profileData ? 'Please complete your profile to generate a preview' : 'Unable to generate preview'}
+                  </p>
+                </div>
               )}
             </div>
           </div>
