@@ -123,15 +123,53 @@ export function EditProfileDialog({ open, onOpenChange, onSaved }: EditProfileDi
         description: "Failed to save profile",
         variant: "destructive",
       });
-    } else {
-      toast({
-        title: "Profile Saved",
-        description: "Your profile has been updated successfully",
-      });
-      onSaved();
-      onOpenChange(false);
+      setLoading(false);
+      return;
     }
+
+    toast({
+      title: "Profile Saved",
+      description: "Your profile has been updated successfully",
+    });
+
+    // Trigger automatic profile enhancement if LinkedIn or website URL is provided
+    if (linkedinUrl || websiteUrl) {
+      toast({
+        title: "Enhancing Profile",
+        description: "Extracting information from your links...",
+      });
+
+      try {
+        const { data: enhanceData, error: enhanceError } = await supabase.functions.invoke('enhance-profile', {
+          body: { 
+            linkedinUrl: linkedinUrl || null, 
+            websiteUrl: websiteUrl || null 
+          }
+        });
+
+        if (enhanceError) {
+          console.error('Enhancement error:', enhanceError);
+          toast({
+            title: "Enhancement Note",
+            description: "Could not extract additional information from the provided links",
+            variant: "destructive",
+          });
+        } else if (enhanceData?.success) {
+          toast({
+            title: "Profile Enhanced!",
+            description: "Your profile has been automatically updated with information from your links",
+          });
+          // Refresh the profile to show updated data
+          await fetchProfile();
+        }
+      } catch (enhanceError) {
+        console.error('Error enhancing profile:', enhanceError);
+      }
+    }
+
     setLoading(false);
+    onSaved();
+    onOpenChange(false);
   };
 
   const addSkill = () => {
