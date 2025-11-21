@@ -15,9 +15,11 @@ interface EditProfileDialogProps {
 }
 
 interface Experience {
-  title: string;
+  position: string;
   company: string;
-  duration: string;
+  location: string;
+  start_date: string;
+  end_date: string;
   description: string;
 }
 
@@ -157,7 +159,7 @@ export function EditProfileDialog({ open, onOpenChange, onSaved }: EditProfileDi
   };
 
   const addExperience = () => {
-    setExperience([...experience, { title: "", company: "", duration: "", description: "" }]);
+    setExperience([...experience, { position: "", company: "", location: "", start_date: "", end_date: "", description: "" }]);
   };
 
   const updateExperience = (index: number, field: keyof Experience, value: string) => {
@@ -316,8 +318,8 @@ export function EditProfileDialog({ open, onOpenChange, onSaved }: EditProfileDi
                 <div className="flex justify-between items-start">
                   <div className="grid grid-cols-2 gap-3 flex-1">
                     <Input
-                      value={exp.title}
-                      onChange={(e) => updateExperience(index, 'title', e.target.value)}
+                      value={exp.position}
+                      onChange={(e) => updateExperience(index, 'position', e.target.value)}
                       placeholder="Job Title"
                     />
                     <Input
@@ -337,10 +339,22 @@ export function EditProfileDialog({ open, onOpenChange, onSaved }: EditProfileDi
                   </Button>
                 </div>
                 <Input
-                  value={exp.duration}
-                  onChange={(e) => updateExperience(index, 'duration', e.target.value)}
-                  placeholder="Duration (e.g., 2020 - 2023)"
+                  value={exp.location}
+                  onChange={(e) => updateExperience(index, 'location', e.target.value)}
+                  placeholder="Location (e.g., New York, NY)"
                 />
+                <div className="grid grid-cols-2 gap-3">
+                  <Input
+                    value={exp.start_date}
+                    onChange={(e) => updateExperience(index, 'start_date', e.target.value)}
+                    placeholder="Start Date (e.g., Jan 2020)"
+                  />
+                  <Input
+                    value={exp.end_date}
+                    onChange={(e) => updateExperience(index, 'end_date', e.target.value)}
+                    placeholder="End Date (e.g., Dec 2023)"
+                  />
+                </div>
                 <Textarea
                   value={exp.description}
                   onChange={(e) => updateExperience(index, 'description', e.target.value)}

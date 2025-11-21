@@ -42,10 +42,11 @@ interface ParsedResume {
   summary?: string;
   skills?: string[];
   experience?: Array<{
-    title: string;
+    position: string;
     company: string;
-    duration: string;
     location?: string;
+    start_date: string;
+    end_date: string;
     description: string;
   }>;
   education?: Array<{
@@ -684,11 +685,15 @@ export default function Profile() {
                     <div key={index} className="relative pl-8 before:absolute before:left-0 before:top-2 before:bottom-0 before:w-0.5 before:bg-gradient-to-b before:from-primary before:to-transparent">
                       <div className="absolute left-0 top-1 w-2 h-2 bg-primary rounded-full -translate-x-[3px]" />
                       <div className="space-y-2">
-                        <h3 className="text-xl font-semibold text-foreground">{exp.title}</h3>
+                        <h3 className="text-xl font-semibold text-foreground">{exp.position}</h3>
                         <p className="text-primary font-medium">{exp.company}</p>
                         <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                          {exp.duration && <span>{exp.duration}</span>}
-                          {exp.duration && exp.location && <span>•</span>}
+                          {(exp.start_date || exp.end_date) && (
+                            <span>
+                              {exp.start_date} {exp.start_date && exp.end_date && '- '} {exp.end_date}
+                            </span>
+                          )}
+                          {(exp.start_date || exp.end_date) && exp.location && <span>•</span>}
                           {exp.location && (
                             <span className="flex items-center gap-1">
                               <MapPin className="h-3 w-3" />
