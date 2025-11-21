@@ -101,7 +101,7 @@ const Index = () => {
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+            <SheetContent side="right" className="w-[85vw] max-w-[400px]">
               <SheetHeader>
                 <SheetTitle className="flex items-center gap-2">
                   <img src={qraftLogo} alt="QRAFTS logo" className="h-8 dark:invert" />
@@ -125,6 +125,7 @@ const Index = () => {
                   {t('landing.hero.cta')}
                 </Button>
                 <div className="h-px bg-border my-2" />
+                <LanguageSwitcher />
                 <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
                   <Button className="w-full rounded-full shadow-lg shadow-primary/20 min-h-[48px]">
                     {t('auth.signIn')}
