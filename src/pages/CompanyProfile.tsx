@@ -135,7 +135,7 @@ const CompanyProfile = () => {
       const decodedCompany = decodeURIComponent(companyName || "");
 
       const { data, error } = await supabase
-        .from("company_notes")
+        .from("company_notes" as any)
         .select("*")
         .eq("user_id", user.id)
         .eq("company_name", decodedCompany)
@@ -146,8 +146,8 @@ const CompanyProfile = () => {
       }
 
       if (data) {
-        setCompanyNotes(data.notes);
-        setSavedNotes(data.notes);
+        setCompanyNotes((data as any).notes);
+        setSavedNotes((data as any).notes);
       }
     } catch (error) {
       console.error("Error fetching company notes:", error);
@@ -164,7 +164,7 @@ const CompanyProfile = () => {
 
       // Check if notes exist
       const { data: existing } = await supabase
-        .from("company_notes")
+        .from("company_notes" as any)
         .select("id")
         .eq("user_id", user.id)
         .eq("company_name", decodedCompany)
@@ -173,15 +173,15 @@ const CompanyProfile = () => {
       if (existing) {
         // Update existing notes
         const { error } = await supabase
-          .from("company_notes")
+          .from("company_notes" as any)
           .update({ notes: companyNotes })
-          .eq("id", existing.id);
+          .eq("id", (existing as any).id);
 
         if (error) throw error;
       } else {
         // Insert new notes
         const { error } = await supabase
-          .from("company_notes")
+          .from("company_notes" as any)
           .insert({
             user_id: user.id,
             company_name: decodedCompany,

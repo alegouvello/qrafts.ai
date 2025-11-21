@@ -88,6 +88,14 @@ export const ApplicationCard = ({ application, onDelete }: ApplicationCardProps)
           <div className="flex-1 min-w-0 space-y-3">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 min-w-0">
+                <Link 
+                  to={`/company/${encodeURIComponent(application.company)}`}
+                  className="inline-block mb-1"
+                >
+                  <p className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
+                    {application.company}
+                  </p>
+                </Link>
                 <h3 className="text-lg font-semibold mb-1 group-hover:text-primary transition-colors truncate">
                   {application.position}
                 </h3>

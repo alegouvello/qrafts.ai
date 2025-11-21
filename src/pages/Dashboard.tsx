@@ -507,7 +507,11 @@ const Dashboard = () => {
             {Object.entries(groupedApplications).map(([company, companyApps]) => (
               <div key={company} className="space-y-3">
                 <div className="flex items-center gap-3 px-2">
-                  <h2 className="text-lg font-semibold">{company}</h2>
+                  <Link to={`/company/${encodeURIComponent(company)}`}>
+                    <h2 className="text-lg font-semibold hover:text-primary transition-colors cursor-pointer">
+                      {company}
+                    </h2>
+                  </Link>
                   <span className="text-xs text-muted-foreground bg-muted/30 px-2 py-1 rounded-full">
                     {companyApps.length} {companyApps.length === 1 ? 'role' : 'roles'}
                   </span>

@@ -1176,7 +1176,11 @@ const ApplicationDetail = () => {
               <div className="flex items-start justify-between gap-4 mb-3">
                 <div className="flex-1 min-w-0">
                   <h1 className="text-3xl font-bold mb-2 truncate">{application.position}</h1>
-                  <p className="text-xl text-muted-foreground mb-3">{application.company}</p>
+                  <Link to={`/company/${encodeURIComponent(application.company)}`}>
+                    <p className="text-xl text-muted-foreground mb-3 hover:text-primary transition-colors">
+                      {application.company}
+                    </p>
+                  </Link>
                 </div>
                 <div className="flex flex-col gap-2 shrink-0">
                   <Select value={application.status} onValueChange={handleStatusChange}>
