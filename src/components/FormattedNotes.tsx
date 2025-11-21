@@ -37,15 +37,15 @@ export const FormattedNotes = ({ notes }: FormattedNotesProps) => {
         {sections.map((section, index) => (
         <div key={index} className="space-y-3">
           {section.title && (
-            <div className="mb-3">
-              <Badge variant="secondary" className="text-xs font-bold tracking-wide border-0">
+            <div className="mb-3 border-0">
+              <Badge variant="secondary" className="text-xs font-bold tracking-wide">
                 {section.title}
               </Badge>
             </div>
           )}
-          <div className="space-y-2.5 pl-0">
+          <div className="space-y-2.5">
             {section.items.map((item, itemIndex) => (
-              <div key={itemIndex} className="text-sm text-muted-foreground border-0">
+              <div key={itemIndex} className="text-sm text-muted-foreground">
                 {item.isMainPoint ? (
                   <div className="space-y-1 mb-2">
                     <p className="font-semibold text-foreground text-[15px]">{item.text}</p>
@@ -70,7 +70,12 @@ export const FormattedNotes = ({ notes }: FormattedNotesProps) => {
 
 // Parse notes into structured sections
 function parseNotes(notes: string) {
-  const lines = notes.split('\n').filter(line => line.trim());
+  const lines = notes.split('\n').filter(line => {
+    const trimmed = line.trim();
+    // Filter out separator lines (---, ___, ===, etc.)
+    if (/^[-_=]{3,}$/.test(trimmed)) return false;
+    return trimmed.length > 0;
+  });
   const sections: Array<{ title: string | null; items: Array<{ text: string; isMainPoint: boolean; isBullet: boolean }> }> = [];
   
   let currentSection: { title: string | null; items: Array<{ text: string; isMainPoint: boolean; isBullet: boolean }> } = {
