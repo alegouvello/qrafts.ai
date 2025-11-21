@@ -51,15 +51,15 @@ const SECONDARY_COLOR: [number, number, number] = [52, 73, 94]; // Dark gray
 const TEXT_COLOR: [number, number, number] = [44, 62, 80]; // Text gray
 const LIGHT_GRAY: [number, number, number] = [236, 240, 241];
 
-export function generateResumePDF(data: ResumeData, layout: 'single' | 'two-column' = 'single') {
+export function generateResumePDF(data: ResumeData, layout: 'single' | 'two-column' = 'single', preview: boolean = false): string | void {
   if (layout === 'two-column') {
-    generateTwoColumnPDF(data);
+    return generateTwoColumnPDF(data, preview);
   } else {
-    generateSingleColumnPDF(data);
+    return generateSingleColumnPDF(data, preview);
   }
 }
 
-function generateSingleColumnPDF(data: ResumeData) {
+function generateSingleColumnPDF(data: ResumeData, preview: boolean = false): string | void {
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -466,7 +466,7 @@ function generateSingleColumnPDF(data: ResumeData) {
   doc.save(fileName);
 }
 
-function generateTwoColumnPDF(data: ResumeData) {
+function generateTwoColumnPDF(data: ResumeData, preview: boolean = false): string | void {
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -841,8 +841,18 @@ function generateTwoColumnPDF(data: ResumeData) {
     });
   }
 
-  // Save PDF
-  const fileName = `${data.full_name || 'Resume'}_TwoColumn_Resume.pdf`;
-  doc.save(fileName);
+  // Save or return PDF
+  if (preview) {
+    return doc.output('dataurlstring');
+  } else {
+    const fileName = `${data.full_name || 'Resume'}_TwoColumn_Resume.pdf`;
+    doc.save(fileName);
+  }
+}
+
+// Generate PDF preview as data URL for preview display
+export function generatePDFPreview(data: ResumeData, layout: 'single' | 'two-column' = 'single'): string {
+  const result = generateResumePDF(data, layout, true);
+  return typeof result === 'string' ? result : '';
 }
 
