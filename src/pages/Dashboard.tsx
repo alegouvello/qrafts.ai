@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { Plus, ArrowLeft, LogOut, BarChart3, Crown, Sparkles, Settings, Briefcase, Clock, Users, TrendingUp } from "lucide-react";
 import { ApplicationCard } from "@/components/ApplicationCard";
 import { AddApplicationDialog } from "@/components/AddApplicationDialog";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import qraftLogo from "@/assets/qrafts-logo.png";
@@ -403,6 +404,7 @@ const Dashboard = () => {
                   </Button>
                 </Link>
               )}
+              <ThemeToggle />
               <Link to="/settings">
                 <Button variant="ghost" className="rounded-full hover:bg-primary/5 transition-all" size="icon">
                   <Settings className="h-4 w-4" />
