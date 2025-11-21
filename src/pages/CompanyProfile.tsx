@@ -285,7 +285,7 @@ const CompanyProfile = () => {
                 </Button>
               </Link>
               <Link to="/dashboard">
-                <img src={qraftLogo} alt="Qraft" className="h-12" />
+                <img src={qraftLogo} alt="Qraft" className="h-20" />
               </Link>
             </div>
           </div>

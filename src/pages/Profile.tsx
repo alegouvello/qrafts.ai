@@ -163,7 +163,7 @@ export default function Profile() {
                 <ArrowLeft className="h-4 w-4" />
                 <span className="hidden sm:inline">Back</span>
               </Button>
-              <img src={qraftLogo} alt="QRAFTS" className="h-12 opacity-80" />
+              <img src={qraftLogo} alt="QRAFTS" className="h-20 opacity-80" />
             </div>
             <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
               <Button

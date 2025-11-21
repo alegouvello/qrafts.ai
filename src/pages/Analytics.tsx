@@ -240,7 +240,7 @@ const Analytics = () => {
                 </Button>
               </Link>
               <Link to="/dashboard">
-                <img src={qraftLogo} alt="Qraft" className="h-12" />
+                <img src={qraftLogo} alt="Qraft" className="h-20" />
               </Link>
               <div className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5 text-primary" />
