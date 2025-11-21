@@ -217,7 +217,7 @@ export default function Profile() {
     }
   };
 
-  const handleApproveEnhancement = async () => {
+  const handleApproveEnhancement = async (selectedSections: string[]) => {
     if (!enhancedData) return;
 
     setApplyingEnhancement(true);
@@ -226,10 +226,19 @@ export default function Profile() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No user found");
 
+      // Merge only selected sections
+      const mergedData = { ...parsedData };
+      
+      selectedSections.forEach(section => {
+        if (enhancedData[section]) {
+          mergedData[section] = enhancedData[section];
+        }
+      });
+
       const { error } = await supabase
         .from('user_profiles')
         .update({
-          resume_text: JSON.stringify(enhancedData),
+          resume_text: JSON.stringify(mergedData),
           updated_at: new Date().toISOString(),
         })
         .eq('user_id', user.id);
@@ -238,7 +247,7 @@ export default function Profile() {
 
       toast({
         title: "Enhancement Applied!",
-        description: "Your profile has been successfully updated",
+        description: `Updated ${selectedSections.length} section${selectedSections.length > 1 ? 's' : ''}`,
       });
 
       // Refresh the profile to show updated data
