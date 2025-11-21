@@ -164,16 +164,16 @@ const Auth = () => {
       
       {/* Main content - centered */}
       <div className="flex-1 flex items-center justify-center px-3 py-4 sm:p-4">
-        <Card className="relative w-full max-w-[95vw] sm:max-w-md p-5 sm:p-8 md:p-10 border-border/40 bg-card/80 backdrop-blur-xl shadow-2xl">
+        <Card className="relative w-full max-w-[95vw] sm:max-w-md p-5 sm:p-8 md:p-10 border-border/40 bg-card/80 backdrop-blur-xl shadow-2xl animate-enter">
           <div className="text-center mb-5 sm:mb-8 md:mb-10 space-y-2 sm:space-y-3 md:space-y-4">
-            <div className="inline-block px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium mb-2 sm:mb-4">
+            <div className="inline-block px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium mb-2 sm:mb-4 animate-fade-in" style={{ animationDelay: '0.1s', animationFillMode: 'backwards' }}>
               Welcome Back
             </div>
-            <img src={qraftLogo} alt="QRAFTS" className="h-14 sm:h-16 md:h-20 mx-auto dark:invert" />
-            <p className="text-xs sm:text-sm md:text-base text-muted-foreground">Your journey to success starts here</p>
+            <img src={qraftLogo} alt="QRAFTS" className="h-14 sm:h-16 md:h-20 mx-auto dark:invert animate-fade-in" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }} />
+            <p className="text-xs sm:text-sm md:text-base text-muted-foreground animate-fade-in" style={{ animationDelay: '0.3s', animationFillMode: 'backwards' }}>Your journey to success starts here</p>
           </div>
 
-        <Tabs defaultValue="signin" className="w-full">
+        <Tabs defaultValue="signin" className="w-full animate-fade-in" style={{ animationDelay: '0.4s', animationFillMode: 'backwards' }}>
           <TabsList className="grid w-full grid-cols-2 bg-muted/50 p-1 rounded-full text-sm">
             <TabsTrigger value="signin" className="rounded-full data-[state=active]:shadow-md">Sign In</TabsTrigger>
             <TabsTrigger value="signup" className="rounded-full data-[state=active]:shadow-md">Sign Up</TabsTrigger>
