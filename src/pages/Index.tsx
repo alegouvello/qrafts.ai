@@ -128,12 +128,12 @@ const Index = () => {
         <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
           <div className="space-y-6 sm:space-y-8 text-center md:text-left">
             <div className="inline-block px-3 sm:px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium animate-fade-in-down">
-              ✨ Your Job Application Assistant
+              ✨ {t('landing.hero.assistant')}
             </div>
             <h2 id="hero-heading" className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-              Stay Organized.
+              {t('landing.hero.stayOrganized')}
               <span className="block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mt-2">
-                Get Better.
+                {t('landing.hero.getBetter')}
               </span>
             </h2>
             <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-lg mx-auto md:mx-0 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
@@ -178,11 +178,11 @@ const Index = () => {
           videoSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         }`}>
           <div className="inline-block px-3 sm:px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium mb-4 animate-glow-pulse">
-            See It In Action
+            {t('landing.video.badge')}
           </div>
-          <h3 id="video-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">Watch QRAFTS in Action</h3>
+          <h3 id="video-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">{t('landing.video.title')}</h3>
           <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
-            See how QRAFTS helps organize job applications and streamline your job search
+            {t('landing.video.description')}
           </p>
         </div>
         
@@ -219,7 +219,7 @@ const Index = () => {
           featuresSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         }`}>
           <div className="inline-block px-3 sm:px-4 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs sm:text-sm font-medium mb-4">
-            Everything You Need
+            {t('landing.features.badge')}
           </div>
           <h3 id="features-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">{t('landing.features.title')}</h3>
           <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
@@ -325,14 +325,14 @@ const Index = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-primary opacity-90 animate-glow-pulse" />
           <div className="relative px-6 sm:px-12 py-16 sm:py-20 text-center text-white">
             <h3 id="cta-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">
-              Ready to Transform Your Job Search?
+              {t('landing.cta.title')}
             </h3>
             <p className="text-lg sm:text-xl mb-8 sm:mb-10 opacity-95 max-w-2xl mx-auto px-4">
-              Join thousands of professionals who landed their dream jobs with QRAFTS
+              {t('landing.cta.description')}
             </p>
             <Link to="/auth">
               <Button size="lg" variant="secondary" className="w-full sm:w-auto rounded-full group shadow-2xl hover:scale-110 hover:shadow-primary/30 transition-all duration-300 min-h-[48px]">
-                Start Tracking for Free
+                {t('landing.cta.button')}
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>

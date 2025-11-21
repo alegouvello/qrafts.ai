@@ -42,11 +42,26 @@
   "landing": {
     "hero": {
       "title": "Rastrea tus solicitudes de empleo con insights impulsados por IA",
+      "tagline": "Mantente Organizado. Mejora.",
+      "stayOrganized": "Mantente Organizado.",
+      "getBetter": "Mejora.",
       "subtitle": "Nunca más pierdas una oportunidad. Qrafts te ayuda a organizar, rastrear y optimizar tu búsqueda de empleo con insights inteligentes.",
       "cta": "Comenzar gratis",
-      "demo": "Ver demo"
+      "demo": "Ver demo",
+      "assistant": "Tu Asistente de Solicitudes"
+    },
+    "video": {
+      "badge": "Ver en Acción",
+      "title": "Mira QRAFTS en Acción",
+      "description": "Descubre cómo QRAFTS te ayuda a organizar tus solicitudes y simplificar tu búsqueda de empleo"
+    },
+    "cta": {
+      "title": "¿Listo para Transformar tu Búsqueda de Empleo?",
+      "description": "Únete a miles de profesionales que consiguieron sus trabajos soñados con QRAFTS",
+      "button": "Comenzar Gratis"
     },
     "features": {
+      "badge": "Todo lo Que Necesitas",
       "title": "Todo lo que necesitas para conseguir el trabajo de tus sueños",
       "organize": {
         "title": "Organizar solicitudes",
