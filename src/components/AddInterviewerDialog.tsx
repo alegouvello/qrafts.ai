@@ -56,25 +56,22 @@ export const AddInterviewerDialog = ({ applicationId, applicationCompany, onInte
 
       if (insertError) throw insertError;
 
-      // If LinkedIn URL provided, trigger extraction
+      // If LinkedIn URL provided, trigger extraction (but it's optional)
       if (linkedinUrl && interviewer) {
         toast({
           title: t("toast.success"),
-          description: "Interviewer added. Extracting LinkedIn profile...",
+          description: "Interviewer added successfully",
         });
 
+        // Try to extract LinkedIn profile, but don't fail if it doesn't work
         supabase.functions
           .invoke("extract-linkedin-profile", {
             body: { interviewerId: interviewer.id, linkedinUrl },
           })
-          .then(({ error }) => {
-            if (error) {
-              console.error("LinkedIn extraction error:", error);
-              toast({
-                title: t("toast.warning"),
-                description: "Failed to extract LinkedIn profile",
-                variant: "destructive",
-              });
+          .then(({ data, error }) => {
+            if (error || data?.error) {
+              console.log("LinkedIn extraction not available:", error || data?.error);
+              // Don't show error toast - LinkedIn extraction is optional
             } else {
               toast({
                 title: t("toast.success"),
@@ -161,7 +158,7 @@ export const AddInterviewerDialog = ({ applicationId, applicationCompany, onInte
             />
           </div>
           <div>
-            <Label htmlFor="linkedinUrl">LinkedIn URL</Label>
+            <Label htmlFor="linkedinUrl">LinkedIn URL (Optional)</Label>
             <Input
               id="linkedinUrl"
               type="url"
@@ -170,7 +167,7 @@ export const AddInterviewerDialog = ({ applicationId, applicationCompany, onInte
               placeholder="https://linkedin.com/in/johndoe"
             />
             <p className="text-xs text-muted-foreground mt-1">
-              We'll automatically extract their profile information
+              LinkedIn profile reference (extraction may not be available)
             </p>
           </div>
           <div className="flex justify-end gap-2">

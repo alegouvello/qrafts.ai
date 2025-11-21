@@ -49,8 +49,11 @@ serve(async (req) => {
       const errorText = await scrapeResponse.text();
       console.error('Failed to scrape LinkedIn profile:', errorText);
       return new Response(
-        JSON.stringify({ error: 'Failed to scrape LinkedIn profile' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ 
+          error: 'LinkedIn scraping not available',
+          message: 'LinkedIn requires enterprise Firecrawl plan. Please add interviewer details manually.'
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -59,8 +62,11 @@ serve(async (req) => {
     if (!scrapeResult.success) {
       console.error('Failed to scrape LinkedIn profile:', scrapeResult);
       return new Response(
-        JSON.stringify({ error: 'Failed to scrape LinkedIn profile' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ 
+          error: 'LinkedIn scraping not available',
+          message: scrapeResult.error || 'LinkedIn requires enterprise Firecrawl plan. Please add interviewer details manually.'
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
