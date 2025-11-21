@@ -271,7 +271,17 @@
     "feature3": "Bibliothèque de réponses maîtresses avec correspondance IA",
     "feature4": "Support prioritaire",
     "feature5": "Analyses et insights avancés",
-    "pricingDetails": "Seulement 5$/mois avec essai gratuit de 14 jours"
+    "pricingDetails": "Seulement 5$/mois avec essai gratuit de 14 jours",
+    "proFeature1": "Candidatures illimitées",
+    "proFeature2": "Analyse d'adéquation au poste par IA",
+    "proFeature3": "Analyses et insights avancés",
+    "proFeature4": "Support prioritaire",
+    "manageSubscriptionBilling": "Gérer l'abonnement et la facturation",
+    "deleteWarningText": "Cette action ne peut pas être annulée. Ceci supprimera définitivement :",
+    "deleteItem1": "Toutes vos candidatures et réponses",
+    "deleteItem2": "Votre profil et paramètres",
+    "deleteItem3": "Tous les événements et données de chronologie",
+    "deleteItem4": "Votre abonnement (si actif)"
   },
   "auth": {
     "signIn": "Se connecter",

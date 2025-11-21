@@ -271,7 +271,17 @@
     "feature3": "Biblioteca de respuestas maestras con coincidencia IA",
     "feature4": "Soporte prioritario",
     "feature5": "Análisis e insights avanzados",
-    "pricingDetails": "Solo $5/mes con prueba gratuita de 14 días"
+    "pricingDetails": "Solo $5/mes con prueba gratuita de 14 días",
+    "proFeature1": "Solicitudes de empleo ilimitadas",
+    "proFeature2": "Análisis de adecuación al puesto con IA",
+    "proFeature3": "Análisis e insights avanzados",
+    "proFeature4": "Soporte prioritario",
+    "manageSubscriptionBilling": "Gestionar suscripción y facturación",
+    "deleteWarningText": "Esta acción no se puede deshacer. Esto eliminará permanentemente:",
+    "deleteItem1": "Todas tus solicitudes de empleo y respuestas",
+    "deleteItem2": "Tu perfil y configuración",
+    "deleteItem3": "Todos los eventos y datos de línea de tiempo",
+    "deleteItem4": "Tu suscripción (si está activa)"
   },
   "auth": {
     "signIn": "Iniciar sesión",
