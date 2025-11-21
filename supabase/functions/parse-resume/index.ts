@@ -53,8 +53,10 @@ async function extractStructuredTextFromDocx(arrayBuffer: ArrayBuffer): Promise<
     const headingMatch = paragraphContent.match(/<w:pStyle[^>]+w:val="Heading(\d+)"/);
     const level = headingMatch ? parseInt(headingMatch[1]) : 0;
     
-    // Check if it's a bullet point
+    // Check if it's a bullet point and get indentation level
     const isBullet = /<w:numPr>/.test(paragraphContent);
+    const indentMatch = paragraphContent.match(/<w:ilvl[^>]+w:val="(\d+)"/);
+    const indentLevel = indentMatch ? parseInt(indentMatch[1]) : 0;
     
     // Extract text from all text runs
     let text = '';
@@ -101,17 +103,20 @@ async function extractStructuredTextFromDocx(arrayBuffer: ArrayBuffer): Promise<
       .trim();
     
     if (text) {
-      paragraphs.push({ text, isHeading, isBullet, level });
+      paragraphs.push({ text, isHeading, isBullet, level: isBullet ? indentLevel : level });
     }
   }
   
-  // Format the paragraphs into structured text
+  // Format the paragraphs into structured text with nested bullets
   let structuredText = '';
-  for (const para of paragraphs) {
+  for (let i = 0; i < paragraphs.length; i++) {
+    const para = paragraphs[i];
     if (para.isHeading) {
       structuredText += `\n${'#'.repeat(para.level)} ${para.text}\n`;
     } else if (para.isBullet) {
-      structuredText += `• ${para.text}\n`;
+      // Add indentation marker for nested bullets
+      const indent = '  '.repeat(para.level);
+      structuredText += `${indent}• ${para.text}\n`;
     } else {
       structuredText += `${para.text}\n`;
     }
@@ -205,12 +210,13 @@ SUMMARY FORMATTING:
 - If no bullets, wrap in <p> tags
 
 EXPERIENCE DESCRIPTION FORMATTING:
-- Convert bullet points to proper HTML format
-- Split descriptions by bullet character (•) or newline-separated points
-- Wrap multiple bullet points in <ul><li> tags
-- Preserve the exact text of each bullet point
-- Example: "• Point 1 • Point 2" becomes "<ul><li>Point 1</li><li>Point 2</li></ul>"
-- If no bullets, wrap in <p> tags
+- Detect and preserve nested bullet structures
+- Main bullet points should have sub-points indented beneath them
+- Convert to nested HTML <ul> lists when there are sub-bullets
+- Main point format: "<li>Main point<ul><li>Sub-point 1</li><li>Sub-point 2</li></ul></li>"
+- Look for patterns like "Point:" followed by sub-points
+- Preserve exact text of each bullet and sub-bullet
+- If no nesting, use flat <ul><li> structure
 
 PUBLICATION EXTRACTION:
 - Look for sections titled "Publications", "Articles", "Writing", "Papers"

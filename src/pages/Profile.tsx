@@ -12,6 +12,7 @@ import { MasterAnswersDialog } from "@/components/MasterAnswersDialog";
 import { EnhancementPreviewDialog } from "@/components/EnhancementPreviewDialog";
 import { Footer } from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
+import { convertBulletsToHTML } from "@/utils/bulletFormatter";
 import {
   Dialog,
   DialogContent,
@@ -166,24 +167,14 @@ export default function Profile() {
           
           // Convert plain text bullet points to HTML if needed for summary
           if (parsed.summary && !parsed.summary.includes('<')) {
-            const parts = parsed.summary.split('•').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-            if (parts.length > 1) {
-              parsed.summary = '<ul>' + parts.map((point: string) => `<li>${point}</li>`).join('') + '</ul>';
-            } else if (parsed.summary.trim()) {
-              parsed.summary = `<p>${parsed.summary}</p>`;
-            }
+            parsed.summary = convertBulletsToHTML(parsed.summary);
           }
           
           // Convert plain text bullet points to HTML if needed for experience
           if (parsed.experience) {
             parsed.experience = parsed.experience.map((exp: any) => {
               if (exp.description && !exp.description.includes('<')) {
-                const parts = exp.description.split('•').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-                if (parts.length > 1) {
-                  exp.description = '<ul>' + parts.map((point: string) => `<li>${point}</li>`).join('') + '</ul>';
-                } else if (exp.description.trim()) {
-                  exp.description = `<p>${exp.description}</p>`;
-                }
+                exp.description = convertBulletsToHTML(exp.description);
               }
               return exp;
             });
@@ -731,10 +722,10 @@ export default function Profile() {
                               </span>
                             )}
                           </div>
-                          <div 
-                            className="prose prose-sm max-w-none text-foreground/80 [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:space-y-1 [&_li]:leading-relaxed [&_strong]:font-semibold [&_strong]:text-foreground [&_a]:text-primary [&_a]:underline [&_a]:hover:text-primary/80"
-                            dangerouslySetInnerHTML={{ __html: exp.description }}
-                          />
+                <div 
+                  className="prose prose-sm max-w-none text-foreground/80 [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:space-y-1 [&_ul_ul]:list-circle [&_ul_ul]:ml-6 [&_li]:leading-relaxed [&_strong]:font-semibold [&_strong]:text-foreground [&_a]:text-primary [&_a]:underline [&_a]:hover:text-primary/80"
+                  dangerouslySetInnerHTML={{ __html: exp.description }}
+                />
                         </div>
                       </div>
                     );
