@@ -315,5 +315,25 @@
     "eventAdded": "Event added successfully",
     "saved": "Saved successfully",
     "copied": "Copied to clipboard"
+  },
+  "comparison": {
+    "title": "Application Comparison",
+    "subtitle": "Compare your applications ranked by AI fit score",
+    "analyzeAll": "Analyze All",
+    "analyzing": "Analyzing...",
+    "applicationsAnalyzed": "Applications Analyzed",
+    "outOfTotal": "out of {{total}} total",
+    "averageFitScore": "Average Fit Score",
+    "bestMatch": "Best Match",
+    "fitScore": "Fit Score",
+    "rank": "Rank #{{rank}}",
+    "hideReasoning": "Hide reasoning",
+    "showReasoning": "Show reasoning",
+    "overallAssessment": "Overall Assessment",
+    "strengths": "Strengths",
+    "areasForImprovement": "Areas for Improvement",
+    "suggestions": "Suggestions",
+    "backToDashboard": "Back to Dashboard",
+    "back": "Back"
   }
 }

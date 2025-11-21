@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Minus, ExternalLink, Sparkles, ChevronDown, ChevronUp, Settings, Crown } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import qraftLogo from "@/assets/qrafts-logo.png";
+import { useTranslation } from "react-i18next";
 
 interface Application {
   id: string;
@@ -30,6 +31,7 @@ interface ApplicationWithScore extends Application {
 }
 
 const ComparisonView = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [applications, setApplications] = useState<ApplicationWithScore[]>([]);
@@ -351,8 +353,8 @@ const ComparisonView = () => {
                 size="sm"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Back to Dashboard</span>
-                <span className="sm:hidden">Back</span>
+                <span className="hidden sm:inline">{t('comparison.backToDashboard')}</span>
+                <span className="sm:hidden">{t('comparison.back')}</span>
               </Button>
               <Link to="/settings">
                 <Button variant="ghost" size="sm" className="rounded-full">
@@ -365,9 +367,9 @@ const ComparisonView = () => {
 
           <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
             <div>
-              <h1 className="text-3xl sm:text-4xl font-bold mb-2">Application Comparison</h1>
+              <h1 className="text-3xl sm:text-4xl font-bold mb-2">{t('comparison.title')}</h1>
               <p className="text-sm sm:text-base text-muted-foreground">
-                Compare your applications ranked by AI fit score
+                {t('comparison.subtitle')}
               </p>
             </div>
             <Button
@@ -379,12 +381,12 @@ const ComparisonView = () => {
               {analyzingAll ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Analyzing...
+                  {t('comparison.analyzing')}
                 </>
               ) : (
                 <>
                   <Sparkles className="h-4 w-4 mr-2" />
-                  Analyze All
+                  {t('comparison.analyzeAll')}
                 </>
               )}
             </Button>
@@ -395,20 +397,20 @@ const ComparisonView = () => {
         {analyzedCount > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 sm:mb-8">
             <Card className="p-4 sm:p-6">
-              <div className="text-xs sm:text-sm text-muted-foreground mb-1">Applications Analyzed</div>
+              <div className="text-xs sm:text-sm text-muted-foreground mb-1">{t('comparison.applicationsAnalyzed')}</div>
               <div className="text-2xl sm:text-3xl font-bold">{analyzedCount}</div>
               <div className="text-xs text-muted-foreground mt-1">
-                out of {applications.length} total
+                {t('comparison.outOfTotal', { total: applications.length })}
               </div>
             </Card>
             <Card className="p-4 sm:p-6">
-              <div className="text-xs sm:text-sm text-muted-foreground mb-1">Average Fit Score</div>
+              <div className="text-xs sm:text-sm text-muted-foreground mb-1">{t('comparison.averageFitScore')}</div>
               <div className={`text-2xl sm:text-3xl font-bold ${getScoreColor(avgScore)}`}>
                 {avgScore}%
               </div>
             </Card>
             <Card className="p-4 sm:p-6">
-              <div className="text-xs sm:text-sm text-muted-foreground mb-1">Best Match</div>
+              <div className="text-xs sm:text-sm text-muted-foreground mb-1">{t('comparison.bestMatch')}</div>
               <div className="text-2xl sm:text-3xl font-bold text-green-600">
                 {Math.max(...applications.map(app => app.fitScore || 0))}%
               </div>
@@ -434,11 +436,11 @@ const ComparisonView = () => {
                   <div className="text-muted-foreground mb-3">{app.company}</div>
 
                   {app.fitScore !== undefined && (
-                    <div className="space-y-3">
+                      <div className="space-y-3">
                       <div className="flex items-center gap-4">
                         <div className="flex-1">
                           <div className="flex items-center justify-between text-sm mb-1">
-                            <span className="text-muted-foreground">Fit Score</span>
+                            <span className="text-muted-foreground">{t('comparison.fitScore')}</span>
                             <span className={`font-semibold ${getScoreColor(app.fitScore)}`}>
                               {app.fitScore}%
                             </span>
@@ -446,7 +448,7 @@ const ComparisonView = () => {
                           <Progress value={app.fitScore} className="h-2" />
                         </div>
                         <Badge variant={getScoreBadgeVariant(app.fitScore)}>
-                          Rank #{index + 1}
+                          {t('comparison.rank', { rank: index + 1 })}
                         </Badge>
                       </div>
 
@@ -459,12 +461,12 @@ const ComparisonView = () => {
                             {expandedReasons[app.id] ? (
                               <>
                                 <ChevronUp className="h-4 w-4" />
-                                Hide reasoning
+                                {t('comparison.hideReasoning')}
                               </>
                             ) : (
                               <>
                                 <ChevronDown className="h-4 w-4" />
-                                Show reasoning
+                                {t('comparison.showReasoning')}
                               </>
                             )}
                           </button>
@@ -472,13 +474,13 @@ const ComparisonView = () => {
                           {expandedReasons[app.id] && (
                             <div className="mt-3 p-4 bg-muted/50 rounded-lg space-y-3">
                               <div>
-                                <div className="text-sm font-medium mb-1">Overall Assessment</div>
+                                <div className="text-sm font-medium mb-1">{t('comparison.overallAssessment')}</div>
                                 <p className="text-sm text-muted-foreground">{app.overallFit}</p>
                               </div>
                               
                               {app.strengths && app.strengths.length > 0 && (
                                 <div>
-                                  <div className="text-sm font-medium text-green-600 mb-1">Strengths</div>
+                                  <div className="text-sm font-medium text-green-600 mb-1">{t('comparison.strengths')}</div>
                                   <ul className="list-disc list-inside space-y-1">
                                     {app.strengths.map((strength, i) => (
                                       <li key={i} className="text-sm text-muted-foreground">{strength}</li>
@@ -489,7 +491,7 @@ const ComparisonView = () => {
                               
                               {app.gaps && app.gaps.length > 0 && (
                                 <div>
-                                  <div className="text-sm font-medium text-orange-600 mb-1">Areas for Improvement</div>
+                                  <div className="text-sm font-medium text-orange-600 mb-1">{t('comparison.areasForImprovement')}</div>
                                   <ul className="list-disc list-inside space-y-1">
                                     {app.gaps.map((gap, i) => (
                                       <li key={i} className="text-sm text-muted-foreground">{gap}</li>
