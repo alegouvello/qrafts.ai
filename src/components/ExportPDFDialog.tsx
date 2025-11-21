@@ -163,19 +163,25 @@ export function ExportPDFDialog({ open, onOpenChange, onExport, profileData, gen
           {/* Right side - PDF Preview */}
           <div className="space-y-2">
             <p className="text-sm font-medium">Preview:</p>
-            <div className="border rounded-lg overflow-hidden bg-muted/30" style={{ height: '500px' }}>
+            <div className="border rounded-lg overflow-hidden bg-white" style={{ height: '500px' }}>
               {loadingPreview ? (
                 <div className="flex flex-col items-center justify-center h-full gap-2">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   <p className="text-sm text-muted-foreground">Generating preview...</p>
                 </div>
               ) : previewUrl ? (
-                <embed
-                  src={previewUrl}
+                <object
+                  data={previewUrl}
                   type="application/pdf"
                   className="w-full h-full"
-                  title="PDF Preview"
-                />
+                  aria-label="PDF Preview"
+                >
+                  <iframe
+                    src={previewUrl}
+                    className="w-full h-full"
+                    title="PDF Preview"
+                  />
+                </object>
               ) : (
                 <div className="flex flex-col items-center justify-center h-full gap-2 p-4">
                   <p className="text-sm text-muted-foreground">
