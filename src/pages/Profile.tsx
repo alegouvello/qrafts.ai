@@ -1115,8 +1115,6 @@ export default function Profile() {
         open={showExportPDFDialog}
         onOpenChange={setShowExportPDFDialog}
         onExport={handleExportPDF}
-        profileData={parsedData}
-        generatePDFPreview={generatePDFPreview}
       />
 
       {/* Target Role Dialog */}
