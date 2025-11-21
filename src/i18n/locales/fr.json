@@ -315,5 +315,25 @@
     "eventAdded": "Événement ajouté avec succès",
     "saved": "Enregistré avec succès",
     "copied": "Copié dans le presse-papiers"
+  },
+  "comparison": {
+    "title": "Comparaison des candidatures",
+    "subtitle": "Comparez vos candidatures classées par score d'adéquation IA",
+    "analyzeAll": "Tout analyser",
+    "analyzing": "Analyse en cours...",
+    "applicationsAnalyzed": "Candidatures analysées",
+    "outOfTotal": "sur {{total}} au total",
+    "averageFitScore": "Score d'adéquation moyen",
+    "bestMatch": "Meilleure correspondance",
+    "fitScore": "Score d'adéquation",
+    "rank": "Rang #{{rank}}",
+    "hideReasoning": "Masquer le raisonnement",
+    "showReasoning": "Afficher le raisonnement",
+    "overallAssessment": "Évaluation globale",
+    "strengths": "Points forts",
+    "areasForImprovement": "Domaines d'amélioration",
+    "suggestions": "Suggestions",
+    "backToDashboard": "Retour au tableau de bord",
+    "back": "Retour"
   }
 }

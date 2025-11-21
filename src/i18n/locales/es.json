@@ -315,5 +315,25 @@
     "eventAdded": "Evento añadido con éxito",
     "saved": "Guardado con éxito",
     "copied": "Copiado al portapapeles"
+  },
+  "comparison": {
+    "title": "Comparación de solicitudes",
+    "subtitle": "Compara tus solicitudes clasificadas por puntuación de adecuación IA",
+    "analyzeAll": "Analizar todo",
+    "analyzing": "Analizando...",
+    "applicationsAnalyzed": "Solicitudes analizadas",
+    "outOfTotal": "de {{total}} en total",
+    "averageFitScore": "Puntuación de adecuación promedio",
+    "bestMatch": "Mejor coincidencia",
+    "fitScore": "Puntuación de adecuación",
+    "rank": "Rango #{{rank}}",
+    "hideReasoning": "Ocultar razonamiento",
+    "showReasoning": "Mostrar razonamiento",
+    "overallAssessment": "Evaluación general",
+    "strengths": "Fortalezas",
+    "areasForImprovement": "Áreas de mejora",
+    "suggestions": "Sugerencias",
+    "backToDashboard": "Volver al panel",
+    "back": "Volver"
   }
 }
