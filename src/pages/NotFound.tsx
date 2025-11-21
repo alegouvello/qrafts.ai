@@ -1,8 +1,10 @@
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import qraftLogo from "@/assets/qrafts-logo.png";
 
 const NotFound = () => {
+  const { t } = useTranslation();
   const location = useLocation();
 
   useEffect(() => {
@@ -14,13 +16,13 @@ const NotFound = () => {
       <div className="text-center space-y-6">
         <img src={qraftLogo} alt="QRAFTS" className="h-12 mx-auto opacity-60 dark:invert" />
         <div>
-          <h1 className="mb-2 text-6xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">404</h1>
-          <p className="mb-6 text-xl text-muted-foreground">Page not found</p>
+          <h1 className="mb-2 text-6xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{t('notFound.title')}</h1>
+          <p className="mb-6 text-xl text-muted-foreground">{t('notFound.message')}</p>
           <a 
             href="/" 
             className="inline-block px-6 py-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30"
           >
-            Return Home
+            {t('notFound.returnHome')}
           </a>
         </div>
       </div>
