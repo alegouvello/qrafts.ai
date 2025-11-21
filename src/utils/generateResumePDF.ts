@@ -74,21 +74,50 @@ function generateSingleColumnPDF(data: ResumeData, preview: boolean = false): st
 
   // Helper function to extract bullet points from HTML
   const extractBulletPoints = (html: string = ''): string[] => {
-    // First try to extract <li> items
-    const liMatches = html.match(/<li[^>]*>(.*?)<\/li>/gi);
-    if (liMatches && liMatches.length > 0) {
-      return liMatches.map(li => 
-        li.replace(/<[^>]*>/g, '')
+    const results: string[] = [];
+    
+    // First extract <p> tags (intro paragraphs)
+    const pMatches = html.match(/<p[^>]*>(.*?)<\/p>/gi);
+    if (pMatches && pMatches.length > 0) {
+      pMatches.forEach(p => {
+        const cleaned = p
+          .replace(/<[^>]*>/g, '')
           .replace(/&nbsp;/g, ' ')
           .replace(/&amp;/g, '&')
           .replace(/&lt;/g, '<')
           .replace(/&gt;/g, '>')
           .replace(/&quot;/g, '"')
-          .trim()
-      ).filter(text => text.length > 0);
+          .trim();
+        if (cleaned.length > 0) {
+          results.push(cleaned);
+        }
+      });
     }
     
-    // If no <li> tags, strip HTML and split by bullets or newlines
+    // Then extract <li> items
+    const liMatches = html.match(/<li[^>]*>(.*?)<\/li>/gi);
+    if (liMatches && liMatches.length > 0) {
+      liMatches.forEach(li => {
+        const cleaned = li
+          .replace(/<[^>]*>/g, '')
+          .replace(/&nbsp;/g, ' ')
+          .replace(/&amp;/g, '&')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&quot;/g, '"')
+          .trim();
+        if (cleaned.length > 0) {
+          results.push(cleaned);
+        }
+      });
+    }
+    
+    // If we found p or li tags, return those
+    if (results.length > 0) {
+      return results;
+    }
+    
+    // If no structured tags, strip HTML and split by bullets or newlines
     const stripped = html
       .replace(/<[^>]*>/g, '')
       .replace(/&nbsp;/g, ' ')
@@ -199,21 +228,20 @@ function generateSingleColumnPDF(data: ResumeData, preview: boolean = false): st
     const summaryBullets = extractBulletPoints(data.summary);
     
     if (summaryBullets.length > 1) {
-      // Has multiple bullet points - format as list
+      // Has multiple items - check if first is intro paragraph
       const firstParagraph = summaryBullets[0];
       let hasIntroParagraph = false;
       
-      // Check if first item is an intro paragraph (doesn't start with bold label like "AI Venture Building –")
-      // and is reasonably long (intro paragraphs are usually substantial)
+      // If first item is long and doesn't start with bold label, it's an intro paragraph
       if (firstParagraph && firstParagraph.length > 100 && !(/^[A-Z][A-Za-z\s&]+\s*[–-]\s/.test(firstParagraph))) {
         addWrappedText(firstParagraph, 10, contentWidth, 5.5);
         yPos += 2;
         hasIntroParagraph = true;
       }
       
-      // Bullet points
+      // Print remaining items as bullet points
       summaryBullets.forEach((bullet, idx) => {
-        // Skip first item only if it was printed as intro paragraph
+        // Skip first item if it was the intro paragraph
         if (idx === 0 && hasIntroParagraph) return;
         
         const cleanBullet = bullet.trim();
@@ -531,21 +559,50 @@ function generateTwoColumnPDF(data: ResumeData, preview: boolean = false): strin
 
   // Helper function to extract bullet points from HTML
   const extractBulletPoints = (html: string = ''): string[] => {
-    // First try to extract <li> items
-    const liMatches = html.match(/<li[^>]*>(.*?)<\/li>/gi);
-    if (liMatches && liMatches.length > 0) {
-      return liMatches.map(li => 
-        li.replace(/<[^>]*>/g, '')
+    const results: string[] = [];
+    
+    // First extract <p> tags (intro paragraphs)
+    const pMatches = html.match(/<p[^>]*>(.*?)<\/p>/gi);
+    if (pMatches && pMatches.length > 0) {
+      pMatches.forEach(p => {
+        const cleaned = p
+          .replace(/<[^>]*>/g, '')
           .replace(/&nbsp;/g, ' ')
           .replace(/&amp;/g, '&')
           .replace(/&lt;/g, '<')
           .replace(/&gt;/g, '>')
           .replace(/&quot;/g, '"')
-          .trim()
-      ).filter(text => text.length > 0);
+          .trim();
+        if (cleaned.length > 0) {
+          results.push(cleaned);
+        }
+      });
     }
     
-    // If no <li> tags, strip HTML and split by bullets or newlines
+    // Then extract <li> items
+    const liMatches = html.match(/<li[^>]*>(.*?)<\/li>/gi);
+    if (liMatches && liMatches.length > 0) {
+      liMatches.forEach(li => {
+        const cleaned = li
+          .replace(/<[^>]*>/g, '')
+          .replace(/&nbsp;/g, ' ')
+          .replace(/&amp;/g, '&')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&quot;/g, '"')
+          .trim();
+        if (cleaned.length > 0) {
+          results.push(cleaned);
+        }
+      });
+    }
+    
+    // If we found p or li tags, return those
+    if (results.length > 0) {
+      return results;
+    }
+    
+    // If no structured tags, strip HTML and split by bullets or newlines
     const stripped = html
       .replace(/<[^>]*>/g, '')
       .replace(/&nbsp;/g, ' ')
@@ -724,12 +781,11 @@ function generateTwoColumnPDF(data: ResumeData, preview: boolean = false): strin
     const summaryBullets = extractBulletPoints(data.summary);
     
     if (summaryBullets.length > 1) {
-      // Has multiple bullet points - format as list
+      // Has multiple items - check if first is intro paragraph
       const firstParagraph = summaryBullets[0];
       let hasIntroParagraph = false;
       
-      // Check if first item is an intro paragraph (doesn't start with bold label like "AI Venture Building –")
-      // and is reasonably long (intro paragraphs are usually substantial)
+      // If first item is long and doesn't start with bold label, it's an intro paragraph
       if (firstParagraph && firstParagraph.length > 100 && !(/^[A-Z][A-Za-z\s&]+\s*[–-]\s/.test(firstParagraph))) {
         const introLines = doc.splitTextToSize(firstParagraph, mainWidth);
         introLines.forEach((line: string) => {
@@ -741,9 +797,9 @@ function generateTwoColumnPDF(data: ResumeData, preview: boolean = false): strin
         hasIntroParagraph = true;
       }
       
-      // Bullet points
+      // Print remaining items as bullet points
       summaryBullets.forEach((bullet, idx) => {
-        // Skip first item only if it was printed as intro paragraph
+        // Skip first item if it was the intro paragraph
         if (idx === 0 && hasIntroParagraph) return;
         
         const cleanBullet = bullet.trim();
