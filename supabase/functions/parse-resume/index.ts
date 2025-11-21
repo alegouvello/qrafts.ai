@@ -196,6 +196,14 @@ CRITICAL RULES:
 5. For education, include: institution, degree, field, and dates
 6. Identify and extract: skills, certifications, projects, awards, languages, volunteer work, interests
 
+SUMMARY FORMATTING:
+- Convert bullet points to proper HTML format
+- Split summary by bullet character (•) or newline-separated points
+- Wrap multiple bullet points in <ul><li> tags
+- Preserve the exact text of each bullet point
+- Example: "• Point 1 • Point 2" becomes "<ul><li>Point 1</li><li>Point 2</li></ul>"
+- If no bullets, wrap in <p> tags
+
 EXPERIENCE DESCRIPTION FORMATTING:
 - Convert bullet points to proper HTML format
 - Split descriptions by bullet character (•) or newline-separated points
@@ -218,7 +226,7 @@ Return ONLY valid JSON with this structure:
   "linkedin_url": "string",
   "website_url": "string",
   "location": "string",
-  "summary": "string (professional bio/summary)",
+  "summary": "string (HTML formatted with <ul><li> tags or <p> tags)",
   "skills": ["string"],
   "experience": [
     {

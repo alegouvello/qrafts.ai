@@ -74,26 +74,33 @@ export function EditProfileDialog({ open, onOpenChange, onSaved }: EditProfileDi
         try {
           const parsed = JSON.parse(data.resume_text);
           setExistingResumeData(parsed);
-          setSummary(parsed.summary || "");
+          
+          // Convert plain text with bullet points to proper HTML for summary
+          let processedSummary = parsed.summary || "";
+          if (processedSummary && !processedSummary.includes('<')) {
+            const parts = processedSummary.split('•').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+            if (parts.length > 1) {
+              processedSummary = '<ul>' + parts.map((point: string) => `<li>${point}</li>`).join('') + '</ul>';
+            } else if (processedSummary.trim()) {
+              processedSummary = `<p>${processedSummary}</p>`;
+            }
+          }
+          setSummary(processedSummary);
           setSkills(parsed.skills || []);
           
-          // Convert plain text with bullet points to proper HTML
+          // Convert plain text with bullet points to proper HTML for experience
           const processedExperience = (parsed.experience || []).map((exp: any) => {
-            if (exp.description && !exp.description.startsWith('<')) {
+            if (exp.description && !exp.description.includes('<')) {
               // Plain text format - convert bullet points to HTML list
-              // Handle both newline-separated bullets and inline bullets
-              let desc = exp.description;
-              
-              // Split by bullet character
-              const parts = desc.split('•').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+              const parts = exp.description.split('•').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
               
               if (parts.length > 1) {
                 // Multiple bullet points - create HTML list
                 const htmlList = '<ul>' + parts.map((point: string) => `<li>${point}</li>`).join('') + '</ul>';
                 return { ...exp, description: htmlList };
-              } else {
+              } else if (exp.description.trim()) {
                 // Single paragraph - wrap in <p> tag
-                return { ...exp, description: `<p>${desc}</p>` };
+                return { ...exp, description: `<p>${exp.description}</p>` };
               }
             }
             return exp;
@@ -289,12 +296,10 @@ export function EditProfileDialog({ open, onOpenChange, onSaved }: EditProfileDi
           {/* Summary */}
           <div className="space-y-2">
             <Label htmlFor="summary">Professional Summary</Label>
-            <Textarea
-              id="summary"
-              value={summary}
-              onChange={(e) => setSummary(e.target.value)}
+            <RichTextEditor
+              content={summary}
+              onChange={setSummary}
               placeholder="Brief professional summary..."
-              rows={4}
             />
           </div>
 
