@@ -9,8 +9,8 @@ export const Footer = () => {
 
   return (
     <footer className="border-t border-border bg-background/50 backdrop-blur-sm mt-auto">
-      <div className="container mx-auto px-4 py-8 sm:py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+      <div className="container mx-auto px-4 py-6 sm:py-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           {/* Brand & Social */}
           <div className="flex flex-col items-center md:items-start gap-4">
             <h3 className="text-lg font-semibold">{t('footer.followUs')}</h3>
@@ -55,7 +55,7 @@ export const Footer = () => {
           </div>
         </div>
 
-        <Separator className="mb-6" />
+        <Separator className="mb-4" />
         
         <div className="text-center text-sm text-muted-foreground">
           © {currentYear} Qrafts. {t('footer.allRightsReserved')}.
