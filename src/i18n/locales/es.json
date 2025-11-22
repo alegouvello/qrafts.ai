@@ -339,7 +339,10 @@
   "footer": {
     "allRightsReserved": "Todos los derechos reservados",
     "privacyPolicy": "Política de privacidad",
-    "termsOfService": "Términos de servicio"
+    "termsOfService": "Términos de servicio",
+    "followUs": "Síguenos",
+    "quickLinks": "Enlaces rápidos",
+    "company": "Empresa"
   },
   "notFound": {
     "title": "404",
