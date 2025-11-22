@@ -94,14 +94,13 @@ function parseNotes(notes: string) {
   
   const lines = cleanedNotes.split('\n').filter(line => {
     const trimmed = line.trim();
-    // Filter out separator lines (---, ___, ===, or any line that's mostly separators)
-    if (/^[-_=\s]{2,}$/.test(trimmed)) return false;
-    // Filter out lines that are just repeated dashes, underscores, or equals signs
-    if (trimmed.length > 0 && /^[-_=]+$/.test(trimmed.replace(/\s/g, ''))) return false;
-    // Filter out lines that are mostly made of dashes, underscores, equals, or pipes
-    if (trimmed.length > 2 && /^[-_=|]{3,}$/.test(trimmed)) return false;
     // Filter out empty or whitespace-only lines
     if (trimmed.length === 0) return false;
+    // Filter out lines that are ONLY separator characters (dashes, underscores, equals, pipes)
+    if (/^[-_=|\s]+$/.test(trimmed)) return false;
+    // Filter out lines with mostly separator characters (>80% of the line)
+    const sepCount = (trimmed.match(/[-_=|]/g) || []).length;
+    if (sepCount > trimmed.length * 0.8) return false;
     return true;
   });
   const sections: Array<{ title: string | null; items: Array<{ text: string; isMainPoint: boolean; isBullet: boolean }> }> = [];
