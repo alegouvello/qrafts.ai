@@ -10,10 +10,6 @@ interface FormattedNotesProps {
 
 export const FormattedNotes = ({ notes }: FormattedNotesProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  
-  // Debug: log the raw notes
-  console.log('Raw notes:', notes);
-  
   const sections = parseNotes(notes);
 
   return (
@@ -37,50 +33,34 @@ export const FormattedNotes = ({ notes }: FormattedNotesProps) => {
         </CollapsibleTrigger>
       </div>
       
-      <style dangerouslySetInnerHTML={{
-        __html: `
-          .notes-content * {
-            border: none !important;
-            border-top: none !important;
-            border-bottom: none !important;
-            text-decoration: none !important;
-          }
-          .notes-content hr {
-            display: none !important;
-          }
-        `
-      }} />
-      
-      <CollapsibleContent className="space-y-6 notes-content [&_hr]:hidden [&_*]:border-0 [&_*]:border-t-0 [&_*]:border-b-0">
+      <CollapsibleContent className="space-y-6">
         {sections.map((section, index) => (
-        <div key={index} className="space-y-3 border-0">
-          {section.title && (
-            <div className="mb-4 border-0 [&::after]:hidden">
-              <Badge variant="secondary" className="text-xs font-bold tracking-wide border-0">
-                {section.title}
-              </Badge>
-            </div>
-          )}
-          <div className="space-y-2.5 border-0">
-            {section.items.map((item, itemIndex) => (
-              <div key={itemIndex} className="text-sm text-muted-foreground border-0">
-                {item.isMainPoint ? (
-                  <div className="space-y-1 mb-2 border-0">
-                    <p className="font-semibold text-foreground text-[15px] border-0">{item.text}</p>
-                  </div>
-                ) : item.isBullet ? (
-                  <div className="flex gap-2.5 items-start border-0">
-                    <span className="text-primary mt-1 text-base">•</span>
-                    <p className="flex-1 leading-relaxed border-0">{item.text}</p>
-                  </div>
-                ) : (
-                  <p className="leading-relaxed text-muted-foreground/90 border-0">{item.text}</p>
-                )}
+          <div key={index} className="space-y-3">
+            {section.title && (
+              <div className="mb-3">
+                <Badge variant="secondary" className="text-xs font-bold tracking-wide">
+                  {section.title}
+                </Badge>
               </div>
-            ))}
+            )}
+            <div className="space-y-2">
+              {section.items.map((item, itemIndex) => (
+                <div key={itemIndex} className="text-sm">
+                  {item.isMainPoint ? (
+                    <p className="font-semibold text-foreground mb-1">{item.text}</p>
+                  ) : item.isBullet ? (
+                    <div className="flex gap-2 items-start">
+                      <span className="text-primary mt-0.5">•</span>
+                      <p className="flex-1 text-muted-foreground leading-relaxed">{item.text}</p>
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground leading-relaxed">{item.text}</p>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
       </CollapsibleContent>
     </Collapsible>
   );
@@ -88,34 +68,38 @@ export const FormattedNotes = ({ notes }: FormattedNotesProps) => {
 
 // Parse notes into structured sections
 function parseNotes(notes: string) {
-  // Remove any HTML tags like <hr>, <hr/>, etc. and any markdown/text separators
-  let cleanedNotes = notes
+  // Clean the notes by removing HTML tags and separator lines
+  const cleanedNotes = notes
     .replace(/<hr\s*\/?>/gi, '')
     .replace(/<\/hr>/gi, '');
   
-  const lines = cleanedNotes.split('\n').map(line => {
-    const trimmed = line.trim();
-    // Check if this line is mostly underscores, dashes, or equals
-    // Count how many separator characters vs total characters
-    const sepChars = (trimmed.match(/[_\-=|]/g) || []).length;
-    const totalChars = trimmed.replace(/\s/g, '').length;
-    
-    // If more than 70% is separator characters, replace with empty string
-    if (totalChars > 0 && sepChars / totalChars > 0.7) {
-      console.log('Filtering out separator line:', trimmed);
-      return '';
-    }
-    
-    return line;
-  }).filter(line => {
-    const trimmed = line.trim();
-    // Filter out empty lines
-    if (trimmed.length === 0) return false;
-    return true;
-  });
-  const sections: Array<{ title: string | null; items: Array<{ text: string; isMainPoint: boolean; isBullet: boolean }> }> = [];
+  const lines = cleanedNotes.split('\n')
+    .map(line => line.trim())
+    .filter(line => {
+      // Remove empty lines
+      if (line.length === 0) return false;
+      
+      // Remove lines that are purely separator characters
+      // Match lines with 3+ consecutive underscores, dashes, or equals
+      if (/^[_\-=]{3,}$/.test(line)) return false;
+      
+      // Remove lines where separator characters make up most of the content
+      const separatorCount = (line.match(/[_\-=]/g) || []).length;
+      const nonSpaceCount = line.replace(/\s/g, '').length;
+      if (nonSpaceCount > 0 && separatorCount / nonSpaceCount > 0.7) return false;
+      
+      return true;
+    });
+
+  const sections: Array<{ 
+    title: string | null; 
+    items: Array<{ text: string; isMainPoint: boolean; isBullet: boolean }> 
+  }> = [];
   
-  let currentSection: { title: string | null; items: Array<{ text: string; isMainPoint: boolean; isBullet: boolean }> } = {
+  let currentSection: { 
+    title: string | null; 
+    items: Array<{ text: string; isMainPoint: boolean; isBullet: boolean }> 
+  } = {
     title: null,
     items: []
   };
@@ -131,11 +115,13 @@ function parseNotes(notes: string) {
     'CERTIFICATIONS',
     'PUBLICATIONS',
     'PROJECTS',
-    'INTERESTS'
+    'INTERESTS',
+    'OTHER NOTABLE INFO',
+    'ABOUT'
   ];
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
+    const line = lines[i];
     
     // Check if this is a section header
     if (sectionHeaders.includes(line.toUpperCase())) {
@@ -162,9 +148,8 @@ function parseNotes(notes: string) {
         isMainPoint: true,
         isBullet: false
       });
-    } else if (line.length > 0) {
+    } else {
       // Regular text content
-      // Check if it's a continuation of a bullet point
       const lastItem = currentSection.items[currentSection.items.length - 1];
       if (lastItem && lastItem.isBullet && !line.match(/^\w+:/)) {
         // Append to the last bullet point
