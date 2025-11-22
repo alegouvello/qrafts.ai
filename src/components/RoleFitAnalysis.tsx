@@ -118,34 +118,27 @@ export const RoleFitAnalysis = ({ company, position, roleDetails, resumeText, su
   return (
     <div className="space-y-4">
       {!analysis ? (
-        <Card className="p-6">
-          <div className="flex items-start gap-4">
-            <Sparkles className="h-5 w-5 text-primary mt-1" />
-            <div className="flex-1">
-              <h3 className="font-semibold mb-2">AI Role Fit Analysis</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Get an AI-powered analysis comparing your resume with this role's requirements
-              </p>
-              <Button 
-                onClick={analyzeRoleFit} 
-                disabled={loading || !resumeText}
-                size="sm"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Analyze Fit
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        </Card>
+        <div className="flex items-center justify-end">
+          <Button 
+            onClick={analyzeRoleFit} 
+            disabled={loading || !resumeText}
+            size="sm"
+            variant="outline"
+            className="gap-2"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Analyzing...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4" />
+                AI Role Fit
+              </>
+            )}
+          </Button>
+        </div>
       ) : (
         <div className="space-y-4">
           <Card className="p-6">
