@@ -10,6 +10,10 @@ interface FormattedNotesProps {
 
 export const FormattedNotes = ({ notes }: FormattedNotesProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  
+  // Debug: log the raw notes
+  console.log('Raw notes:', notes);
+  
   const sections = parseNotes(notes);
 
   return (
@@ -85,22 +89,28 @@ export const FormattedNotes = ({ notes }: FormattedNotesProps) => {
 // Parse notes into structured sections
 function parseNotes(notes: string) {
   // Remove any HTML tags like <hr>, <hr/>, etc. and any markdown/text separators
-  const cleanedNotes = notes
+  let cleanedNotes = notes
     .replace(/<hr\s*\/?>/gi, '')
-    .replace(/<\/hr>/gi, '')
-    .replace(/_{3,}/g, '')  // Remove lines of underscores
-    .replace(/-{3,}/g, '')  // Remove lines of dashes
-    .replace(/={3,}/g, ''); // Remove lines of equals signs
+    .replace(/<\/hr>/gi, '');
   
-  const lines = cleanedNotes.split('\n').filter(line => {
+  const lines = cleanedNotes.split('\n').map(line => {
     const trimmed = line.trim();
-    // Filter out empty or whitespace-only lines
+    // Check if this line is mostly underscores, dashes, or equals
+    // Count how many separator characters vs total characters
+    const sepChars = (trimmed.match(/[_\-=|]/g) || []).length;
+    const totalChars = trimmed.replace(/\s/g, '').length;
+    
+    // If more than 70% is separator characters, replace with empty string
+    if (totalChars > 0 && sepChars / totalChars > 0.7) {
+      console.log('Filtering out separator line:', trimmed);
+      return '';
+    }
+    
+    return line;
+  }).filter(line => {
+    const trimmed = line.trim();
+    // Filter out empty lines
     if (trimmed.length === 0) return false;
-    // Filter out lines that are ONLY separator characters (dashes, underscores, equals, pipes)
-    if (/^[-_=|\s]+$/.test(trimmed)) return false;
-    // Filter out lines with mostly separator characters (>80% of the line)
-    const sepCount = (trimmed.match(/[-_=|]/g) || []).length;
-    if (sepCount > trimmed.length * 0.8) return false;
     return true;
   });
   const sections: Array<{ title: string | null; items: Array<{ text: string; isMainPoint: boolean; isBullet: boolean }> }> = [];
