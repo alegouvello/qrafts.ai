@@ -144,17 +144,17 @@ const Index = () => {
         <div className="absolute bottom-20 -right-20 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
         
         <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
-          <div className="space-y-6 sm:space-y-8 text-center md:text-left">
-            <h2 id="hero-heading" className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+          <div className="space-y-8 sm:space-y-10 text-center md:text-left">
+            <h2 id="hero-heading" className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight animate-fade-in-up">
               {t('landing.hero.stayOrganized')}
-              <span className="block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mt-2">
+              <span className="block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mt-3">
                 {t('landing.hero.getBetter')}
               </span>
             </h2>
-            <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-lg mx-auto md:mx-0 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+            <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-lg mx-auto md:mx-0 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
               {t('landing.hero.subtitle')}
             </p>
-            <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 pt-4 justify-center md:justify-start animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 justify-center md:justify-start animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               <Link to="/auth" className="w-full sm:w-auto">
                 <Button size="lg" className="w-full sm:w-auto rounded-full group shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:scale-105 transition-all duration-300 min-h-[48px]">
                   {t('landing.hero.cta')}
