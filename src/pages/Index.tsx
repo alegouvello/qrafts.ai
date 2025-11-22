@@ -172,12 +172,16 @@ const Index = () => {
           </div>
           <div className="relative order-first md:order-last animate-fade-in-right" style={{ animationDelay: '0.2s' }}>
             <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur-3xl opacity-50 animate-glow-pulse" />
-            <img 
-              src={heroProfessional} 
-              alt="Professional organizing job applications with confidence" 
-              className="relative rounded-2xl sm:rounded-3xl shadow-2xl w-full border border-border/50 hover:scale-105 transition-transform duration-500"
-              loading="eager"
-            />
+            <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-border/50 hover:scale-105 transition-transform duration-500">
+              <img 
+                src={heroProfessional} 
+                alt="Professional organizing job applications with confidence" 
+                className="relative w-full"
+                loading="eager"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10 pointer-events-none" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.15)_100%)] pointer-events-none" />
+            </div>
           </div>
         </div>
       </section>
@@ -261,6 +265,8 @@ const Index = () => {
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   loading="lazy"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_50%,rgba(0,0,0,0.2)_100%)] pointer-events-none" />
               </div>
               <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 group-hover:rotate-6 transition-transform duration-300">
                 <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
@@ -290,6 +296,8 @@ const Index = () => {
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   loading="lazy"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_50%,rgba(0,0,0,0.2)_100%)] pointer-events-none" />
               </div>
               <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl bg-accent/10 flex items-center justify-center border border-accent/20 group-hover:rotate-6 transition-transform duration-300">
                 <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-accent" />
@@ -319,6 +327,8 @@ const Index = () => {
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   loading="lazy"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_50%,rgba(0,0,0,0.2)_100%)] pointer-events-none" />
               </div>
               <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl bg-success/10 flex items-center justify-center border border-success/20 group-hover:rotate-6 transition-transform duration-300">
                 <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-success" />
