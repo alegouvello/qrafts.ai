@@ -17,6 +17,7 @@ import { AddInterviewerDialog } from "@/components/AddInterviewerDialog";
 import { InterviewPrepCard } from "@/components/InterviewPrepCard";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { Footer } from "@/components/Footer";
 import {
@@ -37,6 +38,8 @@ import {
   Copy,
   Check,
   Crown,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import {
   Select,
@@ -160,6 +163,13 @@ const ApplicationDetail = () => {
     product_id: string | null;
   }>({ subscribed: false, product_id: null });
   const [interviewers, setInterviewers] = useState<Interviewer[]>([]);
+  const [roleDetailsOpen, setRoleDetailsOpen] = useState(() => {
+    // Default to open on desktop (width > 768px), closed on mobile
+    if (typeof window !== 'undefined') {
+      return window.innerWidth > 768;
+    }
+    return false;
+  });
 
   useEffect(() => {
     checkAuth();
@@ -1377,90 +1387,103 @@ const ApplicationDetail = () => {
           {/* Role Details */}
           {application.role_summary && (
             <Card className="p-6 bg-card/30 backdrop-blur-sm border-border/50">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-lg">Role Details</h3>
-                <Button
-                  onClick={handleRefreshJobDescription}
-                  disabled={refreshingDescription}
-                  variant="outline"
-                  size="sm"
-                >
-                  {refreshingDescription ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Refreshing...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Refresh Description
-                    </>
-                  )}
-                </Button>
-              </div>
-              <div className="grid gap-4">
-                {(application.role_summary.location || application.role_summary.salary_range) && (
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {application.role_summary.location && (
-                      <div>
-                        <span className="text-sm text-muted-foreground">Location</span>
-                        <p className="font-medium">{application.role_summary.location}</p>
+              <Collapsible open={roleDetailsOpen} onOpenChange={setRoleDetailsOpen}>
+                <div className="flex items-center justify-between mb-4">
+                  <CollapsibleTrigger asChild>
+                    <button className="flex items-center gap-2 hover:text-primary transition-colors">
+                      <h3 className="font-semibold text-lg">Role Details</h3>
+                      {roleDetailsOpen ? (
+                        <ChevronUp className="h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4" />
+                      )}
+                    </button>
+                  </CollapsibleTrigger>
+                  <Button
+                    onClick={handleRefreshJobDescription}
+                    disabled={refreshingDescription}
+                    variant="outline"
+                    size="sm"
+                  >
+                    {refreshingDescription ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Refreshing...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Refresh Description
+                      </>
+                    )}
+                  </Button>
+                </div>
+                <CollapsibleContent className="animate-accordion-down">
+                  <div className="grid gap-4">
+                    {(application.role_summary.location || application.role_summary.salary_range) && (
+                      <div className="grid md:grid-cols-2 gap-4">
+                        {application.role_summary.location && (
+                          <div>
+                            <span className="text-sm text-muted-foreground">Location</span>
+                            <p className="font-medium">{application.role_summary.location}</p>
+                          </div>
+                        )}
+                        {application.role_summary.salary_range && (
+                          <div>
+                            <span className="text-sm text-muted-foreground">Salary Range</span>
+                            <p className="font-medium">{application.role_summary.salary_range}</p>
+                          </div>
+                        )}
                       </div>
                     )}
-                    {application.role_summary.salary_range && (
+                    {application.role_summary.description && (
                       <div>
-                        <span className="text-sm text-muted-foreground">Salary Range</span>
-                        <p className="font-medium">{application.role_summary.salary_range}</p>
+                        <span className="text-sm text-muted-foreground">Description</span>
+                        <p className="text-sm mt-1 leading-relaxed">{application.role_summary.description}</p>
+                      </div>
+                    )}
+                    {application.role_summary.responsibilities && application.role_summary.responsibilities.length > 0 && (
+                      <div>
+                        <span className="text-sm text-muted-foreground">Key Responsibilities</span>
+                        <ul className="mt-2 space-y-1">
+                          {application.role_summary.responsibilities.map((item, idx) => (
+                            <li key={idx} className="text-sm flex items-start gap-2">
+                              <span className="text-primary mt-1">•</span>
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {application.role_summary.requirements && application.role_summary.requirements.length > 0 && (
+                      <div>
+                        <span className="text-sm text-muted-foreground">Requirements</span>
+                        <ul className="mt-2 space-y-1">
+                          {application.role_summary.requirements.map((item, idx) => (
+                            <li key={idx} className="text-sm flex items-start gap-2">
+                              <span className="text-primary mt-1">•</span>
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {application.role_summary.benefits && application.role_summary.benefits.length > 0 && (
+                      <div>
+                        <span className="text-sm text-muted-foreground">Benefits</span>
+                        <ul className="mt-2 space-y-1">
+                          {application.role_summary.benefits.map((item, idx) => (
+                            <li key={idx} className="text-sm flex items-start gap-2">
+                              <span className="text-primary mt-1">•</span>
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
                     )}
                   </div>
-                )}
-                {application.role_summary.description && (
-                  <div>
-                    <span className="text-sm text-muted-foreground">Description</span>
-                    <p className="text-sm mt-1 leading-relaxed">{application.role_summary.description}</p>
-                  </div>
-                )}
-                {application.role_summary.responsibilities && application.role_summary.responsibilities.length > 0 && (
-                  <div>
-                    <span className="text-sm text-muted-foreground">Key Responsibilities</span>
-                    <ul className="mt-2 space-y-1">
-                      {application.role_summary.responsibilities.map((item, idx) => (
-                        <li key={idx} className="text-sm flex items-start gap-2">
-                          <span className="text-primary mt-1">•</span>
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {application.role_summary.requirements && application.role_summary.requirements.length > 0 && (
-                  <div>
-                    <span className="text-sm text-muted-foreground">Requirements</span>
-                    <ul className="mt-2 space-y-1">
-                      {application.role_summary.requirements.map((item, idx) => (
-                        <li key={idx} className="text-sm flex items-start gap-2">
-                          <span className="text-primary mt-1">•</span>
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {application.role_summary.benefits && application.role_summary.benefits.length > 0 && (
-                  <div>
-                    <span className="text-sm text-muted-foreground">Benefits</span>
-                    <ul className="mt-2 space-y-1">
-                      {application.role_summary.benefits.map((item, idx) => (
-                        <li key={idx} className="text-sm flex items-start gap-2">
-                          <span className="text-primary mt-1">•</span>
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
+                </CollapsibleContent>
+              </Collapsible>
             </Card>
           )}
 
