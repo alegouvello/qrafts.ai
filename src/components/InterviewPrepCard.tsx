@@ -169,10 +169,7 @@ export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: In
       {isExpanded && (
         <CardContent className="space-y-6" onClick={(e) => e.stopPropagation()}>
           {interviewer.notes && (
-            <div className="bg-muted/30 rounded-lg p-4">
-              <h4 className="font-semibold text-sm mb-4 flex items-center gap-2">
-                <Badge variant="outline">Notes</Badge>
-              </h4>
+            <div className="bg-muted/30 rounded-lg p-4" style={{ border: 'none' }}>
               <FormattedNotes notes={interviewer.notes} />
             </div>
           )}

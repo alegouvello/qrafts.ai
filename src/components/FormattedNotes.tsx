@@ -61,8 +61,8 @@ export const FormattedNotes = ({ notes }: FormattedNotesProps) => {
         {sections.map((section, index) => (
           <div key={index} className="space-y-3" style={{ border: 'none' }}>
             {section.title && (
-              <div className="mb-3" style={{ border: 'none' }}>
-                <Badge variant="secondary" className="text-xs font-bold tracking-wide" style={{ border: 'none' }}>
+              <div className="mb-3">
+                <Badge variant="secondary" className="text-xs font-bold tracking-wide !border-0">
                   {section.title}
                 </Badge>
               </div>
