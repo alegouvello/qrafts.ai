@@ -1,0 +1,14 @@
+{
+  "appId": "com.qrafts.app",
+  "appName": "Qrafts",
+  "webDir": "dist",
+  "ios": {
+    "scheme": "App",
+    "contentInset": "automatic",
+    "allowsLinkPreview": false,
+    "scrollEnabled": true,
+    "handleApplicationLifecycle": true,
+    "hideLogs": false
+  }
+}
+
