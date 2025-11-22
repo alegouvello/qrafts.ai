@@ -650,9 +650,7 @@ const Dashboard = () => {
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 items-start">
                   {companyApps.map((application, index) => (
-                    <div key={application.id} className="animate-fade-in" style={{ animationDelay: `${(groupIndex * 100) + (index * 50)}ms` }}>
-                      <ApplicationCard application={application} onDelete={handleDeleteApplication} />
-                    </div>
+                    <ApplicationCard key={application.id} application={application} onDelete={handleDeleteApplication} />
                   ))}
                 </div>
               </div>
