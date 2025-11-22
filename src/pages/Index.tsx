@@ -232,7 +232,11 @@ const Index = () => {
         <div className={`text-center mb-16 sm:mb-20 space-y-4 transition-all duration-1000 ${
           featuresSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         }`}>
-          <h3 id="features-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">{t('landing.features.title')}</h3>
+          <h3 id="features-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              {t('landing.features.title')}
+            </span>
+          </h3>
           <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
             {t('landing.hero.subtitle')}
           </p>
