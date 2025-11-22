@@ -249,24 +249,24 @@ const Index = () => {
           <div 
             ref={feature1.ref}
             className={`group relative transition-all duration-1000 ${
-              feature1.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+              feature1.isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-10 scale-95'
             }`}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-3xl transition-all duration-500 group-hover:from-primary/10 group-hover:scale-105" />
             <div className="relative p-6 sm:p-8 space-y-4 sm:space-y-6">
-              <div className="relative h-40 sm:h-48 rounded-2xl overflow-hidden">
+              <div className="relative h-40 sm:h-48 rounded-2xl overflow-hidden shadow-lg">
                 <img 
                   src={featureOrganize} 
                   alt="Organization dashboard" 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   loading="lazy"
                 />
               </div>
-              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 group-hover:rotate-6 transition-transform duration-300">
                 <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
               </div>
               <div className="space-y-3">
-                <h4 className="text-xl sm:text-2xl font-bold">{t('landing.features.organize.title')}</h4>
+                <h4 className="text-xl sm:text-2xl font-bold group-hover:text-primary transition-colors duration-300">{t('landing.features.organize.title')}</h4>
                 <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
                   {t('landing.features.organize.description')}
                 </p>
@@ -277,25 +277,25 @@ const Index = () => {
           {/* Feature 2 */}
           <div 
             ref={feature2.ref}
-            className={`group relative transition-all duration-1000 delay-200 ${
-              feature2.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            className={`group relative transition-all duration-1000 delay-100 ${
+              feature2.isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-10 scale-95'
             }`}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent rounded-3xl transition-all duration-500 group-hover:from-accent/10 group-hover:scale-105" />
             <div className="relative p-6 sm:p-8 space-y-4 sm:space-y-6">
-              <div className="relative h-40 sm:h-48 rounded-2xl overflow-hidden">
+              <div className="relative h-40 sm:h-48 rounded-2xl overflow-hidden shadow-lg">
                 <img 
                   src={featureAnalyze} 
                   alt="AI-powered analysis dashboard" 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   loading="lazy"
                 />
               </div>
-              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl bg-accent/10 flex items-center justify-center border border-accent/20">
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl bg-accent/10 flex items-center justify-center border border-accent/20 group-hover:rotate-6 transition-transform duration-300">
                 <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-accent" />
               </div>
               <div className="space-y-3">
-                <h4 className="text-xl sm:text-2xl font-bold">{t('landing.features.analyze.title')}</h4>
+                <h4 className="text-xl sm:text-2xl font-bold group-hover:text-accent transition-colors duration-300">{t('landing.features.analyze.title')}</h4>
                 <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
                   {t('landing.features.analyze.description')}
                 </p>
@@ -306,25 +306,25 @@ const Index = () => {
           {/* Feature 3 */}
           <div 
             ref={feature3.ref}
-            className={`group relative sm:col-span-2 md:col-span-1 transition-all duration-1000 delay-400 ${
-              feature3.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            className={`group relative sm:col-span-2 md:col-span-1 transition-all duration-1000 delay-200 ${
+              feature3.isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-10 scale-95'
             }`}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-success/5 to-transparent rounded-3xl transition-all duration-500 group-hover:from-success/10 group-hover:scale-105" />
             <div className="relative p-6 sm:p-8 space-y-4 sm:space-y-6">
-              <div className="relative h-40 sm:h-48 rounded-2xl overflow-hidden">
+              <div className="relative h-40 sm:h-48 rounded-2xl overflow-hidden shadow-lg">
                 <img 
                   src={featureAutomate} 
                   alt="Automated follow-up notifications" 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   loading="lazy"
                 />
               </div>
-              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl bg-success/10 flex items-center justify-center border border-success/20">
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl bg-success/10 flex items-center justify-center border border-success/20 group-hover:rotate-6 transition-transform duration-300">
                 <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-success" />
               </div>
               <div className="space-y-3">
-                <h4 className="text-xl sm:text-2xl font-bold">{t('landing.features.automate.title')}</h4>
+                <h4 className="text-xl sm:text-2xl font-bold group-hover:text-success transition-colors duration-300">{t('landing.features.automate.title')}</h4>
                 <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
                   {t('landing.features.automate.description')}
                 </p>
