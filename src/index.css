@@ -126,6 +126,11 @@ All colors MUST be HSL.
     scroll-behavior: smooth;
   }
   
+  /* Offset scroll position for sticky header */
+  section[id] {
+    scroll-margin-top: 5rem;
+  }
+  
   @keyframes fade-in-up {
     from {
       opacity: 0;
