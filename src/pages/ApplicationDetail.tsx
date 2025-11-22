@@ -170,6 +170,46 @@ const ApplicationDetail = () => {
     }
     return false;
   });
+  const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(() => {
+    // Default to all expanded on desktop, none on mobile
+    if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+      return new Set();
+    }
+    return new Set();
+  });
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth <= 768;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      
+      // If switching to desktop, expand all questions
+      if (!mobile && expandedQuestions.size === 0) {
+        setExpandedQuestions(new Set(questions.map(q => q.id)));
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [questions, expandedQuestions.size]);
+
+  const toggleQuestion = (questionId: string) => {
+    setExpandedQuestions(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(questionId)) {
+        newSet.delete(questionId);
+      } else {
+        newSet.add(questionId);
+      }
+      return newSet;
+    });
+  };
 
   useEffect(() => {
     checkAuth();
@@ -1613,87 +1653,107 @@ const ApplicationDetail = () => {
                   return (isYesNoQuestion || isShortField) && (answers[question.id] || '').length < 150;
                 })();
 
+                const isExpanded = !isMobile || expandedQuestions.has(question.id);
+
                 return (
                   <Card key={question.id} className="p-4 bg-card/30 backdrop-blur-sm border-border/50 hover:border-primary/30 transition-all">
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold mt-0.5">
-                        {index + 1}
-                      </div>
-                      <div className="flex-1 min-w-0 space-y-3">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex items-start gap-2 flex-1 flex-wrap">
-                            <h3 className="font-medium leading-tight flex-1 min-w-0">{question.question_text}</h3>
-                            {autoPopulatedAnswers.has(question.id) && (
-                              <Badge variant="secondary" className="text-xs flex-shrink-0">
-                                <Sparkles className="w-3 h-3 mr-1" />
-                                Auto-filled
-                              </Badge>
-                            )}
-                            {confidenceScores[question.id] && (
-                              <Badge 
-                                variant={
-                                  confidenceScores[question.id].score >= 80 ? "default" :
-                                  confidenceScores[question.id].score >= 60 ? "secondary" :
-                                  "destructive"
-                                }
-                                className="text-xs flex-shrink-0 cursor-pointer"
-                                onClick={() => setExpandedConfidence(
-                                  expandedConfidence === question.id ? null : question.id
-                                )}
-                              >
-                                <TrendingUp className="w-3 h-3 mr-1" />
-                                ~{confidenceScores[question.id].score}% fit
-                              </Badge>
-                            )}
-                          </div>
-                          {hasAnswer && !isModified && (
-                            <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
-                          )}
+                    <Collapsible open={isExpanded} onOpenChange={() => isMobile && toggleQuestion(question.id)}>
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold mt-0.5">
+                          {index + 1}
                         </div>
-                        
-                        {/* Confidence Score Details */}
-                        {confidenceScores[question.id] && expandedConfidence === question.id && (
-                          <div className="mt-3 p-3 rounded-lg bg-muted/50 border border-border space-y-2">
-                            <div className="flex items-start gap-2">
-                              <Info className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                              <div className="space-y-2 flex-1">
-                                <p className="text-sm text-foreground">
-                                  <span className="font-medium">Analysis:</span> {confidenceScores[question.id].reasoning}
-                                </p>
-                                {confidenceScores[question.id].suggestions && confidenceScores[question.id].score < 100 && (
-                                  <div className="space-y-2">
-                                    <div className="flex items-center justify-between">
-                                      <p className="text-sm font-medium text-foreground">Suggestions to improve:</p>
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => handleQuickApplySuggestion(question.id, question.question_text)}
-                                        disabled={applyingSuggestion[question.id]}
-                                        className="h-7 text-xs"
-                                      >
-                                        {applyingSuggestion[question.id] ? (
-                                          <>
-                                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                                            Applying...
-                                          </>
-                                        ) : (
-                                          <>
-                                            <Sparkles className="h-3 w-3 mr-1" />
-                                            Quick Apply
-                                          </>
-                                        )}
-                                      </Button>
-                                    </div>
-                                    <p className="text-sm text-muted-foreground whitespace-pre-line">
-                                      {confidenceScores[question.id].suggestions}
-                                    </p>
-                                  </div>
+                        <div className="flex-1 min-w-0 space-y-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <CollapsibleTrigger asChild className={isMobile ? "cursor-pointer" : "cursor-default"}>
+                              <div className="flex items-start gap-2 flex-1 flex-wrap">
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                  <h3 className="font-medium leading-tight flex-1 min-w-0">{question.question_text}</h3>
+                                  {isMobile && (
+                                    <button className="flex-shrink-0 p-1 hover:bg-muted rounded transition-colors">
+                                      {isExpanded ? (
+                                        <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                                      ) : (
+                                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                      )}
+                                    </button>
+                                  )}
+                                </div>
+                                {autoPopulatedAnswers.has(question.id) && (
+                                  <Badge variant="secondary" className="text-xs flex-shrink-0">
+                                    <Sparkles className="w-3 h-3 mr-1" />
+                                    Auto-filled
+                                  </Badge>
+                                )}
+                                {confidenceScores[question.id] && (
+                                  <Badge 
+                                    variant={
+                                      confidenceScores[question.id].score >= 80 ? "default" :
+                                      confidenceScores[question.id].score >= 60 ? "secondary" :
+                                      "destructive"
+                                    }
+                                    className="text-xs flex-shrink-0 cursor-pointer"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setExpandedConfidence(
+                                        expandedConfidence === question.id ? null : question.id
+                                      );
+                                    }}
+                                  >
+                                    <TrendingUp className="w-3 h-3 mr-1" />
+                                    ~{confidenceScores[question.id].score}% fit
+                                  </Badge>
                                 )}
                               </div>
-                            </div>
+                            </CollapsibleTrigger>
+                            {hasAnswer && !isModified && (
+                              <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                            )}
                           </div>
-                        )}
-                        <div className="space-y-2">
+                        
+                          <CollapsibleContent className="animate-accordion-down">
+                            {/* Confidence Score Details */}
+                            {confidenceScores[question.id] && expandedConfidence === question.id && (
+                              <div className="mt-3 p-3 rounded-lg bg-muted/50 border border-border space-y-2">
+                                <div className="flex items-start gap-2">
+                                  <Info className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                                  <div className="space-y-2 flex-1">
+                                    <p className="text-sm text-foreground">
+                                      <span className="font-medium">Analysis:</span> {confidenceScores[question.id].reasoning}
+                                    </p>
+                                    {confidenceScores[question.id].suggestions && confidenceScores[question.id].score < 100 && (
+                                      <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                          <p className="text-sm font-medium text-foreground">Suggestions to improve:</p>
+                                          <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => handleQuickApplySuggestion(question.id, question.question_text)}
+                                            disabled={applyingSuggestion[question.id]}
+                                            className="h-7 text-xs"
+                                          >
+                                            {applyingSuggestion[question.id] ? (
+                                              <>
+                                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                                Applying...
+                                              </>
+                                            ) : (
+                                              <>
+                                                <Sparkles className="h-3 w-3 mr-1" />
+                                                Quick Apply
+                                              </>
+                                            )}
+                                          </Button>
+                                        </div>
+                                        <p className="text-sm text-muted-foreground whitespace-pre-line">
+                                          {confidenceScores[question.id].suggestions}
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                            <div className="space-y-2">
                           <div className="flex items-center justify-between">
                             <span className="text-sm font-medium">Your Answer</span>
                             {hasCurrentAnswer && (
@@ -1838,9 +1898,11 @@ const ApplicationDetail = () => {
                             )}
                           </Button>
                          </div>
-                        )}
-                       </div>
-                    </div>
+                            )}
+                          </CollapsibleContent>
+                        </div>
+                      </div>
+                    </Collapsible>
                   </Card>
                 );
               })}
