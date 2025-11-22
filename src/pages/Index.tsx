@@ -164,14 +164,6 @@ const Index = () => {
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="w-full sm:w-auto rounded-full border-border/60 hover:border-primary/50 hover:scale-105 transition-all duration-300 min-h-[48px]"
-                onClick={scrollToVideo}
-              >
-                {t('landing.hero.demo')}
-              </Button>
             </div>
           </div>
           <div className="relative order-first md:order-last animate-fade-in-right" style={{ animationDelay: '0.2s' }}>
