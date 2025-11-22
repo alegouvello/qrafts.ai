@@ -14,10 +14,10 @@ import {
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { Footer } from "@/components/Footer";
 import heroWorkspace from "@/assets/hero-workspace.jpg";
-import heroProfessional from "@/assets/hero-professional.jpg";
-import featureOrganize from "@/assets/feature-organize-new.jpg";
-import featureAnalyze from "@/assets/feature-analyze-new.jpg";
-import featureAutomate from "@/assets/feature-automate-new.jpg";
+import heroProfessional from "@/assets/hero-realistic.jpg";
+import featureOrganize from "@/assets/feature-organize-realistic.jpg";
+import featureAnalyze from "@/assets/feature-analyze-realistic.jpg";
+import featureAutomate from "@/assets/feature-automate-realistic.jpg";
 import qraftLogo from "@/assets/qrafts-logo.png";
 
 
