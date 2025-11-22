@@ -10,10 +10,34 @@ interface FormattedNotesProps {
 
 export const FormattedNotes = ({ notes }: FormattedNotesProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  
+  // Debug: Show raw notes in console
+  console.log('=== RAW NOTES START ===');
+  console.log(notes);
+  console.log('=== RAW NOTES END ===');
+  
   const sections = parseNotes(notes);
 
   return (
     <Collapsible open={isExpanded} onOpenChange={setIsExpanded} className="space-y-3">
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          .notes-container * {
+            border: none !important;
+            border-top: none !important;
+            border-bottom: none !important;
+            border-left: none !important;
+            border-right: none !important;
+          }
+          .notes-container::before,
+          .notes-container::after,
+          .notes-container *::before,
+          .notes-container *::after {
+            border: none !important;
+            content: none !important;
+          }
+        `
+      }} />
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium text-muted-foreground">Notes</span>
         <CollapsibleTrigger asChild>
@@ -33,28 +57,28 @@ export const FormattedNotes = ({ notes }: FormattedNotesProps) => {
         </CollapsibleTrigger>
       </div>
       
-      <CollapsibleContent className="space-y-6">
+      <CollapsibleContent className="space-y-6 notes-container">
         {sections.map((section, index) => (
-          <div key={index} className="space-y-3">
+          <div key={index} className="space-y-3" style={{ border: 'none' }}>
             {section.title && (
-              <div className="mb-3">
-                <Badge variant="secondary" className="text-xs font-bold tracking-wide">
+              <div className="mb-3" style={{ border: 'none' }}>
+                <Badge variant="secondary" className="text-xs font-bold tracking-wide" style={{ border: 'none' }}>
                   {section.title}
                 </Badge>
               </div>
             )}
-            <div className="space-y-2">
+            <div className="space-y-2" style={{ border: 'none' }}>
               {section.items.map((item, itemIndex) => (
-                <div key={itemIndex} className="text-sm">
+                <div key={itemIndex} className="text-sm" style={{ border: 'none' }}>
                   {item.isMainPoint ? (
-                    <p className="font-semibold text-foreground mb-1">{item.text}</p>
+                    <p className="font-semibold text-foreground mb-1" style={{ border: 'none' }}>{item.text}</p>
                   ) : item.isBullet ? (
-                    <div className="flex gap-2 items-start">
+                    <div className="flex gap-2 items-start" style={{ border: 'none' }}>
                       <span className="text-primary mt-0.5">•</span>
-                      <p className="flex-1 text-muted-foreground leading-relaxed">{item.text}</p>
+                      <p className="flex-1 text-muted-foreground leading-relaxed" style={{ border: 'none' }}>{item.text}</p>
                     </div>
                   ) : (
-                    <p className="text-muted-foreground leading-relaxed">{item.text}</p>
+                    <p className="text-muted-foreground leading-relaxed" style={{ border: 'none' }}>{item.text}</p>
                   )}
                 </div>
               ))}
