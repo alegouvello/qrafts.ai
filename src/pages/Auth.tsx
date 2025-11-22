@@ -34,17 +34,25 @@ const Auth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if user is already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        navigate("/dashboard");
+    // Set up auth state listener FIRST to catch OAuth callbacks
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state change:', event, session?.user?.email);
+      
+      if (event === 'SIGNED_IN' && session) {
+        console.log('User signed in, redirecting to dashboard');
+        navigate("/dashboard", { replace: true });
+      }
+      
+      if (event === 'TOKEN_REFRESHED') {
+        console.log('Token refreshed');
       }
     });
 
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate("/dashboard");
+        console.log('Existing session found, redirecting to dashboard');
+        navigate("/dashboard", { replace: true });
       }
     });
 
@@ -138,17 +146,35 @@ const Auth = () => {
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/dashboard`,
-      }
-    });
+    
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
+        }
+      });
 
-    if (error) {
+      if (error) {
+        console.error('Google OAuth error:', error);
+        toast({
+          title: "Google sign in failed",
+          description: error.message,
+          variant: "destructive",
+        });
+        setGoogleLoading(false);
+      } else {
+        console.log('Google OAuth initiated successfully');
+      }
+    } catch (err) {
+      console.error('Unexpected error during Google sign in:', err);
       toast({
         title: "Google sign in failed",
-        description: error.message,
+        description: "An unexpected error occurred",
         variant: "destructive",
       });
       setGoogleLoading(false);
