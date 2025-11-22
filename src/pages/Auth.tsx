@@ -30,7 +30,13 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [oauthProcessing, setOauthProcessing] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [resetPasswordMode, setResetPasswordMode] = useState(false);
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [errors, setErrors] = useState<{ email?: string; password?: string; newPassword?: string; confirmPassword?: string }>({});
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -38,6 +44,15 @@ const Auth = () => {
     // Check if we're returning from OAuth (hash contains access_token)
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const hasOAuthParams = hashParams.has('access_token') || hashParams.has('error');
+    
+    // Check if we're in password reset mode (type=recovery in URL)
+    const urlParams = new URLSearchParams(window.location.search);
+    const isPasswordReset = hashParams.get('type') === 'recovery' || urlParams.get('type') === 'recovery';
+    
+    if (isPasswordReset) {
+      console.log('Password reset mode detected');
+      setResetPasswordMode(true);
+    }
     
     if (hasOAuthParams) {
       setOauthProcessing(true);
@@ -48,10 +63,16 @@ const Auth = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state change:', event, session?.user?.email);
       
-      if (event === 'SIGNED_IN' && session) {
+      if (event === 'SIGNED_IN' && session && !isPasswordReset) {
         console.log('User signed in, redirecting to dashboard');
         setOauthProcessing(false);
         navigate("/dashboard", { replace: true });
+      }
+      
+      if (event === 'PASSWORD_RECOVERY') {
+        console.log('Password recovery event detected');
+        setResetPasswordMode(true);
+        setOauthProcessing(false);
       }
       
       if (event === 'TOKEN_REFRESHED') {
@@ -71,7 +92,7 @@ const Auth = () => {
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
+      if (session && !isPasswordReset) {
         console.log('Existing session found, redirecting to dashboard');
         setOauthProcessing(false);
         navigate("/dashboard", { replace: true });
@@ -206,8 +227,132 @@ const Auth = () => {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetLoading(true);
+    setErrors({});
+
+    // Validate email
+    const emailSchema = z.string().trim().email("Invalid email address");
+    const result = emailSchema.safeParse(resetEmail);
+    
+    if (!result.success) {
+      setErrors({ email: "Invalid email address" });
+      setResetLoading(false);
+      return;
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+      redirectTo: `${window.location.origin}/auth`,
+    });
+
+    if (error) {
+      toast({
+        title: "Password reset failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Check your email",
+        description: "We've sent you a password reset link. Please check your inbox.",
+      });
+      setForgotPasswordOpen(false);
+      setResetEmail("");
+    }
+
+    setResetLoading(false);
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+
+    // Validate passwords
+    if (newPassword.length < 8) {
+      setErrors({ newPassword: "Password must be at least 8 characters" });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setErrors({ confirmPassword: "Passwords do not match" });
+      return;
+    }
+
+    setLoading(true);
+
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (error) {
+      toast({
+        title: "Password update failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Password updated",
+        description: "Your password has been successfully updated.",
+      });
+      setResetPasswordMode(false);
+      setNewPassword("");
+      setConfirmPassword("");
+      // Redirect to dashboard after password reset
+      setTimeout(() => navigate("/dashboard"), 1000);
+    }
+
+    setLoading(false);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
+      {/* Password Reset Dialog */}
+      {forgotPasswordOpen && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in duration-300" onClick={() => setForgotPasswordOpen(false)}>
+          <Card className="p-6 max-w-md mx-4 border-border/40 bg-card/80 backdrop-blur-xl shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold">Reset your password</h3>
+                <p className="text-sm text-muted-foreground">Enter your email address and we'll send you a link to reset your password.</p>
+              </div>
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="reset-email">Email</Label>
+                  <Input
+                    id="reset-email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    className="h-11 rounded-xl"
+                    required
+                  />
+                  {errors.email && (
+                    <p className="text-xs text-destructive">{errors.email}</p>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setForgotPasswordOpen(false)}
+                    className="flex-1"
+                    disabled={resetLoading}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" className="flex-1" disabled={resetLoading}>
+                    {resetLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Send Reset Link
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </Card>
+        </div>
+      )}
       {/* OAuth Processing Overlay */}
       {oauthProcessing && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in duration-300">
@@ -250,14 +395,15 @@ const Auth = () => {
             <img src={qraftLogo} alt="Qrafts" className="h-14 sm:h-16 md:h-20 mx-auto dark:invert animate-fade-in" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }} />
             <p className="text-xs sm:text-sm md:text-base text-muted-foreground animate-fade-in" style={{ animationDelay: '0.3s', animationFillMode: 'backwards' }}>Your journey to success starts here</p>
           </div>
+          
+          {!resetPasswordMode ? (
+            <Tabs defaultValue="signin" className="w-full animate-fade-in" style={{ animationDelay: '0.4s', animationFillMode: 'backwards' }}>
+              <TabsList className="grid w-full grid-cols-2 bg-muted/50 p-1 rounded-full text-sm">
+                <TabsTrigger value="signin" className="rounded-full data-[state=active]:shadow-md">Sign In</TabsTrigger>
+                <TabsTrigger value="signup" className="rounded-full data-[state=active]:shadow-md">Sign Up</TabsTrigger>
+              </TabsList>
 
-        <Tabs defaultValue="signin" className="w-full animate-fade-in" style={{ animationDelay: '0.4s', animationFillMode: 'backwards' }}>
-          <TabsList className="grid w-full grid-cols-2 bg-muted/50 p-1 rounded-full text-sm">
-            <TabsTrigger value="signin" className="rounded-full data-[state=active]:shadow-md">Sign In</TabsTrigger>
-            <TabsTrigger value="signup" className="rounded-full data-[state=active]:shadow-md">Sign Up</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="signin" className="mt-4 sm:mt-6">
+              <TabsContent value="signin" className="mt-4 sm:mt-6">
             <Button
               type="button"
               onClick={handleGoogleSignIn}
@@ -330,7 +476,16 @@ const Auth = () => {
                   <p className="text-xs text-destructive animate-fade-in">{errors.password}</p>
                 )}
               </div>
-              <Button 
+              <div className="flex items-center justify-end">
+                <button
+                  type="button"
+                  onClick={() => setForgotPasswordOpen(true)}
+                  className="text-xs text-primary hover:underline transition-colors"
+                >
+                  Forgot password?
+                </button>
+              </div>
+              <Button
                 type="submit" 
                 className="w-full h-11 rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 hover:scale-[1.02]" 
                 disabled={loading}
@@ -429,6 +584,62 @@ const Auth = () => {
             </form>
           </TabsContent>
         </Tabs>
+          ) : (
+            <div className="w-full animate-fade-in space-y-6" style={{ animationDelay: '0.4s', animationFillMode: 'backwards' }}>
+              <div className="space-y-2 text-center">
+                <h2 className="text-2xl font-bold">Set New Password</h2>
+                <p className="text-sm text-muted-foreground">Enter your new password below</p>
+              </div>
+              
+              <form onSubmit={handleResetPassword} className="space-y-4 sm:space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="new-password" className="text-sm font-medium">New Password</Label>
+                  <Input
+                    id="new-password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className={`h-11 rounded-xl border-border/60 transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/20 ${errors.newPassword ? 'border-destructive' : ''}`}
+                    required
+                    minLength={8}
+                  />
+                  {errors.newPassword && (
+                    <p className="text-xs text-destructive animate-fade-in">{errors.newPassword}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Password must be at least 8 characters
+                  </p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-password" className="text-sm font-medium">Confirm Password</Label>
+                  <Input
+                    id="confirm-password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className={`h-11 rounded-xl border-border/60 transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/20 ${errors.confirmPassword ? 'border-destructive' : ''}`}
+                    required
+                    minLength={8}
+                  />
+                  {errors.confirmPassword && (
+                    <p className="text-xs text-destructive animate-fade-in">{errors.confirmPassword}</p>
+                  )}
+                </div>
+                
+                <Button 
+                  type="submit" 
+                  className="w-full h-11 rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 hover:scale-[1.02]" 
+                  disabled={loading}
+                >
+                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Update Password
+                </Button>
+              </form>
+            </div>
+          )}
       </Card>
       </div>
       
