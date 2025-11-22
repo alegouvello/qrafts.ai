@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, forwardRef, useImperativeHandle } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Sparkles, CheckCircle2, XCircle, Lightbulb, Loader2 } from "lucide-react";
+import { CheckCircle2, XCircle, Lightbulb, Loader2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 interface RoleFitAnalysisProps {
@@ -14,6 +14,12 @@ interface RoleFitAnalysisProps {
   resumeText: string | null;
   subscribed: boolean;
   onUpgrade: () => void;
+  hideButton?: boolean;
+}
+
+export interface RoleFitAnalysisRef {
+  analyzeRoleFit: () => Promise<void>;
+  loading: boolean;
 }
 
 interface Analysis {
@@ -24,7 +30,7 @@ interface Analysis {
   suggestions: string[];
 }
 
-export const RoleFitAnalysis = ({ company, position, roleDetails, resumeText, subscribed, onUpgrade }: RoleFitAnalysisProps) => {
+export const RoleFitAnalysis = forwardRef<RoleFitAnalysisRef, RoleFitAnalysisProps>(({ company, position, roleDetails, resumeText, subscribed, onUpgrade, hideButton = false }, ref) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
@@ -115,9 +121,14 @@ export const RoleFitAnalysis = ({ company, position, roleDetails, resumeText, su
     return "Weak Match";
   };
 
+  useImperativeHandle(ref, () => ({
+    analyzeRoleFit,
+    loading,
+  }));
+
   return (
     <div className="space-y-4">
-      {!analysis ? (
+      {!hideButton && !analysis && (
         <div className="flex items-center justify-end">
           <Button 
             onClick={analyzeRoleFit} 
@@ -133,13 +144,13 @@ export const RoleFitAnalysis = ({ company, position, roleDetails, resumeText, su
               </>
             ) : (
               <>
-                <Sparkles className="h-4 w-4" />
                 AI Role Fit
               </>
             )}
           </Button>
         </div>
-      ) : (
+      )}
+      {analysis && (
         <div className="space-y-4">
           <Card className="p-6">
             <div className="space-y-4">
@@ -233,4 +244,6 @@ export const RoleFitAnalysis = ({ company, position, roleDetails, resumeText, su
       )}
     </div>
   );
-};
+});
+
+RoleFitAnalysis.displayName = "RoleFitAnalysis";

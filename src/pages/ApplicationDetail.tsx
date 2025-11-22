@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -11,7 +11,7 @@ import { SaveTemplateDialog } from "@/components/SaveTemplateDialog";
 import { BrowseTemplatesDialog } from "@/components/BrowseTemplatesDialog";
 import { AddTimelineEventDialog } from "@/components/AddTimelineEventDialog";
 import { TimelineView } from "@/components/TimelineView";
-import { RoleFitAnalysis } from "@/components/RoleFitAnalysis";
+import { RoleFitAnalysis, RoleFitAnalysisRef } from "@/components/RoleFitAnalysis";
 import { StatusHistoryTimeline } from "@/components/StatusHistoryTimeline";
 import { AddInterviewerDialog } from "@/components/AddInterviewerDialog";
 import { InterviewPrepCard } from "@/components/InterviewPrepCard";
@@ -183,6 +183,7 @@ const ApplicationDetail = () => {
     }
     return false;
   });
+  const roleFitRef = useRef<RoleFitAnalysisRef>(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -1439,24 +1440,44 @@ const ApplicationDetail = () => {
                       )}
                     </button>
                   </CollapsibleTrigger>
-                  <Button
-                    onClick={handleRefreshJobDescription}
-                    disabled={refreshingDescription}
-                    variant="outline"
-                    size="sm"
-                  >
-                    {refreshingDescription ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Refreshing...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="h-4 w-4 mr-2" />
-                        Refresh Description
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      onClick={() => roleFitRef.current?.analyzeRoleFit()}
+                      disabled={roleFitRef.current?.loading || !userProfile?.resume_text}
+                      variant="outline"
+                      size="sm"
+                    >
+                      {roleFitRef.current?.loading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Analyzing...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="h-4 w-4 mr-2" />
+                          AI Role Fit
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      onClick={handleRefreshJobDescription}
+                      disabled={refreshingDescription}
+                      variant="outline"
+                      size="sm"
+                    >
+                      {refreshingDescription ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Refreshing...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="h-4 w-4 mr-2" />
+                          Refresh Description
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
                 <CollapsibleContent className="animate-accordion-down">
                   <div className="grid gap-4">
@@ -1530,12 +1551,14 @@ const ApplicationDetail = () => {
           {/* AI Role Fit Analysis */}
           {application.role_summary && (
             <RoleFitAnalysis 
+              ref={roleFitRef}
               company={application.company}
               position={application.position}
               roleDetails={application.role_summary} 
               resumeText={userProfile?.resume_text || null}
               subscribed={subscriptionStatus.subscribed}
               onUpgrade={handleUpgrade}
+              hideButton={true}
             />
           )}
         </div>
