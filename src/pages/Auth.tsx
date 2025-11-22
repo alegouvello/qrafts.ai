@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Footer } from "@/components/Footer";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft, LogOut } from "lucide-react";
 import qraftLogo from "@/assets/qrafts-logo.png";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
@@ -36,6 +36,9 @@ const Auth = () => {
   const [resetLoading, setResetLoading] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [verificationPending, setVerificationPending] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState("");
+  const [resendingVerification, setResendingVerification] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; newPassword?: string; confirmPassword?: string }>({});
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -64,7 +67,16 @@ const Auth = () => {
       console.log('Auth state change:', event, session?.user?.email);
       
       if (event === 'SIGNED_IN' && session && !isPasswordReset) {
-        console.log('User signed in, redirecting to dashboard');
+        // Check if email is confirmed
+        if (!session.user.email_confirmed_at) {
+          console.log('Email not confirmed, showing verification message');
+          setVerificationPending(true);
+          setVerificationEmail(session.user.email || "");
+          setOauthProcessing(false);
+          return;
+        }
+        
+        console.log('User signed in with verified email, redirecting to dashboard');
         setOauthProcessing(false);
         navigate("/dashboard", { replace: true });
       }
@@ -93,7 +105,16 @@ const Auth = () => {
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session && !isPasswordReset) {
-        console.log('Existing session found, redirecting to dashboard');
+        // Check if email is confirmed
+        if (!session.user.email_confirmed_at) {
+          console.log('Existing session but email not confirmed');
+          setVerificationPending(true);
+          setVerificationEmail(session.user.email || "");
+          setOauthProcessing(false);
+          return;
+        }
+        
+        console.log('Existing session found with verified email, redirecting to dashboard');
         setOauthProcessing(false);
         navigate("/dashboard", { replace: true });
       } else if (hasOAuthParams) {
@@ -174,7 +195,7 @@ const Auth = () => {
 
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email: result.data.email,
       password: result.data.password,
     });
@@ -185,6 +206,16 @@ const Auth = () => {
         description: error.message,
         variant: "destructive",
       });
+      setLoading(false);
+      return;
+    }
+
+    // Check if email is confirmed
+    if (data.user && !data.user.email_confirmed_at) {
+      setVerificationPending(true);
+      setVerificationEmail(data.user.email || "");
+      setLoading(false);
+      return;
     }
 
     setLoading(false);
@@ -306,8 +337,98 @@ const Auth = () => {
     setLoading(false);
   };
 
+  const handleResendVerification = async () => {
+    setResendingVerification(true);
+
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: verificationEmail,
+    });
+
+    if (error) {
+      toast({
+        title: "Failed to resend",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Email sent",
+        description: "Verification email has been resent. Please check your inbox.",
+      });
+    }
+
+    setResendingVerification(false);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setVerificationPending(false);
+    setVerificationEmail("");
+    toast({
+      title: "Logged out",
+      description: "You have been logged out successfully.",
+    });
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
+      {/* Email Verification Pending Screen */}
+      {verificationPending && !resetPasswordMode && (
+        <div className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in duration-300">
+          <Card className="p-8 max-w-md mx-4 border-border/40 bg-card/80 backdrop-blur-xl shadow-2xl">
+            <div className="flex flex-col items-center gap-6 text-center">
+              <div className="relative">
+                <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center">
+                  <svg className="h-10 w-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <h3 className="text-2xl font-bold">Verify Your Email</h3>
+                <p className="text-sm text-muted-foreground">
+                  We've sent a verification link to:
+                </p>
+                <p className="text-sm font-medium text-foreground">{verificationEmail}</p>
+              </div>
+
+              <div className="w-full space-y-3 text-sm text-muted-foreground">
+                <p>Please check your email and click the verification link to access your dashboard.</p>
+                <div className="bg-muted/30 rounded-lg p-4 space-y-2 text-left">
+                  <p className="font-medium text-foreground">Didn't receive the email?</p>
+                  <ul className="list-disc list-inside space-y-1 text-xs">
+                    <li>Check your spam/junk folder</li>
+                    <li>Make sure you entered the correct email</li>
+                    <li>Wait a few minutes and try resending</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="flex flex-col w-full gap-2">
+                <Button
+                  onClick={handleResendVerification}
+                  disabled={resendingVerification}
+                  className="w-full"
+                >
+                  {resendingVerification && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Resend Verification Email
+                </Button>
+                <Button
+                  onClick={handleLogout}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+      
       {/* Password Reset Dialog */}
       {forgotPasswordOpen && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in duration-300" onClick={() => setForgotPasswordOpen(false)}>
