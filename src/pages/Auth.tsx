@@ -29,22 +29,43 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [oauthProcessing, setOauthProcessing] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
+    // Check if we're returning from OAuth (hash contains access_token)
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const hasOAuthParams = hashParams.has('access_token') || hashParams.has('error');
+    
+    if (hasOAuthParams) {
+      setOauthProcessing(true);
+      console.log('OAuth callback detected');
+    }
+
     // Set up auth state listener FIRST to catch OAuth callbacks
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state change:', event, session?.user?.email);
       
       if (event === 'SIGNED_IN' && session) {
         console.log('User signed in, redirecting to dashboard');
+        setOauthProcessing(false);
         navigate("/dashboard", { replace: true });
       }
       
       if (event === 'TOKEN_REFRESHED') {
         console.log('Token refreshed');
+      }
+      
+      // Handle OAuth errors
+      if (hashParams.has('error')) {
+        setOauthProcessing(false);
+        toast({
+          title: "Authentication failed",
+          description: hashParams.get('error_description') || "Unable to complete sign in",
+          variant: "destructive",
+        });
       }
     });
 
@@ -52,12 +73,16 @@ const Auth = () => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         console.log('Existing session found, redirecting to dashboard');
+        setOauthProcessing(false);
         navigate("/dashboard", { replace: true });
+      } else if (hasOAuthParams) {
+        // OAuth params present but no session yet - keep loading
+        setTimeout(() => setOauthProcessing(false), 5000); // Timeout after 5s
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, toast]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -183,6 +208,24 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
+      {/* OAuth Processing Overlay */}
+      {oauthProcessing && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in duration-300">
+          <Card className="p-8 max-w-sm mx-4 border-border/40 bg-card/80 backdrop-blur-xl shadow-2xl">
+            <div className="flex flex-col items-center gap-4 text-center">
+              <div className="relative">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl animate-pulse" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold">Completing Google sign in...</h3>
+                <p className="text-sm text-muted-foreground">Please wait while we authenticate your account</p>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+      
       {/* Background decoration */}
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/10 via-background to-background pointer-events-none" />
       <div className="fixed top-1/4 -right-32 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
