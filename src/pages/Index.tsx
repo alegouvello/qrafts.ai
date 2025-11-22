@@ -15,8 +15,9 @@ import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { Footer } from "@/components/Footer";
 import heroWorkspace from "@/assets/hero-workspace.jpg";
 import heroProfessional from "@/assets/hero-professional.jpg";
-import featureOrganize from "@/assets/feature-organize.jpg";
-import featureAutomate from "@/assets/feature-automate.jpg";
+import featureOrganize from "@/assets/feature-organize-new.jpg";
+import featureAnalyze from "@/assets/feature-analyze-new.jpg";
+import featureAutomate from "@/assets/feature-automate-new.jpg";
 import qraftLogo from "@/assets/qrafts-logo.png";
 
 
@@ -284,8 +285,8 @@ const Index = () => {
             <div className="relative p-6 sm:p-8 space-y-4 sm:space-y-6">
               <div className="relative h-40 sm:h-48 rounded-2xl overflow-hidden">
                 <img 
-                  src={featureAutomate} 
-                  alt="Smart automation" 
+                  src={featureAnalyze} 
+                  alt="AI-powered analysis dashboard" 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   loading="lazy"
                 />
@@ -311,8 +312,13 @@ const Index = () => {
           >
             <div className="absolute inset-0 bg-gradient-to-br from-success/5 to-transparent rounded-3xl transition-all duration-500 group-hover:from-success/10 group-hover:scale-105" />
             <div className="relative p-6 sm:p-8 space-y-4 sm:space-y-6">
-              <div className="relative h-40 sm:h-48 rounded-2xl overflow-hidden bg-gradient-to-br from-success/10 via-primary/5 to-accent/10 flex items-center justify-center">
-                <TrendingUp className="h-24 w-24 sm:h-32 sm:w-32 text-primary/30" />
+              <div className="relative h-40 sm:h-48 rounded-2xl overflow-hidden">
+                <img 
+                  src={featureAutomate} 
+                  alt="Automated follow-up notifications" 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                />
               </div>
               <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl bg-success/10 flex items-center justify-center border border-success/20">
                 <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-success" />
