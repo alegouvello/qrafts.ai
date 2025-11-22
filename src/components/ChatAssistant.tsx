@@ -248,7 +248,7 @@ export const ChatAssistant = () => {
               </Avatar>
               <div>
                 <h3 className="font-semibold flex items-center gap-2">
-                  QRAFTS Assistant
+                  Qrafts Assistant
                   {!subscriptionStatus.subscribed && (
                     <Crown className="h-3.5 w-3.5 text-primary" />
                   )}

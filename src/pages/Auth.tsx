@@ -178,7 +178,7 @@ const Auth = () => {
             <div className="inline-block px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium mb-2 sm:mb-4 animate-fade-in" style={{ animationDelay: '0.1s', animationFillMode: 'backwards' }}>
               Welcome Back
             </div>
-            <img src={qraftLogo} alt="QRAFTS" className="h-14 sm:h-16 md:h-20 mx-auto dark:invert animate-fade-in" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }} />
+            <img src={qraftLogo} alt="Qrafts" className="h-14 sm:h-16 md:h-20 mx-auto dark:invert animate-fade-in" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }} />
             <p className="text-xs sm:text-sm md:text-base text-muted-foreground animate-fade-in" style={{ animationDelay: '0.3s', animationFillMode: 'backwards' }}>Your journey to success starts here</p>
           </div>
 
