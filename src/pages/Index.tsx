@@ -78,7 +78,7 @@ const Index = () => {
       <header className="relative border-b border-border/40 bg-background/80 backdrop-blur-xl sticky top-0 z-50">
         <nav className="container mx-auto px-4 sm:px-6 py-0 flex items-center justify-between" aria-label="Main navigation">
           <div className="flex items-center gap-2 sm:gap-3">
-            <img src={qraftLogo} alt="QRAFTS logo" className="h-24 sm:h-28 md:h-32 dark:invert" />
+            <img src={qraftLogo} alt="QRAFTS logo" className="h-12 sm:h-14 md:h-16 dark:invert" />
           </div>
           
           {/* Desktop Navigation */}
