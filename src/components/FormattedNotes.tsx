@@ -33,30 +33,30 @@ export const FormattedNotes = ({ notes }: FormattedNotesProps) => {
         </CollapsibleTrigger>
       </div>
       
-      <CollapsibleContent className="space-y-6 [&_hr]:hidden [&_*]:!border-0 [&_*]:!border-b-0">
+      <CollapsibleContent className="space-y-6">
         {sections.map((section, index) => (
-        <div key={index} className="space-y-3 border-0">
+        <div key={index} className="space-y-3">
           {section.title && (
-            <div className="mb-4 pb-0">
+            <div className="mb-4">
               <Badge variant="secondary" className="text-xs font-bold tracking-wide">
                 {section.title}
               </Badge>
             </div>
           )}
-          <div className="space-y-2.5 border-0">
+          <div className="space-y-2.5">
             {section.items.map((item, itemIndex) => (
-              <div key={itemIndex} className="text-sm text-muted-foreground border-0">
+              <div key={itemIndex} className="text-sm text-muted-foreground">
                 {item.isMainPoint ? (
-                  <div className="space-y-1 mb-2 border-0">
+                  <div className="space-y-1 mb-2">
                     <p className="font-semibold text-foreground text-[15px]">{item.text}</p>
                   </div>
                 ) : item.isBullet ? (
-                  <div className="flex gap-2.5 items-start border-0">
+                  <div className="flex gap-2.5 items-start">
                     <span className="text-primary mt-1 text-base">•</span>
                     <p className="flex-1 leading-relaxed">{item.text}</p>
                   </div>
                 ) : (
-                  <p className="leading-relaxed text-muted-foreground/90 border-0">{item.text}</p>
+                  <p className="leading-relaxed text-muted-foreground/90">{item.text}</p>
                 )}
               </div>
             ))}
