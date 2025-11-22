@@ -235,10 +235,6 @@ const Index = () => {
         <div className={`text-center mb-16 sm:mb-20 space-y-4 transition-all duration-1000 ${
           featuresSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         }`}>
-          <div className="inline-block px-3 sm:px-4 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs sm:text-sm font-medium mb-4">
-            {t('landing.features.badge')}
-          </div>
-          <h3 id="features-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">{t('landing.features.title')}</h3>
           <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
             {t('landing.hero.subtitle')}
           </p>
