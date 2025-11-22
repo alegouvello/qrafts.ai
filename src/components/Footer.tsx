@@ -11,7 +11,7 @@ export const Footer = () => {
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © {currentYear} Qraft. {t('footer.allRightsReserved')}.
+            © {currentYear} Qrafts. {t('footer.allRightsReserved')}.
           </p>
           <nav className="flex gap-6">
             <Link 
