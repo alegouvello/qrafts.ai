@@ -434,9 +434,13 @@ const Dashboard = () => {
               <Link to="/profile" className="flex-1 sm:flex-none">
                 <Button variant="ghost" className="w-full rounded-full hover:bg-primary/5 transition-all text-sm flex items-center justify-center gap-2">
                   {userProfile?.avatar_url ? (
-                    <Avatar className="h-6 w-6">
-                      <AvatarImage src={userProfile.avatar_url} alt={userProfile.full_name || "Profile"} />
-                      <AvatarFallback>
+                    <Avatar className="h-10 w-10 border-2 border-primary/20">
+                      <AvatarImage 
+                        src={userProfile.avatar_url} 
+                        alt={userProfile.full_name || "Profile"}
+                        className="object-cover"
+                      />
+                      <AvatarFallback className="text-base font-semibold">
                         {userProfile.full_name?.[0]?.toUpperCase() || "U"}
                       </AvatarFallback>
                     </Avatar>
