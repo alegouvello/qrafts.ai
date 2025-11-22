@@ -102,7 +102,7 @@ const Index = () => {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[280px] sm:w-[350px] md:w-[400px]">
-              <SheetHeader>
+              <SheetHeader className="py-3 sm:py-4">
                 <SheetTitle className="flex items-center gap-2">
                   <img src={qraftLogo} alt="Qrafts logo" className="h-8 dark:invert" />
                 </SheetTitle>
