@@ -145,9 +145,6 @@ const Index = () => {
         
         <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
           <div className="space-y-6 sm:space-y-8 text-center md:text-left">
-            <div className="inline-block px-3 sm:px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium animate-fade-in-down">
-              ✨ {t('landing.hero.assistant')}
-            </div>
             <h2 id="hero-heading" className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
               {t('landing.hero.stayOrganized')}
               <span className="block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mt-2">
@@ -158,6 +155,12 @@ const Index = () => {
               {t('landing.hero.subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 pt-4 justify-center md:justify-start animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+              <Link to="/auth" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full sm:w-auto rounded-full group shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:scale-105 transition-all duration-300 min-h-[48px]">
+                  {t('landing.hero.cta')}
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
               <Button 
                 size="lg" 
                 variant="outline" 
