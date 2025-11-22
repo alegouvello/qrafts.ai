@@ -322,7 +322,7 @@ const Settings = () => {
               </Link>
               <img 
                 src={qraftLogo} 
-                alt="QRAFTS" 
+                alt="Qrafts"
                 className="h-16 transition-all duration-300 hover:scale-105 dark:invert" 
               />
             </div>

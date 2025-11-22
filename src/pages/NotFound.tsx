@@ -14,7 +14,7 @@ const NotFound = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
       <div className="text-center space-y-6">
-        <img src={qraftLogo} alt="QRAFTS" className="h-12 mx-auto opacity-60 dark:invert" />
+        <img src={qraftLogo} alt="Qrafts" className="h-12 mx-auto opacity-60 dark:invert" />
         <div>
           <h1 className="mb-2 text-6xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{t('notFound.title')}</h1>
           <p className="mb-6 text-xl text-muted-foreground">{t('notFound.message')}</p>
