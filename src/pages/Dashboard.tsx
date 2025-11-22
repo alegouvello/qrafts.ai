@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Footer } from "@/components/Footer";
-import { Plus, ArrowLeft, LogOut, BarChart3, Crown, Sparkles, Settings, Briefcase, Clock, Users, TrendingUp } from "lucide-react";
+import { Plus, ArrowLeft, LogOut, BarChart3, Crown, Sparkles, Settings, Briefcase, Clock, Users, TrendingUp, Filter } from "lucide-react";
 import { ApplicationCard } from "@/components/ApplicationCard";
 import { AddApplicationDialog } from "@/components/AddApplicationDialog";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -30,6 +30,7 @@ const Dashboard = () => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "interview" | "rejected" | "accepted">("all");
   const [userProfile, setUserProfile] = useState<{
     full_name: string | null;
     avatar_url: string | null;
@@ -381,8 +382,13 @@ const Dashboard = () => {
       : 0,
   };
 
+  // Filter applications by status
+  const filteredApplications = statusFilter === "all" 
+    ? applications 
+    : applications.filter((a) => a.status === statusFilter);
+
   // Group applications by company
-  const groupedApplications = applications.reduce((acc, app) => {
+  const groupedApplications = filteredApplications.reduce((acc, app) => {
     if (!acc[app.company]) {
       acc[app.company] = [];
     }
@@ -608,6 +614,56 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* Filter Buttons */}
+        {!loading && applications.length > 0 && (
+          <div className="mb-6 flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Filter className="h-4 w-4" />
+              <span className="font-medium">Filter:</span>
+            </div>
+            <Button
+              variant={statusFilter === "all" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setStatusFilter("all")}
+              className="rounded-full"
+            >
+              All ({applications.length})
+            </Button>
+            <Button
+              variant={statusFilter === "pending" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setStatusFilter("pending")}
+              className="rounded-full"
+            >
+              Pending ({stats.pending})
+            </Button>
+            <Button
+              variant={statusFilter === "interview" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setStatusFilter("interview")}
+              className="rounded-full"
+            >
+              Interview ({stats.interviews})
+            </Button>
+            <Button
+              variant={statusFilter === "rejected" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setStatusFilter("rejected")}
+              className="rounded-full"
+            >
+              Rejected ({applications.filter((a) => a.status === "rejected").length})
+            </Button>
+            <Button
+              variant={statusFilter === "accepted" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setStatusFilter("accepted")}
+              className="rounded-full"
+            >
+              Accepted ({applications.filter((a) => a.status === "accepted").length})
+            </Button>
+          </div>
+        )}
+
         {loading ? (
           <div className="space-y-8">
             {[1, 2, 3].map((i) => (
@@ -631,6 +687,25 @@ const Dashboard = () => {
               <Button onClick={() => setShowAddDialog(true)} className="rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all mt-6">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Application
+              </Button>
+            </div>
+          </div>
+        ) : filteredApplications.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="max-w-md mx-auto space-y-4">
+              <div className="w-16 h-16 rounded-full bg-muted/20 flex items-center justify-center mx-auto">
+                <Filter className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-xl font-semibold">No applications found</h3>
+              <p className="text-muted-foreground">
+                No applications match the current filter. Try selecting a different status.
+              </p>
+              <Button 
+                onClick={() => setStatusFilter("all")}
+                variant="outline"
+                className="rounded-full"
+              >
+                Clear Filter
               </Button>
             </div>
           </div>
