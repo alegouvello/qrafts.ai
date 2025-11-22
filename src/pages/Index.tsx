@@ -14,6 +14,7 @@ import {
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { Footer } from "@/components/Footer";
 import heroWorkspace from "@/assets/hero-workspace.jpg";
+import heroProfessional from "@/assets/hero-professional.jpg";
 import featureOrganize from "@/assets/feature-organize.jpg";
 import featureAutomate from "@/assets/feature-automate.jpg";
 import qraftLogo from "@/assets/qrafts-logo.png";
@@ -171,8 +172,8 @@ const Index = () => {
           <div className="relative order-first md:order-last animate-fade-in-right" style={{ animationDelay: '0.2s' }}>
             <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur-3xl opacity-50 animate-glow-pulse" />
             <img 
-              src={heroWorkspace} 
-              alt="Professional workspace with laptop and coffee" 
+              src={heroProfessional} 
+              alt="Professional organizing job applications with confidence" 
               className="relative rounded-2xl sm:rounded-3xl shadow-2xl w-full border border-border/50 hover:scale-105 transition-transform duration-500"
               loading="eager"
             />
