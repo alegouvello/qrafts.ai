@@ -339,7 +339,10 @@
   "footer": {
     "allRightsReserved": "All rights reserved",
     "privacyPolicy": "Privacy Policy",
-    "termsOfService": "Terms of Service"
+    "termsOfService": "Terms of Service",
+    "followUs": "Follow Us",
+    "quickLinks": "Quick Links",
+    "company": "Company"
   },
   "notFound": {
     "title": "404",
