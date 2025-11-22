@@ -82,7 +82,7 @@ const Index = () => {
           </div>
           
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-3">
             <LanguageSwitcher />
             <Link to="/auth">
               <Button variant="outline" size="sm" className="rounded-full border-border/60 hover:border-primary/50 transition-all min-h-[44px]">
