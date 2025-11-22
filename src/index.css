@@ -141,4 +141,56 @@ All colors MUST be HSL.
       transform: translateY(0);
     }
   }
+
+  /* iPad and Tablet Optimizations */
+  @media (min-width: 768px) and (max-width: 1024px) {
+    /* Ensure touch targets are at least 44x44px */
+    button, a, input, select, textarea {
+      min-height: 44px;
+    }
+
+    /* Optimize tap interactions */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+    }
+
+    /* Better spacing for tablet screens */
+    .container {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+
+    /* Optimize card sizes for tablets */
+    .max-w-md {
+      max-width: 32rem;
+    }
+
+    /* Better font scaling for tablets */
+    html {
+      font-size: 106.25%; /* 17px base instead of 16px */
+    }
+  }
+
+  /* iPad Landscape specific optimizations */
+  @media (min-width: 1024px) and (max-width: 1366px) and (orientation: landscape) {
+    /* Optimize for landscape viewing */
+    .min-h-screen {
+      min-height: 100vh;
+      min-height: 100dvh; /* Dynamic viewport height */
+    }
+
+    /* Better modal sizing in landscape */
+    .max-w-md, .max-w-lg {
+      max-width: 600px;
+    }
+  }
+
+  /* Prevent zoom on input focus (iOS/Safari) */
+  @supports (-webkit-touch-callout: none) {
+    input, select, textarea {
+      font-size: 16px !important;
+    }
+  }
 }
+
