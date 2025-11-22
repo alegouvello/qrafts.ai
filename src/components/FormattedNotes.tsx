@@ -33,30 +33,44 @@ export const FormattedNotes = ({ notes }: FormattedNotesProps) => {
         </CollapsibleTrigger>
       </div>
       
-      <CollapsibleContent className="space-y-6">
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          .notes-content * {
+            border: none !important;
+            border-top: none !important;
+            border-bottom: none !important;
+            text-decoration: none !important;
+          }
+          .notes-content hr {
+            display: none !important;
+          }
+        `
+      }} />
+      
+      <CollapsibleContent className="space-y-6 notes-content [&_hr]:hidden [&_*]:border-0 [&_*]:border-t-0 [&_*]:border-b-0">
         {sections.map((section, index) => (
-        <div key={index} className="space-y-3">
+        <div key={index} className="space-y-3 border-0">
           {section.title && (
-            <div className="mb-4">
-              <Badge variant="secondary" className="text-xs font-bold tracking-wide">
+            <div className="mb-4 border-0 [&::after]:hidden">
+              <Badge variant="secondary" className="text-xs font-bold tracking-wide border-0">
                 {section.title}
               </Badge>
             </div>
           )}
-          <div className="space-y-2.5">
+          <div className="space-y-2.5 border-0">
             {section.items.map((item, itemIndex) => (
-              <div key={itemIndex} className="text-sm text-muted-foreground">
+              <div key={itemIndex} className="text-sm text-muted-foreground border-0">
                 {item.isMainPoint ? (
-                  <div className="space-y-1 mb-2">
-                    <p className="font-semibold text-foreground text-[15px]">{item.text}</p>
+                  <div className="space-y-1 mb-2 border-0">
+                    <p className="font-semibold text-foreground text-[15px] border-0">{item.text}</p>
                   </div>
                 ) : item.isBullet ? (
-                  <div className="flex gap-2.5 items-start">
+                  <div className="flex gap-2.5 items-start border-0">
                     <span className="text-primary mt-1 text-base">•</span>
-                    <p className="flex-1 leading-relaxed">{item.text}</p>
+                    <p className="flex-1 leading-relaxed border-0">{item.text}</p>
                   </div>
                 ) : (
-                  <p className="leading-relaxed text-muted-foreground/90">{item.text}</p>
+                  <p className="leading-relaxed text-muted-foreground/90 border-0">{item.text}</p>
                 )}
               </div>
             ))}
@@ -70,8 +84,13 @@ export const FormattedNotes = ({ notes }: FormattedNotesProps) => {
 
 // Parse notes into structured sections
 function parseNotes(notes: string) {
-  // Remove any HTML tags like <hr>, <hr/>, etc.
-  const cleanedNotes = notes.replace(/<hr\s*\/?>/gi, '').replace(/<\/hr>/gi, '');
+  // Remove any HTML tags like <hr>, <hr/>, etc. and any markdown/text separators
+  const cleanedNotes = notes
+    .replace(/<hr\s*\/?>/gi, '')
+    .replace(/<\/hr>/gi, '')
+    .replace(/_{3,}/g, '')  // Remove lines of underscores
+    .replace(/-{3,}/g, '')  // Remove lines of dashes
+    .replace(/={3,}/g, ''); // Remove lines of equals signs
   
   const lines = cleanedNotes.split('\n').filter(line => {
     const trimmed = line.trim();
