@@ -158,12 +158,14 @@ const Index = () => {
               {t('landing.hero.subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 pt-4 justify-center md:justify-start animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-              <Link to="/auth" className="w-full sm:w-auto">
-                <Button size="lg" className="w-full sm:w-auto rounded-full group shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:scale-105 transition-all duration-300 min-h-[48px]">
-                  {t('landing.hero.cta')}
-                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="w-full sm:w-auto rounded-full border-border/60 hover:border-primary/50 hover:scale-105 transition-all duration-300 min-h-[48px]"
+                onClick={scrollToVideo}
+              >
+                {t('landing.hero.demo')}
+              </Button>
             </div>
           </div>
           <div className="relative order-first md:order-last animate-fade-in-right" style={{ animationDelay: '0.2s' }}>
