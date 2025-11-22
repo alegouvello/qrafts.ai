@@ -94,7 +94,7 @@ export const ApplicationCard = ({ application, onDelete }: ApplicationCardProps)
         <div className="space-y-3">
           <div className="space-y-2">
             <div className="flex items-start justify-between gap-2">
-              <h3 className="font-semibold text-base leading-tight group-hover:text-primary transition-colors line-clamp-2">
+              <h3 className="font-semibold text-base leading-tight group-hover:text-primary transition-colors line-clamp-2 min-h-[2.5rem]">
                 {application.position}
               </h3>
               <Badge variant={statusInfo.variant} className="shrink-0 text-xs">
