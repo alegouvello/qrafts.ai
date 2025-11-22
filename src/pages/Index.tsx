@@ -138,36 +138,36 @@ const Index = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="relative container mx-auto px-4 sm:px-6 py-20 sm:py-28 md:py-36 overflow-hidden" aria-labelledby="hero-heading">
+      <section className="relative container mx-auto px-4 sm:px-6 py-16 sm:py-24 md:py-32 overflow-hidden" aria-labelledby="hero-heading">
         {/* Animated gradient orbs */}
         <div className="absolute top-20 -left-20 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-float" />
         <div className="absolute bottom-20 -right-20 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
         
         <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
-          <div className="space-y-7 sm:space-y-9 text-center md:text-left">
-            <div className="inline-block px-4 py-2 rounded-full bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 text-primary text-xs sm:text-sm font-semibold animate-fade-in-down backdrop-blur-sm">
+          <div className="space-y-6 sm:space-y-8 text-center md:text-left">
+            <div className="inline-block px-3 sm:px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium animate-fade-in-down">
               ✨ {t('landing.hero.assistant')}
             </div>
-            <h2 id="hero-heading" className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold leading-[1.1] tracking-tight animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-              <span className="inline-block mb-3">{t('landing.hero.stayOrganized')}</span>
-              <span className="block bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
+            <h2 id="hero-heading" className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+              {t('landing.hero.stayOrganized')}
+              <span className="block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mt-2">
                 {t('landing.hero.getBetter')}
               </span>
             </h2>
-            <p className="text-xl sm:text-2xl text-muted-foreground/90 leading-relaxed max-w-xl mx-auto md:mx-0 animate-fade-in-up font-light" style={{ animationDelay: '0.2s' }}>
+            <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-lg mx-auto md:mx-0 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               {t('landing.hero.subtitle')}
             </p>
-            <div className="flex flex-col sm:flex-row flex-wrap gap-4 pt-6 justify-center md:justify-start animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 pt-4 justify-center md:justify-start animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
               <Link to="/auth" className="w-full sm:w-auto">
-                <Button size="lg" className="w-full sm:w-auto rounded-full group shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:scale-105 transition-all duration-300 min-h-[52px] text-base font-semibold px-8">
+                <Button size="lg" className="w-full sm:w-auto rounded-full group shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:scale-105 transition-all duration-300 min-h-[48px]">
                   {t('landing.hero.cta')}
-                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
               <Button 
                 size="lg" 
                 variant="outline" 
-                className="w-full sm:w-auto rounded-full border-2 border-border/60 hover:border-primary/50 hover:bg-primary/5 hover:scale-105 transition-all duration-300 min-h-[52px] text-base font-semibold px-8"
+                className="w-full sm:w-auto rounded-full border-border/60 hover:border-primary/50 hover:scale-105 transition-all duration-300 min-h-[48px]"
                 onClick={scrollToVideo}
               >
                 {t('landing.hero.demo')}
