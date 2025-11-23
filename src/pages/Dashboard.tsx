@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Footer } from "@/components/Footer";
-import { Plus, ArrowLeft, LogOut, BarChart3, Crown, Sparkles, Settings, Briefcase, Clock, Users, TrendingUp, Filter } from "lucide-react";
+import { Plus, ArrowLeft, LogOut, BarChart3, Crown, Sparkles, Settings, Briefcase, Clock, Users, TrendingUp, Filter, Search, X } from "lucide-react";
 import { ApplicationCard } from "@/components/ApplicationCard";
 import { AddApplicationDialog } from "@/components/AddApplicationDialog";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -13,6 +14,8 @@ import { supabase } from "@/integrations/supabase/client";
 import qraftLogo from "@/assets/qrafts-logo.png";
 import PullToRefresh from "react-simple-pull-to-refresh";
 import { useTranslation } from "react-i18next";
+import { EmptyState } from "@/components/EmptyState";
+import { useSubscription } from "@/hooks/useSubscription";
 
 interface Application {
   id: string;
@@ -31,18 +34,18 @@ const Dashboard = () => {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "interview" | "rejected" | "accepted">("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [userProfile, setUserProfile] = useState<{
     full_name: string | null;
     avatar_url: string | null;
   } | null>(null);
-  const [subscriptionStatus, setSubscriptionStatus] = useState<{
-    subscribed: boolean;
-    product_id: string | null;
-    subscription_end: string | null;
-    is_trialing?: boolean;
-    trial_end?: string | null;
-  }>({ subscribed: false, product_id: null, subscription_end: null });
-  const [checkingSubscription, setCheckingSubscription] = useState(false);
+  const { 
+    subscriptionStatus, 
+    checking: checkingSubscription, 
+    handleUpgrade, 
+    handleManageSubscription,
+    checkSubscription 
+  } = useSubscription();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -51,7 +54,6 @@ const Dashboard = () => {
     checkAuth();
     fetchApplications();
     fetchUserProfile();
-    checkSubscription();
     
     // Check for checkout success/cancel
     const checkout = searchParams.get('checkout');
@@ -107,83 +109,12 @@ const Dashboard = () => {
     }
   };
 
-  const checkSubscription = async () => {
-    setCheckingSubscription(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        console.log('No active session, skipping subscription check');
-        setCheckingSubscription(false);
-        return;
-      }
-
-      const { data, error } = await supabase.functions.invoke('check-subscription', {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`
-        }
-      });
-      
-      if (error) {
-        console.error('Error checking subscription:', error);
-      } else if (data) {
-        setSubscriptionStatus(data);
-      }
-    } catch (error) {
-      console.error('Error checking subscription:', error);
-    } finally {
-      setCheckingSubscription(false);
-    }
-  };
-
-  const handleUpgrade = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('create-checkout');
-      if (error) {
-        toast({
-          title: "Error",
-          description: "Failed to create checkout session",
-          variant: "destructive",
-        });
-      } else if (data?.url) {
-        window.open(data.url, '_blank');
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to initiate checkout",
-        variant: "destructive",
-      });
-    }
-  };
-
   const handleRefresh = async () => {
     await Promise.all([
       fetchApplications(),
       fetchUserProfile(),
       checkSubscription()
     ]);
-  };
-
-  const handleManageSubscription = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('customer-portal');
-      if (error) {
-        toast({
-          title: "Error",
-          description: "Failed to open subscription management",
-          variant: "destructive",
-        });
-      } else if (data?.url) {
-        window.open(data.url, '_blank');
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to open portal",
-        variant: "destructive",
-      });
-    }
   };
 
   const fetchApplications = async () => {
@@ -389,10 +320,14 @@ const Dashboard = () => {
       : 0,
   };
 
-  // Filter applications by status
-  const filteredApplications = statusFilter === "all" 
-    ? applications 
-    : applications.filter((a) => a.status === statusFilter);
+  // Filter applications by status and search query
+  const filteredApplications = applications.filter((app) => {
+    const matchesStatus = statusFilter === "all" || app.status === statusFilter;
+    const matchesSearch = searchQuery === "" || 
+      app.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      app.position.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesStatus && matchesSearch;
+  });
 
   // Group applications by company
   const groupedApplications = filteredApplications.reduce((acc, app) => {
@@ -552,9 +487,21 @@ const Dashboard = () => {
                 <Sparkles className="h-4 w-4 text-warning" />
               </div>
               <div className="flex-1">
-                <h3 className="text-sm font-semibold text-warning mb-1">
-                  {applications.length >= 5 ? 'Application Limit Reached' : 'Almost at Your Limit'}
-                </h3>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-semibold text-warning">
+                    {applications.length >= 5 ? 'Application Limit Reached' : 'Almost at Your Limit'}
+                  </h3>
+                  <span className="text-xs font-medium text-muted-foreground">
+                    {applications.length}/5 apps
+                  </span>
+                </div>
+                {/* Progress Bar */}
+                <div className="w-full bg-muted/50 rounded-full h-2 mb-3 overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-warning to-primary transition-all duration-500 rounded-full"
+                    style={{ width: `${(applications.length / 5) * 100}%` }}
+                  />
+                </div>
                 <p className="text-xs text-muted-foreground mb-3">
                   {applications.length >= 5 
                     ? 'You\'ve reached the free tier limit of 5 applications. Upgrade to Pro for unlimited tracking and AI-powered features.'
@@ -625,13 +572,37 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Filter Buttons */}
+        {/* Search and Filter */}
         {!loading && applications.length > 0 && (
-          <div className="mb-6 flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Filter className="h-4 w-4" />
-              <span className="font-medium">Filter:</span>
+          <div className="mb-6 space-y-4">
+            {/* Search Bar */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search by company or position..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 rounded-full"
+              />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0 rounded-full"
+                  onClick={() => setSearchQuery("")}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
             </div>
+            
+            {/* Filter Buttons */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Filter className="h-4 w-4" />
+                <span className="font-medium">Filter:</span>
+              </div>
             <Button
               variant={statusFilter === "all" ? "default" : "outline"}
               size="sm"
@@ -673,6 +644,7 @@ const Dashboard = () => {
               Accepted ({applications.filter((a) => a.status === "accepted").length})
             </Button>
           </div>
+        </div>
         )}
 
         {loading ? (
@@ -685,41 +657,38 @@ const Dashboard = () => {
             ))}
           </div>
         ) : applications.length === 0 ? (
-          <div className="text-center py-24">
-            <div className="max-w-md mx-auto space-y-6">
-              <div className="relative mx-auto mb-8">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-full blur-2xl" />
-                <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center mx-auto border border-primary/20">
-                  <Plus className="h-12 w-12 text-primary" />
-                </div>
-              </div>
-              <h3 className="text-3xl font-bold">Start Your Journey</h3>
-              <p className="text-muted-foreground text-lg leading-relaxed">Add your first application to begin tracking your progress and organizing your job search</p>
-              <Button onClick={() => setShowAddDialog(true)} className="rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all mt-6">
+          <EmptyState
+            icon={Briefcase}
+            title="Start Your Journey"
+            description="Add your first application to begin tracking your progress and organizing your job search"
+            action={
+              <Button onClick={() => setShowAddDialog(true)} className="rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all" size="lg">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Application
               </Button>
-            </div>
-          </div>
+            }
+          />
         ) : filteredApplications.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="max-w-md mx-auto space-y-4">
-              <div className="w-16 h-16 rounded-full bg-muted/20 flex items-center justify-center mx-auto">
-                <Filter className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <h3 className="text-xl font-semibold">No applications found</h3>
-              <p className="text-muted-foreground">
-                No applications match the current filter. Try selecting a different status.
-              </p>
+          <EmptyState
+            icon={searchQuery ? Search : Filter}
+            title={searchQuery ? "No matches found" : "No applications found"}
+            description={searchQuery 
+              ? `No applications match "${searchQuery}". Try a different search term.`
+              : "No applications match the current filter. Try selecting a different status."}
+            action={
               <Button 
-                onClick={() => setStatusFilter("all")}
+                onClick={() => {
+                  setStatusFilter("all");
+                  setSearchQuery("");
+                }}
                 variant="outline"
                 className="rounded-full"
               >
-                Clear Filter
+                Clear {searchQuery ? "Search & Filter" : "Filter"}
               </Button>
-            </div>
-          </div>
+            }
+            className="py-12"
+          />
         ) : (
           <div className="space-y-10">
             {Object.entries(groupedApplications).map(([company, companyApps], groupIndex) => (
