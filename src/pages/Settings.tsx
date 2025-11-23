@@ -444,7 +444,7 @@ const Settings = () => {
                               </Badge>
                             )}
                           </div>
-                          <p className="text-muted-foreground">$5 per month</p>
+                          <p className="text-muted-foreground">$29.99 per month</p>
                         </div>
                         <div className="p-4 rounded-full bg-success/20 backdrop-blur-sm">
                           <Crown className="h-8 w-8 text-success animate-float" />
