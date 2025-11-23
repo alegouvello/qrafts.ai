@@ -519,13 +519,13 @@ const Settings = () => {
                         <div>
                           <h3 className="text-2xl font-bold">Upgrade to Qraft Pro</h3>
                           <Badge className="mt-2 bg-success/20 text-success border-success/30">
-                            14-Day Free Trial
+                            7-Day Free Trial
                           </Badge>
                         </div>
                       </div>
                       
                       <p className="text-muted-foreground mb-6 text-lg">
-                        Try all Pro features free for 14 days. No credit card required during trial.
+                        Try all Pro features free for 7 days. No credit card required during trial.
                       </p>
 
                       <div className="grid sm:grid-cols-2 gap-4 mb-6">
