@@ -38,23 +38,6 @@ const TryChatWidget = () => {
     setError(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke('demo-chat', {
-        body: { 
-          messages: [
-            ...messages,
-            { role: "user", content: userMessage }
-          ],
-          language: i18n.language 
-        }
-      });
-
-      if (error) {
-        console.error('Error calling demo-chat:', error);
-        setError('Failed to get response. Please try again.');
-        setIsTyping(false);
-        return;
-      }
-
       // Handle streaming response
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/demo-chat`,
@@ -72,6 +55,19 @@ const TryChatWidget = () => {
           }),
         }
       );
+
+      // Check for rate limiting
+      if (response.status === 429) {
+        const errorData = await response.json();
+        const waitMinutes = errorData.resetTime 
+          ? Math.ceil((new Date(errorData.resetTime).getTime() - Date.now()) / (60 * 1000))
+          : 60;
+        
+        setError(`Rate limit exceeded. Please try again in ${waitMinutes} minutes.`);
+        setIsTyping(false);
+        setMessages(prev => prev.filter(msg => msg.content !== ""));
+        return;
+      }
 
       if (!response.ok || !response.body) {
         throw new Error('Failed to get streaming response');
