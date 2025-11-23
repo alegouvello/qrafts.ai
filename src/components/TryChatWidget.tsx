@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Send, Sparkles, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { supabase } from "@/integrations/supabase/client";
+import ReactMarkdown from 'react-markdown';
 
 interface Message {
   role: "user" | "assistant";
@@ -11,10 +13,11 @@ interface Message {
 }
 
 const TryChatWidget = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -25,27 +28,107 @@ const TryChatWidget = () => {
     scrollToBottom();
   }, [messages]);
 
-  // Pre-scripted demo responses
-  const getDemoResponse = (userMessage: string): string => {
-    const lowerMessage = userMessage.toLowerCase();
-    
-    if (lowerMessage.includes("improve") || lowerMessage.includes("answer")) {
-      return t('landing.tryChat.responses.improve');
-    } else if (lowerMessage.includes("interview") || lowerMessage.includes("prepare")) {
-      return t('landing.tryChat.responses.interview');
-    } else if (lowerMessage.includes("resume") || lowerMessage.includes("cv")) {
-      return t('landing.tryChat.responses.resume');
-    } else if (lowerMessage.includes("job") || lowerMessage.includes("role") || lowerMessage.includes("position")) {
-      return t('landing.tryChat.responses.jobFit');
-    } else if (lowerMessage.includes("track") || lowerMessage.includes("organize")) {
-      return t('landing.tryChat.responses.organize');
-    } else {
-      return t('landing.tryChat.responses.default');
+  const streamChat = async (userMessage: string) => {
+    setIsTyping(true);
+    setError(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('demo-chat', {
+        body: { 
+          messages: [
+            ...messages,
+            { role: "user", content: userMessage }
+          ],
+          language: i18n.language 
+        }
+      });
+
+      if (error) {
+        console.error('Error calling demo-chat:', error);
+        setError('Failed to get response. Please try again.');
+        setIsTyping(false);
+        return;
+      }
+
+      // Handle streaming response
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/demo-chat`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            messages: [
+              ...messages,
+              { role: "user", content: userMessage }
+            ],
+            language: i18n.language
+          }),
+        }
+      );
+
+      if (!response.ok || !response.body) {
+        throw new Error('Failed to get streaming response');
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let assistantMessage = '';
+      
+      // Add empty assistant message that we'll update
+      setMessages(prev => [...prev, { role: "assistant", content: "" }]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n').filter(line => line.trim() !== '');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') {
+              setIsTyping(false);
+              continue;
+            }
+
+            try {
+              const parsed = JSON.parse(data);
+              const content = parsed.choices?.[0]?.delta?.content;
+              
+              if (content) {
+                assistantMessage += content;
+                setMessages(prev => {
+                  const newMessages = [...prev];
+                  newMessages[newMessages.length - 1] = {
+                    role: "assistant",
+                    content: assistantMessage
+                  };
+                  return newMessages;
+                });
+              }
+            } catch (e) {
+              // Ignore parsing errors for incomplete chunks
+            }
+          }
+        }
+      }
+
+      setIsTyping(false);
+    } catch (err) {
+      console.error('Error streaming chat:', err);
+      setError('Something went wrong. Please try again.');
+      setIsTyping(false);
+      
+      // Remove the empty assistant message on error
+      setMessages(prev => prev.filter(msg => msg.content !== ""));
     }
   };
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || isTyping) return;
 
     const userMessage = input.trim();
     setInput("");
@@ -53,15 +136,8 @@ const TryChatWidget = () => {
     // Add user message
     setMessages(prev => [...prev, { role: "user", content: userMessage }]);
     
-    // Simulate typing
-    setIsTyping(true);
-    
-    // Simulate response delay
-    setTimeout(() => {
-      const response = getDemoResponse(userMessage);
-      setMessages(prev => [...prev, { role: "assistant", content: response }]);
-      setIsTyping(false);
-    }, 1000 + Math.random() * 1000);
+    // Stream AI response
+    await streamChat(userMessage);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -107,6 +183,7 @@ const TryChatWidget = () => {
                   variant="outline"
                   className="text-left justify-start h-auto py-3 px-4 whitespace-normal"
                   onClick={() => handleExampleClick(question)}
+                  disabled={isTyping}
                 >
                   <Send className="h-4 w-4 mr-2 flex-shrink-0" />
                   <span className="text-sm">{question}</span>
@@ -128,7 +205,13 @@ const TryChatWidget = () => {
                       : "bg-muted"
                   }`}
                 >
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                  {message.role === "assistant" ? (
+                    <div className="text-sm leading-relaxed prose prose-sm max-w-none dark:prose-invert">
+                      <ReactMarkdown>{message.content}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                  )}
                 </div>
               </div>
             ))}
@@ -141,6 +224,11 @@ const TryChatWidget = () => {
               </div>
             )}
           </>
+        )}
+        {error && (
+          <div className="text-center py-2">
+            <p className="text-sm text-destructive">{error}</p>
+          </div>
         )}
         <div ref={messagesEndRef} />
       </div>
