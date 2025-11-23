@@ -12,6 +12,7 @@ import { MasterAnswersDialog } from "@/components/MasterAnswersDialog";
 import { EnhancementPreviewDialog } from "@/components/EnhancementPreviewDialog";
 import { ManualEnhancementDialog } from "@/components/ManualEnhancementDialog";
 import { ExportPDFDialog } from "@/components/ExportPDFDialog";
+import { ResumeOrderAnalysisDialog } from "@/components/ResumeOrderAnalysisDialog";
 import { Footer } from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 import { convertBulletsToHTML } from "@/utils/bulletFormatter";
@@ -102,6 +103,9 @@ export default function Profile() {
   const [showManualEnhancementDialog, setShowManualEnhancementDialog] = useState(false);
   const [showTargetRoleDialog, setShowTargetRoleDialog] = useState(false);
   const [showExportPDFDialog, setShowExportPDFDialog] = useState(false);
+  const [showOrderAnalysis, setShowOrderAnalysis] = useState(false);
+  const [orderAnalysis, setOrderAnalysis] = useState<any>(null);
+  const [analyzingOrder, setAnalyzingOrder] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [enhancingProfile, setEnhancingProfile] = useState(false);
   const [enhancedData, setEnhancedData] = useState<any>(null);
@@ -455,6 +459,67 @@ export default function Profile() {
     }
   };
 
+  const handleAnalyzeOrder = async () => {
+    if (!parsedData) {
+      toast({
+        title: "No Profile Data",
+        description: "Please upload your resume first to analyze section order",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setAnalyzingOrder(true);
+    toast({
+      title: "Analyzing Resume",
+      description: "AI is analyzing your resume structure...",
+    });
+
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-resume-order', {
+        body: { resumeData: parsedData }
+      });
+
+      if (error) throw error;
+
+      if (data?.success && data?.analysis) {
+        setOrderAnalysis(data.analysis);
+        setShowOrderAnalysis(true);
+        toast({
+          title: "Analysis Complete",
+          description: "Review the AI-powered recommendations",
+        });
+      } else {
+        throw new Error('Invalid response from analysis');
+      }
+    } catch (error: any) {
+      console.error('Error analyzing resume order:', error);
+      toast({
+        title: "Analysis Failed",
+        description: error.message || "Failed to analyze resume structure",
+        variant: "destructive",
+      });
+    } finally {
+      setAnalyzingOrder(false);
+    }
+  };
+
+  const getCurrentSectionOrder = () => {
+    const order: string[] = [];
+    if (parsedData?.summary) order.push('summary');
+    if (parsedData?.experience?.length) order.push('experience');
+    if (parsedData?.education?.length) order.push('education');
+    if (parsedData?.skills?.length) order.push('skills');
+    if (parsedData?.publications?.length) order.push('publications');
+    if (parsedData?.certifications?.length) order.push('certifications');
+    if (parsedData?.awards?.length) order.push('awards');
+    if (parsedData?.projects?.length) order.push('projects');
+    if (parsedData?.languages?.length) order.push('languages');
+    if (parsedData?.volunteer_work?.length) order.push('volunteer_work');
+    if (parsedData?.interests?.length || parsedData?.additional_skills?.length) order.push('interests');
+    return order;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -542,6 +607,21 @@ export default function Profile() {
                 <FileDown className="h-4 w-4" />
                 <span className="hidden md:inline">Export PDF</span>
                 <span className="md:hidden">PDF</span>
+              </Button>
+              <Button
+                onClick={handleAnalyzeOrder}
+                variant="outline"
+                size="sm"
+                disabled={analyzingOrder || !parsedData}
+                className="gap-2 bg-gradient-to-r from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20 backdrop-blur-sm flex-1 sm:flex-none border border-primary/20"
+              >
+                <Sparkles className="h-4 w-4" />
+                <span className="hidden md:inline">
+                  {analyzingOrder ? "Analyzing..." : "Analyze Order"}
+                </span>
+                <span className="md:hidden">
+                  {analyzingOrder ? "..." : "Analyze"}
+                </span>
               </Button>
               <Link to="/settings">
                 <Button
@@ -1294,6 +1374,13 @@ export default function Profile() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <ResumeOrderAnalysisDialog
+        open={showOrderAnalysis}
+        onOpenChange={setShowOrderAnalysis}
+        analysis={orderAnalysis}
+        currentOrder={getCurrentSectionOrder()}
+      />
       
       <Footer />
     </div>
