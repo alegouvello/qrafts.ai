@@ -84,6 +84,13 @@
       "placeholder": "Escribe tu pregunta...",
       "typing": "Pensando...",
       "disclaimer": "Esta es una demostración. Regístrate para desbloquear el asistente IA completo con tus datos reales.",
+      "messagesUsed": "mensajes usados",
+      "limitReached": {
+        "title": "Límite de Demostración Alcanzado",
+        "message": "¡Has probado los 5 mensajes de demostración! Regístrate gratis para continuar chateando con asistencia IA ilimitada.",
+        "button": "Registrarse Gratis",
+        "inputPlaceholder": "Regístrate para continuar chateando..."
+      },
       "examples": {
         "improve": "¿Cómo puedo mejorar mis respuestas de aplicación?",
         "interview": "¿Qué debo preparar para mi próxima entrevista?",

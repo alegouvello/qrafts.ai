@@ -84,6 +84,13 @@
       "placeholder": "Tapez votre question...",
       "typing": "Réflexion...",
       "disclaimer": "Ceci est une démo. Inscrivez-vous pour débloquer l'assistant IA complet avec vos données réelles.",
+      "messagesUsed": "messages utilisés",
+      "limitReached": {
+        "title": "Limite de Démonstration Atteinte",
+        "message": "Vous avez essayé les 5 messages de démonstration! Inscrivez-vous gratuitement pour continuer à discuter avec une assistance IA illimitée.",
+        "button": "S'inscrire Gratuitement",
+        "inputPlaceholder": "Inscrivez-vous pour continuer à discuter..."
+      },
       "examples": {
         "improve": "Comment puis-je améliorer mes réponses de candidature?",
         "interview": "Que dois-je préparer pour mon prochain entretien?",
