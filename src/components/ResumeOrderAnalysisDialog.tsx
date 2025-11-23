@@ -17,6 +17,8 @@ interface ResumeOrderAnalysisDialogProps {
   onOpenChange: (open: boolean) => void;
   analysis: ResumeOrderAnalysis | null;
   currentOrder: string[];
+  onApplyOrder: (recommendedOrder: string[]) => void;
+  isApplying?: boolean;
 }
 
 const sectionLabels: Record<string, string> = {
@@ -38,7 +40,9 @@ export function ResumeOrderAnalysisDialog({
   open,
   onOpenChange,
   analysis,
-  currentOrder
+  currentOrder,
+  onApplyOrder,
+  isApplying = false
 }: ResumeOrderAnalysisDialogProps) {
   if (!analysis) return null;
 
@@ -186,20 +190,17 @@ export function ResumeOrderAnalysisDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
               className="flex-1"
+              disabled={isApplying}
             >
               Close
             </Button>
             <Button
-              onClick={() => {
-                onOpenChange(false);
-                // Note: Section reordering would need to be implemented
-                // For now, this just closes the dialog
-              }}
+              onClick={() => onApplyOrder(analysis.recommendedOrder)}
               className="flex-1 gap-2"
-              disabled
+              disabled={isApplying}
             >
               <Sparkles className="h-4 w-4" />
-              Apply Order (Coming Soon)
+              {isApplying ? "Applying..." : "Apply Order"}
             </Button>
           </div>
         </div>

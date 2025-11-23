@@ -106,6 +106,7 @@ export default function Profile() {
   const [showOrderAnalysis, setShowOrderAnalysis] = useState(false);
   const [orderAnalysis, setOrderAnalysis] = useState<any>(null);
   const [analyzingOrder, setAnalyzingOrder] = useState(false);
+  const [applyingOrder, setApplyingOrder] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [enhancingProfile, setEnhancingProfile] = useState(false);
   const [enhancedData, setEnhancedData] = useState<any>(null);
@@ -518,6 +519,57 @@ export default function Profile() {
     if (parsedData?.volunteer_work?.length) order.push('volunteer_work');
     if (parsedData?.interests?.length || parsedData?.additional_skills?.length) order.push('interests');
     return order;
+  };
+
+  const handleApplyOrder = async (recommendedOrder: string[]) => {
+    if (!parsedData) return;
+
+    setApplyingOrder(true);
+    toast({
+      title: "Applying New Order",
+      description: "Reordering your resume sections...",
+    });
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("No user found");
+
+      // The parsedData already contains all the data, we don't need to reorder it
+      // The display order is controlled by the component rendering
+      // We just save a metadata field to remember the preferred order
+      const updatedData = {
+        ...parsedData,
+        _sectionOrder: recommendedOrder // Store preferred order
+      };
+
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({
+          resume_text: JSON.stringify(updatedData),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Order Applied!",
+        description: "Your resume sections have been reordered based on AI recommendations",
+      });
+
+      await fetchProfile();
+      setShowOrderAnalysis(false);
+      setOrderAnalysis(null);
+    } catch (error) {
+      console.error('Error applying order:', error);
+      toast({
+        title: "Failed to Apply Order",
+        description: "Could not save the new section order",
+        variant: "destructive",
+      });
+    } finally {
+      setApplyingOrder(false);
+    }
   };
 
   if (loading) {
@@ -1380,6 +1432,8 @@ export default function Profile() {
         onOpenChange={setShowOrderAnalysis}
         analysis={orderAnalysis}
         currentOrder={getCurrentSectionOrder()}
+        onApplyOrder={handleApplyOrder}
+        isApplying={applyingOrder}
       />
       
       <Footer />
