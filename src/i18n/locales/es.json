@@ -55,6 +55,28 @@
       "title": "Mira Qrafts en Acción",
       "description": "Descubre cómo Qrafts te ayuda a organizar tus solicitudes y simplificar tu búsqueda de empleo"
     },
+    "aiAssistant": {
+      "badge": "Asistente Potenciado por IA",
+      "title": "Tu Entrenador Personal de Carrera",
+      "subtitle": "Obtén ayuda inteligente e instantánea durante tu búsqueda de empleo",
+      "features": {
+        "smart": {
+          "title": "Sugerencias Inteligentes",
+          "description": "Recibe recomendaciones impulsadas por IA para mejorar tus respuestas y currículum",
+          "demo": "¿Cómo puedo mejorar mi respuesta a '¿Por qué quieres trabajar aquí?'"
+        },
+        "instant": {
+          "title": "Análisis Instantáneo",
+          "description": "Analiza descripciones de trabajo y obtén información personalizada sobre el ajuste del rol",
+          "demo": "Analiza esta oferta de trabajo para un puesto de Desarrollador Senior"
+        },
+        "contextual": {
+          "title": "Ayuda Contextual",
+          "description": "Haz preguntas sobre tus aplicaciones, entrevistas y obtén consejos personalizados",
+          "demo": "¿Qué debo preparar para mi próxima entrevista en Google?"
+        }
+      }
+    },
     "cta": {
       "title": "¿Listo para Transformar tu Búsqueda de Empleo?",
       "description": "Únete a miles de profesionales que consiguieron sus trabajos soñados con Qrafts",
