@@ -515,11 +515,11 @@ const Dashboard = () => {
                   <Crown className="h-5 w-5 text-primary" />
                   <h3 className="text-lg font-semibold">Upgrade to Qraft Pro</h3>
                   <span className="px-2 py-1 text-xs font-semibold rounded-full bg-success/20 text-success border border-success/30">
-                    14-Day Free Trial
+                    7-Day Free Trial
                   </span>
                 </div>
                 <p className="text-sm text-muted-foreground mb-3">
-                  Try Qraft Pro free for 14 days, then just $29.99/month. Cancel anytime.
+                  Try Qraft Pro free for 7 days, then just $29.99/month. Cancel anytime.
                 </p>
                 <ul className="text-sm space-y-1 text-muted-foreground">
                   <li className="flex items-center gap-2">
