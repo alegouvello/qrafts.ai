@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { ChatAssistant } from "@/components/ChatAssistant";
 import Index from "./pages/Index";
@@ -19,6 +19,13 @@ import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+const ChatAssistantWrapper = () => {
+  const location = useLocation();
+  // Don't show chat assistant on landing page
+  if (location.pathname === '/') return null;
+  return <ChatAssistant />;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -41,7 +48,7 @@ const App = () => (
             <Route path="/terms" element={<Terms />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-          <ChatAssistant />
+          <ChatAssistantWrapper />
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>

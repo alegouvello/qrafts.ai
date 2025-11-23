@@ -359,8 +359,11 @@ const Index = () => {
             <h3 id="cta-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">
               {t('landing.cta.title')}
             </h3>
-            <p className="text-lg sm:text-xl mb-8 sm:mb-10 opacity-95 max-w-2xl mx-auto px-4">
+            <p className="text-lg sm:text-xl mb-3 opacity-95 max-w-2xl mx-auto px-4">
               {t('landing.cta.description')}
+            </p>
+            <p className="text-sm sm:text-base mb-8 sm:mb-10 opacity-90 max-w-xl mx-auto px-4">
+              {t('landing.cta.assistantNote')}
             </p>
             <Link to="/auth">
               <Button size="lg" variant="secondary" className="w-full sm:w-auto rounded-full group shadow-2xl hover:scale-110 hover:shadow-primary/30 transition-all duration-300 min-h-[48px]">
