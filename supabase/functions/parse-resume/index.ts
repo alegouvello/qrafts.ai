@@ -198,8 +198,11 @@ CRITICAL RULES:
 2. Preserve dates, locations, and time periods exactly as written
 3. For publications, extract title, publisher/platform, date, and URL (if present in markdown links)
 4. For experience, include: company, position, location, start_date, end_date, and FULL description
-5. For education, include: institution, degree, field, location, start_date, end_date - extract ALL education entries including certifications and training programs
-6. Identify and extract: skills, certifications, projects, awards, languages, volunteer work, interests
+5. For education, include: institution, degree, field, location, start_date, end_date, gpa, honors, thesis/dissertation, and academic achievements - extract ALL education entries including certifications and training programs
+6. Extract academic honors like "Summa Cum Laude", "Magna Cum Laude", "Dean's List", etc.
+7. Extract thesis or dissertation titles if mentioned
+8. Identify academic achievements like scholarships, research grants, publications during studies, teaching assistant roles
+9. Identify and extract: skills, certifications, projects, awards, languages, volunteer work, interests
 
 SUMMARY FORMATTING:
 - Convert bullet points to proper HTML format
@@ -251,7 +254,11 @@ Return ONLY valid JSON with this structure:
       "field": "string (field of study)",
       "location": "string (city, country)",
       "start_date": "string (e.g., '2009' or 'Sept 2009')",
-      "end_date": "string (e.g., '2011' or 'Present')"
+      "end_date": "string (e.g., '2011' or 'Present')",
+      "gpa": "string (e.g., '3.8/4.0' or '17.5/20')",
+      "honors": ["string (e.g., 'Summa Cum Laude', 'Dean's List')"],
+      "thesis": "string (title of thesis or dissertation if mentioned)",
+      "achievements": ["string (academic achievements like scholarships, grants, publications, teaching roles)"]
     }
   ],
   "certifications": [

@@ -63,6 +63,10 @@ interface ParsedResume {
     start_date: string;
     end_date: string;
     location?: string;
+    gpa?: string;
+    honors?: string[];
+    thesis?: string;
+    achievements?: string[];
   }>;
   certifications?: (string | { name: string; issuer: string; date: string })[];
   publications?: (string | { title: string; publisher: string; date: string; url?: string })[];
@@ -1033,25 +1037,75 @@ export default function Profile() {
                   {parsedData.education.map((edu, index) => (
                     <div key={index} className="relative pl-8 before:absolute before:left-0 before:top-2 before:bottom-0 before:w-0.5 before:bg-gradient-to-b before:from-primary before:to-transparent">
                       <div className="absolute left-0 top-1 w-2 h-2 bg-primary rounded-full -translate-x-[3px]" />
-                      <div className="space-y-2">
-                        <h3 className="text-xl font-semibold text-foreground">
-                          {edu.degree}{edu.field && ` in ${edu.field}`}
-                        </h3>
-                        <p className="text-primary font-medium">{edu.institution}</p>
-                        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                          {(edu.start_date || edu.end_date) && (
-                            <span>
-                              {edu.start_date} {edu.start_date && edu.end_date && '- '} {edu.end_date}
-                            </span>
-                          )}
-                          {(edu.start_date || edu.end_date) && edu.location && <span>•</span>}
-                          {edu.location && (
-                            <span className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              {edu.location}
-                            </span>
-                          )}
+                      <div className="space-y-3">
+                        <div className="space-y-2">
+                          <h3 className="text-xl font-semibold text-foreground">
+                            {edu.degree}{edu.field && ` in ${edu.field}`}
+                          </h3>
+                          <p className="text-primary font-medium">{edu.institution}</p>
+                          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                            {(edu.start_date || edu.end_date) && (
+                              <span>
+                                {edu.start_date} {edu.start_date && edu.end_date && '- '} {edu.end_date}
+                              </span>
+                            )}
+                            {(edu.start_date || edu.end_date) && edu.location && <span>•</span>}
+                            {edu.location && (
+                              <span className="flex items-center gap-1">
+                                <MapPin className="h-3 w-3" />
+                                {edu.location}
+                              </span>
+                            )}
+                            {edu.gpa && (
+                              <>
+                                <span>•</span>
+                                <span className="font-medium text-foreground">GPA: {edu.gpa}</span>
+                              </>
+                            )}
+                          </div>
                         </div>
+
+                        {/* Honors */}
+                        {edu.honors && edu.honors.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {edu.honors.map((honor, idx) => (
+                              <span
+                                key={idx}
+                                className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-success/10 text-success border border-success/20"
+                              >
+                                <Trophy className="h-3 w-3" aria-hidden="true" />
+                                {honor}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Thesis/Dissertation */}
+                        {edu.thesis && (
+                          <div className="p-4 rounded-lg bg-muted/30 border border-border/40">
+                            <div className="flex items-start gap-2">
+                              <BookMarked className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" aria-hidden="true" />
+                              <div>
+                                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Thesis/Dissertation</span>
+                                <p className="text-sm text-foreground mt-1 leading-relaxed">{edu.thesis}</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Academic Achievements */}
+                        {edu.achievements && edu.achievements.length > 0 && (
+                          <div className="space-y-2">
+                            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Academic Achievements</span>
+                            <ul className="space-y-1.5">
+                              {edu.achievements.map((achievement, idx) => (
+                                <li key={idx} className="text-sm text-foreground/80 leading-relaxed pl-4 relative before:absolute before:left-0 before:top-2 before:w-1.5 before:h-1.5 before:bg-accent before:rounded-full">
+                                  {achievement}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
