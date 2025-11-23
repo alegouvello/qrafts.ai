@@ -573,6 +573,43 @@ export default function Profile() {
     }
   };
 
+  const handleResetOrder = async () => {
+    if (!parsedData) return;
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('No user found');
+
+      // Remove _sectionOrder from the parsed resume data
+      const updatedData = { ...parsedData };
+      delete updatedData._sectionOrder;
+
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({
+          resume_text: JSON.stringify(updatedData),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Order Reset!",
+        description: "Resume sections restored to default order",
+      });
+
+      await fetchProfile();
+    } catch (error) {
+      console.error('Error resetting order:', error);
+      toast({
+        title: "Failed to Reset Order",
+        description: "Could not reset the section order",
+        variant: "destructive",
+      });
+    }
+  };
+
   const renderSection = (sectionKey: string) => {
     if (!parsedData) return null;
 
@@ -1041,16 +1078,29 @@ export default function Profile() {
               <img src={qraftLogo} alt="Qrafts" className="h-20 opacity-80 transition-all duration-300 hover:scale-105 hover:opacity-100 hover:drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.4)] dark:invert" />
             </div>
             <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
+              {/* Primary Actions */}
               <Button
-                onClick={() => setShowMasterAnswersDialog(true)}
-                variant="secondary"
+                onClick={() => setShowEditDialog(true)}
+                size="sm"
+                className="gap-2 flex-1 sm:flex-none"
+              >
+                <Edit className="h-4 w-4" />
+                <span className="hidden sm:inline">Edit Profile</span>
+                <span className="sm:hidden">Edit</span>
+              </Button>
+              
+              <Button
+                onClick={() => setShowUploadDialog(true)}
+                variant="outline"
                 size="sm"
                 className="gap-2 bg-background/50 backdrop-blur-sm flex-1 sm:flex-none"
               >
-                <BookOpen className="h-4 w-4" />
-                <span className="hidden sm:inline">Master Answers</span>
-                <span className="sm:hidden">Answers</span>
+                <Upload className="h-4 w-4" />
+                <span className="hidden md:inline">Upload Resume</span>
+                <span className="md:hidden">Upload</span>
               </Button>
+
+              {/* AI Features */}
               <Button
                 onClick={() => setShowReviewDialog(true)}
                 variant="secondary"
@@ -1061,6 +1111,7 @@ export default function Profile() {
                 <span className="hidden sm:inline">AI Review</span>
                 <span className="sm:hidden">Review</span>
               </Button>
+              
               <Button
                 onClick={() => setShowManualEnhancementDialog(true)}
                 disabled={enhancingProfile}
@@ -1072,35 +1123,8 @@ export default function Profile() {
                 <span className="hidden md:inline">{enhancingProfile ? "Enhancing..." : "Enhance Profile"}</span>
                 <span className="md:hidden">{enhancingProfile ? "..." : "Enhance"}</span>
               </Button>
-              <Button
-                onClick={() => setShowUploadDialog(true)}
-                variant="outline"
-                size="sm"
-                className="gap-2 bg-background/50 backdrop-blur-sm flex-1 sm:flex-none"
-              >
-                <Upload className="h-4 w-4" />
-                <span className="hidden md:inline">Upload Resume</span>
-                <span className="md:hidden">Upload</span>
-              </Button>
-              <Button
-                onClick={() => setShowEditDialog(true)}
-                size="sm"
-                className="gap-2 flex-1 sm:flex-none"
-              >
-                <Edit className="h-4 w-4" />
-                <span className="hidden sm:inline">Edit Profile</span>
-                <span className="sm:hidden">Edit</span>
-              </Button>
-              <Button
-                onClick={() => setShowExportPDFDialog(true)}
-                variant="outline"
-                size="sm"
-                className="gap-2 bg-background/50 backdrop-blur-sm flex-1 sm:flex-none"
-              >
-                <FileDown className="h-4 w-4" />
-                <span className="hidden md:inline">Export PDF</span>
-                <span className="md:hidden">PDF</span>
-              </Button>
+
+              {/* Section Order Controls */}
               <Button
                 onClick={handleAnalyzeOrder}
                 variant="outline"
@@ -1116,6 +1140,43 @@ export default function Profile() {
                   {analyzingOrder ? "..." : "Analyze"}
                 </span>
               </Button>
+
+              {parsedData?._sectionOrder && (
+                <Button
+                  onClick={handleResetOrder}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 bg-background/50 backdrop-blur-sm flex-1 sm:flex-none border border-muted"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  <span className="hidden md:inline">Reset Order</span>
+                  <span className="md:hidden">Reset</span>
+                </Button>
+              )}
+
+              {/* Utility Actions */}
+              <Button
+                onClick={() => setShowMasterAnswersDialog(true)}
+                variant="secondary"
+                size="sm"
+                className="gap-2 bg-background/50 backdrop-blur-sm flex-1 sm:flex-none"
+              >
+                <BookOpen className="h-4 w-4" />
+                <span className="hidden sm:inline">Master Answers</span>
+                <span className="sm:hidden">Answers</span>
+              </Button>
+
+              <Button
+                onClick={() => setShowExportPDFDialog(true)}
+                variant="outline"
+                size="sm"
+                className="gap-2 bg-background/50 backdrop-blur-sm flex-1 sm:flex-none"
+              >
+                <FileDown className="h-4 w-4" />
+                <span className="hidden md:inline">Export PDF</span>
+                <span className="md:hidden">PDF</span>
+              </Button>
+
               <Link to="/settings">
                 <Button
                   variant="outline"
