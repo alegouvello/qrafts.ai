@@ -57,9 +57,12 @@ interface ParsedResume {
     description: string;
   }>;
   education?: Array<{
+    institution: string;
     degree: string;
-    school: string;
-    year: string;
+    field?: string;
+    start_date: string;
+    end_date: string;
+    location?: string;
   }>;
   certifications?: (string | { name: string; issuer: string; date: string })[];
   publications?: (string | { title: string; publisher: string; date: string; url?: string })[];
@@ -1028,11 +1031,28 @@ export default function Profile() {
                 </div>
                 <div className="space-y-6">
                   {parsedData.education.map((edu, index) => (
-                    <div key={index} className="relative pl-8 before:absolute before:left-0 before:top-2 before:w-0.5 before:h-full before:bg-gradient-to-b before:from-primary before:to-transparent">
+                    <div key={index} className="relative pl-8 before:absolute before:left-0 before:top-2 before:bottom-0 before:w-0.5 before:bg-gradient-to-b before:from-primary before:to-transparent">
                       <div className="absolute left-0 top-1 w-2 h-2 bg-primary rounded-full -translate-x-[3px]" />
-                      <h3 className="text-lg font-semibold">{edu.degree}</h3>
-                      <p className="text-primary font-medium">{edu.school}</p>
-                      <p className="text-sm text-muted-foreground">{edu.year}</p>
+                      <div className="space-y-2">
+                        <h3 className="text-xl font-semibold text-foreground">
+                          {edu.degree}{edu.field && ` in ${edu.field}`}
+                        </h3>
+                        <p className="text-primary font-medium">{edu.institution}</p>
+                        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                          {(edu.start_date || edu.end_date) && (
+                            <span>
+                              {edu.start_date} {edu.start_date && edu.end_date && '- '} {edu.end_date}
+                            </span>
+                          )}
+                          {(edu.start_date || edu.end_date) && edu.location && <span>•</span>}
+                          {edu.location && (
+                            <span className="flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />
+                              {edu.location}
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>

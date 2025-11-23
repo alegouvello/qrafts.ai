@@ -198,7 +198,7 @@ CRITICAL RULES:
 2. Preserve dates, locations, and time periods exactly as written
 3. For publications, extract title, publisher/platform, date, and URL (if present in markdown links)
 4. For experience, include: company, position, location, start_date, end_date, and FULL description
-5. For education, include: institution, degree, field, and dates
+5. For education, include: institution, degree, field, location, start_date, end_date - extract ALL education entries including certifications and training programs
 6. Identify and extract: skills, certifications, projects, awards, languages, volunteer work, interests
 
 SUMMARY FORMATTING:
@@ -246,11 +246,12 @@ Return ONLY valid JSON with this structure:
   ],
   "education": [
     {
-      "institution": "string",
-      "degree": "string",
-      "field": "string",
-      "start_date": "string",
-      "end_date": "string"
+      "institution": "string (school or university name)",
+      "degree": "string (degree or certification name)",
+      "field": "string (field of study)",
+      "location": "string (city, country)",
+      "start_date": "string (e.g., '2009' or 'Sept 2009')",
+      "end_date": "string (e.g., '2011' or 'Present')"
     }
   ],
   "certifications": [
