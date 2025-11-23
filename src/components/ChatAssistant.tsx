@@ -5,10 +5,18 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import ReactMarkdown from 'react-markdown';
+import { useSubscription } from "@/hooks/useSubscription";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type Message = {
   role: "user" | "assistant";
@@ -26,83 +34,11 @@ export const ChatAssistant = () => {
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [subscriptionStatus, setSubscriptionStatus] = useState<{
-    subscribed: boolean;
-    product_id: string | null;
-  }>({ subscribed: false, product_id: null });
+  const { subscriptionStatus, handleUpgrade } = useSubscription();
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-assistant`;
-
-  useEffect(() => {
-    checkSubscription();
-  }, []);
-
-  const checkSubscription = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        console.log('No active session, skipping subscription check');
-        return;
-      }
-
-      const { data, error } = await supabase.functions.invoke('check-subscription', {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`
-        }
-      });
-      
-      if (error) {
-        console.error('Error checking subscription:', error);
-        toast({
-          title: "Subscription Check Failed",
-          description: "Unable to verify your subscription status. Some features may be unavailable.",
-          variant: "destructive",
-          action: (
-            <Button onClick={checkSubscription} size="sm" variant="outline">
-              Retry
-            </Button>
-          ),
-        });
-      } else if (data) {
-        setSubscriptionStatus(data);
-      }
-    } catch (error) {
-      console.error('Error checking subscription:', error);
-      toast({
-        title: "Connection Error",
-        description: "Failed to check subscription status. Please try again later.",
-        variant: "destructive",
-        action: (
-          <Button onClick={checkSubscription} size="sm" variant="outline">
-            Retry
-          </Button>
-        ),
-      });
-    }
-  };
-
-  const handleUpgrade = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('create-checkout');
-      if (error) {
-        toast({
-          title: "Error",
-          description: "Failed to create checkout session",
-          variant: "destructive",
-        });
-      } else if (data?.url) {
-        window.open(data.url, '_blank');
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to start checkout process",
-        variant: "destructive",
-      });
-    }
-  };
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -216,6 +152,68 @@ export const ChatAssistant = () => {
     }
   };
 
+  const ChatContent = () => (
+    <>
+      <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+        <div className="space-y-4">
+          {messages.map((msg, i) => (
+            <div
+              key={i}
+              className={`flex ${
+                msg.role === "user" ? "justify-end" : "justify-start"
+              }`}
+            >
+              <div
+                className={`max-w-[80%] rounded-2xl px-4 py-2 ${
+                  msg.role === "user"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted"
+                }`}
+              >
+                {msg.role === "assistant" ? (
+                  <div className="text-sm prose prose-sm max-w-none dark:prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-1 prose-strong:font-semibold">
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  </div>
+                ) : (
+                  <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                )}
+              </div>
+            </div>
+          ))}
+          {isLoading && (
+            <div className="flex justify-start">
+              <div className="bg-muted rounded-2xl px-4 py-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+              </div>
+            </div>
+          )}
+        </div>
+      </ScrollArea>
+
+      {/* Input */}
+      <div className="p-4 border-t">
+        <div className="flex gap-2">
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder={t('chat.placeholder')}
+            disabled={isLoading}
+            className="flex-1"
+          />
+          <Button
+            onClick={handleSend}
+            disabled={!input.trim() || isLoading}
+            size="icon"
+            className="rounded-full"
+          >
+            <Send className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </>
+  );
+
   return (
     <>
       {/* Floating Button */}
@@ -236,98 +234,72 @@ export const ChatAssistant = () => {
         </div>
       )}
 
-      {/* Chat Window */}
-      {isOpen && (
-        <Card className="fixed bottom-6 right-6 w-96 h-[600px] shadow-2xl z-50 flex flex-col">
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-primary/10 to-accent/10">
-            <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10 bg-primary">
-                <AvatarFallback className="bg-primary text-primary-foreground">
-                  Q
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <h3 className="font-semibold flex items-center gap-2">
-                  Qrafts Assistant
-                  {!subscriptionStatus.subscribed && (
-                    <Crown className="h-3.5 w-3.5 text-primary" />
-                  )}
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  {subscriptionStatus.subscribed ? "Here to help" : "Pro feature"}
-                </p>
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsOpen(false)}
-              className="rounded-full"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Messages */}
-          <ScrollArea className="flex-1 p-4" ref={scrollRef}>
-            <div className="space-y-4">
-              {messages.map((msg, i) => (
-                <div
-                  key={i}
-                  className={`flex ${
-                    msg.role === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  <div
-                    className={`max-w-[80%] rounded-2xl px-4 py-2 ${
-                      msg.role === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted"
-                    }`}
-                  >
-                    {msg.role === "assistant" ? (
-                      <div className="text-sm prose prose-sm max-w-none dark:prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-1 prose-strong:font-semibold">
-                        <ReactMarkdown>{msg.content}</ReactMarkdown>
-                      </div>
-                    ) : (
-                      <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+      {/* Mobile Drawer */}
+      {isMobile ? (
+        <Drawer open={isOpen} onOpenChange={setIsOpen}>
+          <DrawerContent className="h-[85vh]">
+            <DrawerHeader className="border-b bg-gradient-to-r from-primary/10 to-accent/10">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-10 w-10 bg-primary">
+                  <AvatarFallback className="bg-primary text-primary-foreground">
+                    Q
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <DrawerTitle className="flex items-center gap-2">
+                    Qrafts Assistant
+                    {!subscriptionStatus.subscribed && (
+                      <Crown className="h-3.5 w-3.5 text-primary" />
                     )}
-                  </div>
+                  </DrawerTitle>
+                  <p className="text-xs text-muted-foreground">
+                    {subscriptionStatus.subscribed ? "Here to help" : "Pro feature"}
+                  </p>
                 </div>
-              ))}
-              {isLoading && (
-                <div className="flex justify-start">
-                  <div className="bg-muted rounded-2xl px-4 py-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  </div>
-                </div>
-              )}
+              </div>
+            </DrawerHeader>
+            <div className="flex flex-col h-full">
+              <ChatContent />
             </div>
-          </ScrollArea>
-
-          {/* Input */}
-          <div className="p-4 border-t">
-            <div className="flex gap-2">
-              <Input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder={t('chat.placeholder')}
-                disabled={isLoading}
-                className="flex-1"
-              />
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        /* Desktop Card */
+        isOpen && (
+          <Card className="fixed bottom-6 right-6 w-96 h-[600px] shadow-2xl z-50 flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-primary/10 to-accent/10">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-10 w-10 bg-primary">
+                  <AvatarFallback className="bg-primary text-primary-foreground">
+                    Q
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="font-semibold flex items-center gap-2">
+                    Qrafts Assistant
+                    {!subscriptionStatus.subscribed && (
+                      <Crown className="h-3.5 w-3.5 text-primary" />
+                    )}
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    {subscriptionStatus.subscribed ? "Here to help" : "Pro feature"}
+                  </p>
+                </div>
+              </div>
               <Button
-                onClick={handleSend}
-                disabled={!input.trim() || isLoading}
+                variant="ghost"
                 size="icon"
+                onClick={() => setIsOpen(false)}
                 className="rounded-full"
               >
-                <Send className="h-4 w-4" />
+                <X className="h-4 w-4" />
               </Button>
             </div>
-          </div>
-        </Card>
+
+            <ChatContent />
+          </Card>
+        )
       )}
     </>
   );
