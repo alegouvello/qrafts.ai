@@ -384,11 +384,11 @@ const Index = () => {
             }`}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-3xl transition-all duration-500 group-hover:from-primary/10 group-hover:scale-105" />
-            <div className="relative p-6 sm:p-8 space-y-6">
+            <div className="relative p-6 sm:p-8 flex flex-col h-full">
               <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 group-hover:rotate-6 transition-transform duration-300">
                 <Brain className="h-6 w-6 text-primary" />
               </div>
-              <div className="space-y-3">
+              <div className="space-y-3 mt-6">
                 <h4 className="text-xl sm:text-2xl font-bold group-hover:text-primary transition-colors duration-300">
                   {t('landing.aiAssistant.features.smart.title')}
                 </h4>
@@ -397,7 +397,7 @@ const Index = () => {
                 </p>
               </div>
               {/* Demo interaction */}
-              <div className="relative mt-6">
+              <div className="relative mt-auto pt-6">
                 <div className="bg-card border border-border rounded-2xl p-4 shadow-lg">
                   <div className="flex items-start gap-3 mb-3">
                     <MessageSquare className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
@@ -424,11 +424,11 @@ const Index = () => {
             }`}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent rounded-3xl transition-all duration-500 group-hover:from-accent/10 group-hover:scale-105" />
-            <div className="relative p-6 sm:p-8 space-y-6">
+            <div className="relative p-6 sm:p-8 flex flex-col h-full">
               <div className="h-12 w-12 rounded-2xl bg-accent/10 flex items-center justify-center border border-accent/20 group-hover:rotate-6 transition-transform duration-300">
                 <Zap className="h-6 w-6 text-accent" />
               </div>
-              <div className="space-y-3">
+              <div className="space-y-3 mt-6">
                 <h4 className="text-xl sm:text-2xl font-bold group-hover:text-accent transition-colors duration-300">
                   {t('landing.aiAssistant.features.instant.title')}
                 </h4>
@@ -437,7 +437,7 @@ const Index = () => {
                 </p>
               </div>
               {/* Demo interaction */}
-              <div className="relative mt-6">
+              <div className="relative mt-auto pt-6">
                 <div className="bg-card border border-border rounded-2xl p-4 shadow-lg">
                   <div className="flex items-start gap-3 mb-3">
                     <MessageSquare className="h-5 w-5 text-accent mt-1 flex-shrink-0" />
@@ -464,11 +464,11 @@ const Index = () => {
             }`}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-3xl transition-all duration-500 group-hover:from-primary/10 group-hover:scale-105" />
-            <div className="relative p-6 sm:p-8 space-y-6">
+            <div className="relative p-6 sm:p-8 flex flex-col h-full">
               <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 group-hover:rotate-6 transition-transform duration-300">
                 <Sparkles className="h-6 w-6 text-primary" />
               </div>
-              <div className="space-y-3">
+              <div className="space-y-3 mt-6">
                 <h4 className="text-xl sm:text-2xl font-bold group-hover:text-primary transition-colors duration-300">
                   {t('landing.aiAssistant.features.contextual.title')}
                 </h4>
@@ -477,7 +477,7 @@ const Index = () => {
                 </p>
               </div>
               {/* Demo interaction */}
-              <div className="relative mt-6">
+              <div className="relative mt-auto pt-6">
                 <div className="bg-card border border-border rounded-2xl p-4 shadow-lg">
                   <div className="flex items-start gap-3 mb-3">
                     <MessageSquare className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
