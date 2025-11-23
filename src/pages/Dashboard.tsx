@@ -519,7 +519,7 @@ const Dashboard = () => {
                   </span>
                 </div>
                 <p className="text-sm text-muted-foreground mb-3">
-                  Try Qraft Pro free for 14 days, then just $5/month. Cancel anytime.
+                  Try Qraft Pro free for 14 days, then just $29.99/month. Cancel anytime.
                 </p>
                 <ul className="text-sm space-y-1 text-muted-foreground">
                   <li className="flex items-center gap-2">
