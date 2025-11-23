@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight, FileText, Sparkles, TrendingUp, Menu } from "lucide-react";
+import { ArrowRight, FileText, Sparkles, TrendingUp, Menu, MessageSquare, Zap, Brain } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import {
@@ -45,6 +45,10 @@ const Index = () => {
   const feature1 = useScrollAnimation({ threshold: 0.3 });
   const feature2 = useScrollAnimation({ threshold: 0.3 });
   const feature3 = useScrollAnimation({ threshold: 0.3 });
+  const aiAssistantSection = useScrollAnimation({ threshold: 0.2 });
+  const aiFeature1 = useScrollAnimation({ threshold: 0.3 });
+  const aiFeature2 = useScrollAnimation({ threshold: 0.3 });
+  const aiFeature3 = useScrollAnimation({ threshold: 0.3 });
   const ctaSection = useScrollAnimation({ threshold: 0.3 });
 
   const scrollToVideo = () => {
@@ -338,6 +342,154 @@ const Index = () => {
                 <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
                   {t('landing.features.automate.description')}
                 </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* AI Assistant Showcase Section */}
+      <section 
+        ref={aiAssistantSection.ref}
+        className="relative container mx-auto px-4 sm:px-6 py-16 sm:py-24 overflow-hidden" 
+        aria-labelledby="ai-assistant-heading"
+      >
+        {/* Background decoration */}
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-accent/5 pointer-events-none" />
+        
+        <div className={`text-center mb-16 sm:mb-20 space-y-4 transition-all duration-1000 ${
+          aiAssistantSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        }`}>
+          <div className="inline-block px-3 sm:px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium mb-4 animate-glow-pulse">
+            {t('landing.aiAssistant.badge')}
+          </div>
+          <h3 id="ai-assistant-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
+            <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+              {t('landing.aiAssistant.title')}
+            </span>
+          </h3>
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
+            {t('landing.aiAssistant.subtitle')}
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
+          {/* AI Feature 1 */}
+          <div 
+            ref={aiFeature1.ref}
+            className={`group relative transition-all duration-1000 ${
+              aiFeature1.isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-10 scale-95'
+            }`}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-3xl transition-all duration-500 group-hover:from-primary/10 group-hover:scale-105" />
+            <div className="relative p-6 sm:p-8 space-y-6">
+              <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 group-hover:rotate-6 transition-transform duration-300">
+                <Brain className="h-6 w-6 text-primary" />
+              </div>
+              <div className="space-y-3">
+                <h4 className="text-xl sm:text-2xl font-bold group-hover:text-primary transition-colors duration-300">
+                  {t('landing.aiAssistant.features.smart.title')}
+                </h4>
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                  {t('landing.aiAssistant.features.smart.description')}
+                </p>
+              </div>
+              {/* Demo interaction */}
+              <div className="relative mt-6">
+                <div className="bg-card border border-border rounded-2xl p-4 shadow-lg">
+                  <div className="flex items-start gap-3 mb-3">
+                    <MessageSquare className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
+                    <p className="text-sm text-foreground italic">
+                      {t('landing.aiAssistant.features.smart.demo')}
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3 pl-8">
+                    <div className="flex-1">
+                      <div className="h-2 bg-primary/20 rounded-full mb-2 animate-pulse" />
+                      <div className="h-2 bg-primary/10 rounded-full w-3/4 animate-pulse" style={{ animationDelay: '0.2s' }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* AI Feature 2 */}
+          <div 
+            ref={aiFeature2.ref}
+            className={`group relative transition-all duration-1000 delay-100 ${
+              aiFeature2.isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-10 scale-95'
+            }`}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent rounded-3xl transition-all duration-500 group-hover:from-accent/10 group-hover:scale-105" />
+            <div className="relative p-6 sm:p-8 space-y-6">
+              <div className="h-12 w-12 rounded-2xl bg-accent/10 flex items-center justify-center border border-accent/20 group-hover:rotate-6 transition-transform duration-300">
+                <Zap className="h-6 w-6 text-accent" />
+              </div>
+              <div className="space-y-3">
+                <h4 className="text-xl sm:text-2xl font-bold group-hover:text-accent transition-colors duration-300">
+                  {t('landing.aiAssistant.features.instant.title')}
+                </h4>
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                  {t('landing.aiAssistant.features.instant.description')}
+                </p>
+              </div>
+              {/* Demo interaction */}
+              <div className="relative mt-6">
+                <div className="bg-card border border-border rounded-2xl p-4 shadow-lg">
+                  <div className="flex items-start gap-3 mb-3">
+                    <MessageSquare className="h-5 w-5 text-accent mt-1 flex-shrink-0" />
+                    <p className="text-sm text-foreground italic">
+                      {t('landing.aiAssistant.features.instant.demo')}
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3 pl-8">
+                    <div className="flex-1">
+                      <div className="h-2 bg-accent/20 rounded-full mb-2 animate-pulse" />
+                      <div className="h-2 bg-accent/10 rounded-full w-2/3 animate-pulse" style={{ animationDelay: '0.2s' }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* AI Feature 3 */}
+          <div 
+            ref={aiFeature3.ref}
+            className={`group relative transition-all duration-1000 delay-200 ${
+              aiFeature3.isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-10 scale-95'
+            }`}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-3xl transition-all duration-500 group-hover:from-primary/10 group-hover:scale-105" />
+            <div className="relative p-6 sm:p-8 space-y-6">
+              <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 group-hover:rotate-6 transition-transform duration-300">
+                <Sparkles className="h-6 w-6 text-primary" />
+              </div>
+              <div className="space-y-3">
+                <h4 className="text-xl sm:text-2xl font-bold group-hover:text-primary transition-colors duration-300">
+                  {t('landing.aiAssistant.features.contextual.title')}
+                </h4>
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                  {t('landing.aiAssistant.features.contextual.description')}
+                </p>
+              </div>
+              {/* Demo interaction */}
+              <div className="relative mt-6">
+                <div className="bg-card border border-border rounded-2xl p-4 shadow-lg">
+                  <div className="flex items-start gap-3 mb-3">
+                    <MessageSquare className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
+                    <p className="text-sm text-foreground italic">
+                      {t('landing.aiAssistant.features.contextual.demo')}
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3 pl-8">
+                    <div className="flex-1">
+                      <div className="h-2 bg-primary/20 rounded-full mb-2 animate-pulse" />
+                      <div className="h-2 bg-primary/10 rounded-full w-4/5 animate-pulse" style={{ animationDelay: '0.2s' }} />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

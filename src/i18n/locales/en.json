@@ -55,6 +55,28 @@
       "title": "Watch Qrafts in Action",
       "description": "See how Qrafts helps organize job applications and streamline your job search"
     },
+    "aiAssistant": {
+      "badge": "AI-Powered Assistant",
+      "title": "Your Personal Career Coach",
+      "subtitle": "Get instant, intelligent help throughout your job search journey",
+      "features": {
+        "smart": {
+          "title": "Smart Suggestions",
+          "description": "Get AI-powered recommendations for improving your application answers and resume",
+          "demo": "How can I improve my answer to 'Why do you want to work here?'"
+        },
+        "instant": {
+          "title": "Instant Analysis",
+          "description": "Analyze job descriptions and get personalized insights about role fit",
+          "demo": "Analyze this job posting for a Senior Developer role"
+        },
+        "contextual": {
+          "title": "Context-Aware Help",
+          "description": "Ask questions about your applications, interviews, and get tailored advice",
+          "demo": "What should I prepare for my upcoming interview at Google?"
+        }
+      }
+    },
     "cta": {
       "title": "Ready to Transform Your Job Search?",
       "description": "Join thousands of professionals who landed their dream jobs with Qrafts",
