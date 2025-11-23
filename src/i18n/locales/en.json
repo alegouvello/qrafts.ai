@@ -77,6 +77,27 @@
         }
       }
     },
+    "tryChat": {
+      "title": "Try It Now",
+      "subtitle": "Ask me anything about your job search",
+      "prompt": "Try asking a question or click an example below:",
+      "placeholder": "Type your question...",
+      "typing": "Thinking...",
+      "disclaimer": "This is a demo. Sign up to unlock the full AI assistant with your actual job data.",
+      "examples": {
+        "improve": "How can I improve my application answers?",
+        "interview": "What should I prepare for my next interview?",
+        "track": "How can I track my job applications better?"
+      },
+      "responses": {
+        "improve": "Great question! I can help you craft stronger answers by:\n\n1. Analyzing the job description to understand key requirements\n2. Suggesting specific examples from your experience\n3. Structuring your response using the STAR method\n4. Highlighting relevant achievements\n\nSign up to get personalized feedback on your actual applications!",
+        "interview": "I'd be happy to help you prepare! Here's what I recommend:\n\n1. Research the company's recent news and projects\n2. Prepare 2-3 stories for common behavioral questions\n3. Review the job requirements and match them to your skills\n4. Prepare thoughtful questions for the interviewer\n\nWith a Qrafts account, I can analyze your interviewer's LinkedIn profile and give you personalized prep tips!",
+        "resume": "I can help you optimize your resume by:\n\n1. Highlighting relevant skills for each role\n2. Quantifying your achievements with metrics\n3. Using action verbs and industry keywords\n4. Ensuring ATS-friendly formatting\n\nSign up to get AI-powered resume analysis tailored to specific job postings!",
+        "jobFit": "I can analyze how well a position matches your profile by:\n\n1. Comparing job requirements with your skills\n2. Identifying gaps and how to address them\n3. Suggesting talking points for your application\n4. Calculating a fit score\n\nCreate an account to get detailed fit analysis for all your applications!",
+        "organize": "Qrafts helps you stay organized with:\n\n1. A centralized dashboard for all applications\n2. Timeline view of interviews and deadlines\n3. Automated reminders for follow-ups\n4. Company research notes in one place\n\nSign up free to start organizing your job search today!",
+        "default": "I'm here to help with your job search! I can assist with:\n\n• Improving application answers\n• Interview preparation\n• Resume optimization\n• Job fit analysis\n• Application tracking\n\nSign up to get personalized AI assistance throughout your entire job search journey!"
+      }
+    },
     "cta": {
       "title": "Ready to Transform Your Job Search?",
       "description": "Join thousands of professionals who landed their dream jobs with Qrafts",

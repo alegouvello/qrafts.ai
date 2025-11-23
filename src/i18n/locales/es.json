@@ -77,6 +77,27 @@
         }
       }
     },
+    "tryChat": {
+      "title": "Pruébalo Ahora",
+      "subtitle": "Pregúntame cualquier cosa sobre tu búsqueda de empleo",
+      "prompt": "Prueba haciendo una pregunta o haz clic en un ejemplo:",
+      "placeholder": "Escribe tu pregunta...",
+      "typing": "Pensando...",
+      "disclaimer": "Esta es una demostración. Regístrate para desbloquear el asistente IA completo con tus datos reales.",
+      "examples": {
+        "improve": "¿Cómo puedo mejorar mis respuestas de aplicación?",
+        "interview": "¿Qué debo preparar para mi próxima entrevista?",
+        "track": "¿Cómo puedo rastrear mejor mis solicitudes de empleo?"
+      },
+      "responses": {
+        "improve": "¡Excelente pregunta! Puedo ayudarte a crear respuestas más sólidas:\n\n1. Analizando la descripción del trabajo para entender los requisitos clave\n2. Sugiriendo ejemplos específicos de tu experiencia\n3. Estructurando tu respuesta usando el método STAR\n4. Destacando logros relevantes\n\n¡Regístrate para obtener comentarios personalizados sobre tus aplicaciones reales!",
+        "interview": "¡Me encantaría ayudarte a prepararte! Te recomiendo:\n\n1. Investigar las noticias y proyectos recientes de la empresa\n2. Preparar 2-3 historias para preguntas de comportamiento comunes\n3. Revisar los requisitos del trabajo y relacionarlos con tus habilidades\n4. Preparar preguntas reflexivas para el entrevistador\n\n¡Con una cuenta de Qrafts, puedo analizar el perfil de LinkedIn de tu entrevistador y darte consejos personalizados!",
+        "resume": "Puedo ayudarte a optimizar tu currículum:\n\n1. Destacando habilidades relevantes para cada rol\n2. Cuantificando tus logros con métricas\n3. Usando verbos de acción y palabras clave de la industria\n4. Asegurando formato compatible con ATS\n\n¡Regístrate para obtener análisis de currículum impulsado por IA adaptado a ofertas de trabajo específicas!",
+        "jobFit": "Puedo analizar qué tan bien encaja un puesto con tu perfil:\n\n1. Comparando requisitos del trabajo con tus habilidades\n2. Identificando brechas y cómo abordarlas\n3. Sugiriendo puntos clave para tu aplicación\n4. Calculando una puntuación de ajuste\n\n¡Crea una cuenta para obtener análisis detallado de ajuste para todas tus aplicaciones!",
+        "organize": "Qrafts te ayuda a mantenerte organizado con:\n\n1. Un panel centralizado para todas las aplicaciones\n2. Vista de cronología de entrevistas y plazos\n3. Recordatorios automáticos para seguimientos\n4. Notas de investigación de empresa en un solo lugar\n\n¡Regístrate gratis para comenzar a organizar tu búsqueda de empleo hoy!",
+        "default": "¡Estoy aquí para ayudarte con tu búsqueda de empleo! Puedo asistir con:\n\n• Mejorar respuestas de aplicación\n• Preparación de entrevistas\n• Optimización de currículum\n• Análisis de ajuste de trabajo\n• Seguimiento de aplicaciones\n\n¡Regístrate para obtener asistencia IA personalizada durante todo tu proceso de búsqueda de empleo!"
+      }
+    },
     "cta": {
       "title": "¿Listo para Transformar tu Búsqueda de Empleo?",
       "description": "Únete a miles de profesionales que consiguieron sus trabajos soñados con Qrafts",
