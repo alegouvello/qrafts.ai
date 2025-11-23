@@ -1,21 +1,20 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Footer } from "@/components/Footer";
-import { Plus, ArrowLeft, LogOut, BarChart3, Crown, Sparkles, Settings, Briefcase, Clock, Users, TrendingUp, Filter, Search, X } from "lucide-react";
-import { ApplicationCard } from "@/components/ApplicationCard";
+import { Crown, Sparkles, Filter, Search, X } from "lucide-react";
 import { AddApplicationDialog } from "@/components/AddApplicationDialog";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import qraftLogo from "@/assets/qrafts-logo.png";
 import PullToRefresh from "react-simple-pull-to-refresh";
 import { useTranslation } from "react-i18next";
 import { EmptyState } from "@/components/EmptyState";
 import { useSubscription } from "@/hooks/useSubscription";
+import { OnboardingDialog } from "@/components/OnboardingDialog";
+import { DashboardHeader } from "@/components/Dashboard/DashboardHeader";
+import { DashboardStats } from "@/components/Dashboard/DashboardStats";
+import { ApplicationsList } from "@/components/Dashboard/ApplicationsList";
 
 interface Application {
   id: string;
@@ -35,6 +34,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "interview" | "rejected" | "accepted">("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [userProfile, setUserProfile] = useState<{
     full_name: string | null;
     avatar_url: string | null;
@@ -54,6 +54,7 @@ const Dashboard = () => {
     checkAuth();
     fetchApplications();
     fetchUserProfile();
+    checkIfFirstTimeUser();
     
     // Check for checkout success/cancel
     const checkout = searchParams.get('checkout');
@@ -75,6 +76,22 @@ const Dashboard = () => {
       window.history.replaceState({}, '', '/dashboard');
     }
   }, []);
+
+  const checkIfFirstTimeUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    // Check if user has any applications
+    const { data: apps } = await supabase
+      .from("applications")
+      .select("id")
+      .limit(1);
+
+    // Show onboarding if no applications exist
+    if (!apps || apps.length === 0) {
+      setShowOnboarding(true);
+    }
+  };
 
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -344,91 +361,23 @@ const Dashboard = () => {
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/3 via-background to-background pointer-events-none" />
       
       {/* Header */}
-      <header className="relative border-b border-border/40 bg-background/80 backdrop-blur-xl sticky top-0 z-10">
-        <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-5">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
-              <Link to="/">
-                <Button variant="ghost" size="icon" className="rounded-full flex-shrink-0">
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
-              </Link>
-              <img src={qraftLogo} alt="Qrafts" className="h-20 transition-all duration-300 hover:scale-105 hover:drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.5)] dark:invert" />
-            </div>
-            <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto">
-              <Button 
-                onClick={() => {
-                  if (!subscriptionStatus.subscribed && applications.length >= 5) {
-                    toast({
-                      title: "Application Limit Reached",
-                      description: "Free users can track up to 5 applications. Upgrade to Pro for unlimited tracking.",
-                      variant: "destructive",
-                    });
-                  } else {
-                    setShowAddDialog(true);
-                  }
-                }}
-                className="flex-1 sm:flex-none rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all text-sm"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add
-              </Button>
-              <Link to="/profile" className="flex-1 sm:flex-none">
-                <Button variant="ghost" className="w-full rounded-full hover:bg-primary/5 transition-all text-sm flex items-center justify-center gap-2">
-                  {userProfile?.avatar_url ? (
-                    <Avatar className="h-10 w-10 border-2 border-primary/20">
-                      <AvatarImage 
-                        src={userProfile.avatar_url} 
-                        alt={userProfile.full_name || "Profile"}
-                        className="object-cover"
-                      />
-                      <AvatarFallback className="text-base font-semibold">
-                        {userProfile.full_name?.[0]?.toUpperCase() || "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                  ) : (
-                    "Profile"
-                  )}
-                </Button>
-              </Link>
-              <Link to="/comparison" className="flex-1 sm:flex-none">
-                <Button variant="ghost" className="w-full rounded-full hover:bg-accent/5 transition-all text-sm">
-                  <BarChart3 className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Compare</span>
-                  <span className="sm:hidden">Stats</span>
-                </Button>
-              </Link>
-              {subscriptionStatus.subscribed && (
-                <Link to="/settings">
-                  <Button 
-                    variant="ghost" 
-                    className="rounded-full hover:bg-success/10 transition-all px-3 border border-success/20 bg-success/5"
-                    size="sm"
-                  >
-                    <Crown className="h-3.5 w-3.5 mr-1.5 text-success" />
-                    <span className="text-xs font-medium text-success">Pro</span>
-                    {subscriptionStatus.is_trialing && (
-                      <span className="ml-1.5 px-1.5 py-0.5 text-[10px] rounded-full bg-primary/20 text-primary border border-primary/30">
-                        Trial
-                      </span>
-                    )}
-                  </Button>
-                </Link>
-              )}
-              <LanguageSwitcher />
-              <ThemeToggle />
-              <Link to="/settings">
-                <Button variant="ghost" className="rounded-full hover:bg-primary/5 transition-all" size="icon">
-                  <Settings className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Button variant="ghost" onClick={handleSignOut} className="rounded-full hover:bg-destructive/5 transition-all" size="icon">
-                <LogOut className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <DashboardHeader
+        userProfile={userProfile}
+        subscriptionStatus={subscriptionStatus}
+        applicationsCount={applications.length}
+        onAddApplication={() => {
+          if (!subscriptionStatus.subscribed && applications.length >= 5) {
+            toast({
+              title: "Application Limit Reached",
+              description: "Free users can track up to 5 applications. Upgrade to Pro for unlimited tracking.",
+              variant: "destructive",
+            });
+          } else {
+            setShowAddDialog(true);
+          }
+        }}
+        onSignOut={handleSignOut}
+      />
 
       {/* Main Content */}
       <PullToRefresh
@@ -522,129 +471,51 @@ const Dashboard = () => {
         )}
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
-          <div className="group relative bg-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-border/40 hover:border-border transition-all hover:shadow-lg animate-fade-in" style={{ animationDelay: '0ms' }}>
-            <div className="flex items-start justify-between mb-3 sm:mb-4">
-              <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-primary/5 transition-transform group-hover:scale-110">
-                <Briefcase className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-              </div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-2xl sm:text-3xl font-bold text-foreground">{stats.total}</div>
-              <div className="text-xs sm:text-sm text-muted-foreground">{t('dashboard.stats.total')}</div>
-            </div>
-          </div>
-          
-          <div className="group relative bg-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-border/40 hover:border-border transition-all hover:shadow-lg animate-fade-in" style={{ animationDelay: '100ms' }}>
-            <div className="flex items-start justify-between mb-3 sm:mb-4">
-              <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-warning/5 transition-transform group-hover:scale-110">
-                <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-warning" />
-              </div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-2xl sm:text-3xl font-bold text-foreground">{stats.pending}</div>
-              <div className="text-xs sm:text-sm text-muted-foreground">{t('dashboard.stats.pendingReview')}</div>
-            </div>
-          </div>
-          
-          <div className="group relative bg-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-border/40 hover:border-border transition-all hover:shadow-lg animate-fade-in" style={{ animationDelay: '200ms' }}>
-            <div className="flex items-start justify-between mb-3 sm:mb-4">
-              <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-primary/5 transition-transform group-hover:scale-110">
-                <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-              </div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-2xl sm:text-3xl font-bold text-foreground">{stats.interviews}</div>
-              <div className="text-xs sm:text-sm text-muted-foreground">{t('dashboard.stats.interview')}</div>
-            </div>
-          </div>
-          
-          <div className="group relative bg-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-border/40 hover:border-border transition-all hover:shadow-lg animate-fade-in" style={{ animationDelay: '300ms' }}>
-            <div className="flex items-start justify-between mb-3 sm:mb-4">
-              <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-success/5 transition-transform group-hover:scale-110">
-                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-success" />
-              </div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-2xl sm:text-3xl font-bold text-foreground">{stats.responseRate}%</div>
-              <div className="text-xs sm:text-sm text-muted-foreground">{t('dashboard.stats.responseRate')}</div>
-            </div>
-          </div>
-        </div>
+        <DashboardStats stats={stats} />
 
         {/* Search and Filter */}
         {!loading && applications.length > 0 && (
           <div className="mb-6 space-y-4">
             {/* Search Bar */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
               <Input
                 type="text"
                 placeholder="Search by company or position..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 rounded-full"
+                className="pl-10 pr-10 rounded-full border-border/40"
+                aria-label="Search applications"
               />
               {searchQuery && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0 rounded-full"
+                <button
                   onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label="Clear search"
                 >
-                  <X className="h-4 w-4" />
-                </Button>
+                  <X className="h-4 w-4" aria-hidden="true" />
+                </button>
               )}
             </div>
-            
+
             {/* Filter Buttons */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Filter className="h-4 w-4" />
-                <span className="font-medium">Filter:</span>
-              </div>
-            <Button
-              variant={statusFilter === "all" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setStatusFilter("all")}
-              className="rounded-full"
-            >
-              All ({applications.length})
-            </Button>
-            <Button
-              variant={statusFilter === "pending" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setStatusFilter("pending")}
-              className="rounded-full"
-            >
-              Pending ({stats.pending})
-            </Button>
-            <Button
-              variant={statusFilter === "interview" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setStatusFilter("interview")}
-              className="rounded-full"
-            >
-              Interview ({stats.interviews})
-            </Button>
-            <Button
-              variant={statusFilter === "rejected" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setStatusFilter("rejected")}
-              className="rounded-full"
-            >
-              Rejected ({applications.filter((a) => a.status === "rejected").length})
-            </Button>
-            <Button
-              variant={statusFilter === "accepted" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setStatusFilter("accepted")}
-              className="rounded-full"
-            >
-              Accepted ({applications.filter((a) => a.status === "accepted").length})
-            </Button>
+            <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filter applications by status">
+              {(["all", "pending", "interview", "rejected", "accepted"] as const).map((status) => (
+                <Button
+                  key={status}
+                  variant={statusFilter === status ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setStatusFilter(status)}
+                  className="rounded-full transition-all"
+                  role="tab"
+                  aria-selected={statusFilter === status}
+                  aria-controls="applications-list"
+                >
+                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                </Button>
+              ))}
+            </div>
           </div>
-        </div>
         )}
 
         {loading ? (
@@ -658,12 +529,11 @@ const Dashboard = () => {
           </div>
         ) : applications.length === 0 ? (
           <EmptyState
-            icon={Briefcase}
+            icon={Filter}
             title="Start Your Journey"
             description="Add your first application to begin tracking your progress and organizing your job search"
             action={
               <Button onClick={() => setShowAddDialog(true)} className="rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all" size="lg">
-                <Plus className="h-4 w-4 mr-2" />
                 Add Application
               </Button>
             }
@@ -690,27 +560,10 @@ const Dashboard = () => {
             className="py-12"
           />
         ) : (
-          <div className="space-y-10">
-            {Object.entries(groupedApplications).map(([company, companyApps], groupIndex) => (
-              <div key={company} className="space-y-4 animate-fade-in" style={{ animationDelay: `${groupIndex * 100}ms` }}>
-                <div className="flex items-center gap-3">
-                  <Link to={`/company/${encodeURIComponent(company)}`}>
-                    <h2 className="text-xl font-semibold hover:text-primary transition-colors cursor-pointer">
-                      {company}
-                    </h2>
-                  </Link>
-                  <span className="text-xs text-muted-foreground bg-muted/50 px-3 py-1 rounded-full">
-                    {companyApps.length} {companyApps.length === 1 ? 'role' : 'roles'}
-                  </span>
-                </div>
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 items-start">
-                  {companyApps.map((application, index) => (
-                    <ApplicationCard key={application.id} application={application} onDelete={handleDeleteApplication} />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+          <ApplicationsList 
+            groupedApplications={groupedApplications}
+            onDelete={handleDeleteApplication}
+          />
         )}
       </main>
       </PullToRefresh>
@@ -719,6 +572,11 @@ const Dashboard = () => {
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
         onAdd={handleAddApplication}
+      />
+      
+      <OnboardingDialog
+        open={showOnboarding}
+        onComplete={() => setShowOnboarding(false)}
       />
       
       <Footer />
