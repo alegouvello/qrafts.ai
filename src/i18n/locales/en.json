@@ -84,6 +84,13 @@
       "placeholder": "Type your question...",
       "typing": "Thinking...",
       "disclaimer": "This is a demo. Sign up to unlock the full AI assistant with your actual job data.",
+      "messagesUsed": "messages used",
+      "limitReached": {
+        "title": "Demo Limit Reached",
+        "message": "You've tried all 5 demo messages! Sign up for free to continue chatting with unlimited AI assistance.",
+        "button": "Sign Up Free",
+        "inputPlaceholder": "Sign up to continue chatting..."
+      },
       "examples": {
         "improve": "How can I improve my application answers?",
         "interview": "What should I prepare for my next interview?",

@@ -6,6 +6,7 @@ import { Send, Sparkles, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from 'react-markdown';
+import { Link } from "react-router-dom";
 
 interface Message {
   role: "user" | "assistant";
@@ -18,7 +19,11 @@ const TryChatWidget = () => {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [messageCount, setMessageCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const MAX_DEMO_MESSAGES = 5;
+  const isLimitReached = messageCount >= MAX_DEMO_MESSAGES;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -128,10 +133,13 @@ const TryChatWidget = () => {
   };
 
   const handleSend = async () => {
-    if (!input.trim() || isTyping) return;
+    if (!input.trim() || isTyping || isLimitReached) return;
 
     const userMessage = input.trim();
     setInput("");
+    
+    // Increment message count
+    setMessageCount(prev => prev + 1);
     
     // Add user message
     setMessages(prev => [...prev, { role: "user", content: userMessage }]);
@@ -154,6 +162,7 @@ const TryChatWidget = () => {
   ];
 
   const handleExampleClick = (question: string) => {
+    if (isLimitReached) return;
     setInput(question);
   };
 
@@ -183,7 +192,7 @@ const TryChatWidget = () => {
                   variant="outline"
                   className="text-left justify-start h-auto py-3 px-4 whitespace-normal"
                   onClick={() => handleExampleClick(question)}
-                  disabled={isTyping}
+                  disabled={isTyping || isLimitReached}
                 >
                   <Send className="h-4 w-4 mr-2 flex-shrink-0" />
                   <span className="text-sm">{question}</span>
@@ -223,6 +232,22 @@ const TryChatWidget = () => {
                 </div>
               </div>
             )}
+            {isLimitReached && (
+              <div className="flex justify-center animate-fade-in-up">
+                <Card className="bg-primary/5 border-primary/20 p-4 max-w-md">
+                  <div className="text-center space-y-3">
+                    <Sparkles className="h-8 w-8 text-primary mx-auto" />
+                    <p className="text-sm font-medium">{t('landing.tryChat.limitReached.title')}</p>
+                    <p className="text-xs text-muted-foreground">{t('landing.tryChat.limitReached.message')}</p>
+                    <Link to="/auth">
+                      <Button size="sm" className="mt-2">
+                        {t('landing.tryChat.limitReached.button')}
+                      </Button>
+                    </Link>
+                  </div>
+                </Card>
+              </div>
+            )}
           </>
         )}
         {error && (
@@ -239,13 +264,13 @@ const TryChatWidget = () => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder={t('landing.tryChat.placeholder')}
+          placeholder={isLimitReached ? t('landing.tryChat.limitReached.inputPlaceholder') : t('landing.tryChat.placeholder')}
           className="flex-1"
-          disabled={isTyping}
+          disabled={isTyping || isLimitReached}
         />
         <Button
           onClick={handleSend}
-          disabled={!input.trim() || isTyping}
+          disabled={!input.trim() || isTyping || isLimitReached}
           size="icon"
           className="flex-shrink-0"
         >
@@ -253,9 +278,11 @@ const TryChatWidget = () => {
         </Button>
       </div>
 
-      <p className="text-xs text-muted-foreground text-center pt-2">
-        {t('landing.tryChat.disclaimer')}
-      </p>
+      {!isLimitReached && (
+        <p className="text-xs text-muted-foreground text-center pt-2">
+          {t('landing.tryChat.disclaimer')} ({messageCount}/{MAX_DEMO_MESSAGES} {t('landing.tryChat.messagesUsed')})
+        </p>
+      )}
     </Card>
   );
 };
