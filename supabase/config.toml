@@ -41,3 +41,6 @@ verify_jwt = true
 
 [functions.demo-chat]
 verify_jwt = false
+
+[functions.analyze-resume-order]
+verify_jwt = true
