@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, FileText, Sparkles, TrendingUp, Menu, MessageSquare, Zap, Brain } from "lucide-react";
+import TryChatWidget from "@/components/TryChatWidget";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import {
@@ -49,6 +50,7 @@ const Index = () => {
   const aiFeature1 = useScrollAnimation({ threshold: 0.3 });
   const aiFeature2 = useScrollAnimation({ threshold: 0.3 });
   const aiFeature3 = useScrollAnimation({ threshold: 0.3 });
+  const tryChatSection = useScrollAnimation({ threshold: 0.3 });
   const ctaSection = useScrollAnimation({ threshold: 0.3 });
 
   const scrollToVideo = () => {
@@ -493,6 +495,18 @@ const Index = () => {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Try Chat Widget Section */}
+      <section 
+        ref={tryChatSection.ref}
+        className="relative container mx-auto px-4 sm:px-6 py-16 sm:py-24" 
+      >
+        <div className={`transition-all duration-1000 ${
+          tryChatSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        }`}>
+          <TryChatWidget />
         </div>
       </section>
 

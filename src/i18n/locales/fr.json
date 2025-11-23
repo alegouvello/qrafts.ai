@@ -77,6 +77,27 @@
         }
       }
     },
+    "tryChat": {
+      "title": "Essayez Maintenant",
+      "subtitle": "Demandez-moi tout sur votre recherche d'emploi",
+      "prompt": "Essayez de poser une question ou cliquez sur un exemple:",
+      "placeholder": "Tapez votre question...",
+      "typing": "Réflexion...",
+      "disclaimer": "Ceci est une démo. Inscrivez-vous pour débloquer l'assistant IA complet avec vos données réelles.",
+      "examples": {
+        "improve": "Comment puis-je améliorer mes réponses de candidature?",
+        "interview": "Que dois-je préparer pour mon prochain entretien?",
+        "track": "Comment puis-je mieux suivre mes candidatures?"
+      },
+      "responses": {
+        "improve": "Excellente question! Je peux vous aider à créer des réponses plus solides:\n\n1. Analyser la description du poste pour comprendre les exigences clés\n2. Suggérer des exemples spécifiques de votre expérience\n3. Structurer votre réponse en utilisant la méthode STAR\n4. Mettre en évidence les réalisations pertinentes\n\nInscrivez-vous pour obtenir des commentaires personnalisés sur vos candidatures réelles!",
+        "interview": "Je serais ravi de vous aider à vous préparer! Voici ce que je recommande:\n\n1. Rechercher les actualités et projets récents de l'entreprise\n2. Préparer 2-3 histoires pour les questions comportementales courantes\n3. Examiner les exigences du poste et les faire correspondre à vos compétences\n4. Préparer des questions réfléchies pour l'intervieweur\n\nAvec un compte Qrafts, je peux analyser le profil LinkedIn de votre intervieweur et vous donner des conseils personnalisés!",
+        "resume": "Je peux vous aider à optimiser votre CV:\n\n1. Mettre en évidence les compétences pertinentes pour chaque rôle\n2. Quantifier vos réalisations avec des métriques\n3. Utiliser des verbes d'action et des mots-clés de l'industrie\n4. Assurer un formatage compatible ATS\n\nInscrivez-vous pour obtenir une analyse de CV alimentée par IA adaptée aux offres d'emploi spécifiques!",
+        "jobFit": "Je peux analyser dans quelle mesure un poste correspond à votre profil:\n\n1. Comparer les exigences du poste avec vos compétences\n2. Identifier les lacunes et comment y remédier\n3. Suggérer des points de discussion pour votre candidature\n4. Calculer un score d'adéquation\n\nCréez un compte pour obtenir une analyse d'adéquation détaillée pour toutes vos candidatures!",
+        "organize": "Qrafts vous aide à rester organisé avec:\n\n1. Un tableau de bord centralisé pour toutes les candidatures\n2. Vue chronologique des entretiens et échéances\n3. Rappels automatiques pour les suivis\n4. Notes de recherche d'entreprise en un seul endroit\n\nInscrivez-vous gratuitement pour commencer à organiser votre recherche d'emploi aujourd'hui!",
+        "default": "Je suis là pour vous aider avec votre recherche d'emploi! Je peux vous assister avec:\n\n• Améliorer les réponses de candidature\n• Préparation d'entretien\n• Optimisation de CV\n• Analyse d'adéquation au poste\n• Suivi des candidatures\n\nInscrivez-vous pour obtenir une assistance IA personnalisée tout au long de votre recherche d'emploi!"
+      }
+    },
     "cta": {
       "title": "Prêt à Transformer Votre Recherche d'Emploi?",
       "description": "Rejoignez des milliers de professionnels qui ont décroché leur emploi de rêve avec Qrafts",
