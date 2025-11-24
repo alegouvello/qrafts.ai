@@ -92,6 +92,11 @@ const Index = () => {
           
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-3 lg:gap-4">
+            <Link to="/blog">
+              <Button variant="ghost" size="sm" className="rounded-full hover:bg-accent/10 min-h-[44px] md:min-h-[48px] px-6 text-base">
+                Blog
+              </Button>
+            </Link>
             <LanguageSwitcher />
             <Link to="/auth">
               <Button variant="outline" size="sm" className="rounded-full border-border/60 hover:border-primary/50 transition-all min-h-[44px] md:min-h-[48px] px-6 text-base">
@@ -122,6 +127,15 @@ const Index = () => {
                   <Sparkles className="h-5 w-5 mr-3 flex-shrink-0" />
                   <span className="flex-1">{t('landing.features.title')}</span>
                 </Button>
+                <Link to="/blog" onClick={() => setMobileMenuOpen(false)} className="w-full">
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start text-base rounded-full min-h-[48px]"
+                  >
+                    <FileText className="h-5 w-5 mr-3 flex-shrink-0" />
+                    Blog
+                  </Button>
+                </Link>
                 <Button 
                   variant="ghost" 
                   onClick={scrollToCTA}

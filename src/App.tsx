@@ -17,14 +17,16 @@ import ComparisonView from "./pages/ComparisonView";
 import CompanyProfile from "./pages/CompanyProfile";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 const ChatAssistantWrapper = () => {
   const location = useLocation();
-  // Don't show chat assistant on landing page
-  if (location.pathname === '/') return null;
+  // Don't show chat assistant on landing page or blog pages
+  if (location.pathname === '/' || location.pathname.startsWith('/blog')) return null;
   return <ChatAssistant />;
 };
 
@@ -46,6 +48,8 @@ const App = () => (
               <Route path="/comparison" element={<ComparisonView />} />
               <Route path="/company/:companyName" element={<CompanyProfile />} />
               <Route path="/application/:id" element={<ApplicationDetail />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="*" element={<NotFound />} />
