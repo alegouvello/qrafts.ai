@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/sheet";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { Footer } from "@/components/Footer";
+import { SocialProof } from "@/components/SocialProof";
 import heroWorkspace from "@/assets/hero-workspace.jpg";
 import heroProfessional from "@/assets/hero-realistic.jpg";
 import featureOrganize from "@/assets/feature-organize-realistic.jpg";
@@ -175,6 +176,9 @@ const Index = () => {
                 {t('landing.hero.demo')}
               </Button>
             </div>
+            
+            {/* Social Proof */}
+            <SocialProof />
           </div>
           <div className="relative order-first md:order-last animate-fade-in-right" style={{ animationDelay: '0.2s' }}>
             <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur-3xl opacity-50 animate-glow-pulse" />

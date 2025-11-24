@@ -40,6 +40,12 @@
     "logout": "Cerrar sesión"
   },
   "landing": {
+    "socialProof": {
+      "totalUsers": "Usuarios Activos",
+      "recentSignups": "Esta Semana",
+      "newUsers": "nuevos usuarios",
+      "liveNow": "En Vivo"
+    },
     "hero": {
       "title": "Rastrea tus solicitudes de empleo con insights impulsados por IA",
       "tagline": "Mantente Organizado. Consigue Empleo.",
