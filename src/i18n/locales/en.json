@@ -40,6 +40,12 @@
     "logout": "Logout"
   },
   "landing": {
+    "socialProof": {
+      "totalUsers": "Active Users",
+      "recentSignups": "This Week",
+      "newUsers": "new users",
+      "liveNow": "Live Now"
+    },
     "hero": {
       "title": "Track Your Job Applications with AI-Powered Insights",
       "tagline": "Stay Organized. Get Hired.",

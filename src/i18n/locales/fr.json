@@ -40,6 +40,12 @@
     "logout": "Déconnexion"
   },
   "landing": {
+    "socialProof": {
+      "totalUsers": "Utilisateurs Actifs",
+      "recentSignups": "Cette Semaine",
+      "newUsers": "nouveaux utilisateurs",
+      "liveNow": "En Direct"
+    },
     "hero": {
       "title": "Suivez vos candidatures avec des insights alimentés par l'IA",
       "tagline": "Restez Organisé. Décrochez l'Emploi.",
