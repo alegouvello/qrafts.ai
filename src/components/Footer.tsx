@@ -32,6 +32,12 @@ export const Footer = () => {
             <h3 className="text-lg font-semibold">{t('footer.quickLinks')}</h3>
             <nav className="flex flex-col gap-2 text-center">
               <Link 
+                to="/blog" 
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Blog
+              </Link>
+              <Link 
                 to="/privacy" 
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
