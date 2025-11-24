@@ -2094,6 +2094,13 @@ const ApplicationDetail = () => {
         onOpenChange={setShowAddTimelineDialog}
         onAdd={handleAddTimelineEvent}
       />
+
+      {/* Add Question Dialog */}
+      <AddQuestionDialog
+        open={showAddQuestionDialog}
+        onOpenChange={setShowAddQuestionDialog}
+        onAdd={handleAddManualQuestion}
+      />
       
       <Footer />
     </div>
