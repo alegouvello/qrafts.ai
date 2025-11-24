@@ -46,6 +46,29 @@
       "newUsers": "new users",
       "liveNow": "Live Now"
     },
+    "testimonials": {
+      "badge": "What Our Users Say",
+      "title": "Trusted by Job Seekers",
+      "subtitle": "Join thousands who have transformed their job search with Qrafts",
+      "averageRating": "Average Rating",
+      "happyUsers": "Happy Users",
+      "satisfaction": "Satisfaction Rate",
+      "user1": {
+        "name": "Sarah Johnson",
+        "role": "Software Engineer",
+        "content": "Qrafts completely changed how I organize my job applications. The AI insights helped me land interviews at top tech companies. I cannot imagine job hunting without it!"
+      },
+      "user2": {
+        "name": "Michael Rodriguez",
+        "role": "Product Manager",
+        "content": "The interview prep feature is incredible. Being able to track each company and interviewer made me feel so much more prepared. Landed my dream job in just 3 weeks!"
+      },
+      "user3": {
+        "name": "Alex Chen",
+        "role": "UX Designer",
+        "content": "Finally, a tool that understands the job search struggle. The automated reminders kept me on track, and the AI assistant answered all my questions. Five stars!"
+      }
+    },
     "hero": {
       "title": "Track Your Job Applications with AI-Powered Insights",
       "tagline": "Stay Organized. Get Hired.",
