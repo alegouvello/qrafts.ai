@@ -1,6 +1,6 @@
 import { Link, useParams, Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Tag, ArrowLeft } from "lucide-react";
+import { Calendar, Clock, Tag, ArrowLeft, Linkedin } from "lucide-react";
 import { getBlogPost, getRecentPosts } from "@/data/blogPosts";
 import { Footer } from "@/components/Footer";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -111,6 +111,23 @@ const BlogPost = () => {
             >
               {post.content}
             </ReactMarkdown>
+          </div>
+
+          {/* Share on LinkedIn */}
+          <div className="mt-8 flex items-center justify-center gap-3">
+            <span className="text-sm text-muted-foreground">Share this article:</span>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 hover:bg-[#0A66C2] hover:text-white hover:border-[#0A66C2] transition-colors"
+              onClick={() => {
+                const url = encodeURIComponent(window.location.href);
+                window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank', 'width=600,height=600');
+              }}
+            >
+              <Linkedin className="h-4 w-4" />
+              Share on LinkedIn
+            </Button>
           </div>
 
           {/* CTA */}
