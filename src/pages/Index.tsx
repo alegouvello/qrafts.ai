@@ -15,6 +15,7 @@ import {
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { Footer } from "@/components/Footer";
 import { SocialProof } from "@/components/SocialProof";
+import { SEO } from "@/components/SEO";
 import heroWorkspace from "@/assets/hero-workspace.jpg";
 import heroProfessional from "@/assets/hero-realistic.jpg";
 import featureOrganize from "@/assets/feature-organize-realistic.jpg";
@@ -80,6 +81,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title="QRAFTS - Smart Job Application Tracking & AI Interview Prep"
+        description="Track job applications, organize answers, and land your dream job with QRAFTS - the intelligent AI-powered application management platform. Get AI interview prep, role fit analysis, and automated follow-ups."
+        keywords="job application tracker, interview preparation, AI career coach, job search organizer, application management, resume analyzer, interview practice, career tools"
+        canonicalUrl={window.location.origin}
+      />
       {/* Decorative background gradient */}
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-background to-background pointer-events-none" />
       

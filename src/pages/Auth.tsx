@@ -14,6 +14,7 @@ import qraftLogo from "@/assets/qrafts-logo.png";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { SEO } from "@/components/SEO";
 
 const authSchema = z.object({
   email: z.string().trim().email("Invalid email address").max(255, "Email too long"),
@@ -373,6 +374,12 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
+      <SEO 
+        title="Sign In to QRAFTS"
+        description="Sign in to your QRAFTS account to access your job application tracker, AI interview prep tools, and career management dashboard. New to QRAFTS? Create your free account today."
+        keywords="sign in, login, job tracker login, QRAFTS account, create account, register"
+        noindex={true}
+      />
       {/* Email Verification Pending Screen */}
       {verificationPending && !resetPasswordMode && (
         <div className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in duration-300 p-4">

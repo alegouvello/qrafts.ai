@@ -2,12 +2,19 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { SEO } from "@/components/SEO";
 
 const Terms = () => {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title="Terms of Service"
+        description="Review QRAFTS' Terms of Service to understand your rights and responsibilities when using our job application tracking platform."
+        keywords="terms of service, user agreement, terms and conditions, QRAFTS terms"
+        canonicalUrl={`${window.location.origin}/terms`}
+      />
       {/* Decorative background gradient */}
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-accent/5 via-background to-background pointer-events-none" />
       

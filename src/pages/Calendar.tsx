@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format, isSameDay, startOfWeek, endOfWeek, addDays, isSameWeek, startOfDay, endOfDay } from "date-fns";
+import { SEO } from "@/components/SEO";
 
 interface TimelineEvent {
   id: string;
@@ -209,6 +210,12 @@ const CalendarPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title="Interview Calendar & Reminders"
+        description="View and manage all your interview schedules, application deadlines, and follow-up reminders in one place. Never miss an important job application event."
+        keywords="interview calendar, event scheduler, interview reminders, application deadlines, job calendar"
+        noindex={true}
+      />
       {/* Header */}
       <header className="border-b border-border bg-card sticky top-0 z-50 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-3 sm:py-4">

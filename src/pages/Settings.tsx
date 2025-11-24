@@ -25,6 +25,7 @@ import { z } from "zod";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { SEO } from "@/components/SEO";
 
 const passwordSchema = z.object({
   newPassword: z.string().min(6, "Password must be at least 6 characters"),
@@ -303,6 +304,12 @@ const Settings = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      <SEO 
+        title="Account Settings"
+        description="Manage your QRAFTS account settings, subscription, password, language preferences, and theme. Upgrade to Qraft Pro for unlimited features."
+        keywords="account settings, subscription management, password change, profile settings"
+        noindex={true}
+      />
       {/* Decorative Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl animate-float"></div>

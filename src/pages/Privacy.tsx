@@ -2,12 +2,19 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { SEO } from "@/components/SEO";
 
 const Privacy = () => {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title="Privacy Policy"
+        description="Read QRAFTS' Privacy Policy to understand how we collect, use, and protect your personal information and job application data."
+        keywords="privacy policy, data protection, user privacy, QRAFTS privacy"
+        canonicalUrl={`${window.location.origin}/privacy`}
+      />
       {/* Decorative background gradient */}
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-background to-background pointer-events-none" />
       

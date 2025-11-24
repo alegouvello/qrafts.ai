@@ -20,6 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { Footer } from "@/components/Footer";
+import { SEO } from "@/components/SEO";
 import {
   ArrowLeft,
   Calendar,
@@ -1269,6 +1270,12 @@ const ApplicationDetail = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title={`${application?.position || 'Application'} at ${application?.company || 'Company'}`}
+        description={`Manage your job application for ${application?.position} position at ${application?.company}. Track answers, prepare for interviews, and manage your application timeline.`}
+        keywords="job application details, application tracker, interview questions, job answers"
+        noindex={true}
+      />
       {/* Header */}
       <header className="border-b bg-card/30 backdrop-blur-md sticky top-0 z-50">
         <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
