@@ -57,48 +57,57 @@ const Blog = () => {
       <section className="container mx-auto px-4 sm:px-6 pb-24">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {sortedPosts.map((post) => (
-            <article
-              key={post.slug}
-              className="group bg-card border border-border/50 rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300"
-            >
-              {/* Category Badge */}
-              <div className="p-6 pb-4">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-                  <Tag className="h-4 w-4 text-primary" />
-                  <span className="text-primary font-medium">{post.category}</span>
-                </div>
-
-                {/* Title */}
-                <h2 className="text-2xl font-bold mb-3 group-hover:text-primary transition-colors line-clamp-2">
-                  {post.title}
-                </h2>
-
-                {/* Excerpt */}
-                <p className="text-muted-foreground leading-relaxed mb-4 line-clamp-3">
-                  {post.excerpt}
-                </p>
-
-                {/* Meta */}
-                <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
-                    <span>{new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+            <Link key={post.slug} to={`/blog/${post.slug}`}>
+              <article className="group bg-card border border-border/50 rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 h-full">
+                {/* Hero Image */}
+                {post.image && (
+                  <div className="relative h-48 overflow-hidden">
+                    <img 
+                      src={post.image} 
+                      alt={post.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    <span>{post.readTime}</span>
+                )}
+
+                <div className="p-6">
+                  {/* Category Badge */}
+                  <div className="flex items-center gap-2 text-sm mb-3">
+                    <Tag className="h-4 w-4 text-primary" />
+                    <span className="text-primary font-medium">{post.category}</span>
+                  </div>
+
+                  {/* Title */}
+                  <h2 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors line-clamp-2">
+                    {post.title}
+                  </h2>
+
+                  {/* Excerpt */}
+                  <p className="text-muted-foreground leading-relaxed mb-4 line-clamp-3 text-sm">
+                    {post.excerpt}
+                  </p>
+
+                  {/* Meta */}
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-3.5 w-3.5" />
+                      <span>{new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-3.5 w-3.5" />
+                      <span>{post.readTime}</span>
+                    </div>
+                  </div>
+
+                  {/* Read More Link */}
+                  <div className="flex items-center text-primary font-medium text-sm group-hover:gap-2 gap-1 transition-all">
+                    Read Article
+                    <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
-
-                {/* Read More Link */}
-                <Link to={`/blog/${post.slug}`}>
-                  <Button variant="ghost" className="group/btn p-0 h-auto hover:bg-transparent">
-                    Read More
-                    <ArrowRight className="ml-2 h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
-              </div>
-            </article>
+              </article>
+            </Link>
           ))}
         </div>
       </section>
