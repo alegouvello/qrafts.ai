@@ -1783,13 +1783,19 @@ const ApplicationDetail = () => {
 
                 const isFileUpload = (() => {
                   const lowerQuestion = question.question_text.toLowerCase();
-                  return (
+                  // Only treat as file upload if it explicitly asks to upload/attach
+                  const hasUploadKeyword = 
+                    lowerQuestion.includes('upload') ||
+                    lowerQuestion.includes('attach') ||
+                    lowerQuestion.includes('submit a');
+                  
+                  const hasFileKeyword = 
                     lowerQuestion.includes('resume') ||
                     lowerQuestion.includes('cv') ||
-                    lowerQuestion.includes('cover letter') ||
-                    lowerQuestion.includes('upload') ||
-                    lowerQuestion.includes('attach')
-                  );
+                    lowerQuestion.includes('cover letter');
+                  
+                  // Must have both upload action and file type to be file upload
+                  return hasUploadKeyword && hasFileKeyword;
                 })();
 
                 const isShortAnswer = (() => {
