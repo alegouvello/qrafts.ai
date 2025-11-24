@@ -79,12 +79,23 @@ const BlogPost = () => {
           </h1>
 
           {/* Excerpt */}
-          <p className="text-xl text-muted-foreground mb-8 pb-8 border-b border-border">
+          <p className="text-xl text-muted-foreground mb-8">
             {post.excerpt}
           </p>
 
+          {/* Hero Image */}
+          {post.image && (
+            <div className="mb-8 rounded-2xl overflow-hidden">
+              <img 
+                src={post.image} 
+                alt={post.title}
+                className="w-full h-auto object-cover"
+              />
+            </div>
+          )}
+
           {/* Content */}
-          <div className="prose prose-lg dark:prose-invert max-w-none">
+          <div className="prose prose-lg dark:prose-invert max-w-none pb-8 border-b border-border">
             <ReactMarkdown
               components={{
                 h1: ({ children }) => <h1 className="text-3xl font-bold mt-8 mb-4">{children}</h1>,
