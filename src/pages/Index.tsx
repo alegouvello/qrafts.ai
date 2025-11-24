@@ -15,7 +15,6 @@ import {
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { Footer } from "@/components/Footer";
 import { SocialProof } from "@/components/SocialProof";
-import { Testimonials } from "@/components/Testimonials";
 import heroWorkspace from "@/assets/hero-workspace.jpg";
 import heroProfessional from "@/assets/hero-realistic.jpg";
 import featureOrganize from "@/assets/feature-organize-realistic.jpg";
@@ -502,9 +501,6 @@ const Index = () => {
           </div>
         </div>
       </section>
-
-      {/* Testimonials Section */}
-      <Testimonials />
 
       {/* Try Chat Widget Section */}
       <section
