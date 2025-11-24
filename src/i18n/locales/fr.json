@@ -46,6 +46,29 @@
       "newUsers": "nouveaux utilisateurs",
       "liveNow": "En Direct"
     },
+    "testimonials": {
+      "badge": "Ce Que Disent Nos Utilisateurs",
+      "title": "Approuvé par les Chercheurs d'Emploi",
+      "subtitle": "Rejoignez des milliers de personnes qui ont transformé leur recherche d'emploi avec Qrafts",
+      "averageRating": "Note Moyenne",
+      "happyUsers": "Utilisateurs Satisfaits",
+      "satisfaction": "Taux de Satisfaction",
+      "user1": {
+        "name": "Sarah Johnson",
+        "role": "Ingénieure Logiciel",
+        "content": "Qrafts a complètement changé ma façon d'organiser mes candidatures. Les insights IA m'ont aidée à décrocher des entretiens dans les meilleures entreprises tech. Je ne peux plus imaginer chercher un emploi sans!"
+      },
+      "user2": {
+        "name": "Michael Rodriguez",
+        "role": "Chef de Produit",
+        "content": "La fonction de préparation aux entretiens est incroyable. Pouvoir suivre chaque entreprise et intervieweur m'a rendu beaucoup plus préparé. J'ai décroché mon emploi de rêve en seulement 3 semaines!"
+      },
+      "user3": {
+        "name": "Alex Chen",
+        "role": "Designer UX",
+        "content": "Enfin un outil qui comprend la difficulté de la recherche d'emploi. Les rappels automatiques m'ont gardé sur la bonne voie, et l'assistant IA a répondu à toutes mes questions. Cinq étoiles!"
+      }
+    },
     "hero": {
       "title": "Suivez vos candidatures avec des insights alimentés par l'IA",
       "tagline": "Restez Organisé. Décrochez l'Emploi.",

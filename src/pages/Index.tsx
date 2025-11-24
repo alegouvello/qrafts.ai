@@ -15,6 +15,7 @@ import {
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { Footer } from "@/components/Footer";
 import { SocialProof } from "@/components/SocialProof";
+import { Testimonials } from "@/components/Testimonials";
 import heroWorkspace from "@/assets/hero-workspace.jpg";
 import heroProfessional from "@/assets/hero-realistic.jpg";
 import featureOrganize from "@/assets/feature-organize-realistic.jpg";
@@ -502,8 +503,11 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Testimonials Section */}
+      <Testimonials />
+
       {/* Try Chat Widget Section */}
-      <section 
+      <section
         ref={tryChatSection.ref}
         className="relative container mx-auto px-4 sm:px-6 py-16 sm:py-24" 
       >

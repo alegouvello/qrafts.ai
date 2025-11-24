@@ -46,6 +46,29 @@
       "newUsers": "nuevos usuarios",
       "liveNow": "En Vivo"
     },
+    "testimonials": {
+      "badge": "Lo Que Dicen Nuestros Usuarios",
+      "title": "Confiado por Buscadores de Empleo",
+      "subtitle": "Únete a miles que han transformado su búsqueda de empleo con Qrafts",
+      "averageRating": "Calificación Promedio",
+      "happyUsers": "Usuarios Felices",
+      "satisfaction": "Tasa de Satisfacción",
+      "user1": {
+        "name": "Sarah Johnson",
+        "role": "Ingeniera de Software",
+        "content": "Qrafts cambió completamente cómo organizo mis solicitudes de empleo. Los insights de IA me ayudaron a conseguir entrevistas en las mejores empresas tech. ¡No puedo imaginar buscar trabajo sin esto!"
+      },
+      "user2": {
+        "name": "Michael Rodriguez",
+        "role": "Gerente de Producto",
+        "content": "La función de preparación de entrevistas es increíble. Poder rastrear cada empresa y entrevistador me hizo sentir mucho más preparado. ¡Conseguí el trabajo de mis sueños en solo 3 semanas!"
+      },
+      "user3": {
+        "name": "Alex Chen",
+        "role": "Diseñador UX",
+        "content": "Por fin, una herramienta que entiende la lucha de buscar empleo. Los recordatorios automáticos me mantuvieron en el camino correcto, y el asistente IA respondió todas mis preguntas. ¡Cinco estrellas!"
+      }
+    },
     "hero": {
       "title": "Rastrea tus solicitudes de empleo con insights impulsados por IA",
       "tagline": "Mantente Organizado. Consigue Empleo.",
