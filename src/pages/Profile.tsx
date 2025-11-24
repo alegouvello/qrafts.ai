@@ -28,6 +28,7 @@ import qraftLogo from "@/assets/qrafts-logo.png";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { SEO } from "@/components/SEO";
 
 interface ProfileData {
   full_name: string | null;
@@ -1060,6 +1061,12 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
+      <SEO 
+        title="Your Profile"
+        description="Manage your professional profile, resume, skills, and experience. Upload your resume, enhance it with AI, and export it as a professional PDF document."
+        keywords="professional profile, resume manager, CV editor, profile enhancement, AI resume"
+        noindex={true}
+      />
       {/* Header with gradient background */}
       <div className="relative bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 border-b">
         <div className="absolute inset-0 bg-grid-white/5 [mask-image:linear-gradient(0deg,transparent,black)]" />

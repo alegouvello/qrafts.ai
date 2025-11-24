@@ -15,6 +15,7 @@ import { OnboardingDialog } from "@/components/OnboardingDialog";
 import { DashboardHeader } from "@/components/Dashboard/DashboardHeader";
 import { DashboardStats } from "@/components/Dashboard/DashboardStats";
 import { ApplicationsList } from "@/components/Dashboard/ApplicationsList";
+import { SEO } from "@/components/SEO";
 
 interface Application {
   id: string;
@@ -357,6 +358,12 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
+      <SEO 
+        title="Your Job Applications Dashboard"
+        description="Manage and track all your job applications in one place. View application status, interview schedules, and get AI-powered insights to improve your job search success rate."
+        keywords="job dashboard, application tracker, interview tracking, job search management"
+        noindex={true}
+      />
       {/* Subtle background pattern */}
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/3 via-background to-background pointer-events-none" />
       

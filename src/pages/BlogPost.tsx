@@ -4,6 +4,7 @@ import { Calendar, Clock, Tag, ArrowLeft } from "lucide-react";
 import { getBlogPost, getRecentPosts } from "@/data/blogPosts";
 import { Footer } from "@/components/Footer";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { SEO } from "@/components/SEO";
 import ReactMarkdown from "react-markdown";
 import qraftLogo from "@/assets/qrafts-logo.png";
 
@@ -18,6 +19,13 @@ const BlogPost = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title={post.title}
+        description={post.excerpt}
+        keywords={`${post.category}, job search, career advice, ${post.title.toLowerCase()}`}
+        canonicalUrl={`${window.location.origin}/blog/${post.slug}`}
+        ogType="article"
+      />
       {/* Header */}
       <header className="border-b border-border/40 bg-background/80 backdrop-blur-xl sticky top-0 z-50">
         <nav className="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">

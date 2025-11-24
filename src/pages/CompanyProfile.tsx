@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Footer } from "@/components/Footer";
+import { SEO } from "@/components/SEO";
 import {
   ArrowLeft,
   Building2,
@@ -310,6 +311,12 @@ const CompanyProfile = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title={`${decodedCompany} Company Profile & Insights`}
+        description={`View detailed insights about ${decodedCompany} including application success rates, average response times, and community-sourced statistics.`}
+        keywords={`${decodedCompany} jobs, company insights, application statistics, company profile`}
+        noindex={true}
+      />
       {/* Header */}
       <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">

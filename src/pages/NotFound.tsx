@@ -1,6 +1,7 @@
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { SEO } from "@/components/SEO";
 import qraftLogo from "@/assets/qrafts-logo.png";
 
 const NotFound = () => {
@@ -13,6 +14,11 @@ const NotFound = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
+      <SEO 
+        title="Page Not Found - 404"
+        description="The page you're looking for doesn't exist. Return to QRAFTS homepage to continue tracking your job applications."
+        noindex={true}
+      />
       <div className="text-center space-y-6">
         <img src={qraftLogo} alt="Qrafts" className="h-12 mx-auto opacity-60 dark:invert" />
         <div>

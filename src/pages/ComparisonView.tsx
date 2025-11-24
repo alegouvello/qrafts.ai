@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Minus, ExternalLink, Sparkles, ChevronDown, ChevronUp, Settings, Crown } from "lucide-react";
 import { Footer } from "@/components/Footer";
+import { SEO } from "@/components/SEO";
 import qraftLogo from "@/assets/qrafts-logo.png";
 import { useTranslation } from "react-i18next";
 
@@ -341,6 +342,12 @@ const ComparisonView = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+      <SEO 
+        title="Compare Job Applications by AI Fit Score"
+        description="Compare all your job applications side-by-side with AI-powered fit scores. See which opportunities match your skills and experience best."
+        keywords="job comparison, fit score, AI analysis, application ranking, job match"
+        noindex={true}
+      />
       <div className="container mx-auto px-4 py-6 sm:py-8 max-w-6xl">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
