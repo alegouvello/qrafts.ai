@@ -5,6 +5,7 @@ import { getBlogPost, getRecentPosts } from "@/data/blogPosts";
 import { Footer } from "@/components/Footer";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { SEO } from "@/components/SEO";
+import { StructuredData } from "@/components/StructuredData";
 import ReactMarkdown from "react-markdown";
 import qraftLogo from "@/assets/qrafts-logo.png";
 
@@ -26,11 +27,20 @@ const BlogPost = () => {
         canonicalUrl={`${window.location.origin}/blog/${post.slug}`}
         ogType="article"
       />
+      <StructuredData 
+        type="article"
+        title={post.title}
+        description={post.excerpt}
+        author={post.author}
+        datePublished={post.date}
+        image={post.image}
+        url={`${window.location.origin}/blog/${post.slug}`}
+      />
       {/* Header */}
       <header className="border-b border-border/40 bg-background/80 backdrop-blur-xl sticky top-0 z-50">
         <nav className="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 sm:gap-3">
-            <img src={qraftLogo} alt="Qrafts logo" className="h-12 sm:h-14 md:h-16 dark:invert" />
+            <img src={qraftLogo} alt="QRAFTS - AI-powered job application tracking and career management platform logo" className="h-12 sm:h-14 md:h-16 dark:invert" />
           </Link>
           
           <div className="flex items-center gap-3 lg:gap-4">
@@ -88,7 +98,7 @@ const BlogPost = () => {
             <div className="mb-8 rounded-2xl overflow-hidden">
               <img 
                 src={post.image} 
-                alt={post.title}
+                alt={`${post.title} - Comprehensive guide on ${post.category.toLowerCase()} for job seekers and career professionals`}
                 className="w-full h-auto object-cover"
               />
             </div>

@@ -5,6 +5,7 @@ import { blogPosts } from "@/data/blogPosts";
 import { Footer } from "@/components/Footer";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { SEO } from "@/components/SEO";
+import { StructuredData } from "@/components/StructuredData";
 import qraftLogo from "@/assets/qrafts-logo.png";
 
 const Blog = () => {
@@ -20,11 +21,18 @@ const Blog = () => {
         keywords="job search tips, career advice, interview tips, resume writing, job application advice, career development"
         canonicalUrl={`${window.location.origin}/blog`}
       />
+      <StructuredData type="organization" />
+      <StructuredData 
+        type="website" 
+        name="QRAFTS Blog"
+        description="Job search tips, career advice, and expert insights for landing your dream job"
+        url={`${window.location.origin}/blog`}
+      />
       {/* Header */}
       <header className="border-b border-border/40 bg-background/80 backdrop-blur-xl sticky top-0 z-50">
         <nav className="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 sm:gap-3">
-            <img src={qraftLogo} alt="Qrafts logo" className="h-12 sm:h-14 md:h-16 dark:invert" />
+            <img src={qraftLogo} alt="QRAFTS - AI-powered job application tracking and career management platform logo" className="h-12 sm:h-14 md:h-16 dark:invert" />
           </Link>
           
           <div className="flex items-center gap-3 lg:gap-4">
@@ -64,7 +72,7 @@ const Blog = () => {
                   <div className="relative h-48 overflow-hidden">
                     <img 
                       src={post.image} 
-                      alt={post.title}
+                      alt={`${post.title} - Visual guide showing ${post.category.toLowerCase()} strategies for job seekers`}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />

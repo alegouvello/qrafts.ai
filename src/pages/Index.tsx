@@ -16,6 +16,7 @@ import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { Footer } from "@/components/Footer";
 import { SocialProof } from "@/components/SocialProof";
 import { SEO } from "@/components/SEO";
+import { StructuredData } from "@/components/StructuredData";
 import heroWorkspace from "@/assets/hero-workspace.jpg";
 import heroProfessional from "@/assets/hero-realistic.jpg";
 import featureOrganize from "@/assets/feature-organize-realistic.jpg";
@@ -87,6 +88,13 @@ const Index = () => {
         keywords="job application tracker, interview preparation, AI career coach, job search organizer, application management, resume analyzer, interview practice, career tools"
         canonicalUrl={window.location.origin}
       />
+      <StructuredData type="organization" />
+      <StructuredData 
+        type="website" 
+        name="QRAFTS"
+        description="Smart job application tracking and AI-powered interview preparation platform"
+        url={window.location.origin}
+      />
       {/* Decorative background gradient */}
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-background to-background pointer-events-none" />
       
@@ -94,7 +102,7 @@ const Index = () => {
       <header className="relative border-b border-border/40 bg-background/80 backdrop-blur-xl sticky top-0 z-50">
         <nav className="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between" aria-label="Main navigation">
           <div className="flex items-center gap-2 sm:gap-3">
-            <img src={qraftLogo} alt="Qrafts logo" className="h-12 sm:h-14 md:h-16 dark:invert" />
+            <img src={qraftLogo} alt="QRAFTS - AI-powered job application tracking and career management platform logo" className="h-12 sm:h-14 md:h-16 dark:invert" />
           </div>
           
           {/* Desktop Navigation */}
@@ -122,7 +130,7 @@ const Index = () => {
             <SheetContent side="right" className="w-[280px] sm:w-[350px] md:w-[400px]">
               <SheetHeader className="py-3 sm:py-4">
                 <SheetTitle className="flex items-center gap-2">
-                  <img src={qraftLogo} alt="Qrafts logo" className="h-8 dark:invert" />
+                  <img src={qraftLogo} alt="QRAFTS - AI-powered job application tracking and career management platform logo" className="h-8 dark:invert" />
                 </SheetTitle>
               </SheetHeader>
               <div className="flex flex-col gap-4 mt-8">
@@ -206,7 +214,7 @@ const Index = () => {
             <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-border/50 hover:scale-105 transition-transform duration-500">
               <img 
                 src={heroProfessional} 
-                alt="Professional organizing job applications with confidence" 
+                alt="Modern professional workspace showing QRAFTS job application tracker dashboard with organized applications, interview schedules, and career progress tracking" 
                 className="relative w-full"
                 loading="eager"
               />
@@ -292,7 +300,7 @@ const Index = () => {
               <div className="relative h-40 sm:h-48 rounded-2xl overflow-hidden shadow-lg">
                 <img 
                   src={featureOrganize} 
-                  alt="Organization dashboard" 
+                  alt="QRAFTS application management dashboard displaying organized job applications with status tracking, company names, positions, and application dates for efficient job search management" 
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   loading="lazy"
                 />
@@ -323,7 +331,7 @@ const Index = () => {
               <div className="relative h-40 sm:h-48 rounded-2xl overflow-hidden shadow-lg">
                 <img 
                   src={featureAnalyze} 
-                  alt="AI-powered analysis dashboard" 
+                  alt="AI-powered role fit analysis showing compatibility scores, skill matching, experience alignment, and personalized career insights for job seekers using QRAFTS platform" 
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   loading="lazy"
                 />
@@ -354,7 +362,7 @@ const Index = () => {
               <div className="relative h-40 sm:h-48 rounded-2xl overflow-hidden shadow-lg">
                 <img 
                   src={featureAutomate} 
-                  alt="Automated follow-up notifications" 
+                  alt="Automated interview follow-up system with smart notification reminders, email templates, and scheduling tools for job application tracking and follow-through" 
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   loading="lazy"
                 />
