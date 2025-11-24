@@ -16,7 +16,7 @@ export const blogPosts: BlogPost[] = [
     title: "Why Job Boards Aren't Enough: The Case for a Personal Application Tracker",
     excerpt: "Job boards have made job postings ubiquitous, but success rates remain dismally low. Learn why a personal application tracker is essential for modern job seekers.",
     author: "Qrafts Team",
-    date: "2024-11-24",
+    date: "2025-11-24",
     category: "Job Search Strategy",
     readTime: "8 min read",
     image: "/src/assets/blog-job-boards-hero.jpg",
