@@ -15,6 +15,7 @@ import { RoleFitAnalysis, RoleFitAnalysisRef } from "@/components/RoleFitAnalysi
 import { StatusHistoryTimeline } from "@/components/StatusHistoryTimeline";
 import { AddInterviewerDialog } from "@/components/AddInterviewerDialog";
 import { InterviewPrepCard } from "@/components/InterviewPrepCard";
+import { AddQuestionDialog } from "@/components/AddQuestionDialog";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -142,6 +143,7 @@ const ApplicationDetail = () => {
   const [showSaveTemplateDialog, setShowSaveTemplateDialog] = useState(false);
   const [showBrowseTemplatesDialog, setShowBrowseTemplatesDialog] = useState(false);
   const [showAddTimelineDialog, setShowAddTimelineDialog] = useState(false);
+  const [showAddQuestionDialog, setShowAddQuestionDialog] = useState(false);
   const [currentQuestionForTemplate, setCurrentQuestionForTemplate] = useState<string | null>(null);
   const [currentImprovement, setCurrentImprovement] = useState<{
     questionId: string;
@@ -1069,6 +1071,47 @@ const ApplicationDetail = () => {
     });
   };
 
+  const handleAddManualQuestion = async (questionText: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      // Get the highest question order
+      const maxOrder = questions.length > 0 
+        ? Math.max(...questions.map(q => q.question_order))
+        : -1;
+
+      // Insert the new question
+      const { data: newQuestion, error } = await supabase
+        .from("questions")
+        .insert({
+          application_id: id,
+          question_text: questionText,
+          question_order: maxOrder + 1,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Update local state
+      setQuestions([...questions, newQuestion]);
+      
+      toast({
+        title: "Question Added",
+        description: "Your question has been added successfully.",
+      });
+    } catch (error) {
+      console.error("Error adding question:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add question. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
   const handleReextractQuestions = async () => {
     if (!application) return;
 
@@ -1585,24 +1628,34 @@ const ApplicationDetail = () => {
           <TabsContent value="questions" className="space-y-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold">Application Questions</h2>
-              <Button
-                onClick={handleReextractQuestions}
-                disabled={reextracting}
-                variant="outline"
-                size="sm"
-              >
-                {reextracting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Re-extracting...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Re-extract Questions
-                  </>
-                )}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setShowAddQuestionDialog(true)}
+                  variant="default"
+                  size="sm"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Question
+                </Button>
+                <Button
+                  onClick={handleReextractQuestions}
+                  disabled={reextracting}
+                  variant="outline"
+                  size="sm"
+                >
+                  {reextracting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Re-extracting...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Re-extract Questions
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
 
           {questions.length === 0 ? (
