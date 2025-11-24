@@ -1,3 +1,5 @@
+import blogJobBoardsHero from "@/assets/blog-job-boards-hero.jpg";
+
 export interface BlogPost {
   slug: string;
   title: string;
@@ -19,7 +21,7 @@ export const blogPosts: BlogPost[] = [
     date: "2025-11-24",
     category: "Job Search Strategy",
     readTime: "8 min read",
-    image: "/src/assets/blog-job-boards-hero.jpg",
+    image: blogJobBoardsHero,
     content: `
 # Why Job Boards Aren't Enough: The Case for a Personal Application Tracker
 
