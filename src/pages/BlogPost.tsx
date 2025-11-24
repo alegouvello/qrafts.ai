@@ -39,7 +39,7 @@ const BlogPost = () => {
       {/* Header */}
       <header className="border-b border-border/40 bg-background/80 backdrop-blur-xl sticky top-0 z-50">
         <nav className="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 sm:gap-3">
+          <Link to="/" className="flex items-center gap-2 sm:gap-3" onClick={() => window.scrollTo(0, 0)}>
             <img src={qraftLogo} alt="QRAFTS - AI-powered job application tracking and career management platform logo" className="h-12 sm:h-14 md:h-16 dark:invert" />
           </Link>
           
