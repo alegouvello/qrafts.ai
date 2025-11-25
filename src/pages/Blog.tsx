@@ -28,6 +28,13 @@ const Blog = () => {
         description="Job search tips, career advice, and expert insights for landing your dream job"
         url={`${window.location.origin}/blog`}
       />
+      <StructuredData 
+        type="breadcrumb"
+        items={[
+          { name: 'Home', url: window.location.origin },
+          { name: 'Blog', url: `${window.location.origin}/blog` }
+        ]}
+      />
       {/* Header */}
       <header className="border-b border-border/40 bg-background/80 backdrop-blur-xl sticky top-0 z-50">
         <nav className="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">

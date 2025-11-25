@@ -23,18 +23,33 @@ const BlogPost = () => {
       <SEO 
         title={post.title}
         description={post.excerpt}
-        keywords={`${post.category}, job search, career advice, ${post.title.toLowerCase()}`}
+        keywords={`${post.category}, job search, career advice, interview tips, resume writing, ${post.title.toLowerCase()}`}
         canonicalUrl={`${window.location.origin}/blog/${post.slug}`}
         ogType="article"
+        ogImage={post.image ? `${window.location.origin}${post.image}` : undefined}
+        publishedTime={new Date(post.date).toISOString()}
+        modifiedTime={new Date(post.date).toISOString()}
+        author={post.author}
+        section={post.category}
+        tags={[post.category, 'job search', 'career advice']}
       />
       <StructuredData 
         type="article"
         title={post.title}
         description={post.excerpt}
         author={post.author}
-        datePublished={post.date}
-        image={post.image}
+        datePublished={new Date(post.date).toISOString()}
+        dateModified={new Date(post.date).toISOString()}
+        image={post.image ? `${window.location.origin}${post.image}` : undefined}
         url={`${window.location.origin}/blog/${post.slug}`}
+      />
+      <StructuredData 
+        type="breadcrumb"
+        items={[
+          { name: 'Home', url: window.location.origin },
+          { name: 'Blog', url: `${window.location.origin}/blog` },
+          { name: post.title, url: `${window.location.origin}/blog/${post.slug}` }
+        ]}
       />
       {/* Header */}
       <header className="border-b border-border/40 bg-background/80 backdrop-blur-xl sticky top-0 z-50">
