@@ -14,6 +14,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { OnboardingDialog } from "@/components/OnboardingDialog";
 import { DashboardHeader } from "@/components/Dashboard/DashboardHeader";
 import { DashboardStats } from "@/components/Dashboard/DashboardStats";
+import { WeeklyChart } from "@/components/Dashboard/WeeklyChart";
 import { ApplicationsList } from "@/components/Dashboard/ApplicationsList";
 import { SEO } from "@/components/SEO";
 
@@ -482,6 +483,13 @@ const Dashboard = () => {
 
         {/* Stats */}
         <DashboardStats stats={stats} />
+
+        {/* Weekly Chart */}
+        {!loading && applications.length > 0 && (
+          <div className="mb-6 sm:mb-8">
+            <WeeklyChart applications={applications} />
+          </div>
+        )}
 
         {/* Search and Filter */}
         {!loading && applications.length > 0 && (
