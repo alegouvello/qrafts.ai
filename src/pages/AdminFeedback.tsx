@@ -31,10 +31,16 @@ import {
   CheckCircle2,
   Clock,
   XCircle,
-  FileText
+  FileText,
+  MessageSquare,
+  TrendingUp,
+  AlertCircle,
+  Sparkles
 } from "lucide-react";
 import { SEO } from "@/components/SEO";
 import { format } from "date-fns";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import feedbackHero from "@/assets/feedback-hero.jpg";
 
 interface Feedback {
   id: string;
@@ -63,6 +69,9 @@ const AdminFeedback = () => {
   const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
   const [internalNotes, setInternalNotes] = useState("");
   const [updatingStatus, setUpdatingStatus] = useState(false);
+
+  const heroSection = useScrollAnimation({ threshold: 0.2 });
+  const statsSection = useScrollAnimation({ threshold: 0.3 });
 
   const handleBack = () => {
     if (window.history.length > 1) {
@@ -227,14 +236,21 @@ const AdminFeedback = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "resolved":
-        return "bg-green-500/10 text-green-500 border-green-500/20";
+        return "bg-success/10 text-success border-success/20";
       case "in_progress":
-        return "bg-blue-500/10 text-blue-500 border-blue-500/20";
+        return "bg-primary/10 text-primary border-primary/20";
       case "closed":
-        return "bg-gray-500/10 text-gray-500 border-gray-500/20";
+        return "bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20";
       default:
-        return "bg-yellow-500/10 text-yellow-500 border-yellow-500/20";
+        return "bg-warning/10 text-warning border-warning/20";
     }
+  };
+
+  const stats = {
+    total: feedback.length,
+    pending: feedback.filter(f => f.status === "pending").length,
+    inProgress: feedback.filter(f => f.status === "in_progress").length,
+    resolved: feedback.filter(f => f.status === "resolved").length,
   };
 
   if (adminLoading || loading) {
@@ -260,50 +276,145 @@ const AdminFeedback = () => {
         canonicalUrl={`${window.location.origin}/admin/feedback`}
       />
 
+      {/* Decorative background gradient */}
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-background to-background pointer-events-none" />
+
       {/* Header */}
-      <header className="border-b border-border/40 bg-background/95 backdrop-blur-xl sticky top-0 z-50">
+      <header className="relative border-b border-border/40 bg-background/80 backdrop-blur-xl sticky top-0 z-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleBack}
-              className="gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
-            <div>
-              <h1 className="text-xl font-semibold">Feedback Dashboard</h1>
-              <p className="text-sm text-muted-foreground">
-                {filteredFeedback.length} of {feedback.length} items
-              </p>
-            </div>
-          </div>
-          <Button onClick={exportToCSV} variant="outline" className="gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleBack}
+            className="gap-2 rounded-full hover:bg-accent/10"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+          <Button 
+            onClick={exportToCSV} 
+            variant="outline" 
+            className="gap-2 rounded-full border-border/60 hover:border-primary/50"
+          >
             <Download className="h-4 w-4" />
-            Export CSV
+            <span className="hidden sm:inline">Export CSV</span>
           </Button>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Hero Section */}
+      <section 
+        ref={heroSection.ref}
+        className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 overflow-hidden"
+      >
+        {/* Animated gradient orbs */}
+        <div className="absolute top-20 -left-20 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-20 -right-20 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
+        
+        <div className={`grid md:grid-cols-2 gap-12 items-center transition-all duration-1000 ${
+          heroSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        }`}>
+          <div className="space-y-6">
+            <div className="inline-block px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-4 animate-glow-pulse">
+              <Sparkles className="inline h-4 w-4 mr-2" />
+              Admin Dashboard
+            </div>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight tracking-tight">
+              Feedback
+              <span className="block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mt-2">
+                Dashboard
+              </span>
+            </h1>
+            <p className="text-lg text-muted-foreground leading-relaxed max-w-lg">
+              Manage and respond to user feedback, track suggestions, and improve your product based on real user insights.
+            </p>
+          </div>
+          <div className="relative animate-fade-in-right" style={{ animationDelay: '0.2s' }}>
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur-3xl opacity-50 animate-glow-pulse" />
+            <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-border/50 hover:scale-105 transition-transform duration-500">
+              <img 
+                src={feedbackHero}
+                alt="Feedback management dashboard illustration"
+                className="relative w-full"
+                loading="eager"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10 pointer-events-none" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section 
+        ref={statsSection.ref}
+        className="relative container mx-auto px-4 sm:px-6 lg:px-8 pb-8"
+      >
+        <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 transition-all duration-1000 ${
+          statsSection.isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+        }`}>
+          <Card className="relative overflow-hidden border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg group">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <CardContent className="pt-6 relative">
+              <div className="flex items-start justify-between mb-2">
+                <MessageSquare className="h-8 w-8 text-primary opacity-80" />
+              </div>
+              <p className="text-3xl font-bold mb-1">{stats.total}</p>
+              <p className="text-sm text-muted-foreground">Total Feedback</p>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden border-border/50 hover:border-warning/50 transition-all duration-300 hover:shadow-lg group">
+            <div className="absolute inset-0 bg-gradient-to-br from-warning/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <CardContent className="pt-6 relative">
+              <div className="flex items-start justify-between mb-2">
+                <AlertCircle className="h-8 w-8 text-warning opacity-80" />
+              </div>
+              <p className="text-3xl font-bold mb-1">{stats.pending}</p>
+              <p className="text-sm text-muted-foreground">Pending</p>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg group">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <CardContent className="pt-6 relative">
+              <div className="flex items-start justify-between mb-2">
+                <Clock className="h-8 w-8 text-primary opacity-80" />
+              </div>
+              <p className="text-3xl font-bold mb-1">{stats.inProgress}</p>
+              <p className="text-sm text-muted-foreground">In Progress</p>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden border-border/50 hover:border-success/50 transition-all duration-300 hover:shadow-lg group">
+            <div className="absolute inset-0 bg-gradient-to-br from-success/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <CardContent className="pt-6 relative">
+              <div className="flex items-start justify-between mb-2">
+                <CheckCircle2 className="h-8 w-8 text-success opacity-80" />
+              </div>
+              <p className="text-3xl font-bold mb-1">{stats.resolved}</p>
+              <p className="text-sm text-muted-foreground">Resolved</p>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      <main className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filters */}
-        <Card className="mb-6">
+        <Card className="mb-8 border-border/50 shadow-lg">
           <CardContent className="pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 <Input
                   placeholder="Search feedback..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 rounded-full border-border/60 focus:border-primary/50"
                 />
               </div>
               
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
+                <SelectTrigger className="rounded-full border-border/60">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -316,7 +427,7 @@ const AdminFeedback = () => {
               </Select>
 
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger>
+                <SelectTrigger className="rounded-full border-border/60">
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -335,10 +446,10 @@ const AdminFeedback = () => {
                   setStatusFilter("all");
                   setCategoryFilter("all");
                 }}
-                className="gap-2"
+                className="gap-2 rounded-full border-border/60 hover:border-primary/50"
               >
                 <Filter className="h-4 w-4" />
-                Clear Filters
+                <span className="hidden sm:inline">Clear Filters</span>
               </Button>
             </div>
           </CardContent>
@@ -346,17 +457,22 @@ const AdminFeedback = () => {
 
         {/* Feedback List */}
         <div className="space-y-4">
-          {filteredFeedback.map((item) => (
-            <Card key={item.id} className="hover:border-primary/50 transition-colors">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="outline" className={getStatusIcon(item.status) && "flex items-center gap-1"}>
+          {filteredFeedback.map((item, index) => (
+            <Card 
+              key={item.id} 
+              className="relative overflow-hidden border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg group animate-fade-in-up"
+              style={{ animationDelay: `${index * 0.05}s` }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <CardHeader className="relative">
+                <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+                  <div className="flex-1 w-full">
+                    <div className="flex flex-wrap items-center gap-2 mb-3">
+                      <Badge variant="outline" className={`flex items-center gap-1.5 ${getStatusColor(item.status)}`}>
                         {getStatusIcon(item.status)}
-                        <span className="capitalize">{item.status.replace("_", " ")}</span>
+                        <span className="capitalize font-medium">{item.status.replace("_", " ")}</span>
                       </Badge>
-                      <Badge variant="secondary" className="capitalize">
+                      <Badge variant="secondary" className="capitalize bg-accent/10 text-accent border-accent/20">
                         {item.category === "feature" && "✨ "}
                         {item.category === "bug" && "🐛 "}
                         {item.category === "improvement" && "🚀 "}
@@ -364,22 +480,30 @@ const AdminFeedback = () => {
                         {item.category}
                       </Badge>
                     </div>
-                    <CardTitle className="text-base font-normal text-muted-foreground">
-                      {item.name || "Anonymous"} 
-                      {item.email && ` (${item.email})`}
+                    <CardTitle className="text-base font-semibold mb-2">
+                      {item.name || "Anonymous User"} 
                     </CardTitle>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {format(new Date(item.created_at), "PPpp")}
-                    </p>
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                      {item.email && (
+                        <span className="flex items-center gap-1">
+                          <MessageSquare className="h-3 w-3" />
+                          {item.email}
+                        </span>
+                      )}
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {format(new Date(item.created_at), "PPpp")}
+                      </span>
+                    </div>
                   </div>
                   
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap sm:flex-nowrap gap-2 w-full sm:w-auto">
                     <Select
                       value={item.status}
                       onValueChange={(value) => updateFeedbackStatus(item.id, value)}
                       disabled={updatingStatus}
                     >
-                      <SelectTrigger className="w-[140px]">
+                      <SelectTrigger className="w-full sm:w-[140px] rounded-full border-border/60">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -399,11 +523,12 @@ const AdminFeedback = () => {
                             setSelectedFeedback(item);
                             setInternalNotes(item.internal_notes || "");
                           }}
+                          className="rounded-full border-border/60 hover:border-primary/50"
                         >
                           Notes
                         </Button>
                       </DialogTrigger>
-                      <DialogContent>
+                      <DialogContent className="sm:max-w-[500px]">
                         <DialogHeader>
                           <DialogTitle>Internal Notes</DialogTitle>
                           <DialogDescription>
@@ -415,8 +540,12 @@ const AdminFeedback = () => {
                           onChange={(e) => setInternalNotes(e.target.value)}
                           placeholder="Add your notes here..."
                           rows={6}
+                          className="resize-none"
                         />
-                        <Button onClick={() => saveInternalNotes(item.id)}>
+                        <Button 
+                          onClick={() => saveInternalNotes(item.id)}
+                          className="rounded-full"
+                        >
                           Save Notes
                         </Button>
                       </DialogContent>
@@ -424,12 +553,19 @@ const AdminFeedback = () => {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm whitespace-pre-wrap mb-4">{item.message}</p>
+              <CardContent className="relative">
+                <p className="text-sm leading-relaxed whitespace-pre-wrap mb-4 text-foreground/90">
+                  {item.message}
+                </p>
                 {item.internal_notes && (
-                  <div className="bg-muted/50 rounded-lg p-3 border border-border/50">
-                    <p className="text-xs font-semibold text-muted-foreground mb-1">Internal Notes:</p>
-                    <p className="text-sm">{item.internal_notes}</p>
+                  <div className="bg-muted/30 rounded-2xl p-4 border border-border/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                        Internal Notes
+                      </p>
+                    </div>
+                    <p className="text-sm leading-relaxed">{item.internal_notes}</p>
                   </div>
                 )}
               </CardContent>
@@ -437,10 +573,27 @@ const AdminFeedback = () => {
           ))}
 
           {filteredFeedback.length === 0 && (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                <p className="text-muted-foreground">No feedback found matching your filters</p>
+            <Card className="border-border/50">
+              <CardContent className="py-20 text-center">
+                <div className="relative inline-block mb-6">
+                  <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl animate-glow-pulse" />
+                  <FileText className="relative h-16 w-16 mx-auto text-muted-foreground/30" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">No feedback found</h3>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  Try adjusting your filters or search terms to find what you're looking for.
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSearchTerm("");
+                    setStatusFilter("all");
+                    setCategoryFilter("all");
+                  }}
+                  className="mt-6 rounded-full"
+                >
+                  Clear All Filters
+                </Button>
               </CardContent>
             </Card>
           )}
