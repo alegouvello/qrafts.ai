@@ -47,26 +47,26 @@
       "liveNow": "Live Now"
     },
     "testimonials": {
-      "badge": "What Our Users Say",
-      "title": "Trusted by Job Seekers",
-      "subtitle": "Join thousands who have transformed their job search with Qrafts",
+      "badge": "Early User Feedback",
+      "title": "Built for Job Seekers",
+      "subtitle": "Helping professionals stay organized and focused during their job search",
       "averageRating": "Average Rating",
-      "happyUsers": "Happy Users",
+      "happyUsers": "Early Users",
       "satisfaction": "Satisfaction Rate",
       "user1": {
-        "name": "Sarah Johnson",
+        "name": "Sarah J.",
         "role": "Software Engineer",
-        "content": "Qrafts completely changed how I organize my job applications. The AI insights helped me land interviews at top tech companies. I cannot imagine job hunting without it!"
+        "content": "Qrafts helps me keep all my applications organized in one place. The AI insights are helpful when preparing for interviews."
       },
       "user2": {
-        "name": "Michael Rodriguez",
+        "name": "Michael R.",
         "role": "Product Manager",
-        "content": "The interview prep feature is incredible. Being able to track each company and interviewer made me feel so much more prepared. Landed my dream job in just 3 weeks!"
+        "content": "The interview prep feature and company tracking make me feel more prepared. It's nice to have everything centralized."
       },
       "user3": {
-        "name": "Alex Chen",
+        "name": "Alex C.",
         "role": "UX Designer",
-        "content": "Finally, a tool that understands the job search struggle. The automated reminders kept me on track, and the AI assistant answered all my questions. Five stars!"
+        "content": "A useful tool for managing the job search process. The automated reminders help me stay on track with follow-ups."
       }
     },
     "hero": {
@@ -86,22 +86,22 @@
     },
     "aiAssistant": {
       "badge": "AI-Powered Assistant",
-      "title": "Your Personal Career Coach",
-      "subtitle": "Get instant, intelligent help throughout your job search journey",
+      "title": "Your Job Search Helper",
+      "subtitle": "Get AI assistance throughout your job search journey",
       "features": {
         "smart": {
           "title": "Smart Suggestions",
-          "description": "Get AI-powered recommendations for improving your application answers and resume",
+          "description": "Get AI-powered recommendations for improving your application answers",
           "demo": "How can I improve my answer to 'Why do you want to work here?'"
         },
         "instant": {
-          "title": "Instant Analysis",
-          "description": "Analyze job descriptions and get personalized insights about role fit",
+          "title": "Job Analysis",
+          "description": "Analyze job descriptions and get insights about role requirements",
           "demo": "Analyze this job posting for a Senior Developer role"
         },
         "contextual": {
           "title": "Context-Aware Help",
-          "description": "Ask questions about your applications, interviews, and get tailored advice",
+          "description": "Ask questions about your applications and get tailored advice",
           "demo": "What should I prepare for my upcoming interview at Google?"
         }
       }
@@ -141,19 +141,19 @@
       "button": "Start Tracking for Free"
     },
     "features": {
-      "badge": "Everything You Need",
-      "title": "Everything You Need to Land Your Dream Job",
+      "badge": "Core Features",
+      "title": "Tools to Help Organize Your Job Search",
       "organize": {
         "title": "Organize Applications",
         "description": "Keep all your job applications in one place with status tracking and timeline views"
       },
       "analyze": {
         "title": "AI-Powered Analysis",
-        "description": "Get intelligent insights on role fit, company culture, and application optimization"
+        "description": "Get intelligent insights on role fit and suggestions for improving your applications"
       },
       "automate": {
-        "title": "Automate Follow-ups",
-        "description": "Never miss a follow-up with smart reminders and automated status updates"
+        "title": "Smart Reminders",
+        "description": "Stay on top of follow-ups with reminders and timeline tracking"
       }
     }
   },

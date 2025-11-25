@@ -47,26 +47,26 @@
       "liveNow": "En Vivo"
     },
     "testimonials": {
-      "badge": "Lo Que Dicen Nuestros Usuarios",
-      "title": "Confiado por Buscadores de Empleo",
-      "subtitle": "Únete a miles que han transformado su búsqueda de empleo con Qrafts",
+      "badge": "Comentarios de Usuarios Iniciales",
+      "title": "Construido para Buscadores de Empleo",
+      "subtitle": "Ayudando a profesionales a mantenerse organizados y enfocados durante su búsqueda de empleo",
       "averageRating": "Calificación Promedio",
-      "happyUsers": "Usuarios Felices",
+      "happyUsers": "Usuarios Iniciales",
       "satisfaction": "Tasa de Satisfacción",
       "user1": {
-        "name": "Sarah Johnson",
+        "name": "Sarah J.",
         "role": "Ingeniera de Software",
-        "content": "Qrafts cambió completamente cómo organizo mis solicitudes de empleo. Los insights de IA me ayudaron a conseguir entrevistas en las mejores empresas tech. ¡No puedo imaginar buscar trabajo sin esto!"
+        "content": "Qrafts me ayuda a mantener todas mis solicitudes organizadas en un solo lugar. Los insights de IA son útiles al prepararme para entrevistas."
       },
       "user2": {
-        "name": "Michael Rodriguez",
+        "name": "Michael R.",
         "role": "Gerente de Producto",
-        "content": "La función de preparación de entrevistas es increíble. Poder rastrear cada empresa y entrevistador me hizo sentir mucho más preparado. ¡Conseguí el trabajo de mis sueños en solo 3 semanas!"
+        "content": "La función de preparación de entrevistas y el seguimiento de empresas me hacen sentir más preparado. Es bueno tener todo centralizado."
       },
       "user3": {
-        "name": "Alex Chen",
+        "name": "Alex C.",
         "role": "Diseñador UX",
-        "content": "Por fin, una herramienta que entiende la lucha de buscar empleo. Los recordatorios automáticos me mantuvieron en el camino correcto, y el asistente IA respondió todas mis preguntas. ¡Cinco estrellas!"
+        "content": "Una herramienta útil para gestionar el proceso de búsqueda de empleo. Los recordatorios automáticos me ayudan a estar al día con los seguimientos."
       }
     },
     "hero": {
@@ -86,22 +86,22 @@
     },
     "aiAssistant": {
       "badge": "Asistente Potenciado por IA",
-      "title": "Tu Entrenador Personal de Carrera",
-      "subtitle": "Obtén ayuda inteligente e instantánea durante tu búsqueda de empleo",
+      "title": "Tu Asistente de Búsqueda de Empleo",
+      "subtitle": "Obtén asistencia de IA durante tu búsqueda de empleo",
       "features": {
         "smart": {
           "title": "Sugerencias Inteligentes",
-          "description": "Recibe recomendaciones impulsadas por IA para mejorar tus respuestas y currículum",
+          "description": "Recibe recomendaciones impulsadas por IA para mejorar tus respuestas de solicitud",
           "demo": "¿Cómo puedo mejorar mi respuesta a '¿Por qué quieres trabajar aquí?'"
         },
         "instant": {
-          "title": "Análisis Instantáneo",
-          "description": "Analiza descripciones de trabajo y obtén información personalizada sobre el ajuste del rol",
+          "title": "Análisis de Trabajos",
+          "description": "Analiza descripciones de trabajo y obtén información sobre los requisitos del puesto",
           "demo": "Analiza esta oferta de trabajo para un puesto de Desarrollador Senior"
         },
         "contextual": {
           "title": "Ayuda Contextual",
-          "description": "Haz preguntas sobre tus aplicaciones, entrevistas y obtén consejos personalizados",
+          "description": "Haz preguntas sobre tus aplicaciones y obtén consejos personalizados",
           "demo": "¿Qué debo preparar para mi próxima entrevista en Google?"
         }
       }
@@ -141,19 +141,19 @@
       "button": "Comenzar Gratis"
     },
     "features": {
-      "badge": "Todo lo Que Necesitas",
-      "title": "Todo lo que necesitas para conseguir el trabajo de tus sueños",
+      "badge": "Funciones Principales",
+      "title": "Herramientas para Organizar tu Búsqueda de Empleo",
       "organize": {
         "title": "Organizar solicitudes",
         "description": "Mantén todas tus solicitudes de empleo en un solo lugar con seguimiento de estado y vistas de línea de tiempo"
       },
       "analyze": {
         "title": "Análisis impulsado por IA",
-        "description": "Obtén insights inteligentes sobre la adecuación del puesto, cultura empresarial y optimización de solicitudes"
+        "description": "Obtén insights inteligentes sobre la adecuación del puesto y sugerencias para mejorar tus solicitudes"
       },
       "automate": {
-        "title": "Automatizar seguimientos",
-        "description": "Nunca pierdas un seguimiento con recordatorios inteligentes y actualizaciones automáticas de estado"
+        "title": "Recordatorios Inteligentes",
+        "description": "Mantente al día con los seguimientos mediante recordatorios y seguimiento de línea de tiempo"
       }
     }
   },
