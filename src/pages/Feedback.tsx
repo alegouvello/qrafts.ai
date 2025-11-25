@@ -11,12 +11,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Lightbulb, ArrowLeft, MessageSquare } from "lucide-react";
+import { ArrowLeft, MessageSquare, Sparkles, Mail, Shield } from "lucide-react";
 import { SEO } from "@/components/SEO";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { z } from "zod";
+import feedbackHero from "@/assets/feedback-hero.jpg";
 
 const feedbackSchema = z.object({
   name: z.string().trim().max(100, "Name must be less than 100 characters").optional(),
@@ -104,6 +106,9 @@ const Feedback = () => {
     }
   };
 
+  const formRef = useScrollAnimation({ threshold: 0.2 });
+  const featuresRef = useScrollAnimation({ threshold: 0.2 });
+
   return (
     <div className="min-h-screen bg-background">
       <SEO
@@ -113,13 +118,13 @@ const Feedback = () => {
       />
 
       {/* Header */}
-      <header className="border-b border-border/40 bg-background/80 backdrop-blur-xl sticky top-0 z-50">
-        <div className="container mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+      <header className="border-b border-border/40 bg-background/95 backdrop-blur-xl sticky top-0 z-50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => navigate(-1)}
-            className="gap-2"
+            className="gap-2 hover:bg-primary/10 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Back
@@ -127,125 +132,178 @@ const Feedback = () => {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 sm:px-6 py-12 sm:py-16 max-w-3xl">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-            <MessageSquare className="h-8 w-8 text-primary" />
+      {/* Hero Section with Background */}
+      <section className="relative overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-cover bg-center opacity-40"
+          style={{ backgroundImage: `url(${feedbackHero})` }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
+        
+        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
+          <div className="text-center max-w-3xl mx-auto">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 backdrop-blur-sm mb-6 animate-fade-in">
+              <MessageSquare className="h-10 w-10 text-primary" />
+            </div>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70 animate-fade-in">
+              Share Your Feedback
+            </h1>
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in">
+              Your insights shape the future of Qrafts. Every suggestion, bug report, and idea helps us build a better experience.
+            </p>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold mb-3">Share Your Feedback</h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Help us make Qrafts better! We'd love to hear your suggestions, bug reports, or ideas for improvement.
-          </p>
         </div>
+      </section>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lightbulb className="h-5 w-5 text-primary" />
-              Tell Us What You Think
-            </CardTitle>
-            <CardDescription>
-              Your feedback helps us prioritize features and fix issues. All submissions are reviewed by our team.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Name (Optional) */}
-              <div className="space-y-2">
-                <Label htmlFor="name">Name (Optional)</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="Your name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  disabled={loading}
-                  maxLength={100}
-                />
-                {errors.name && (
-                  <p className="text-sm text-destructive">{errors.name}</p>
-                )}
-              </div>
+      {/* Main Content */}
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 max-w-5xl">
+        
+        {/* Form Card */}
+        <div ref={formRef.ref} className={`transition-all duration-700 ${formRef.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <Card className="border-border/50 shadow-2xl backdrop-blur-sm bg-card/50">
+            <CardContent className="p-6 sm:p-8 lg:p-12">
+              <form onSubmit={handleSubmit} className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Name (Optional) */}
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-base">Name (Optional)</Label>
+                    <Input
+                      id="name"
+                      type="text"
+                      placeholder="Your name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      disabled={loading}
+                      maxLength={100}
+                      className="h-12 bg-background/50 border-border/50 focus:border-primary transition-colors"
+                    />
+                    {errors.name && (
+                      <p className="text-sm text-destructive">{errors.name}</p>
+                    )}
+                  </div>
 
-              {/* Email (Optional) */}
-              <div className="space-y-2">
-                <Label htmlFor="email">Email (Optional)</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="your.email@example.com"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  disabled={loading}
-                  maxLength={255}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Leave your email if you'd like us to follow up with you
-                </p>
-                {errors.email && (
-                  <p className="text-sm text-destructive">{errors.email}</p>
-                )}
-              </div>
+                  {/* Email (Optional) */}
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-base">Email (Optional)</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="your.email@example.com"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      disabled={loading}
+                      maxLength={255}
+                      className="h-12 bg-background/50 border-border/50 focus:border-primary transition-colors"
+                    />
+                    {errors.email && (
+                      <p className="text-sm text-destructive">{errors.email}</p>
+                    )}
+                  </div>
+                </div>
 
-              {/* Category */}
-              <div className="space-y-2">
-                <Label htmlFor="category">Category *</Label>
-                <Select
-                  value={formData.category}
-                  onValueChange={(value) => setFormData({ ...formData, category: value as FeedbackFormData["category"] })}
+                {/* Category */}
+                <div className="space-y-2">
+                  <Label htmlFor="category" className="text-base">Category *</Label>
+                  <Select
+                    value={formData.category}
+                    onValueChange={(value) => setFormData({ ...formData, category: value as FeedbackFormData["category"] })}
+                    disabled={loading}
+                  >
+                    <SelectTrigger id="category" className="h-12 bg-background/50 border-border/50">
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="feature">✨ Feature Request</SelectItem>
+                      <SelectItem value="bug">🐛 Bug Report</SelectItem>
+                      <SelectItem value="improvement">🚀 Improvement</SelectItem>
+                      <SelectItem value="other">💭 Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {errors.category && (
+                    <p className="text-sm text-destructive">{errors.category}</p>
+                  )}
+                </div>
+
+                {/* Message */}
+                <div className="space-y-2">
+                  <Label htmlFor="message" className="text-base">Your Feedback *</Label>
+                  <Textarea
+                    id="message"
+                    placeholder="Tell us what's on your mind..."
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    disabled={loading}
+                    rows={8}
+                    maxLength={2000}
+                    className="resize-none bg-background/50 border-border/50 focus:border-primary transition-colors"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Minimum 10 characters</span>
+                    <span className={formData.message.length >= 2000 ? "text-destructive" : ""}>{formData.message.length}/2000</span>
+                  </div>
+                  {errors.message && (
+                    <p className="text-sm text-destructive">{errors.message}</p>
+                  )}
+                </div>
+
+                {/* Submit Button */}
+                <Button 
+                  type="submit" 
+                  className="w-full h-14 text-lg font-semibold shadow-lg hover:shadow-xl transition-all" 
                   disabled={loading}
                 >
-                  <SelectTrigger id="category">
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="feature">Feature Request</SelectItem>
-                    <SelectItem value="bug">Bug Report</SelectItem>
-                    <SelectItem value="improvement">Improvement</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.category && (
-                  <p className="text-sm text-destructive">{errors.category}</p>
-                )}
-              </div>
+                  {loading ? (
+                    <span className="flex items-center gap-2">
+                      <div className="h-4 w-4 border-2 border-background border-t-transparent rounded-full animate-spin" />
+                      Submitting...
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <Sparkles className="h-5 w-5" />
+                      Submit Feedback
+                    </span>
+                  )}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
 
-              {/* Message */}
-              <div className="space-y-2">
-                <Label htmlFor="message">Your Feedback *</Label>
-                <Textarea
-                  id="message"
-                  placeholder="Tell us what's on your mind..."
-                  value={formData.message}
-                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  disabled={loading}
-                  rows={8}
-                  maxLength={2000}
-                  className="resize-none"
-                />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Minimum 10 characters</span>
-                  <span>{formData.message.length}/2000</span>
-                </div>
-                {errors.message && (
-                  <p className="text-sm text-destructive">{errors.message}</p>
-                )}
-              </div>
+        {/* Feature Cards */}
+        <div ref={featuresRef.ref} className={`mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 transition-all duration-700 delay-200 ${featuresRef.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <div className="text-center p-6 rounded-2xl bg-card/30 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 mb-4">
+              <MessageSquare className="h-7 w-7 text-primary" />
+            </div>
+            <h3 className="font-semibold text-lg mb-2">Direct Impact</h3>
+            <p className="text-sm text-muted-foreground">Your feedback directly influences our product roadmap</p>
+          </div>
 
-              {/* Submit Button */}
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Submitting..." : "Submit Feedback"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+          <div className="text-center p-6 rounded-2xl bg-card/30 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 mb-4">
+              <Mail className="h-7 w-7 text-primary" />
+            </div>
+            <h3 className="font-semibold text-lg mb-2">Stay Updated</h3>
+            <p className="text-sm text-muted-foreground">Get notified when we implement your suggestions</p>
+          </div>
 
-        {/* Additional Info */}
-        <div className="mt-8 text-center text-sm text-muted-foreground">
-          <p>
-            Want to report a security issue? Please email us at{" "}
-            <a href="mailto:security@qrafts.ai" className="text-primary hover:underline">
+          <div className="text-center p-6 rounded-2xl bg-card/30 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 mb-4">
+              <Shield className="h-7 w-7 text-primary" />
+            </div>
+            <h3 className="font-semibold text-lg mb-2">Private & Secure</h3>
+            <p className="text-sm text-muted-foreground">Your information is safe and never shared</p>
+          </div>
+        </div>
+
+        {/* Security Notice */}
+        <div className="mt-12 text-center">
+          <p className="text-sm text-muted-foreground">
+            For security issues, please email{" "}
+            <a 
+              href="mailto:security@qrafts.ai" 
+              className="text-primary hover:underline font-medium transition-colors"
+            >
               security@qrafts.ai
             </a>
           </p>
