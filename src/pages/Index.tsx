@@ -152,6 +152,15 @@ const Index = () => {
                     Blog
                   </Button>
                 </Link>
+                <Link to="/feedback" onClick={() => setMobileMenuOpen(false)} className="w-full">
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start text-base rounded-full min-h-[48px]"
+                  >
+                    <MessageSquare className="h-5 w-5 mr-3 flex-shrink-0" />
+                    Feedback
+                  </Button>
+                </Link>
                 <Button 
                   variant="ghost" 
                   onClick={scrollToCTA}
