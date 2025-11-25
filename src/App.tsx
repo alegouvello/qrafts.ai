@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { ChatAssistant } from "@/components/ChatAssistant";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { PageTransition } from "@/components/PageTransition";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
@@ -41,23 +42,25 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <ScrollToTop />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/calendar" element={<Calendar />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/comparison" element={<ComparisonView />} />
-              <Route path="/company/:companyName" element={<CompanyProfile />} />
-              <Route path="/application/:id" element={<ApplicationDetail />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/blog/:slug" element={<BlogPost />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/feedback" element={<Feedback />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <PageTransition>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/calendar" element={<Calendar />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/comparison" element={<ComparisonView />} />
+                <Route path="/company/:companyName" element={<CompanyProfile />} />
+                <Route path="/application/:id" element={<ApplicationDetail />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/:slug" element={<BlogPost />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/feedback" element={<Feedback />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </PageTransition>
             <ChatAssistantWrapper />
           </BrowserRouter>
         </TooltipProvider>
