@@ -68,7 +68,7 @@ const AdminFeedback = () => {
     if (window.history.length > 1) {
       navigate(-1);
     } else {
-      navigate('/dashboard');
+      navigate('/');
     }
   };
 
