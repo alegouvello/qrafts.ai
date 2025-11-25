@@ -5,11 +5,11 @@ export const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    // Smooth scroll to top whenever the route changes
+    // Use instant scroll to prevent smooth scrolling issues on initial load
     window.scrollTo({
       top: 0,
       left: 0,
-      behavior: 'smooth'
+      behavior: 'instant' as ScrollBehavior
     });
   }, [pathname]);
 
