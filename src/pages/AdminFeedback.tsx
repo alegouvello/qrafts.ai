@@ -64,6 +64,14 @@ const AdminFeedback = () => {
   const [internalNotes, setInternalNotes] = useState("");
   const [updatingStatus, setUpdatingStatus] = useState(false);
 
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/dashboard');
+    }
+  };
+
   useEffect(() => {
     if (!adminLoading && !isAdmin) {
       toast({
@@ -259,7 +267,7 @@ const AdminFeedback = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate(-1)}
+              onClick={handleBack}
               className="gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
