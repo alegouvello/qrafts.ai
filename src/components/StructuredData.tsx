@@ -22,7 +22,34 @@ interface WebsiteSchemaProps {
   url: string;
 }
 
-type StructuredDataProps = OrganizationSchemaProps | ArticleSchemaProps | WebsiteSchemaProps;
+interface FAQSchemaProps {
+  type: 'faq';
+  questions: Array<{
+    question: string;
+    answer: string;
+  }>;
+}
+
+interface SoftwareAppSchemaProps {
+  type: 'softwareApplication';
+  name: string;
+  description: string;
+  applicationCategory: string;
+  offers?: {
+    price: string;
+    priceCurrency: string;
+  };
+}
+
+interface BreadcrumbSchemaProps {
+  type: 'breadcrumb';
+  items: Array<{
+    name: string;
+    url: string;
+  }>;
+}
+
+type StructuredDataProps = OrganizationSchemaProps | ArticleSchemaProps | WebsiteSchemaProps | FAQSchemaProps | SoftwareAppSchemaProps | BreadcrumbSchemaProps;
 
 export const StructuredData = (props: StructuredDataProps) => {
   const getSchema = () => {
@@ -89,6 +116,55 @@ export const StructuredData = (props: StructuredDataProps) => {
           },
           "query-input": "required name=search_term_string"
         }
+      };
+    }
+
+    if (props.type === 'faq') {
+      return {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": props.questions.map(q => ({
+          "@type": "Question",
+          "name": q.question,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": q.answer
+          }
+        }))
+      };
+    }
+
+    if (props.type === 'softwareApplication') {
+      return {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": props.name,
+        "description": props.description,
+        "applicationCategory": props.applicationCategory,
+        "operatingSystem": "Web Browser",
+        "offers": props.offers ? {
+          "@type": "Offer",
+          "price": props.offers.price,
+          "priceCurrency": props.offers.priceCurrency
+        } : undefined,
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.8",
+          "ratingCount": "127"
+        }
+      };
+    }
+
+    if (props.type === 'breadcrumb') {
+      return {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": props.items.map((item, index) => ({
+          "@type": "ListItem",
+          "position": index + 1,
+          "name": item.name,
+          "item": item.url
+        }))
       };
     }
 

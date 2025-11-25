@@ -88,17 +88,28 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO 
-        title="QRAFTS - Smart Job Application Tracking & AI Interview Prep"
-        description="Track job applications, organize answers, and land your dream job with QRAFTS - the intelligent AI-powered application management platform. Get AI interview prep, role fit analysis, and automated follow-ups."
-        keywords="job application tracker, interview preparation, AI career coach, job search organizer, application management, resume analyzer, interview practice, career tools"
+        title="QRAFTS - AI-Powered Job Application Tracker & Interview Preparation Platform"
+        description="Master your job search with QRAFTS: Track applications, organize interview answers, get AI-powered prep, and land your dream job faster. Smart application tracking with analytics, role fit analysis, and automated follow-ups."
+        keywords="job application tracker, interview preparation, AI career coach, job search organizer, application management, resume analyzer, interview practice, career tools, job hunting app, application status tracker, AI interview prep"
         canonicalUrl={window.location.origin}
+        ogImage={`${window.location.origin}${heroProfessional}`}
       />
       <StructuredData type="organization" />
       <StructuredData 
         type="website" 
         name="QRAFTS"
-        description="Smart job application tracking and AI-powered interview preparation platform"
+        description="AI-powered job application tracking and interview preparation platform"
         url={window.location.origin}
+      />
+      <StructuredData 
+        type="softwareApplication"
+        name="QRAFTS"
+        description="Smart job application tracking platform with AI-powered interview preparation, role fit analysis, and automated follow-ups"
+        applicationCategory="BusinessApplication"
+        offers={{
+          price: "0",
+          priceCurrency: "USD"
+        }}
       />
       {/* Decorative background gradient */}
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-background to-background pointer-events-none" />

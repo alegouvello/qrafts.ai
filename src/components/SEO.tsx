@@ -8,16 +8,26 @@ interface SEOProps {
   ogType?: string;
   canonicalUrl?: string;
   noindex?: boolean;
+  publishedTime?: string;
+  modifiedTime?: string;
+  author?: string;
+  section?: string;
+  tags?: string[];
 }
 
 export const SEO = ({ 
   title, 
   description, 
   keywords,
-  ogImage = "https://lovable.dev/opengraph-image-p98pqg.png",
+  ogImage = "https://qrafts.app/hero-professional.jpg",
   ogType = "website",
   canonicalUrl,
-  noindex = false
+  noindex = false,
+  publishedTime,
+  modifiedTime,
+  author = "QRAFTS",
+  section,
+  tags = []
 }: SEOProps) => {
   const fullTitle = title.includes('QRAFTS') ? title : `${title} | QRAFTS`;
   const siteUrl = window.location.origin;
@@ -51,8 +61,28 @@ export const SEO = ({
       <meta name="twitter:creator" content="@QRAFTS" />
 
       {/* Additional Meta Tags */}
-      <meta name="author" content="QRAFTS" />
+      <meta name="author" content={author} />
       <meta property="og:locale" content="en_US" />
+      <meta name="application-name" content="QRAFTS" />
+      <meta name="apple-mobile-web-app-title" content="QRAFTS" />
+      <meta name="format-detection" content="telephone=no" />
+      
+      {/* Article Specific Meta Tags */}
+      {ogType === 'article' && publishedTime && (
+        <>
+          <meta property="article:published_time" content={publishedTime} />
+          {modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
+          {section && <meta property="article:section" content={section} />}
+          {author && <meta property="article:author" content={author} />}
+          {tags.map((tag, index) => (
+            <meta key={index} property="article:tag" content={tag} />
+          ))}
+        </>
+      )}
+      
+      {/* Performance & Optimization */}
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
     </Helmet>
   );
 };
