@@ -329,8 +329,11 @@ const Dashboard = () => {
     }
   };
 
+  const today = new Date().toISOString().split('T')[0];
+  
   const stats = {
     total: applications.length,
+    newToday: applications.filter((a) => a.appliedDate === today).length,
     pending: applications.filter((a) => a.status === "pending").length,
     interviews: applications.filter((a) => a.status === "interview").length,
     responseRate: applications.length > 0 
