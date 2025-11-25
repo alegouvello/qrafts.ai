@@ -1,9 +1,10 @@
 import { Card } from "@/components/ui/card";
-import { Briefcase, Clock, Users, TrendingUp } from "lucide-react";
+import { Briefcase, Clock, Users, TrendingUp, Plus } from "lucide-react";
 
 interface DashboardStatsProps {
   stats: {
     total: number;
+    newToday: number;
     pending: number;
     interviews: number;
     responseRate: number;
@@ -18,6 +19,13 @@ export const DashboardStats = ({ stats }: DashboardStatsProps) => {
       value: stats.total,
       color: "text-primary",
       bgColor: "bg-primary/10",
+    },
+    {
+      icon: Plus,
+      label: "New Today",
+      value: stats.newToday,
+      color: "text-success",
+      bgColor: "bg-success/10",
     },
     {
       icon: Clock,
@@ -43,7 +51,7 @@ export const DashboardStats = ({ stats }: DashboardStatsProps) => {
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 sm:mb-8">
+    <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6 sm:mb-8">
       {statCards.map((stat, index) => {
         const Icon = stat.icon;
         return (
