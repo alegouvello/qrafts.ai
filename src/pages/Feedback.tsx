@@ -109,6 +109,14 @@ const Feedback = () => {
   const formRef = useScrollAnimation({ threshold: 0.2 });
   const featuresRef = useScrollAnimation({ threshold: 0.2 });
 
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/dashboard');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <SEO
@@ -123,7 +131,7 @@ const Feedback = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate(-1)}
+            onClick={handleBack}
             className="gap-2 hover:bg-primary/10 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
