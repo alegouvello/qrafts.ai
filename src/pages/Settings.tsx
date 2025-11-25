@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Crown, CreditCard, Calendar, Download, Settings as SettingsIcon, RefreshCw, Lock, Trash2, Eye, EyeOff, LogOut, User, Shield, Sparkles } from "lucide-react";
+import { ArrowLeft, Crown, CreditCard, Calendar, Download, Settings as SettingsIcon, RefreshCw, Lock, Trash2, Eye, EyeOff, LogOut, User, Shield, Sparkles, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAdminCheck } from "@/hooks/useAdminCheck";
 import { Footer } from "@/components/Footer";
 import qraftLogo from "@/assets/qrafts-logo.png";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,6 +38,7 @@ const passwordSchema = z.object({
 
 const Settings = () => {
   const { t } = useTranslation();
+  const { isAdmin } = useAdminCheck();
   const [subscriptionStatus, setSubscriptionStatus] = useState<{
     subscribed: boolean;
     product_id: string | null;
@@ -644,6 +646,41 @@ const Settings = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Admin Section - Only visible to admins */}
+          {isAdmin && (
+            <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-primary/5 backdrop-blur-sm animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+              <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-3xl"></div>
+              <CardHeader className="relative">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-3 rounded-full bg-primary/10 animate-glow-pulse" style={{ animationDelay: '0.5s' }}>
+                    <Shield className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl">Admin Tools</CardTitle>
+                    <CardDescription className="text-base">Manage platform features and user feedback</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4 relative">
+                <p className="text-sm text-muted-foreground mb-4">
+                  Access administrative features to manage feedback, monitor user activity, and configure platform settings.
+                </p>
+                
+                <Link to="/admin/feedback">
+                  <Button variant="outline" className="w-full justify-start gap-3 h-14 rounded-xl hover:border-primary/50 hover:bg-primary/5 transition-all group">
+                    <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                      <MessageSquare className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="text-left flex-1">
+                      <p className="font-semibold">Feedback Dashboard</p>
+                      <p className="text-xs text-muted-foreground">View and manage user feedback</p>
+                    </div>
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Danger Zone */}
           <Card className="overflow-hidden border border-destructive/30 shadow-lg shadow-destructive/10 bg-gradient-to-br from-card to-destructive/5 backdrop-blur-sm animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
