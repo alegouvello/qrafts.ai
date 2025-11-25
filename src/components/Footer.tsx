@@ -38,6 +38,12 @@ export const Footer = () => {
                 Blog
               </Link>
               <Link 
+                to="/feedback" 
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Feedback
+              </Link>
+              <Link 
                 to="/privacy" 
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
