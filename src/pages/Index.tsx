@@ -106,7 +106,8 @@ const Index = () => {
           </div>
           
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-3 lg:gap-4">
+          <div className="hidden lg:flex items-center gap-3 lg:gap-4">
+            <SocialProof />
             <Link to="/blog">
               <Button variant="ghost" size="sm" className="rounded-full hover:bg-accent/10 min-h-[44px] md:min-h-[48px] px-6 text-base">
                 Blog
@@ -206,8 +207,6 @@ const Index = () => {
               </Button>
             </div>
             
-            {/* Social Proof */}
-            <SocialProof />
           </div>
           <div className="relative order-first md:order-last animate-fade-in-right" style={{ animationDelay: '0.2s' }}>
             <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur-3xl opacity-50 animate-glow-pulse" />

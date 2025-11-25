@@ -64,38 +64,25 @@ export const SocialProof = () => {
   }
 
   return (
-    <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+    <div className="flex items-center gap-3 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
       {/* Total Users */}
-      <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm">
-        <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
-          <Users className="h-4 w-4 text-primary" />
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm">
+        <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center">
+          <Users className="h-3 w-3 text-primary" />
         </div>
         <div className="flex flex-col">
-          <span className="text-xs text-muted-foreground">{t('landing.socialProof.totalUsers', { defaultValue: 'Active Users' })}</span>
-          <span className="text-sm font-bold text-foreground">{totalUsers}+</span>
+          <span className="text-[10px] text-muted-foreground">{t('landing.socialProof.totalUsers', { defaultValue: 'Active Users' })}</span>
+          <span className="text-xs font-bold text-foreground">{totalUsers}+</span>
         </div>
       </div>
 
-      {/* Recent Activity */}
-      {recentUsers > 0 && (
-        <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-success/10 border border-success/20 backdrop-blur-sm">
-          <div className="h-8 w-8 rounded-full bg-success/20 flex items-center justify-center">
-            <TrendingUp className="h-4 w-4 text-success" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs text-muted-foreground">{t('landing.socialProof.recentSignups', { defaultValue: 'This Week' })}</span>
-            <span className="text-sm font-bold text-foreground">{recentUsers} {t('landing.socialProof.newUsers', { defaultValue: 'new users' })}</span>
-          </div>
-        </div>
-      )}
-
       {/* Live Indicator */}
-      <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20 backdrop-blur-sm">
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 backdrop-blur-sm">
         <div className="relative">
           <div className="h-2 w-2 rounded-full bg-accent animate-pulse" />
           <div className="absolute inset-0 h-2 w-2 rounded-full bg-accent animate-ping" />
         </div>
-        <span className="text-xs font-medium text-accent">{t('landing.socialProof.liveNow', { defaultValue: 'Live Now' })}</span>
+        <span className="text-[10px] font-medium text-accent">{t('landing.socialProof.liveNow', { defaultValue: 'Live Now' })}</span>
       </div>
     </div>
   );
