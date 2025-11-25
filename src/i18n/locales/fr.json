@@ -47,26 +47,26 @@
       "liveNow": "En Direct"
     },
     "testimonials": {
-      "badge": "Ce Que Disent Nos Utilisateurs",
-      "title": "Approuvé par les Chercheurs d'Emploi",
-      "subtitle": "Rejoignez des milliers de personnes qui ont transformé leur recherche d'emploi avec Qrafts",
+      "badge": "Retours d'Utilisateurs Initiaux",
+      "title": "Conçu pour les Chercheurs d'Emploi",
+      "subtitle": "Aidant les professionnels à rester organisés et concentrés pendant leur recherche d'emploi",
       "averageRating": "Note Moyenne",
-      "happyUsers": "Utilisateurs Satisfaits",
+      "happyUsers": "Utilisateurs Initiaux",
       "satisfaction": "Taux de Satisfaction",
       "user1": {
-        "name": "Sarah Johnson",
+        "name": "Sarah J.",
         "role": "Ingénieure Logiciel",
-        "content": "Qrafts a complètement changé ma façon d'organiser mes candidatures. Les insights IA m'ont aidée à décrocher des entretiens dans les meilleures entreprises tech. Je ne peux plus imaginer chercher un emploi sans!"
+        "content": "Qrafts m'aide à garder toutes mes candidatures organisées au même endroit. Les insights IA sont utiles lors de la préparation aux entretiens."
       },
       "user2": {
-        "name": "Michael Rodriguez",
+        "name": "Michael R.",
         "role": "Chef de Produit",
-        "content": "La fonction de préparation aux entretiens est incroyable. Pouvoir suivre chaque entreprise et intervieweur m'a rendu beaucoup plus préparé. J'ai décroché mon emploi de rêve en seulement 3 semaines!"
+        "content": "La fonction de préparation aux entretiens et le suivi des entreprises me font sentir plus préparé. C'est pratique d'avoir tout centralisé."
       },
       "user3": {
-        "name": "Alex Chen",
+        "name": "Alex C.",
         "role": "Designer UX",
-        "content": "Enfin un outil qui comprend la difficulté de la recherche d'emploi. Les rappels automatiques m'ont gardé sur la bonne voie, et l'assistant IA a répondu à toutes mes questions. Cinq étoiles!"
+        "content": "Un outil utile pour gérer le processus de recherche d'emploi. Les rappels automatiques m'aident à rester à jour avec les suivis."
       }
     },
     "hero": {
@@ -86,22 +86,22 @@
     },
     "aiAssistant": {
       "badge": "Assistant Propulsé par IA",
-      "title": "Votre Coach de Carrière Personnel",
-      "subtitle": "Obtenez une aide intelligente et instantanée tout au long de votre recherche d'emploi",
+      "title": "Votre Assistant de Recherche d'Emploi",
+      "subtitle": "Obtenez une assistance IA tout au long de votre recherche d'emploi",
       "features": {
         "smart": {
           "title": "Suggestions Intelligentes",
-          "description": "Recevez des recommandations IA pour améliorer vos réponses et votre CV",
+          "description": "Recevez des recommandations IA pour améliorer vos réponses de candidature",
           "demo": "Comment puis-je améliorer ma réponse à 'Pourquoi voulez-vous travailler ici?'"
         },
         "instant": {
-          "title": "Analyse Instantanée",
-          "description": "Analysez les descriptions de poste et obtenez des informations personnalisées",
+          "title": "Analyse d'Offres",
+          "description": "Analysez les descriptions de poste et obtenez des informations sur les exigences du rôle",
           "demo": "Analysez cette offre d'emploi pour un poste de Développeur Senior"
         },
         "contextual": {
           "title": "Aide Contextuelle",
-          "description": "Posez des questions sur vos candidatures, entretiens et obtenez des conseils sur mesure",
+          "description": "Posez des questions sur vos candidatures et obtenez des conseils sur mesure",
           "demo": "Que dois-je préparer pour mon prochain entretien chez Google?"
         }
       }
@@ -141,19 +141,19 @@
       "button": "Commencer Gratuitement"
     },
     "features": {
-      "badge": "Tout Ce Dont Vous Avez Besoin",
-      "title": "Tout ce dont vous avez besoin pour décrocher votre emploi de rêve",
+      "badge": "Fonctionnalités Principales",
+      "title": "Outils pour Organiser Votre Recherche d'Emploi",
       "organize": {
         "title": "Organiser les candidatures",
         "description": "Gardez toutes vos candidatures au même endroit avec suivi du statut et vues chronologiques"
       },
       "analyze": {
         "title": "Analyse alimentée par l'IA",
-        "description": "Obtenez des insights intelligents sur l'adéquation du poste, la culture d'entreprise et l'optimisation des candidatures"
+        "description": "Obtenez des insights intelligents sur l'adéquation du poste et des suggestions pour améliorer vos candidatures"
       },
       "automate": {
-        "title": "Automatiser les relances",
-        "description": "Ne manquez jamais une relance avec des rappels intelligents et mises à jour automatiques du statut"
+        "title": "Rappels Intelligents",
+        "description": "Restez à jour avec les suivis grâce aux rappels et au suivi chronologique"
       }
     }
   },
