@@ -38,9 +38,23 @@ import {
   Sparkles
 } from "lucide-react";
 import { SEO } from "@/components/SEO";
-import { format } from "date-fns";
+import { format, subDays, startOfDay, eachDayOfInterval } from "date-fns";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import feedbackHero from "@/assets/feedback-hero.jpg";
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 
 interface Feedback {
   id: string;
@@ -72,6 +86,7 @@ const AdminFeedback = () => {
 
   const heroSection = useScrollAnimation({ threshold: 0.2 });
   const statsSection = useScrollAnimation({ threshold: 0.3 });
+  const chartsSection = useScrollAnimation({ threshold: 0.3 });
 
   const handleBack = () => {
     if (window.history.length > 1) {
@@ -253,6 +268,65 @@ const AdminFeedback = () => {
     resolved: feedback.filter(f => f.status === "resolved").length,
   };
 
+  // Prepare chart data - feedback over last 30 days
+  const getFeedbackTrendData = () => {
+    const days = eachDayOfInterval({
+      start: subDays(new Date(), 29),
+      end: new Date(),
+    });
+
+    return days.map(day => {
+      const dayStart = startOfDay(day);
+      const dayFeedback = feedback.filter(f => {
+        const feedbackDate = startOfDay(new Date(f.created_at));
+        return feedbackDate.getTime() === dayStart.getTime();
+      });
+
+      return {
+        date: format(day, "MMM dd"),
+        total: dayFeedback.length,
+        pending: dayFeedback.filter(f => f.status === "pending").length,
+        resolved: dayFeedback.filter(f => f.status === "resolved").length,
+        inProgress: dayFeedback.filter(f => f.status === "in_progress").length,
+      };
+    });
+  };
+
+  // Category distribution data
+  const getCategoryData = () => {
+    const categories = ["feature", "bug", "improvement", "other"];
+    return categories.map(cat => ({
+      name: cat.charAt(0).toUpperCase() + cat.slice(1),
+      count: feedback.filter(f => f.category === cat).length,
+    }));
+  };
+
+  // Status distribution over time
+  const getStatusTrendData = () => {
+    const days = eachDayOfInterval({
+      start: subDays(new Date(), 29),
+      end: new Date(),
+    });
+
+    const cumulativeData = days.map(day => {
+      const dayStart = startOfDay(day);
+      const feedbackUpToDay = feedback.filter(f => {
+        const feedbackDate = startOfDay(new Date(f.created_at));
+        return feedbackDate <= dayStart;
+      });
+
+      return {
+        date: format(day, "MMM dd"),
+        pending: feedbackUpToDay.filter(f => f.status === "pending").length,
+        inProgress: feedbackUpToDay.filter(f => f.status === "in_progress").length,
+        resolved: feedbackUpToDay.filter(f => f.status === "resolved").length,
+        closed: feedbackUpToDay.filter(f => f.status === "closed").length,
+      };
+    });
+
+    return cumulativeData;
+  };
+
   if (adminLoading || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -393,6 +467,173 @@ const AdminFeedback = () => {
               </div>
               <p className="text-3xl font-bold mb-1">{stats.resolved}</p>
               <p className="text-sm text-muted-foreground">Resolved</p>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* Charts Section */}
+      <section 
+        ref={chartsSection.ref}
+        className="relative container mx-auto px-4 sm:px-6 lg:px-8 pb-8"
+      >
+        <div className={`transition-all duration-1000 ${
+          chartsSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        }`}>
+          <div className="flex items-center gap-3 mb-6">
+            <TrendingUp className="h-6 w-6 text-primary" />
+            <h2 className="text-2xl font-bold">Feedback Trends</h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6 mb-6">
+            {/* Feedback Over Time */}
+            <Card className="border-border/50 shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-primary" />
+                  Feedback Submissions (Last 30 Days)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={250}>
+                  <LineChart data={getFeedbackTrendData()}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" />
+                    <XAxis 
+                      dataKey="date" 
+                      className="text-xs"
+                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                    />
+                    <YAxis 
+                      className="text-xs"
+                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--card))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '0.5rem',
+                      }}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="total" 
+                      stroke="hsl(var(--primary))" 
+                      strokeWidth={2}
+                      dot={{ fill: 'hsl(var(--primary))' }}
+                      name="Total Feedback"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            {/* Category Distribution */}
+            <Card className="border-border/50 shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-accent" />
+                  Feedback by Category
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={getCategoryData()}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" />
+                    <XAxis 
+                      dataKey="name" 
+                      className="text-xs"
+                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                    />
+                    <YAxis 
+                      className="text-xs"
+                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--card))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '0.5rem',
+                      }}
+                    />
+                    <Bar 
+                      dataKey="count" 
+                      fill="hsl(var(--accent))" 
+                      radius={[8, 8, 0, 0]}
+                      name="Count"
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Status Trends Over Time */}
+          <Card className="border-border/50 shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-success" />
+                Cumulative Status Distribution (Last 30 Days)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={getStatusTrendData()}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" />
+                  <XAxis 
+                    dataKey="date" 
+                    className="text-xs"
+                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  />
+                  <YAxis 
+                    className="text-xs"
+                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  />
+                  <Tooltip 
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '0.5rem',
+                    }}
+                  />
+                  <Legend />
+                  <Area 
+                    type="monotone" 
+                    dataKey="resolved" 
+                    stackId="1"
+                    stroke="hsl(var(--success))" 
+                    fill="hsl(var(--success))"
+                    fillOpacity={0.6}
+                    name="Resolved"
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="inProgress" 
+                    stackId="1"
+                    stroke="hsl(var(--primary))" 
+                    fill="hsl(var(--primary))"
+                    fillOpacity={0.6}
+                    name="In Progress"
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="pending" 
+                    stackId="1"
+                    stroke="hsl(var(--warning))" 
+                    fill="hsl(var(--warning))"
+                    fillOpacity={0.6}
+                    name="Pending"
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="closed" 
+                    stackId="1"
+                    stroke="hsl(var(--muted-foreground))" 
+                    fill="hsl(var(--muted-foreground))"
+                    fillOpacity={0.6}
+                    name="Closed"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
         </div>
