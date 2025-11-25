@@ -8,6 +8,7 @@ export const SocialProof = () => {
   const [totalUsers, setTotalUsers] = useState(0);
   const [recentUsers, setRecentUsers] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -59,12 +60,35 @@ export const SocialProof = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show badges after scrolling down 50px
+      if (window.scrollY > 50) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    // Check initial scroll position
+    handleScroll();
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   if (isLoading) {
     return null;
   }
 
   return (
-    <div className="flex items-center gap-3 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+    <div 
+      className={`flex items-center gap-3 transition-all duration-500 ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
+      }`}
+    >
       {/* Total Users */}
       <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm">
         <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center">
