@@ -64,7 +64,7 @@ export const SocialProof = () => {
   }
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 sm:gap-6 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+    <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
       {/* Total Users */}
       <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm">
         <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
