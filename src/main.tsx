@@ -4,6 +4,11 @@ import App from "./App.tsx";
 import "./index.css";
 import "./i18n/config";
 
+// Disable automatic scroll restoration
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+
 createRoot(document.getElementById("root")!).render(
   <HelmetProvider>
     <App />
