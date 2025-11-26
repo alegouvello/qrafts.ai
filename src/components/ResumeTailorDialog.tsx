@@ -251,8 +251,8 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
 
         <div className="space-y-4">
           {!analysis && (
-            <Card className="p-4 bg-muted/50">
-              <h3 className="font-semibold mb-2 flex items-center gap-2">
+            <Card className="p-6 bg-muted/50">
+              <h3 className="font-semibold mb-4 flex items-center gap-2">
                 <FileText className="h-4 w-4" />
                 Your Resume
               </h3>
@@ -261,12 +261,9 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
                   <Loader2 className="h-6 w-6 animate-spin" />
                 </div>
               ) : resumeText ? (
-                <Textarea
-                  value={resumeText}
-                  onChange={(e) => setResumeText(e.target.value)}
-                  className="min-h-[200px] font-mono text-sm"
-                  placeholder="Your resume will appear here..."
-                />
+                <div className="prose prose-sm max-w-none dark:prose-invert">
+                  <ReactMarkdown>{resumeText}</ReactMarkdown>
+                </div>
               ) : (
                 <p className="text-sm text-muted-foreground">
                   No resume found. Please upload your resume in your profile first.
