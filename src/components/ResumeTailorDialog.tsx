@@ -35,9 +35,9 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
   const formatHTMLContent = (html: string): string => {
     if (!html) return '';
     
-    // Convert HTML list items to markdown bullets
+    // Convert HTML list items to markdown list syntax
     let text = html
-      .replace(/<li>/gi, '• ')
+      .replace(/<li>/gi, '- ')
       .replace(/<\/li>/gi, '\n')
       .replace(/<ul>/gi, '\n')
       .replace(/<\/ul>/gi, '\n')
