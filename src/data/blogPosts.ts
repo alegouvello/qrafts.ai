@@ -1,18 +1,21 @@
 import blogJobBoardsHero from "@/assets/blog-job-boards-hero.jpg";
+import { z } from "zod";
 
-export interface BlogPost {
-  slug: string;
-  title: string;
-  excerpt: string;
-  content: string;
-  author: string;
-  date: string;
-  category: string;
-  readTime: string;
-  image?: string;
-}
+export const blogPostSchema = z.object({
+  slug: z.string().min(1, "Slug is required").regex(/^[a-z0-9-]+$/, "Slug must be lowercase with hyphens"),
+  title: z.string().min(1, "Title is required").max(200, "Title must be less than 200 characters"),
+  excerpt: z.string().min(1, "Excerpt is required").max(300, "Excerpt must be less than 300 characters"),
+  content: z.string().min(1, "Content is required"),
+  author: z.string().min(1, "Author is required"),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format"),
+  category: z.string().min(1, "Category is required"),
+  readTime: z.string().regex(/^\d+\s+min\s+read$/, "Read time must be in format '8 min read'"),
+  image: z.string().optional(),
+});
 
-export const blogPosts: BlogPost[] = [
+export type BlogPost = z.infer<typeof blogPostSchema>;
+
+const rawBlogPosts: BlogPost[] = [
   {
     slug: "why-job-boards-arent-enough",
     title: "Why Job Boards Aren't Enough: The Case for a Personal Application Tracker",
@@ -77,6 +80,16 @@ Job boards have democratised access to vacancies, but they haven't solved the jo
     `
   }
 ];
+
+// Validate all blog posts on initialization
+export const blogPosts: BlogPost[] = rawBlogPosts.map(post => {
+  const result = blogPostSchema.safeParse(post);
+  if (!result.success) {
+    console.error(`Blog post validation failed for "${post.slug}":`, result.error.format());
+    throw new Error(`Invalid blog post: ${post.slug}`);
+  }
+  return result.data;
+});
 
 export const getBlogPost = (slug: string): BlogPost | undefined => {
   return blogPosts.find(post => post.slug === slug);
