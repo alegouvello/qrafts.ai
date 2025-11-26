@@ -446,7 +446,7 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
                   <FileText className="h-4 w-4 text-muted-foreground" />
                   <h3 className="font-semibold">Your Original Resume</h3>
                 </div>
-                <div className="prose prose-sm max-w-none dark:prose-invert max-h-[500px] overflow-y-auto [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:space-y-1 [&_li]:leading-relaxed">
+                <div className="prose prose-sm max-w-none dark:prose-invert max-h-[500px] overflow-y-auto [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:space-y-1 [&_ul_ul]:list-circle [&_ul_ul]:ml-6 [&_ul_ul_ul]:list-square [&_ul_ul_ul]:ml-6 [&_li]:leading-relaxed">
                   <ReactMarkdown>{originalResume}</ReactMarkdown>
                 </div>
               </Card>
@@ -476,7 +476,7 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
                     )}
                   </Button>
                 </div>
-                <div className="prose prose-sm max-w-none dark:prose-invert max-h-[500px] overflow-y-auto [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:space-y-1 [&_li]:leading-relaxed">
+                <div className="prose prose-sm max-w-none dark:prose-invert max-h-[500px] overflow-y-auto [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:space-y-1 [&_ul_ul]:list-circle [&_ul_ul]:ml-6 [&_ul_ul_ul]:list-square [&_ul_ul_ul]:ml-6 [&_li]:leading-relaxed">
                   <ReactMarkdown>{analysis}</ReactMarkdown>
                 </div>
               </Card>
@@ -490,7 +490,7 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
                   <FileText className="h-4 w-4 text-muted-foreground" />
                   <h3 className="font-semibold">Original Resume</h3>
                 </div>
-                <div className="prose prose-sm max-w-none dark:prose-invert max-h-[500px] overflow-y-auto [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:space-y-1 [&_li]:leading-relaxed">
+                <div className="prose prose-sm max-w-none dark:prose-invert max-h-[500px] overflow-y-auto [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:space-y-1 [&_ul_ul]:list-circle [&_ul_ul]:ml-6 [&_ul_ul_ul]:list-square [&_ul_ul_ul]:ml-6 [&_li]:leading-relaxed">
                   <ReactMarkdown>{originalResume}</ReactMarkdown>
                 </div>
               </Card>
@@ -520,7 +520,7 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
                     )}
                   </Button>
                 </div>
-                <div className="prose prose-sm max-w-none dark:prose-invert max-h-[500px] overflow-y-auto [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:space-y-1 [&_li]:leading-relaxed">
+                <div className="prose prose-sm max-w-none dark:prose-invert max-h-[500px] overflow-y-auto [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:space-y-1 [&_ul_ul]:list-circle [&_ul_ul]:ml-6 [&_ul_ul_ul]:list-square [&_ul_ul_ul]:ml-6 [&_li]:leading-relaxed">
                   <ReactMarkdown>{tailoredResume}</ReactMarkdown>
                 </div>
               </Card>
