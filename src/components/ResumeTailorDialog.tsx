@@ -35,30 +35,43 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
   const formatHTMLContent = (html: string): string => {
     if (!html) return '';
     
-    // First, handle list items to ensure they're on separate lines
-    let text = html
-      // Convert opening ul/ol tags to blank line
-      .replace(/<ul[^>]*>/gi, '\n\n')
-      .replace(/<ol[^>]*>/gi, '\n\n')
-      // Convert each li to a new line with bullet
-      .replace(/<li[^>]*>/gi, '\n- ')
-      // Remove closing li tags
-      .replace(/<\/li>/gi, '')
-      // Remove closing ul/ol tags
-      .replace(/<\/ul>/gi, '\n\n')
-      .replace(/<\/ol>/gi, '\n\n')
-      // Handle paragraphs
+    // First, handle text with bullet characters (•) that aren't in proper HTML lists
+    let text = html;
+    
+    // Check if there are bullet characters but no <li> tags - convert them to list items
+    if (text.includes('•') && !text.includes('<li')) {
+      // Split by bullet character and create proper list
+      const parts = text.split('•').map(p => p.trim()).filter(p => p.length > 0);
+      if (parts.length > 1) {
+        // First part might be intro text, rest are list items
+        text = parts.map((part, idx) => {
+          if (idx === 0 && !part.match(/^[A-Z]/)) {
+            // If first part doesn't start with capital, it's probably intro text
+            return part;
+          }
+          return `\n- ${part}`;
+        }).join('');
+      }
+    } else {
+      // Handle proper HTML lists
+      text = text
+        .replace(/<ul[^>]*>/gi, '\n\n')
+        .replace(/<ol[^>]*>/gi, '\n\n')
+        .replace(/<li[^>]*>/gi, '\n- ')
+        .replace(/<\/li>/gi, '')
+        .replace(/<\/ul>/gi, '\n\n')
+        .replace(/<\/ol>/gi, '\n\n');
+    }
+    
+    // Handle other HTML elements
+    text = text
       .replace(/<p[^>]*>/gi, '\n\n')
       .replace(/<\/p>/gi, '')
-      // Handle line breaks
       .replace(/<br\s*\/?>/gi, '\n')
-      // Remove all remaining HTML tags
       .replace(/<[^>]*>/g, '')
-      // Clean up: remove leading/trailing whitespace from each line
       .split('\n')
       .map(line => line.trim())
       .join('\n')
-      // Collapse multiple blank lines to double newline
       .replace(/\n{3,}/g, '\n\n')
       .trim();
     
