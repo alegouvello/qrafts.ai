@@ -32,6 +32,27 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
   const [copied, setCopied] = useState(false);
   const [copiedTailored, setCopiedTailored] = useState(false);
 
+  const formatHTMLContent = (html: string): string => {
+    if (!html) return '';
+    
+    // Convert HTML list items to markdown bullets
+    let text = html
+      .replace(/<li>/gi, '• ')
+      .replace(/<\/li>/gi, '\n')
+      .replace(/<ul>/gi, '\n')
+      .replace(/<\/ul>/gi, '\n')
+      .replace(/<ol>/gi, '\n')
+      .replace(/<\/ol>/gi, '\n')
+      .replace(/<p>/gi, '\n')
+      .replace(/<\/p>/gi, '\n')
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<[^>]*>/g, '') // Remove remaining HTML tags
+      .replace(/\n{3,}/g, '\n\n') // Collapse multiple newlines
+      .trim();
+    
+    return text;
+  };
+
   const formatResumeFromJSON = (jsonData: any): string => {
     let formatted = '';
     
@@ -45,7 +66,7 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
     
     // Summary
     if (jsonData.summary) {
-      formatted += `\n## Professional Summary\n${jsonData.summary.replace(/<[^>]*>/g, '\n').replace(/\n+/g, '\n')}\n`;
+      formatted += `\n## Professional Summary\n${formatHTMLContent(jsonData.summary)}\n`;
     }
     
     // Experience
@@ -58,7 +79,7 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
           formatted += `${exp.start_date || ''} - ${exp.end_date || ''}\n`;
         }
         if (exp.description) {
-          formatted += `${exp.description.replace(/<[^>]*>/g, '\n').replace(/\n+/g, '\n')}\n`;
+          formatted += `${formatHTMLContent(exp.description)}\n`;
         }
       });
     }
@@ -75,6 +96,7 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
         }
         if (edu.gpa) formatted += `GPA: ${edu.gpa}\n`;
         if (edu.honors?.length > 0) formatted += `Honors: ${edu.honors.join(', ')}\n`;
+        if (edu.description) formatted += `${formatHTMLContent(edu.description)}\n`;
       });
     }
     
@@ -111,7 +133,7 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
       formatted += `\n## Projects\n`;
       jsonData.projects.forEach((proj: any) => {
         formatted += `\n### ${proj.name || proj.title}\n`;
-        if (proj.description) formatted += `${proj.description}\n`;
+        if (proj.description) formatted += `${formatHTMLContent(proj.description)}\n`;
         if (proj.technologies) formatted += `Technologies: ${Array.isArray(proj.technologies) ? proj.technologies.join(', ') : proj.technologies}\n`;
         if (proj.url) formatted += `URL: ${proj.url}\n`;
       });
