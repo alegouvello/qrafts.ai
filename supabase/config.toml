@@ -47,3 +47,6 @@ verify_jwt = true
 
 [functions.tailor-resume]
 verify_jwt = true
+
+[functions.apply-tailored-suggestions]
+verify_jwt = true
