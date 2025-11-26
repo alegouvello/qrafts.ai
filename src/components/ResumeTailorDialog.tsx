@@ -35,19 +35,31 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
   const formatHTMLContent = (html: string): string => {
     if (!html) return '';
     
-    // Convert HTML list items to markdown list syntax with proper spacing
+    // First, handle list items to ensure they're on separate lines
     let text = html
-      .replace(/<ul>/gi, '\n\n') // Add blank line before list
-      .replace(/<\/ul>/gi, '\n\n') // Add blank line after list
-      .replace(/<ol>/gi, '\n\n')
+      // Convert opening ul/ol tags to blank line
+      .replace(/<ul[^>]*>/gi, '\n\n')
+      .replace(/<ol[^>]*>/gi, '\n\n')
+      // Convert each li to a new line with bullet
+      .replace(/<li[^>]*>/gi, '\n- ')
+      // Remove closing li tags
+      .replace(/<\/li>/gi, '')
+      // Remove closing ul/ol tags
+      .replace(/<\/ul>/gi, '\n\n')
       .replace(/<\/ol>/gi, '\n\n')
-      .replace(/<li>/gi, '\n- ') // Start new line with dash
-      .replace(/<\/li>/gi, '') // Remove closing tag
-      .replace(/<p>/gi, '\n\n')
+      // Handle paragraphs
+      .replace(/<p[^>]*>/gi, '\n\n')
       .replace(/<\/p>/gi, '')
+      // Handle line breaks
       .replace(/<br\s*\/?>/gi, '\n')
-      .replace(/<[^>]*>/g, '') // Remove remaining HTML tags
-      .replace(/\n{3,}/g, '\n\n') // Collapse multiple newlines to max 2
+      // Remove all remaining HTML tags
+      .replace(/<[^>]*>/g, '')
+      // Clean up: remove leading/trailing whitespace from each line
+      .split('\n')
+      .map(line => line.trim())
+      .join('\n')
+      // Collapse multiple blank lines to double newline
+      .replace(/\n{3,}/g, '\n\n')
       .trim();
     
     return text;
