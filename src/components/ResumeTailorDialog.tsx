@@ -24,6 +24,7 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
   const [analyzing, setAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<string>("");
   const [resumeText, setResumeText] = useState<string>("");
+  const [originalResume, setOriginalResume] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -116,10 +117,12 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
           const formattedText = formatResumeFromJSON(parsedData);
           console.log('Formatted text length:', formattedText.length);
           setResumeText(formattedText);
+          setOriginalResume(formattedText);
         } catch (parseError) {
           // If not JSON, use as-is
           console.log('Failed to parse as JSON, using raw text:', parseError);
           setResumeText(profile.resume_text);
+          setOriginalResume(profile.resume_text);
         }
       } else {
         console.log('No resume_text in profile');
@@ -222,6 +225,7 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       setAnalysis("");
+      setOriginalResume("");
     }
     onOpenChange(newOpen);
   };
@@ -273,32 +277,47 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
           )}
 
           {analysis && (
-            <Card className="p-6 bg-background">
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="font-semibold text-lg">AI Tailoring Suggestions</h3>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCopyAnalysis}
-                  className="gap-2"
-                >
-                  {copied ? (
-                    <>
-                      <Check className="h-4 w-4" />
-                      Copied
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="h-4 w-4" />
-                      Copy
-                    </>
-                  )}
-                </Button>
-              </div>
-              <div className="prose prose-sm max-w-none dark:prose-invert">
-                <ReactMarkdown>{analysis}</ReactMarkdown>
-              </div>
-            </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <Card className="p-6 bg-muted/30">
+                <div className="flex items-center gap-2 mb-4">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  <h3 className="font-semibold">Your Original Resume</h3>
+                </div>
+                <div className="prose prose-sm max-w-none dark:prose-invert max-h-[500px] overflow-y-auto">
+                  <ReactMarkdown>{originalResume}</ReactMarkdown>
+                </div>
+              </Card>
+              
+              <Card className="p-6 bg-background border-primary/20">
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="font-semibold text-lg flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-primary" />
+                    AI Tailoring Suggestions
+                  </h3>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCopyAnalysis}
+                    className="gap-2"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="h-4 w-4" />
+                        Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-4 w-4" />
+                        Copy
+                      </>
+                    )}
+                  </Button>
+                </div>
+                <div className="prose prose-sm max-w-none dark:prose-invert max-h-[500px] overflow-y-auto">
+                  <ReactMarkdown>{analysis}</ReactMarkdown>
+                </div>
+              </Card>
+            </div>
           )}
 
           <div className="flex justify-end gap-2 pt-4 border-t">
