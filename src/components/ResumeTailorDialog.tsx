@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -212,18 +212,18 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
     }
   };
 
-  const handleOpenChange = async (newOpen: boolean) => {
-    if (newOpen && !resumeText) {
-      // Open dialog first to show loading state
-      onOpenChange(newOpen);
-      // Then fetch resume
-      await fetchResume();
-    } else if (!newOpen) {
-      setAnalysis("");
-      onOpenChange(newOpen);
-    } else {
-      onOpenChange(newOpen);
+  // Fetch resume when dialog opens
+  useEffect(() => {
+    if (open && !resumeText && !loading) {
+      fetchResume();
     }
+  }, [open]);
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      setAnalysis("");
+    }
+    onOpenChange(newOpen);
   };
 
   const handleCopyAnalysis = () => {
