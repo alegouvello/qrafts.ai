@@ -91,6 +91,48 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
       });
     }
     
+    // Publications
+    if (jsonData.publications?.length > 0) {
+      formatted += `\n## Publications\n`;
+      jsonData.publications.forEach((pub: any) => {
+        formatted += `- ${pub.title || pub}`;
+        if (typeof pub === 'object') {
+          if (pub.authors) formatted += ` by ${pub.authors}`;
+          if (pub.journal) formatted += `, ${pub.journal}`;
+          if (pub.year) formatted += ` (${pub.year})`;
+          if (pub.url) formatted += ` - ${pub.url}`;
+        }
+        formatted += `\n`;
+      });
+    }
+    
+    // Projects
+    if (jsonData.projects?.length > 0) {
+      formatted += `\n## Projects\n`;
+      jsonData.projects.forEach((proj: any) => {
+        formatted += `\n### ${proj.name || proj.title}\n`;
+        if (proj.description) formatted += `${proj.description}\n`;
+        if (proj.technologies) formatted += `Technologies: ${Array.isArray(proj.technologies) ? proj.technologies.join(', ') : proj.technologies}\n`;
+        if (proj.url) formatted += `URL: ${proj.url}\n`;
+      });
+    }
+    
+    // Awards & Honors
+    if (jsonData.awards?.length > 0) {
+      formatted += `\n## Awards & Honors\n`;
+      jsonData.awards.forEach((award: any) => {
+        formatted += `- ${typeof award === 'string' ? award : `${award.name || award.title} (${award.year || ''})`}\n`;
+      });
+    }
+    
+    // Languages
+    if (jsonData.languages?.length > 0) {
+      formatted += `\n## Languages\n`;
+      jsonData.languages.forEach((lang: any) => {
+        formatted += `- ${typeof lang === 'string' ? lang : `${lang.language}: ${lang.proficiency || ''}`}\n`;
+      });
+    }
+    
     return formatted;
   };
 
