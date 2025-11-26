@@ -108,7 +108,7 @@ export const ApplicationCard = ({ application, onDelete }: ApplicationCardProps)
                 <Calendar className="h-3.5 w-3.5" />
                 <span>{application.appliedDate}</span>
               </div>
-              {application.avgResponseDays !== null && application.avgResponseDays !== undefined && (
+              {application.status !== "pending" && application.avgResponseDays !== null && application.avgResponseDays !== undefined && (
                 <div className="flex items-center gap-1.5 text-primary/80">
                   <Clock className="h-3.5 w-3.5" />
                   <span className="font-medium">
