@@ -13,7 +13,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Calendar, ExternalLink, MessageSquare, Trash2 } from "lucide-react";
+import { Calendar, ExternalLink, MessageSquare, Trash2, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -30,6 +30,8 @@ interface ApplicationCardProps {
     url: string;
     questions: number;
     answersCompleted: number;
+    avgResponseDays?: number;
+    fastestResponseDays?: number;
   };
   onDelete: (id: string) => void;
 }
@@ -101,9 +103,21 @@ export const ApplicationCard = ({ application, onDelete }: ApplicationCardProps)
                 {statusInfo.label}
               </Badge>
             </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Calendar className="h-3.5 w-3.5" />
-              <span>{application.appliedDate}</span>
+            <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+              <div className="flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5" />
+                <span>{application.appliedDate}</span>
+              </div>
+              {application.avgResponseDays !== null && application.avgResponseDays !== undefined && (
+                <div className="flex items-center gap-1.5 text-primary/80">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span className="font-medium">
+                    {application.avgResponseDays === 0 
+                      ? "Same day" 
+                      : `${Math.round(application.avgResponseDays)}d avg`}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
