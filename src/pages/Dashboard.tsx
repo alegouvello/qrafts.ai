@@ -189,6 +189,27 @@ const Dashboard = () => {
             answerCount = uniqueAnsweredQuestions.size;
           }
 
+          // Get status history to calculate actual response time
+          const { data: statusHistory } = await supabase
+            .from("application_status_history")
+            .select("changed_at, status")
+            .eq("application_id", app.id)
+            .order("changed_at", { ascending: true });
+
+          // Calculate response time from applied_date to first status change
+          let actualResponseDays = null;
+          if (statusHistory && statusHistory.length > 0 && app.status !== "pending") {
+            const appliedDate = new Date(app.applied_date);
+            const firstStatusChange = new Date(statusHistory[0].changed_at);
+            
+            // Normalize to calendar days
+            const appliedDay = new Date(appliedDate.getFullYear(), appliedDate.getMonth(), appliedDate.getDate());
+            const responseDay = new Date(firstStatusChange.getFullYear(), firstStatusChange.getMonth(), firstStatusChange.getDate());
+            
+            const daysDiff = Math.floor((responseDay.getTime() - appliedDay.getTime()) / (1000 * 60 * 60 * 24));
+            actualResponseDays = daysDiff;
+          }
+
           return {
             id: app.id,
             company: app.company,
@@ -198,6 +219,7 @@ const Dashboard = () => {
             url: app.url,
             questions: textQuestions.length,
             answersCompleted: answerCount,
+            actualResponseDays,
           };
         })
       );
@@ -228,7 +250,7 @@ const Dashboard = () => {
       // Add stats to applications
       const transformedWithStats = transformed.map(app => ({
         ...app,
-        avgResponseDays: companyStatsMap.get(app.company)?.avgResponseDays,
+        avgResponseDays: app.actualResponseDays !== null ? app.actualResponseDays : companyStatsMap.get(app.company)?.avgResponseDays,
         fastestResponseDays: companyStatsMap.get(app.company)?.fastestResponseDays,
       }));
 

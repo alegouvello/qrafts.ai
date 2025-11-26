@@ -114,7 +114,9 @@ export const ApplicationCard = ({ application, onDelete }: ApplicationCardProps)
                   <span className="font-medium">
                     {application.avgResponseDays === 0 
                       ? "Same day" 
-                      : `${Math.round(application.avgResponseDays)}d avg`}
+                      : application.avgResponseDays === 1
+                      ? "1 day"
+                      : `${Math.round(application.avgResponseDays)} days`}
                   </span>
                 </div>
               )}
