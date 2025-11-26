@@ -93,25 +93,36 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        console.log('No user found');
+        return;
+      }
 
-      const { data: profile } = await supabase
+      console.log('Fetching resume for user:', user.id);
+      const { data: profile, error: profileError } = await supabase
         .from('user_profiles')
         .select('resume_text')
         .eq('user_id', user.id)
         .maybeSingle();
 
+      console.log('Profile fetch result:', { hasProfile: !!profile, hasResumeText: !!profile?.resume_text, error: profileError });
+
       if (profile?.resume_text) {
         try {
           // Parse JSON if stored as JSON
+          console.log('Attempting to parse resume_text as JSON');
           const parsedData = JSON.parse(profile.resume_text);
+          console.log('Successfully parsed JSON, formatting...');
           const formattedText = formatResumeFromJSON(parsedData);
+          console.log('Formatted text length:', formattedText.length);
           setResumeText(formattedText);
-        } catch {
+        } catch (parseError) {
           // If not JSON, use as-is
+          console.log('Failed to parse as JSON, using raw text:', parseError);
           setResumeText(profile.resume_text);
         }
       } else {
+        console.log('No resume_text in profile');
         toast({
           title: "No Resume Found",
           description: "Please upload your resume in your profile first.",
