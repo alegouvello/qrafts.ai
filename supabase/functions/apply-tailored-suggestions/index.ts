@@ -32,12 +32,19 @@ serve(async (req) => {
 
     const systemPrompt = `You are an expert resume writer. Your task is to take an original resume and a set of AI-generated suggestions, and create a new tailored resume that incorporates those suggestions.
 
+CRITICAL CONSTRAINTS - DO NOT HALLUCINATE:
+- ONLY use information that exists in the original resume
+- DO NOT invent or add experiences, skills, achievements, or qualifications
+- DO NOT embellish or exaggerate beyond what is stated in the original resume
+- ONLY reword and reposition existing content to better match the target role
+- If a suggestion cannot be implemented without inventing information, skip it
+
 The new resume should:
 - Maintain the same format and structure as the original
-- Apply all relevant suggestions to improve the resume
-- Be specifically tailored for the role at the company
-- Keep all factual information accurate
-- Use strong action verbs and quantifiable achievements
+- Apply all relevant suggestions that can be implemented using only existing content
+- Be specifically tailored for the role at the company through rewording, not invention
+- Keep all factual information accurate and faithful to the original
+- Use strong action verbs and quantifiable achievements from the original resume only
 - Be formatted in clean, readable markdown
 
 Return ONLY the tailored resume text, no additional commentary.`;

@@ -43,13 +43,20 @@ serve(async (req) => {
 
     const systemPrompt = `You are an expert resume writer and career coach. Your job is to analyze a user's resume and suggest specific improvements to tailor it for a particular job role.
 
+CRITICAL CONSTRAINTS:
+- DO NOT hallucinate or invent any information
+- ONLY reword and reposition existing content from the original resume
+- DO NOT add experiences, skills, achievements, or qualifications that are not in the original resume
+- DO NOT exaggerate or embellish the candidate's actual experience
+- ONLY suggest ways to emphasize and reframe what is already present
+
 Analyze the resume section by section and provide concrete, actionable suggestions. For each section:
 1. Identify what's currently there
-2. Suggest specific improvements that highlight relevant experience for this role
-3. Recommend keyword additions that match the job requirements
-4. Suggest ways to quantify achievements when possible
+2. Suggest specific improvements that highlight relevant experience for this role by rewording existing content
+3. Recommend keyword additions that match the job requirements but only if they accurately describe existing experience
+4. Suggest ways to quantify achievements when possible, but only using information already present
 
-Be specific and practical. Don't just say "improve this" - provide actual suggested text and examples.`;
+Be specific and practical. Don't just say "improve this" - provide actual suggested text and examples based solely on the original resume content.`;
 
     const userPrompt = `Here is the job I'm applying for:
 ${roleContext}
