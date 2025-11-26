@@ -35,19 +35,19 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
   const formatHTMLContent = (html: string): string => {
     if (!html) return '';
     
-    // Convert HTML list items to markdown list syntax
+    // Convert HTML list items to markdown list syntax with proper spacing
     let text = html
-      .replace(/<li>/gi, '- ')
-      .replace(/<\/li>/gi, '\n')
-      .replace(/<ul>/gi, '\n')
-      .replace(/<\/ul>/gi, '\n')
-      .replace(/<ol>/gi, '\n')
-      .replace(/<\/ol>/gi, '\n')
-      .replace(/<p>/gi, '\n')
-      .replace(/<\/p>/gi, '\n')
+      .replace(/<ul>/gi, '\n\n') // Add blank line before list
+      .replace(/<\/ul>/gi, '\n\n') // Add blank line after list
+      .replace(/<ol>/gi, '\n\n')
+      .replace(/<\/ol>/gi, '\n\n')
+      .replace(/<li>/gi, '\n- ') // Start new line with dash
+      .replace(/<\/li>/gi, '') // Remove closing tag
+      .replace(/<p>/gi, '\n\n')
+      .replace(/<\/p>/gi, '')
       .replace(/<br\s*\/?>/gi, '\n')
       .replace(/<[^>]*>/g, '') // Remove remaining HTML tags
-      .replace(/\n{3,}/g, '\n\n') // Collapse multiple newlines
+      .replace(/\n{3,}/g, '\n\n') // Collapse multiple newlines to max 2
       .trim();
     
     return text;
