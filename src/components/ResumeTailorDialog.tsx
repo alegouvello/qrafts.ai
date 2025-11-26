@@ -201,14 +201,18 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
     }
   };
 
-  const handleOpenChange = (newOpen: boolean) => {
-    if (newOpen && !resumeText && !loading) {
-      fetchResume();
-    }
-    if (!newOpen) {
+  const handleOpenChange = async (newOpen: boolean) => {
+    if (newOpen && !resumeText) {
+      // Open dialog first to show loading state
+      onOpenChange(newOpen);
+      // Then fetch resume
+      await fetchResume();
+    } else if (!newOpen) {
       setAnalysis("");
+      onOpenChange(newOpen);
+    } else {
+      onOpenChange(newOpen);
     }
-    onOpenChange(newOpen);
   };
 
   const handleCopyAnalysis = () => {
