@@ -19,6 +19,7 @@ import { AddQuestionDialog } from "@/components/AddQuestionDialog";
 import { ResumeTailorDialog } from "@/components/ResumeTailorDialog";
 import { SavedResumesDialog } from "@/components/SavedResumesDialog";
 import { useToast } from "@/hooks/use-toast";
+import ReactMarkdown from "react-markdown";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
@@ -152,6 +153,8 @@ const ApplicationDetail = () => {
   const [showAddQuestionDialog, setShowAddQuestionDialog] = useState(false);
   const [showResumeTailorDialog, setShowResumeTailorDialog] = useState(false);
   const [showSavedResumesDialog, setShowSavedResumesDialog] = useState(false);
+  const [savedTailoredResume, setSavedTailoredResume] = useState<any>(null);
+  const [loadingTailoredResume, setLoadingTailoredResume] = useState(false);
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
   const [editingQuestionText, setEditingQuestionText] = useState("");
   const [currentQuestionForTemplate, setCurrentQuestionForTemplate] = useState<string | null>(null);
@@ -233,6 +236,7 @@ const ApplicationDetail = () => {
       fetchTimelineEvents();
       fetchStatusHistory();
       fetchInterviewers();
+      fetchTailoredResume();
       checkSubscription();
     }
   }, [id]);
@@ -537,6 +541,31 @@ const ApplicationDetail = () => {
       console.error("Error fetching interviewers:", error);
     } else {
       setInterviewers(data || []);
+    }
+  };
+
+  const fetchTailoredResume = async () => {
+    if (!id) return;
+    
+    setLoadingTailoredResume(true);
+    try {
+      const { data, error } = await supabase
+        .from("tailored_resumes")
+        .select("*")
+        .eq("application_id", id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error fetching tailored resume:", error);
+      } else {
+        setSavedTailoredResume(data);
+      }
+    } catch (error) {
+      console.error("Error fetching tailored resume:", error);
+    } finally {
+      setLoadingTailoredResume(false);
     }
   };
 
@@ -2167,19 +2196,64 @@ const ApplicationDetail = () => {
                   className="gap-2"
                 >
                   <Library className="h-4 w-4" />
-                  View Saved
+                  View All
                 </Button>
                 <Button 
                   onClick={() => setShowResumeTailorDialog(true)}
                   className="gap-2"
                 >
                   <FileText className="h-4 w-4" />
-                  Tailor Resume
+                  {savedTailoredResume ? 'Update Resume' : 'Tailor Resume'}
                 </Button>
               </div>
             </div>
 
-            <Card className="p-6 bg-gradient-to-br from-primary/5 to-transparent border-primary/20">
+            {loadingTailoredResume ? (
+              <Card className="p-8 text-center">
+                <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+              </Card>
+            ) : savedTailoredResume ? (
+              <Card className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h3 className="font-semibold text-lg">Tailored Resume</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Last updated: {new Date(savedTailoredResume.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        navigator.clipboard.writeText(savedTailoredResume.resume_text);
+                        toast({
+                          title: "Copied",
+                          description: "Resume copied to clipboard",
+                        });
+                      }}
+                      className="gap-2"
+                    >
+                      <Copy className="h-4 w-4" />
+                      Copy
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowResumeTailorDialog(true)}
+                      className="gap-2"
+                    >
+                      <Edit2 className="h-4 w-4" />
+                      Edit
+                    </Button>
+                  </div>
+                </div>
+                <div className="prose prose-sm max-w-none dark:prose-invert max-h-[600px] overflow-y-auto">
+                  <ReactMarkdown>{savedTailoredResume.resume_text}</ReactMarkdown>
+                </div>
+              </Card>
+            ) : (
+              <Card className="p-6 bg-gradient-to-br from-primary/5 to-transparent border-primary/20">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <Sparkles className="h-6 w-6 text-primary" />
@@ -2214,6 +2288,7 @@ const ApplicationDetail = () => {
                 </div>
               </div>
             </Card>
+            )}
           </TabsContent>
 
           {/* Interviewers Tab */}
@@ -2329,7 +2404,13 @@ const ApplicationDetail = () => {
       {application && (
         <ResumeTailorDialog
           open={showResumeTailorDialog}
-          onOpenChange={setShowResumeTailorDialog}
+          onOpenChange={(open) => {
+            setShowResumeTailorDialog(open);
+            if (!open) {
+              // Refresh the tailored resume when dialog closes
+              fetchTailoredResume();
+            }
+          }}
           application={application}
         />
       )}
