@@ -32,7 +32,14 @@ export const StatusHistoryTimeline = ({ history, appliedDate }: StatusHistoryTim
   );
 
   const calculateDuration = (startDate: string, endDate: string) => {
-    const days = differenceInDays(new Date(endDate), new Date(startDate));
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    // Normalize to compare calendar days, not 24-hour periods
+    const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+    const endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+    
+    const days = differenceInDays(endDay, startDay);
     if (days === 0) return "Same day";
     if (days === 1) return "1 day";
     return `${days} days`;
