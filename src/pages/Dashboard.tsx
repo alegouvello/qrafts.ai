@@ -27,6 +27,8 @@ interface Application {
   url: string;
   questions: number;
   answersCompleted: number;
+  avgResponseDays?: number;
+  fastestResponseDays?: number;
 }
 
 const Dashboard = () => {
@@ -199,7 +201,38 @@ const Dashboard = () => {
           };
         })
       );
-      setApplications(transformed);
+
+      // Fetch company stats for each unique company
+      const uniqueCompanies = [...new Set(transformed.map(app => app.company))];
+      const companyStatsMap = new Map();
+      
+      await Promise.all(
+        uniqueCompanies.map(async (company) => {
+          try {
+            const { data: stats } = await supabase.rpc('get_company_stats', { 
+              company_name: company 
+            });
+            
+            if (stats && stats.length > 0) {
+              companyStatsMap.set(company, {
+                avgResponseDays: stats[0].avg_response_days,
+                fastestResponseDays: stats[0].fastest_response_days,
+              });
+            }
+          } catch (error) {
+            console.error(`Error fetching stats for ${company}:`, error);
+          }
+        })
+      );
+
+      // Add stats to applications
+      const transformedWithStats = transformed.map(app => ({
+        ...app,
+        avgResponseDays: companyStatsMap.get(app.company)?.avgResponseDays,
+        fastestResponseDays: companyStatsMap.get(app.company)?.fastestResponseDays,
+      }));
+
+      setApplications(transformedWithStats);
     }
     setLoading(false);
   };
