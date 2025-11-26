@@ -25,8 +25,11 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
   const [analysis, setAnalysis] = useState<string>("");
   const [resumeText, setResumeText] = useState<string>("");
   const [originalResume, setOriginalResume] = useState<string>("");
+  const [tailoredResume, setTailoredResume] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [copiedTailored, setCopiedTailored] = useState(false);
 
   const formatResumeFromJSON = (jsonData: any): string => {
     let formatted = '';
@@ -226,6 +229,7 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
     if (!newOpen) {
       setAnalysis("");
       setOriginalResume("");
+      setTailoredResume("");
     }
     onOpenChange(newOpen);
   };
@@ -238,6 +242,56 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
       description: "Analysis copied to clipboard",
     });
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleCopyTailored = () => {
+    navigator.clipboard.writeText(tailoredResume);
+    setCopiedTailored(true);
+    toast({
+      title: "Copied",
+      description: "Tailored resume copied to clipboard",
+    });
+    setTimeout(() => setCopiedTailored(false), 2000);
+  };
+
+  const handleGenerateTailored = async () => {
+    setGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('apply-tailored-suggestions', {
+        body: {
+          originalResume: originalResume,
+          suggestions: analysis,
+          position: application.position,
+          company: application.company,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        toast({
+          title: "Error",
+          description: data.error,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setTailoredResume(data.tailoredResume);
+      toast({
+        title: "Success",
+        description: "Tailored resume generated successfully!",
+      });
+    } catch (error) {
+      console.error('Error generating tailored resume:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate tailored resume. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setGenerating(false);
+    }
   };
 
   return (
@@ -276,7 +330,7 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
             </Card>
           )}
 
-          {analysis && (
+          {analysis && !tailoredResume && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <Card className="p-6 bg-muted/30">
                 <div className="flex items-center gap-2 mb-4">
@@ -320,6 +374,50 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
             </div>
           )}
 
+          {tailoredResume && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <Card className="p-6 bg-muted/30">
+                <div className="flex items-center gap-2 mb-4">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  <h3 className="font-semibold">Original Resume</h3>
+                </div>
+                <div className="prose prose-sm max-w-none dark:prose-invert max-h-[500px] overflow-y-auto">
+                  <ReactMarkdown>{originalResume}</ReactMarkdown>
+                </div>
+              </Card>
+              
+              <Card className="p-6 bg-primary/5 border-primary/30">
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="font-semibold text-lg flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-primary" />
+                    Tailored Resume
+                  </h3>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCopyTailored}
+                    className="gap-2"
+                  >
+                    {copiedTailored ? (
+                      <>
+                        <Check className="h-4 w-4" />
+                        Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-4 w-4" />
+                        Copy
+                      </>
+                    )}
+                  </Button>
+                </div>
+                <div className="prose prose-sm max-w-none dark:prose-invert max-h-[500px] overflow-y-auto">
+                  <ReactMarkdown>{tailoredResume}</ReactMarkdown>
+                </div>
+              </Card>
+            </div>
+          )}
+
           <div className="flex justify-end gap-2 pt-4 border-t">
             <Button
               variant="outline"
@@ -346,18 +444,50 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
                 )}
               </Button>
             )}
-            {analysis && (
+            {analysis && !tailoredResume && (
+              <>
+                <Button
+                  onClick={() => {
+                    setAnalysis("");
+                    handleAnalyze();
+                  }}
+                  disabled={analyzing}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <FileText className="h-4 w-4" />
+                  Analyze Again
+                </Button>
+                <Button
+                  onClick={handleGenerateTailored}
+                  disabled={generating}
+                  className="gap-2"
+                >
+                  {generating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <FileText className="h-4 w-4" />
+                      Apply Suggestions
+                    </>
+                  )}
+                </Button>
+              </>
+            )}
+            {tailoredResume && (
               <Button
                 onClick={() => {
+                  setTailoredResume("");
                   setAnalysis("");
-                  handleAnalyze();
                 }}
-                disabled={analyzing}
                 variant="outline"
                 className="gap-2"
               >
                 <FileText className="h-4 w-4" />
-                Analyze Again
+                Start Over
               </Button>
             )}
           </div>
