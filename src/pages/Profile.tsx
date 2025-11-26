@@ -4,7 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Mail, Phone, MapPin, Linkedin, Briefcase, GraduationCap, Award, ArrowLeft, Upload, Edit, Sparkles, BookOpen, Trophy, BookMarked, Lightbulb, Globe, Heart, Settings, Camera, Image as ImageIcon, ExternalLink, FileDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { User, Mail, Phone, MapPin, Linkedin, Briefcase, GraduationCap, Award, ArrowLeft, Upload, Edit, Sparkles, BookOpen, Trophy, BookMarked, Lightbulb, Globe, Heart, Settings, Camera, Image as ImageIcon, ExternalLink, FileDown, MoreHorizontal } from "lucide-react";
 import { UploadResumeDialog } from "@/components/UploadResumeDialog";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { ProfileReviewDialog } from "@/components/ProfileReviewDialog";
@@ -1089,110 +1096,83 @@ export default function Profile() {
               <Button
                 onClick={() => setShowEditDialog(true)}
                 size="sm"
-                className="gap-2 flex-1 sm:flex-none"
+                className="gap-2"
               >
                 <Edit className="h-4 w-4" />
-                <span className="hidden sm:inline">Edit Profile</span>
-                <span className="sm:hidden">Edit</span>
+                <span>Edit Profile</span>
               </Button>
               
               <Button
                 onClick={() => setShowUploadDialog(true)}
                 variant="outline"
                 size="sm"
-                className="gap-2 bg-background/50 backdrop-blur-sm flex-1 sm:flex-none"
+                className="gap-2"
               >
                 <Upload className="h-4 w-4" />
-                <span className="hidden md:inline">Upload Resume</span>
-                <span className="md:hidden">Upload</span>
+                <span>Upload Resume</span>
               </Button>
 
-              {/* AI Features */}
               <Button
                 onClick={() => setShowReviewDialog(true)}
                 variant="secondary"
                 size="sm"
-                className="gap-2 bg-background/50 backdrop-blur-sm flex-1 sm:flex-none"
+                className="gap-2"
               >
                 <Sparkles className="h-4 w-4" />
                 <span className="hidden sm:inline">AI Review</span>
                 <span className="sm:hidden">Review</span>
               </Button>
-              
-              <Button
-                onClick={() => setShowManualEnhancementDialog(true)}
-                disabled={enhancingProfile}
-                variant="outline"
-                size="sm"
-                className="gap-2 bg-background/50 backdrop-blur-sm flex-1 sm:flex-none"
-              >
-                <Sparkles className="h-4 w-4" />
-                <span className="hidden md:inline">{enhancingProfile ? "Enhancing..." : "Enhance Profile"}</span>
-                <span className="md:hidden">{enhancingProfile ? "..." : "Enhance"}</span>
-              </Button>
 
-              {/* Section Order Controls */}
-              <Button
-                onClick={handleAnalyzeOrder}
-                variant="outline"
-                size="sm"
-                disabled={analyzingOrder || !parsedData}
-                className="gap-2 bg-gradient-to-r from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20 backdrop-blur-sm flex-1 sm:flex-none border border-primary/20"
-              >
-                <Sparkles className="h-4 w-4" />
-                <span className="hidden md:inline">
-                  {analyzingOrder ? "Analyzing..." : "Analyze Order"}
-                </span>
-                <span className="md:hidden">
-                  {analyzingOrder ? "..." : "Analyze"}
-                </span>
-              </Button>
+              {/* More Actions Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <MoreHorizontal className="h-4 w-4" />
+                    <span className="hidden sm:inline">More</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem onClick={() => setShowManualEnhancementDialog(true)} disabled={enhancingProfile}>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    {enhancingProfile ? "Enhancing..." : "Enhance Profile"}
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuSeparator />
+                  
+                  <DropdownMenuItem onClick={handleAnalyzeOrder} disabled={analyzingOrder || !parsedData}>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    {analyzingOrder ? "Analyzing..." : "Analyze Order"}
+                  </DropdownMenuItem>
 
-              {parsedData?._sectionOrder && (
-                <Button
-                  onClick={handleResetOrder}
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 bg-background/50 backdrop-blur-sm flex-1 sm:flex-none border border-muted"
-                >
-                  <Sparkles className="h-4 w-4" />
-                  <span className="hidden md:inline">Reset Order</span>
-                  <span className="md:hidden">Reset</span>
-                </Button>
-              )}
+                  {parsedData?._sectionOrder && (
+                    <DropdownMenuItem onClick={handleResetOrder}>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Reset Order
+                    </DropdownMenuItem>
+                  )}
+                  
+                  <DropdownMenuSeparator />
+                  
+                  <DropdownMenuItem onClick={() => setShowMasterAnswersDialog(true)}>
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    Master Answers
+                  </DropdownMenuItem>
 
-              {/* Utility Actions */}
-              <Button
-                onClick={() => setShowMasterAnswersDialog(true)}
-                variant="secondary"
-                size="sm"
-                className="gap-2 bg-background/50 backdrop-blur-sm flex-1 sm:flex-none"
-              >
-                <BookOpen className="h-4 w-4" />
-                <span className="hidden sm:inline">Master Answers</span>
-                <span className="sm:hidden">Answers</span>
-              </Button>
-
-              <Button
-                onClick={() => setShowExportPDFDialog(true)}
-                variant="outline"
-                size="sm"
-                className="gap-2 bg-background/50 backdrop-blur-sm flex-1 sm:flex-none"
-              >
-                <FileDown className="h-4 w-4" />
-                <span className="hidden md:inline">Export PDF</span>
-                <span className="md:hidden">PDF</span>
-              </Button>
-
-              <Link to="/settings">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 bg-background/50 backdrop-blur-sm"
-                >
-                  <Settings className="h-4 w-4" />
-                </Button>
-              </Link>
+                  <DropdownMenuItem onClick={() => setShowExportPDFDialog(true)}>
+                    <FileDown className="h-4 w-4 mr-2" />
+                    Export PDF
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuSeparator />
+                  
+                  <DropdownMenuItem asChild>
+                    <Link to="/settings" className="flex items-center cursor-pointer">
+                      <Settings className="h-4 w-4 mr-2" />
+                      Settings
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
