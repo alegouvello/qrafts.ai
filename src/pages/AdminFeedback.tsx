@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { downloadSitemap } from "@/utils/generateSitemap";
 import {
   Select,
   SelectContent,
@@ -365,14 +366,30 @@ const AdminFeedback = () => {
             <ArrowLeft className="h-4 w-4" />
             Back
           </Button>
-          <Button 
-            onClick={exportToCSV} 
-            variant="outline" 
-            className="gap-2 rounded-full border-border/60 hover:border-primary/50"
-          >
-            <Download className="h-4 w-4" />
-            <span className="hidden sm:inline">Export CSV</span>
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => {
+                downloadSitemap();
+                toast({
+                  title: "Success",
+                  description: "Sitemap generated and downloaded",
+                });
+              }} 
+              variant="outline" 
+              className="gap-2 rounded-full border-border/60 hover:border-primary/50"
+            >
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">Sitemap</span>
+            </Button>
+            <Button 
+              onClick={exportToCSV} 
+              variant="outline" 
+              className="gap-2 rounded-full border-border/60 hover:border-primary/50"
+            >
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">Export CSV</span>
+            </Button>
+          </div>
         </div>
       </header>
 
