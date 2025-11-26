@@ -27,6 +27,68 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  const formatResumeFromJSON = (jsonData: any): string => {
+    let formatted = '';
+    
+    // Basic info
+    if (jsonData.full_name) formatted += `${jsonData.full_name}\n`;
+    if (jsonData.email) formatted += `${jsonData.email}\n`;
+    if (jsonData.phone) formatted += `${jsonData.phone}\n`;
+    if (jsonData.location) formatted += `${jsonData.location}\n`;
+    if (jsonData.linkedin_url) formatted += `LinkedIn: ${jsonData.linkedin_url}\n`;
+    if (jsonData.website_url) formatted += `Website: ${jsonData.website_url}\n`;
+    
+    // Summary
+    if (jsonData.summary) {
+      formatted += `\n## Professional Summary\n${jsonData.summary.replace(/<[^>]*>/g, '\n').replace(/\n+/g, '\n')}\n`;
+    }
+    
+    // Experience
+    if (jsonData.experience?.length > 0) {
+      formatted += `\n## Experience\n`;
+      jsonData.experience.forEach((exp: any) => {
+        formatted += `\n### ${exp.position} at ${exp.company}\n`;
+        if (exp.location) formatted += `${exp.location}\n`;
+        if (exp.start_date || exp.end_date) {
+          formatted += `${exp.start_date || ''} - ${exp.end_date || ''}\n`;
+        }
+        if (exp.description) {
+          formatted += `${exp.description.replace(/<[^>]*>/g, '\n').replace(/\n+/g, '\n')}\n`;
+        }
+      });
+    }
+    
+    // Education
+    if (jsonData.education?.length > 0) {
+      formatted += `\n## Education\n`;
+      jsonData.education.forEach((edu: any) => {
+        formatted += `\n### ${edu.degree} in ${edu.field || ''}\n`;
+        formatted += `${edu.institution}\n`;
+        if (edu.location) formatted += `${edu.location}\n`;
+        if (edu.start_date || edu.end_date) {
+          formatted += `${edu.start_date || ''} - ${edu.end_date || ''}\n`;
+        }
+        if (edu.gpa) formatted += `GPA: ${edu.gpa}\n`;
+        if (edu.honors?.length > 0) formatted += `Honors: ${edu.honors.join(', ')}\n`;
+      });
+    }
+    
+    // Skills
+    if (jsonData.skills?.length > 0) {
+      formatted += `\n## Skills\n${jsonData.skills.join(', ')}\n`;
+    }
+    
+    // Certifications
+    if (jsonData.certifications?.length > 0) {
+      formatted += `\n## Certifications\n`;
+      jsonData.certifications.forEach((cert: any) => {
+        formatted += `- ${cert.name} (${cert.issuer}, ${cert.date})\n`;
+      });
+    }
+    
+    return formatted;
+  };
+
   const fetchResume = async () => {
     setLoading(true);
     try {
@@ -40,7 +102,15 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
         .maybeSingle();
 
       if (profile?.resume_text) {
-        setResumeText(profile.resume_text);
+        try {
+          // Parse JSON if stored as JSON
+          const parsedData = JSON.parse(profile.resume_text);
+          const formattedText = formatResumeFromJSON(parsedData);
+          setResumeText(formattedText);
+        } catch {
+          // If not JSON, use as-is
+          setResumeText(profile.resume_text);
+        }
       } else {
         toast({
           title: "No Resume Found",
