@@ -28,6 +28,7 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
   const [tailoredResume, setTailoredResume] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
   const [copiedTailored, setCopiedTailored] = useState(false);
 
@@ -294,6 +295,50 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
     }
   };
 
+  const handleSaveTailoredResume = async () => {
+    setSaving(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to save resumes",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const versionName = `${application.position} at ${application.company} - ${new Date().toLocaleDateString()}`;
+
+      const { error } = await supabase
+        .from('tailored_resumes')
+        .insert({
+          user_id: user.id,
+          application_id: application.id,
+          version_name: versionName,
+          resume_text: tailoredResume,
+          position: application.position,
+          company: application.company,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Saved!",
+        description: "Your tailored resume has been saved to your profile.",
+      });
+    } catch (error) {
+      console.error('Error saving tailored resume:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save resume. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
@@ -478,17 +523,36 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
               </>
             )}
             {tailoredResume && (
-              <Button
-                onClick={() => {
-                  setTailoredResume("");
-                  setAnalysis("");
-                }}
-                variant="outline"
-                className="gap-2"
-              >
-                <FileText className="h-4 w-4" />
-                Start Over
-              </Button>
+              <>
+                <Button
+                  onClick={() => {
+                    setTailoredResume("");
+                    setAnalysis("");
+                  }}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <FileText className="h-4 w-4" />
+                  Start Over
+                </Button>
+                <Button
+                  onClick={handleSaveTailoredResume}
+                  disabled={saving}
+                  className="gap-2"
+                >
+                  {saving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="h-4 w-4" />
+                      Save to Profile
+                    </>
+                  )}
+                </Button>
+              </>
             )}
           </div>
         </div>

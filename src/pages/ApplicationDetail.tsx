@@ -17,6 +17,7 @@ import { AddInterviewerDialog } from "@/components/AddInterviewerDialog";
 import { InterviewPrepCard } from "@/components/InterviewPrepCard";
 import { AddQuestionDialog } from "@/components/AddQuestionDialog";
 import { ResumeTailorDialog } from "@/components/ResumeTailorDialog";
+import { SavedResumesDialog } from "@/components/SavedResumesDialog";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -150,6 +151,7 @@ const ApplicationDetail = () => {
   const [showAddTimelineDialog, setShowAddTimelineDialog] = useState(false);
   const [showAddQuestionDialog, setShowAddQuestionDialog] = useState(false);
   const [showResumeTailorDialog, setShowResumeTailorDialog] = useState(false);
+  const [showSavedResumesDialog, setShowSavedResumesDialog] = useState(false);
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
   const [editingQuestionText, setEditingQuestionText] = useState("");
   const [currentQuestionForTemplate, setCurrentQuestionForTemplate] = useState<string | null>(null);
@@ -2158,13 +2160,23 @@ const ApplicationDetail = () => {
                   Get AI-powered suggestions to tailor your resume for this specific role
                 </p>
               </div>
-              <Button 
-                onClick={() => setShowResumeTailorDialog(true)}
-                className="gap-2"
-              >
-                <FileText className="h-4 w-4" />
-                Tailor Resume
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => setShowSavedResumesDialog(true)}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <Library className="h-4 w-4" />
+                  View Saved
+                </Button>
+                <Button 
+                  onClick={() => setShowResumeTailorDialog(true)}
+                  className="gap-2"
+                >
+                  <FileText className="h-4 w-4" />
+                  Tailor Resume
+                </Button>
+              </div>
             </div>
 
             <Card className="p-6 bg-gradient-to-br from-primary/5 to-transparent border-primary/20">
@@ -2332,6 +2344,12 @@ const ApplicationDetail = () => {
           application={application}
         />
       )}
+
+      {/* Saved Resumes Dialog */}
+      <SavedResumesDialog
+        open={showSavedResumesDialog}
+        onOpenChange={setShowSavedResumesDialog}
+      />
       
       <Footer />
     </div>
