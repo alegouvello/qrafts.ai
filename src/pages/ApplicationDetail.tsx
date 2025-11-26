@@ -2211,17 +2211,6 @@ const ApplicationDetail = () => {
                       <span>Restructure sections to emphasize your strongest qualifications</span>
                     </li>
                   </ul>
-
-                  <div className="pt-4">
-                    <Button 
-                      onClick={() => setShowResumeTailorDialog(true)}
-                      size="lg"
-                      className="w-full sm:w-auto"
-                    >
-                      <FileText className="h-4 w-4 mr-2" />
-                      Start Tailoring Your Resume
-                    </Button>
-                  </div>
                 </div>
               </div>
             </Card>
