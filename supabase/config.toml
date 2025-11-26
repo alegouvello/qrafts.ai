@@ -44,3 +44,6 @@ verify_jwt = false
 
 [functions.analyze-resume-order]
 verify_jwt = true
+
+[functions.tailor-resume]
+verify_jwt = true

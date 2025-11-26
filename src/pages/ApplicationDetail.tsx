@@ -16,6 +16,7 @@ import { StatusHistoryTimeline } from "@/components/StatusHistoryTimeline";
 import { AddInterviewerDialog } from "@/components/AddInterviewerDialog";
 import { InterviewPrepCard } from "@/components/InterviewPrepCard";
 import { AddQuestionDialog } from "@/components/AddQuestionDialog";
+import { ResumeTailorDialog } from "@/components/ResumeTailorDialog";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -45,6 +46,7 @@ import {
   Edit2,
   Trash2,
   X,
+  FileText,
 } from "lucide-react";
 import {
   Select,
@@ -147,6 +149,7 @@ const ApplicationDetail = () => {
   const [showBrowseTemplatesDialog, setShowBrowseTemplatesDialog] = useState(false);
   const [showAddTimelineDialog, setShowAddTimelineDialog] = useState(false);
   const [showAddQuestionDialog, setShowAddQuestionDialog] = useState(false);
+  const [showResumeTailorDialog, setShowResumeTailorDialog] = useState(false);
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
   const [editingQuestionText, setEditingQuestionText] = useState("");
   const [currentQuestionForTemplate, setCurrentQuestionForTemplate] = useState<string | null>(null);
@@ -1703,6 +1706,7 @@ const ApplicationDetail = () => {
         <Tabs defaultValue="questions" className="space-y-6">
           <TabsList className="bg-muted/30">
             <TabsTrigger value="questions">Questions</TabsTrigger>
+            <TabsTrigger value="resume">Resume</TabsTrigger>
             <TabsTrigger value="interviewers">Interviewers</TabsTrigger>
             <TabsTrigger value="timeline">
               <Clock className="h-4 w-4 mr-2" />
@@ -2143,7 +2147,73 @@ const ApplicationDetail = () => {
               })}
             </div>
           )}
-        </TabsContent>
+          </TabsContent>
+
+          {/* Resume Tab */}
+          <TabsContent value="resume" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-semibold mb-2">Resume Tailoring</h2>
+                <p className="text-sm text-muted-foreground">
+                  Get AI-powered suggestions to tailor your resume for this specific role
+                </p>
+              </div>
+              <Button 
+                onClick={() => setShowResumeTailorDialog(true)}
+                className="gap-2"
+              >
+                <FileText className="h-4 w-4" />
+                Tailor Resume
+              </Button>
+            </div>
+
+            <Card className="p-6 bg-gradient-to-br from-primary/5 to-transparent border-primary/20">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Sparkles className="h-6 w-6 text-primary" />
+                </div>
+                <div className="flex-1 space-y-4">
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">How Resume Tailoring Works</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Our AI analyzes your resume alongside the job description and requirements for {application?.position} at {application?.company}. 
+                      It provides specific, actionable suggestions to:
+                    </p>
+                  </div>
+                  
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Highlight relevant experience and skills that match the role</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Incorporate keywords from the job description to pass ATS screening</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Quantify your achievements and demonstrate measurable impact</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Restructure sections to emphasize your strongest qualifications</span>
+                    </li>
+                  </ul>
+
+                  <div className="pt-4">
+                    <Button 
+                      onClick={() => setShowResumeTailorDialog(true)}
+                      size="lg"
+                      className="w-full sm:w-auto"
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Start Tailoring Your Resume
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </TabsContent>
 
           {/* Interviewers Tab */}
           <TabsContent value="interviewers" className="space-y-6">
@@ -2253,6 +2323,15 @@ const ApplicationDetail = () => {
         onOpenChange={setShowAddQuestionDialog}
         onAdd={handleAddManualQuestion}
       />
+
+      {/* Resume Tailor Dialog */}
+      {application && (
+        <ResumeTailorDialog
+          open={showResumeTailorDialog}
+          onOpenChange={setShowResumeTailorDialog}
+          application={application}
+        />
+      )}
       
       <Footer />
     </div>
