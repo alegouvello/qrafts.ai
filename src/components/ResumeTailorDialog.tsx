@@ -446,7 +446,7 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
                   <FileText className="h-4 w-4 text-muted-foreground" />
                   <h3 className="font-semibold">Your Original Resume</h3>
                 </div>
-                <div className="prose prose-sm max-w-none dark:prose-invert max-h-[500px] overflow-y-auto">
+                <div className="prose prose-sm max-w-none dark:prose-invert max-h-[500px] overflow-y-auto [&_ul]:list-none [&_ul]:space-y-2 [&_li]:pl-0 [&_li]:relative [&_li]:before:content-['•'] [&_li]:before:absolute [&_li]:before:-left-4 [&_li]:before:text-primary/60">
                   <ReactMarkdown>{originalResume}</ReactMarkdown>
                 </div>
               </Card>
@@ -476,7 +476,7 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
                     )}
                   </Button>
                 </div>
-                <div className="prose prose-sm max-w-none dark:prose-invert max-h-[500px] overflow-y-auto">
+                <div className="prose prose-sm max-w-none dark:prose-invert max-h-[500px] overflow-y-auto [&_ul]:list-none [&_ul]:space-y-2 [&_li]:pl-0 [&_li]:relative [&_li]:before:content-['•'] [&_li]:before:absolute [&_li]:before:-left-4 [&_li]:before:text-primary/60">
                   <ReactMarkdown>{analysis}</ReactMarkdown>
                 </div>
               </Card>
@@ -490,7 +490,7 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
                   <FileText className="h-4 w-4 text-muted-foreground" />
                   <h3 className="font-semibold">Original Resume</h3>
                 </div>
-                <div className="prose prose-sm max-w-none dark:prose-invert max-h-[500px] overflow-y-auto">
+                <div className="prose prose-sm max-w-none dark:prose-invert max-h-[500px] overflow-y-auto [&_ul]:list-none [&_ul]:space-y-2 [&_li]:pl-0 [&_li]:relative [&_li]:before:content-['•'] [&_li]:before:absolute [&_li]:before:-left-4 [&_li]:before:text-primary/60">
                   <ReactMarkdown>{originalResume}</ReactMarkdown>
                 </div>
               </Card>
@@ -520,7 +520,7 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
                     )}
                   </Button>
                 </div>
-                <div className="prose prose-sm max-w-none dark:prose-invert max-h-[500px] overflow-y-auto">
+                <div className="prose prose-sm max-w-none dark:prose-invert max-h-[500px] overflow-y-auto [&_ul]:list-none [&_ul]:space-y-2 [&_li]:pl-0 [&_li]:relative [&_li]:before:content-['•'] [&_li]:before:absolute [&_li]:before:-left-4 [&_li]:before:text-primary/60">
                   <ReactMarkdown>{tailoredResume}</ReactMarkdown>
                 </div>
               </Card>
