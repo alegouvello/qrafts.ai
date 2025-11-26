@@ -376,6 +376,50 @@ export type Database = {
         }
         Relationships: []
       }
+      tailored_resumes: {
+        Row: {
+          application_id: string | null
+          company: string | null
+          created_at: string
+          id: string
+          position: string | null
+          resume_text: string
+          updated_at: string
+          user_id: string
+          version_name: string
+        }
+        Insert: {
+          application_id?: string | null
+          company?: string | null
+          created_at?: string
+          id?: string
+          position?: string | null
+          resume_text: string
+          updated_at?: string
+          user_id: string
+          version_name: string
+        }
+        Update: {
+          application_id?: string | null
+          company?: string | null
+          created_at?: string
+          id?: string
+          position?: string | null
+          resume_text?: string
+          updated_at?: string
+          user_id?: string
+          version_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tailored_resumes_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       timeline_events: {
         Row: {
           application_id: string
