@@ -131,16 +131,42 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
   };
 
   const handleAnalyze = async () => {
-    if (!resumeText) {
+    // Ensure we have resume text
+    let textToUse = resumeText;
+    if (!textToUse) {
       await fetchResume();
-      if (!resumeText) return;
+      // Wait for state to update - use a ref or refetch
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('resume_text')
+        .eq('user_id', user.id)
+        .maybeSingle();
+        
+      if (!profile?.resume_text) {
+        toast({
+          title: "No Resume Found",
+          description: "Please upload your resume in your profile first.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      try {
+        const parsedData = JSON.parse(profile.resume_text);
+        textToUse = formatResumeFromJSON(parsedData);
+      } catch {
+        textToUse = profile.resume_text;
+      }
     }
 
     setAnalyzing(true);
     try {
       const { data, error } = await supabase.functions.invoke('tailor-resume', {
         body: {
-          resumeText,
+          resumeText: textToUse,
           position: application.position,
           company: application.company,
           roleSummary: application.role_summary,
