@@ -347,6 +347,16 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
   const handleGenerateTailored = async () => {
     setGenerating(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to save resumes",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('apply-tailored-suggestions', {
         body: {
           originalResume: originalResume,
@@ -367,10 +377,28 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
         return;
       }
 
-      setTailoredResume(data.tailoredResume);
+      const tailoredText = data.tailoredResume;
+      setTailoredResume(tailoredText);
+
+      // Automatically save the tailored resume
+      const versionName = `${application.position} at ${application.company} - ${new Date().toLocaleDateString()}`;
+
+      const { error: saveError } = await supabase
+        .from('tailored_resumes')
+        .insert({
+          user_id: user.id,
+          application_id: application.id,
+          version_name: versionName,
+          resume_text: tailoredText,
+          position: application.position,
+          company: application.company,
+        });
+
+      if (saveError) throw saveError;
+
       toast({
-        title: "Success",
-        description: "Tailored resume generated successfully!",
+        title: "Success!",
+        description: "Tailored resume generated and saved to your profile.",
       });
     } catch (error) {
       console.error('Error generating tailored resume:', error);
@@ -612,36 +640,17 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
               </>
             )}
             {tailoredResume && (
-              <>
-                <Button
-                  onClick={() => {
-                    setTailoredResume("");
-                    setAnalysis("");
-                  }}
-                  variant="outline"
-                  className="gap-2"
-                >
-                  <FileText className="h-4 w-4" />
-                  Start Over
-                </Button>
-                <Button
-                  onClick={handleSaveTailoredResume}
-                  disabled={saving}
-                  className="gap-2"
-                >
-                  {saving ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Download className="h-4 w-4" />
-                      Save to Profile
-                    </>
-                  )}
-                </Button>
-              </>
+              <Button
+                onClick={() => {
+                  setTailoredResume("");
+                  setAnalysis("");
+                }}
+                variant="outline"
+                className="gap-2"
+              >
+                <FileText className="h-4 w-4" />
+                Create Another Version
+              </Button>
             )}
           </div>
         </div>
