@@ -45,6 +45,7 @@ import {
   Crown,
   ChevronDown,
   ChevronUp,
+  MessageSquare,
   Edit2,
   Trash2,
   X,
@@ -135,6 +136,7 @@ const ApplicationDetail = () => {
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [suggesting, setSuggesting] = useState<Record<string, boolean>>({});
   const [improving, setImproving] = useState<Record<string, boolean>>({});
+  const [makingNatural, setMakingNatural] = useState<Record<string, boolean>>({});
   const [calculatingConfidence, setCalculatingConfidence] = useState<Record<string, boolean>>({});
   const [confidenceScores, setConfidenceScores] = useState<Record<string, { score: number; reasoning: string; suggestions?: string }>>({});
   const [expandedConfidence, setExpandedConfidence] = useState<string | null>(null);
@@ -776,6 +778,64 @@ const ApplicationDetail = () => {
       questions.find(q => q.id === currentImprovement.questionId)?.question_text || '', 
       userInstructions
     );
+  };
+
+  const handleMakeNatural = async (questionId: string, questionText: string) => {
+    if (!application) return;
+
+    const currentAnswer = answers[questionId];
+    if (!currentAnswer || currentAnswer.trim().length < 10) {
+      toast({
+        title: "No Answer to Rewrite",
+        description: "Please write an answer first before making it more natural.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setMakingNatural((prev) => ({ ...prev, [questionId]: true }));
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const response = await supabase.functions.invoke('improve-answer', {
+        body: {
+          questionText: questionText,
+          currentAnswer: currentAnswer,
+          company: application.company,
+          position: application.position,
+          resumeText: userProfile?.resume_text || undefined,
+          userInstructions: "Rewrite this to sound more natural and conversational. Remove any corporate buzzwords, overly formal language, or AI-sounding phrases. Make it sound like a real person wrote it - authentic, direct, and genuine. Keep the same information but make it flow more naturally.",
+        },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      if (response.data?.success && response.data.improvedVersion) {
+        setAnswers((prev) => ({ ...prev, [questionId]: response.data.improvedVersion }));
+        
+        toast({
+          title: "Made More Natural",
+          description: "Your answer has been rewritten to sound more conversational.",
+        });
+      } else {
+        throw new Error(response.data?.error || 'Failed to make answer more natural');
+      }
+    } catch (error) {
+      console.error('Error making answer natural:', error);
+      toast({
+        title: "Rewrite Failed",
+        description: error instanceof Error ? error.message : "Could not rewrite answer. Please try again.",
+        variant: "destructive",
+      });
+    }
+
+    setMakingNatural((prev) => ({ ...prev, [questionId]: false }));
   };
 
   const handleCalculateConfidence = async (questionId: string, questionText: string) => {
@@ -1805,6 +1865,7 @@ const ApplicationDetail = () => {
                 const isSaving = saving[question.id];
                 const isSuggesting = suggesting[question.id];
                 const isImproving = improving[question.id];
+                const isMakingNatural = makingNatural[question.id];
                 const hasCurrentAnswer = answers[question.id]?.trim();
 
                 const isFileUpload = (() => {
@@ -2106,6 +2167,24 @@ const ApplicationDetail = () => {
                                   <>
                                     <Lightbulb className="h-3 w-3 mr-1.5" />
                                     Improve
+                                  </>
+                                )}
+                              </Button>
+                              <Button
+                                onClick={() => handleMakeNatural(question.id, question.question_text)}
+                                disabled={isMakingNatural}
+                                variant="outline"
+                                size="sm"
+                              >
+                                {isMakingNatural ? (
+                                  <>
+                                    <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
+                                    Rewriting...
+                                  </>
+                                ) : (
+                                  <>
+                                    <MessageSquare className="h-3 w-3 mr-1.5" />
+                                    More Natural
                                   </>
                                 )}
                               </Button>
