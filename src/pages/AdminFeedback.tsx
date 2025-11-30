@@ -140,7 +140,11 @@ const AdminFeedback = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
-      const updates: any = {
+      const updates: {
+        status: string;
+        resolved_at?: string;
+        resolved_by?: string;
+      } = {
         status: newStatus,
       };
 

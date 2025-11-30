@@ -9,6 +9,14 @@ import { Loader2, Sparkles, User, Trash2 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { FormattedNotes } from "@/components/FormattedNotes";
 
+interface InterviewPrep {
+  talkingPoints?: string[];
+  commonGround?: string[];
+  questionsToAsk?: string[];
+  areasToEmphasize?: string[];
+  potentialConcerns?: string[];
+}
+
 interface Interviewer {
   id: string;
   name: string;
@@ -17,8 +25,8 @@ interface Interviewer {
   email: string | null;
   linkedin_url: string | null;
   notes: string | null;
-  extracted_data: any;
-  interview_prep: any;
+  extracted_data: Record<string, unknown> | null;
+  interview_prep: InterviewPrep | null;
 }
 
 interface InterviewPrepCardProps {
@@ -78,11 +86,12 @@ export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: In
         description: "Interviewer deleted successfully",
       });
       onDelete();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting interviewer:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to delete interviewer";
       toast({
         title: t("toast.error"),
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     }

@@ -8,6 +8,28 @@ import { useToast } from "@/hooks/use-toast";
 import ReactMarkdown from "react-markdown";
 import { Card } from "@/components/ui/card";
 
+interface ResumeItem {
+  [key: string]: string | string[] | undefined;
+}
+
+interface ResumeData {
+  full_name?: string;
+  email?: string;
+  phone?: string;
+  location?: string;
+  linkedin_url?: string;
+  website_url?: string;
+  summary?: string;
+  experience?: ResumeItem[];
+  education?: ResumeItem[];
+  skills?: string[];
+  certifications?: (string | ResumeItem)[];
+  publications?: (string | ResumeItem)[];
+  projects?: ResumeItem[];
+  awards?: (string | ResumeItem)[];
+  languages?: (string | ResumeItem)[];
+}
+
 interface ResumeTailorDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -15,7 +37,7 @@ interface ResumeTailorDialogProps {
     id: string;
     company: string;
     position: string;
-    role_summary?: any;
+    role_summary?: Record<string, unknown>;
   };
 }
 
@@ -78,7 +100,7 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
     return text;
   };
 
-  const formatResumeFromJSON = (jsonData: any): string => {
+  const formatResumeFromJSON = (jsonData: ResumeData): string => {
     let formatted = '';
     
     // Basic info
@@ -90,29 +112,29 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
     if (jsonData.website_url) formatted += `Website: ${jsonData.website_url}\n`;
     
     // Summary
-    if (jsonData.summary) {
+    if (jsonData.summary && typeof jsonData.summary === 'string') {
       formatted += `\n## Professional Summary\n${formatHTMLContent(jsonData.summary)}\n`;
     }
     
     // Experience
-    if (jsonData.experience?.length > 0) {
+    if (Array.isArray(jsonData.experience) && jsonData.experience.length > 0) {
       formatted += `\n## Experience\n`;
-      jsonData.experience.forEach((exp: any) => {
+      jsonData.experience.forEach((exp: ResumeItem) => {
         formatted += `\n### ${exp.position} at ${exp.company}\n`;
         if (exp.location) formatted += `${exp.location}\n`;
         if (exp.start_date || exp.end_date) {
           formatted += `${exp.start_date || ''} - ${exp.end_date || ''}\n`;
         }
-        if (exp.description) {
+        if (exp.description && typeof exp.description === 'string') {
           formatted += `${formatHTMLContent(exp.description)}\n`;
         }
       });
     }
     
     // Education
-    if (jsonData.education?.length > 0) {
+    if (Array.isArray(jsonData.education) && jsonData.education.length > 0) {
       formatted += `\n## Education\n`;
-      jsonData.education.forEach((edu: any) => {
+      jsonData.education.forEach((edu: ResumeItem) => {
         formatted += `\n### ${edu.degree} in ${edu.field || ''}\n`;
         formatted += `${edu.institution}\n`;
         if (edu.location) formatted += `${edu.location}\n`;
@@ -120,62 +142,70 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
           formatted += `${edu.start_date || ''} - ${edu.end_date || ''}\n`;
         }
         if (edu.gpa) formatted += `GPA: ${edu.gpa}\n`;
-        if (edu.honors?.length > 0) formatted += `Honors: ${edu.honors.join(', ')}\n`;
-        if (edu.description) formatted += `${formatHTMLContent(edu.description)}\n`;
+        if (edu.honors && Array.isArray(edu.honors)) formatted += `Honors: ${edu.honors.join(', ')}\n`;
+        const eduDesc = edu.description;
+        if (eduDesc) formatted += `${typeof eduDesc === 'string' ? formatHTMLContent(eduDesc) : eduDesc}\n`;
       });
     }
     
     // Skills
-    if (jsonData.skills?.length > 0) {
+    if (Array.isArray(jsonData.skills) && jsonData.skills.length > 0) {
       formatted += `\n## Skills\n${jsonData.skills.join(', ')}\n`;
     }
     
     // Certifications
-    if (jsonData.certifications?.length > 0) {
+    if (Array.isArray(jsonData.certifications) && jsonData.certifications.length > 0) {
       formatted += `\n## Certifications\n`;
-      jsonData.certifications.forEach((cert: any) => {
-        formatted += `- ${cert.name} (${cert.issuer}, ${cert.date})\n`;
+      jsonData.certifications.forEach((cert: string | ResumeItem) => {
+        if (typeof cert === 'string') {
+          formatted += `- ${cert}\n`;
+        } else {
+          formatted += `- ${cert.name} (${cert.issuer}, ${cert.date})\n`;
+        }
       });
     }
     
     // Publications
-    if (jsonData.publications?.length > 0) {
+    if (Array.isArray(jsonData.publications) && jsonData.publications.length > 0) {
       formatted += `\n## Publications\n`;
-      jsonData.publications.forEach((pub: any) => {
-        formatted += `- ${pub.title || pub}`;
-        if (typeof pub === 'object') {
+      jsonData.publications.forEach((pub: string | ResumeItem) => {
+        if (typeof pub === 'string') {
+          formatted += `- ${pub}\n`;
+        } else {
+          formatted += `- ${pub.title || pub}`;
           if (pub.authors) formatted += ` by ${pub.authors}`;
           if (pub.journal) formatted += `, ${pub.journal}`;
           if (pub.year) formatted += ` (${pub.year})`;
           if (pub.url) formatted += ` - ${pub.url}`;
+          formatted += `\n`;
         }
-        formatted += `\n`;
       });
     }
     
     // Projects
-    if (jsonData.projects?.length > 0) {
+    if (Array.isArray(jsonData.projects) && jsonData.projects.length > 0) {
       formatted += `\n## Projects\n`;
-      jsonData.projects.forEach((proj: any) => {
+      jsonData.projects.forEach((proj: ResumeItem) => {
         formatted += `\n### ${proj.name || proj.title}\n`;
-        if (proj.description) formatted += `${formatHTMLContent(proj.description)}\n`;
+        const projDesc = proj.description;
+        if (projDesc) formatted += `${typeof projDesc === 'string' ? formatHTMLContent(projDesc) : projDesc}\n`;
         if (proj.technologies) formatted += `Technologies: ${Array.isArray(proj.technologies) ? proj.technologies.join(', ') : proj.technologies}\n`;
         if (proj.url) formatted += `URL: ${proj.url}\n`;
       });
     }
     
     // Awards & Honors
-    if (jsonData.awards?.length > 0) {
+    if (Array.isArray(jsonData.awards) && jsonData.awards.length > 0) {
       formatted += `\n## Awards & Honors\n`;
-      jsonData.awards.forEach((award: any) => {
+      jsonData.awards.forEach((award: string | ResumeItem) => {
         formatted += `- ${typeof award === 'string' ? award : `${award.name || award.title} (${award.year || ''})`}\n`;
       });
     }
     
     // Languages
-    if (jsonData.languages?.length > 0) {
+    if (Array.isArray(jsonData.languages) && jsonData.languages.length > 0) {
       formatted += `\n## Languages\n`;
-      jsonData.languages.forEach((lang: any) => {
+      jsonData.languages.forEach((lang: string | ResumeItem) => {
         formatted += `- ${typeof lang === 'string' ? lang : `${lang.language}: ${lang.proficiency || ''}`}\n`;
       });
     }
