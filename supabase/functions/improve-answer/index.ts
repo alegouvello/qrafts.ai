@@ -70,6 +70,10 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Extract character limit from question text
+    const charLimitMatch = questionText.match(/(?:max|maximum|limit|allowed|up to)\s*(\d+)\s*characters?/i);
+    const characterLimit = charLimitMatch ? parseInt(charLimitMatch[1]) : null;
+    
     // Build resume context
     const resumeContext = resumeText 
       ? `\n\n**Candidate's Resume/Background:**\n${resumeText.substring(0, 3000)}\n\n**CRITICAL:** Use ONLY real experiences and information from the candidate's resume above. Do not invent or hallucinate any roles, companies, or achievements. Base all improvements on actual resume content.`
@@ -78,6 +82,11 @@ Deno.serve(async (req) => {
     const instructionsContext = userInstructions 
       ? `\n\n**Specific Instructions from User:**\n${userInstructions}\n\n**IMPORTANT:** Make sure to incorporate these specific requests in your improved version.`
       : '';
+    
+    // Build character limit constraint
+    const lengthConstraint = characterLimit 
+      ? `   - **CRITICAL: Must be EXACTLY ${characterLimit} characters or less (current answer is ${currentAnswer.length} characters)**`
+      : '   - Is 150-300 words';
 
     // Build prompt for AI
     const improvementPrompt = `You are an expert career coach reviewing a job application answer.
@@ -106,7 +115,7 @@ Provide a comprehensive critique and improvement of this answer. Structure your 
    - Uses stronger action verbs and concrete examples
    - Is well-structured with clear flow
    - Shows enthusiasm and cultural fit
-   - Is 150-300 words${resumeText ? '\n   - **Uses ONLY real information from the provided resume - do not invent roles, companies, or achievements**' : ''}${userInstructions ? '\n   - **Incorporates the specific instructions provided by the user**' : ''}
+${lengthConstraint}${resumeText ? '\n   - **Uses ONLY real information from the provided resume - do not invent roles, companies, or achievements**' : ''}${userInstructions ? '\n   - **Incorporates the specific instructions provided by the user**' : ''}
 
 Format your response EXACTLY as follows:
 
