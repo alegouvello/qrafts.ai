@@ -6,11 +6,56 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { CheckCircle2, XCircle, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
 
+interface ResumeItem {
+  [key: string]: string | string[] | undefined;
+  title?: string;
+  position?: string;
+  company?: string;
+  description?: string;
+  duration?: string;
+  start_date?: string;
+  end_date?: string;
+  degree?: string;
+  school?: string;
+  institution?: string;
+  year?: string;
+  field?: string;
+  name?: string;
+  issuer?: string;
+  publisher?: string;
+  date?: string;
+  url?: string;
+  language?: string;
+  proficiency?: string;
+  role?: string;
+  organization?: string;
+}
+
+interface ResumeData {
+  full_name?: string;
+  email?: string;
+  phone?: string;
+  location?: string;
+  linkedin_url?: string;
+  website_url?: string;
+  summary?: string;
+  skills?: string[];
+  experience?: ResumeItem[];
+  education?: ResumeItem[];
+  certifications?: (string | ResumeItem)[];
+  projects?: ResumeItem[];
+  publications?: (string | ResumeItem)[];
+  awards?: (string | ResumeItem)[];
+  languages?: (string | ResumeItem)[];
+  volunteer_work?: ResumeItem[];
+  volunteer?: ResumeItem[];
+}
+
 interface EnhancementPreviewDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  currentData: any;
-  enhancedData: any;
+  currentData: ResumeData;
+  enhancedData: ResumeData;
   onApprove: (selectedSections: string[]) => void;
   onReject: () => void;
   loading?: boolean;
@@ -64,7 +109,7 @@ export function EnhancementPreviewDialog({
     onApprove(Array.from(selectedSections));
   };
   
-  const renderArrayComparison = (label: string, sectionKey: string, current: any[], enhanced: any[]) => {
+  const renderArrayComparison = (label: string, sectionKey: string, current: (string | ResumeItem)[], enhanced: (string | ResumeItem)[]) => {
     const currentItems = current || [];
     const enhancedItems = enhanced || [];
     
@@ -78,7 +123,7 @@ export function EnhancementPreviewDialog({
     }
 
     // Helper to format objects in a readable way
-    const formatItem = (item: any) => {
+    const formatItem = (item: string | ResumeItem): string | { title: string; description: string; isHTML: boolean } => {
       if (typeof item === 'string') return item;
       
       // Format experience/work items (handle both title/position fields)
@@ -89,7 +134,7 @@ export function EnhancementPreviewDialog({
         return {
           title: `${jobTitle} at ${item.company}${duration ? ` (${duration})` : ''}`,
           description: item.description || '',
-          isHTML: item.description?.includes('<ul>') || item.description?.includes('<li>')
+          isHTML: item.description?.includes('<ul>') || item.description?.includes('<li>') || false
         };
       }
       
@@ -156,11 +201,11 @@ export function EnhancementPreviewDialog({
               ) : (
                 currentItems.map((item, idx) => {
                   const formatted = formatItem(item);
-                  const isComplex = typeof formatted === 'object' && formatted.title;
+                  const isComplex = typeof formatted === 'object' && 'title' in formatted;
                   
                   return (
                     <div key={idx} className="p-3 bg-muted/30 rounded text-xs">
-                      {isComplex ? (
+                      {isComplex && typeof formatted === 'object' && 'title' in formatted ? (
                         <>
                           <div className="font-semibold mb-2">{formatted.title}</div>
                           {formatted.isHTML ? (
@@ -173,7 +218,7 @@ export function EnhancementPreviewDialog({
                           )}
                         </>
                       ) : (
-                        <pre className="whitespace-pre-wrap font-sans">{formatted}</pre>
+                        <pre className="whitespace-pre-wrap font-sans">{typeof formatted === 'string' ? formatted : JSON.stringify(formatted)}</pre>
                       )}
                     </div>
                   );
@@ -191,7 +236,7 @@ export function EnhancementPreviewDialog({
               ) : (
                 enhancedItems.map((item, idx) => {
                   const formatted = formatItem(item);
-                  const isComplex = typeof formatted === 'object' && formatted.title;
+                  const isComplex = typeof formatted === 'object' && 'title' in formatted;
                   
                   return (
                     <div 
@@ -202,7 +247,7 @@ export function EnhancementPreviewDialog({
                           : 'bg-muted/30 border-muted'
                       }`}
                     >
-                      {isComplex ? (
+                      {isComplex && typeof formatted === 'object' && 'title' in formatted ? (
                         <>
                           <div className="font-semibold mb-2">{formatted.title}</div>
                           {formatted.isHTML ? (
@@ -215,7 +260,7 @@ export function EnhancementPreviewDialog({
                           )}
                         </>
                       ) : (
-                        <pre className="whitespace-pre-wrap font-sans">{formatted}</pre>
+                        <pre className="whitespace-pre-wrap font-sans">{typeof formatted === 'string' ? formatted : JSON.stringify(formatted)}</pre>
                       )}
                     </div>
                   );
@@ -340,7 +385,7 @@ export function EnhancementPreviewDialog({
             
             {renderArrayComparison("Languages", "languages", currentData?.languages || [], enhancedData?.languages || [])}
             
-            {renderArrayComparison("Volunteer Work", "volunteer_work", currentData?.volunteer || [], enhancedData?.volunteer || [])}
+            {renderArrayComparison("Volunteer Work", "volunteer_work", currentData?.volunteer_work || currentData?.volunteer || [], enhancedData?.volunteer_work || enhancedData?.volunteer || [])}
           </div>
         </ScrollArea>
 

@@ -45,7 +45,7 @@ export function EditProfileDialog({ open, onOpenChange, onSaved }: EditProfileDi
   const [skillInput, setSkillInput] = useState("");
   const [experience, setExperience] = useState<Experience[]>([]);
   const [education, setEducation] = useState<Education[]>([]);
-  const [existingResumeData, setExistingResumeData] = useState<any>(null);
+  const [existingResumeData, setExistingResumeData] = useState<Record<string, unknown> | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -85,7 +85,7 @@ export function EditProfileDialog({ open, onOpenChange, onSaved }: EditProfileDi
           setSkills(parsed.skills || []);
           
           // Convert plain text with bullet points to proper HTML for experience
-          const processedExperience = (parsed.experience || []).map((exp: any) => {
+          const processedExperience = (parsed.experience || []).map((exp: Experience) => {
             if (exp.description && !exp.description.includes('<')) {
               exp.description = convertBulletsToHTML(exp.description);
             }
