@@ -18,6 +18,7 @@ import { InterviewPrepCard } from "@/components/InterviewPrepCard";
 import { AddQuestionDialog } from "@/components/AddQuestionDialog";
 import { ResumeTailorDialog } from "@/components/ResumeTailorDialog";
 import { SavedResumesDialog } from "@/components/SavedResumesDialog";
+import { NaturalToneDialog } from "@/components/NaturalToneDialog";
 import { useToast } from "@/hooks/use-toast";
 import ReactMarkdown from "react-markdown";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -155,6 +156,7 @@ const ApplicationDetail = () => {
   const [showAddQuestionDialog, setShowAddQuestionDialog] = useState(false);
   const [showResumeTailorDialog, setShowResumeTailorDialog] = useState(false);
   const [showSavedResumesDialog, setShowSavedResumesDialog] = useState(false);
+  const [showNaturalToneDialog, setShowNaturalToneDialog] = useState(false);
   const [savedTailoredResume, setSavedTailoredResume] = useState<any>(null);
   const [loadingTailoredResume, setLoadingTailoredResume] = useState(false);
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
@@ -165,6 +167,11 @@ const ApplicationDetail = () => {
     strengths: string;
     improvements: string;
     improvedVersion: string;
+  } | null>(null);
+  const [currentNaturalPreview, setCurrentNaturalPreview] = useState<{
+    questionId: string;
+    originalAnswer: string;
+    naturalAnswer: string;
   } | null>(null);
   const [logoError, setLogoError] = useState(false);
   const [userProfile, setUserProfile] = useState<{
@@ -817,12 +824,13 @@ const ApplicationDetail = () => {
       }
 
       if (response.data?.success && response.data.improvedVersion) {
-        setAnswers((prev) => ({ ...prev, [questionId]: response.data.improvedVersion }));
-        
-        toast({
-          title: "Made More Natural",
-          description: "Your answer has been rewritten to sound more conversational.",
+        // Show preview dialog instead of directly applying
+        setCurrentNaturalPreview({
+          questionId: questionId,
+          originalAnswer: currentAnswer,
+          naturalAnswer: response.data.improvedVersion,
         });
+        setShowNaturalToneDialog(true);
       } else {
         throw new Error(response.data?.error || 'Failed to make answer more natural');
       }
@@ -836,6 +844,23 @@ const ApplicationDetail = () => {
     }
 
     setMakingNatural((prev) => ({ ...prev, [questionId]: false }));
+  };
+
+  const handleApplyNaturalTone = () => {
+    if (!currentNaturalPreview) return;
+
+    setAnswers((prev) => ({
+      ...prev,
+      [currentNaturalPreview.questionId]: currentNaturalPreview.naturalAnswer,
+    }));
+
+    toast({
+      title: "Natural Version Applied",
+      description: "The more conversational version has been applied. Don't forget to save!",
+    });
+
+    setShowNaturalToneDialog(false);
+    setCurrentNaturalPreview(null);
   };
 
   const handleCalculateConfidence = async (questionId: string, questionText: string) => {
@@ -2490,6 +2515,17 @@ const ApplicationDetail = () => {
         open={showSavedResumesDialog}
         onOpenChange={setShowSavedResumesDialog}
       />
+
+      {/* Natural Tone Dialog */}
+      {currentNaturalPreview && (
+        <NaturalToneDialog
+          open={showNaturalToneDialog}
+          onOpenChange={setShowNaturalToneDialog}
+          originalAnswer={currentNaturalPreview.originalAnswer}
+          naturalAnswer={currentNaturalPreview.naturalAnswer}
+          onApply={handleApplyNaturalTone}
+        />
+      )}
       
       <Footer />
     </div>
