@@ -110,12 +110,23 @@ Provide a comprehensive critique and improvement of this answer. Structure your 
 
 3. **Improved Version**: A rewritten, enhanced version of the answer that:
    - Maintains the candidate's voice and genuine experiences
+   - Sounds natural and human - NOT like AI-generated text
+   - Avoids buzzwords, corporate jargon, and overly formal language
+   - Uses conversational tone with personality, not robotic perfection
    - Addresses all the weaknesses identified
    - Is more specific, compelling, and professional
    - Uses stronger action verbs and concrete examples
    - Is well-structured with clear flow
    - Shows enthusiasm and cultural fit
 ${lengthConstraint}${resumeText ? '\n   - **Uses ONLY real information from the provided resume - do not invent roles, companies, or achievements**' : ''}${userInstructions ? '\n   - **Incorporates the specific instructions provided by the user**' : ''}
+
+**CRITICAL AUTHENTICITY RULES:**
+- Write like a real person, not an AI
+- Avoid phrases like "I'm thrilled", "I'm excited to leverage", "passionate about", "deep dive", "synergy"
+- Don't overuse adjectives or superlatives
+- Keep sentences varied in length - mix short and long
+- Use simple, direct language over complex vocabulary
+- Include natural imperfections in structure (not every sentence needs perfect parallel structure)
 
 Format your response EXACTLY as follows:
 
@@ -143,7 +154,7 @@ IMPROVED VERSION:
         messages: [
           {
             role: 'system',
-            content: 'You are an expert career coach who provides constructive, specific feedback on job application answers. You help candidates strengthen their responses while maintaining their authentic voice.'
+            content: 'You are an expert career coach who provides constructive, specific feedback on job application answers. You help candidates strengthen their responses while maintaining their authentic voice and natural writing style. You avoid corporate buzzwords and AI-sounding language. Your improved versions sound like they were written by a real, thoughtful person - not a robot.'
           },
           {
             role: 'user',
