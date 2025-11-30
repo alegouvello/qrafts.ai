@@ -793,29 +793,31 @@ const ApplicationDetail = () => {
     const currentAnswer = answers[questionId];
     if (!currentAnswer || currentAnswer.trim().length < 10) {
       toast({
-        title: "No Answer to Rewrite",
-        description: "Please write an answer first before making it more natural.",
+        title: "Add an answer first",
+        description: "Please write an answer before making it more natural.",
         variant: "destructive",
       });
       return;
     }
-    
+
     setMakingNatural((prev) => ({ ...prev, [questionId]: true }));
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('resume_text')
+        .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+        .single();
+
       const response = await supabase.functions.invoke('improve-answer', {
         body: {
           questionText: questionText,
           currentAnswer: currentAnswer,
           company: application.company,
           position: application.position,
-          resumeText: userProfile?.resume_text || undefined,
+          resumeText: profile?.resume_text || '',
           userInstructions: "Rewrite this to sound more natural and conversational. Remove any corporate buzzwords, overly formal language, or AI-sounding phrases. Make it sound like a real person wrote it - authentic, direct, and genuine. Keep the same information but make it flow more naturally.",
-        },
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`,
+          formalityLevel: 2, // Default to balanced
         },
       });
 
@@ -837,13 +839,71 @@ const ApplicationDetail = () => {
     } catch (error) {
       console.error('Error making answer natural:', error);
       toast({
-        title: "Rewrite Failed",
-        description: error instanceof Error ? error.message : "Could not rewrite answer. Please try again.",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to make answer more natural. Please try again.",
         variant: "destructive",
       });
     }
 
     setMakingNatural((prev) => ({ ...prev, [questionId]: false }));
+  };
+
+  const handleRegenerateNaturalTone = async (formalityLevel: number) => {
+    if (!application || !currentNaturalPreview) return;
+
+    const questionText = questions.find(q => q.id === currentNaturalPreview.questionId)?.question_text || '';
+    
+    setMakingNatural((prev) => ({ ...prev, [currentNaturalPreview.questionId]: true }));
+
+    try {
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('resume_text')
+        .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+        .single();
+
+      const formalityInstructions = [
+        "Rewrite this in a very casual, friendly tone - like you're talking to a friend. Use contractions, simple words, and a relaxed style.",
+        "Rewrite this in a casual but clear tone. Keep it conversational and approachable while staying professional enough for a job application.",
+        "Rewrite this to sound natural and conversational. Balance professionalism with authenticity. Remove corporate buzzwords and overly formal language.",
+        "Rewrite this in a professional but personable tone. Use clear, direct language with appropriate business terminology while maintaining warmth.",
+        "Rewrite this in a very professional, polished tone. Use sophisticated vocabulary and formal structure appropriate for senior positions."
+      ];
+
+      const response = await supabase.functions.invoke('improve-answer', {
+        body: {
+          questionText: questionText,
+          currentAnswer: currentNaturalPreview.originalAnswer,
+          company: application.company,
+          position: application.position,
+          resumeText: profile?.resume_text || '',
+          userInstructions: formalityInstructions[formalityLevel],
+          formalityLevel: formalityLevel,
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      if (response.data?.success && response.data.improvedVersion) {
+        setCurrentNaturalPreview({
+          ...currentNaturalPreview,
+          naturalAnswer: response.data.improvedVersion,
+        });
+      } else {
+        throw new Error(response.data?.error || 'Failed to regenerate with new tone');
+      }
+    } catch (error) {
+      console.error('Error regenerating natural tone:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to regenerate with new tone. Please try again.",
+        variant: "destructive",
+      });
+    }
+
+    setMakingNatural((prev) => ({ ...prev, [currentNaturalPreview.questionId]: false }));
   };
 
   const handleApplyNaturalTone = () => {
@@ -2524,6 +2584,8 @@ const ApplicationDetail = () => {
           originalAnswer={currentNaturalPreview.originalAnswer}
           naturalAnswer={currentNaturalPreview.naturalAnswer}
           onApply={handleApplyNaturalTone}
+          onRegenerate={handleRegenerateNaturalTone}
+          isRegenerating={makingNatural[currentNaturalPreview.questionId] || false}
         />
       )}
       
