@@ -14,6 +14,7 @@ const requestSchema = z.object({
   position: z.string().trim().min(1).max(200),
   resumeText: z.string().max(50000).optional(),
   userInstructions: z.string().trim().max(1000).optional(),
+  formalityLevel: z.number().min(0).max(4).optional(),
 });
 
 Deno.serve(async (req) => {
@@ -52,10 +53,11 @@ Deno.serve(async (req) => {
       company, 
       position,
       resumeText,
-      userInstructions 
+      userInstructions,
+      formalityLevel = 2 // Default to balanced
     } = requestSchema.parse(requestBody);
     
-    console.log('Improving answer');
+    console.log('Improving answer with formality level:', formalityLevel);
 
     if (!currentAnswer || currentAnswer.trim().length < 10) {
       return new Response(

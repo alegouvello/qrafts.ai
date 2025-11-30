@@ -8,7 +8,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, ArrowRight } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { MessageSquare, ArrowRight, Loader2 } from "lucide-react";
 
 interface NaturalToneDialogProps {
   open: boolean;
@@ -16,6 +17,8 @@ interface NaturalToneDialogProps {
   originalAnswer: string;
   naturalAnswer: string;
   onApply: () => void;
+  onRegenerate: (formalityLevel: number) => Promise<void>;
+  isRegenerating?: boolean;
 }
 
 export const NaturalToneDialog = ({
@@ -24,8 +27,11 @@ export const NaturalToneDialog = ({
   originalAnswer,
   naturalAnswer,
   onApply,
+  onRegenerate,
+  isRegenerating = false,
 }: NaturalToneDialogProps) => {
   const [applied, setApplied] = useState(false);
+  const [formalityLevel, setFormalityLevel] = useState<number>(2); // Default to "Balanced" (index 2)
 
   const handleApply = () => {
     setApplied(true);
@@ -35,6 +41,20 @@ export const NaturalToneDialog = ({
       setApplied(false);
     }, 300);
   };
+
+  const handleFormalityChange = async (value: number[]) => {
+    const newLevel = value[0];
+    setFormalityLevel(newLevel);
+    await onRegenerate(newLevel);
+  };
+
+  const formalityLabels = [
+    "Very Casual",
+    "Casual", 
+    "Balanced",
+    "Professional",
+    "Very Professional"
+  ];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -48,6 +68,37 @@ export const NaturalToneDialog = ({
             Compare your original answer with the more natural, conversational version
           </p>
         </DialogHeader>
+
+        {/* Formality Slider */}
+        <Card className="p-4 space-y-3 mt-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-sm">Tone Formality</h3>
+            <Badge variant="outline" className="text-xs">
+              {formalityLabels[formalityLevel]}
+            </Badge>
+          </div>
+          <div className="space-y-2">
+            <Slider
+              value={[formalityLevel]}
+              onValueChange={handleFormalityChange}
+              min={0}
+              max={4}
+              step={1}
+              disabled={isRegenerating}
+              className="w-full"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>Casual</span>
+              <span>Professional</span>
+            </div>
+          </div>
+          {isRegenerating && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Regenerating with new tone...
+            </div>
+          )}
+        </Card>
 
         <div className="grid md:grid-cols-2 gap-4 mt-4">
           {/* Original Answer */}
