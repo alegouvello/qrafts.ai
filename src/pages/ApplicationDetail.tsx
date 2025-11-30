@@ -1144,18 +1144,9 @@ const ApplicationDetail = () => {
       }
 
       if (response.data?.success) {
-        const parts = [];
-        if (response.data.company && response.data.position) {
-          parts.push(`Updated: ${response.data.company} - ${response.data.position}`);
-        }
-        if (response.data.roleSummary) {
-          parts.push('Role details extracted');
-        }
-        parts.push(`${response.data.questionsFound} questions found`);
-        
         toast({
           title: "Re-extraction Complete",
-          description: parts.join('. '),
+          description: `${response.data.questionsFound} questions found and extracted.`,
         });
         
         // Wait a moment for database to fully update, then refresh
