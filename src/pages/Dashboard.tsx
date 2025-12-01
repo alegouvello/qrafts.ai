@@ -314,11 +314,12 @@ const Dashboard = () => {
       description: "Extracting job details and questions...",
     });
 
-    // Extract questions and job info in the background
+    // Extract job details and questions in the background
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
-      const response = await supabase.functions.invoke('extract-job-questions', {
+      // First, extract company, position, and job summary
+      const jobInfoResponse = await supabase.functions.invoke('refresh-job-description', {
         body: {
           applicationId: newApp.id,
           jobUrl: data.url,
@@ -328,19 +329,33 @@ const Dashboard = () => {
         },
       });
 
-      if (response.data?.success) {
+      // Then extract application questions
+      const questionsResponse = await supabase.functions.invoke('extract-job-questions', {
+        body: {
+          applicationId: newApp.id,
+          jobUrl: data.url,
+        },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
+
+      if (jobInfoResponse.data?.success || questionsResponse.data?.success) {
         const parts = [];
-        if (response.data.company && response.data.position) {
-          parts.push(`Company: ${response.data.company}, Position: ${response.data.position}`);
+        if (jobInfoResponse.data?.company && jobInfoResponse.data?.position) {
+          parts.push(`${jobInfoResponse.data.company} - ${jobInfoResponse.data.position}`);
         }
-        parts.push(`${response.data.questionsFound} questions extracted`);
+        if (questionsResponse.data?.questionsFound) {
+          parts.push(`${questionsResponse.data.questionsFound} questions extracted`);
+        }
         
         toast({
           title: "Extraction Complete",
-          description: parts.join('. '),
+          description: parts.length > 0 ? parts.join('. ') : 'Job details extracted',
         });
       } else {
-        console.error('Failed to extract:', response.data?.error);
+        console.error('Failed to extract job info:', jobInfoResponse.data?.error);
+        console.error('Failed to extract questions:', questionsResponse.data?.error);
         toast({
           title: "Extraction Issue",
           description: "Could not extract all details. You can edit them manually.",
