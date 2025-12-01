@@ -400,13 +400,19 @@ const AdminFeedback = () => {
       {/* Hero Section */}
       <section 
         ref={heroSection.ref}
-        className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 overflow-hidden"
+        className={`relative container mx-auto px-4 sm:px-6 lg:px-8 overflow-hidden ${
+          feedback.length === 0 ? 'py-8 sm:py-12' : 'py-16 sm:py-20'
+        }`}
       >
-        {/* Animated gradient orbs */}
-        <div className="absolute top-20 -left-20 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-20 -right-20 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
+        {feedback.length > 0 && (
+          <>
+            {/* Animated gradient orbs */}
+            <div className="absolute top-20 -left-20 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-float" />
+            <div className="absolute bottom-20 -right-20 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
+          </>
+        )}
         
-        <div className={`grid md:grid-cols-2 gap-12 items-center transition-all duration-1000 ${
+        <div className={`${feedback.length === 0 ? 'text-center max-w-2xl mx-auto' : 'grid md:grid-cols-2 gap-12 items-center'} transition-all duration-1000 ${
           heroSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         }`}>
           <div className="space-y-6">
@@ -414,36 +420,43 @@ const AdminFeedback = () => {
               <Sparkles className="inline h-4 w-4 mr-2" />
               Admin Dashboard
             </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight tracking-tight">
+            <h1 className={`font-bold leading-tight tracking-tight ${
+              feedback.length === 0 ? 'text-3xl sm:text-4xl' : 'text-4xl sm:text-5xl md:text-6xl'
+            }`}>
               Feedback
               <span className="block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mt-2">
                 Dashboard
               </span>
             </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed max-w-lg">
+            <p className={`text-lg text-muted-foreground leading-relaxed ${
+              feedback.length === 0 ? 'mx-auto' : 'max-w-lg'
+            }`}>
               Manage and respond to user feedback, track suggestions, and improve your product based on real user insights.
             </p>
           </div>
-          <div className="relative animate-fade-in-right" style={{ animationDelay: '0.2s' }}>
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur-3xl opacity-50 animate-glow-pulse" />
-            <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-border/50 hover:scale-105 transition-transform duration-500">
-              <img 
-                src={feedbackHero}
-                alt="Feedback management dashboard illustration"
-                className="relative w-full"
-                loading="eager"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10 pointer-events-none" />
+          {feedback.length > 0 && (
+            <div className="relative animate-fade-in-right" style={{ animationDelay: '0.2s' }}>
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur-3xl opacity-50 animate-glow-pulse" />
+              <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-border/50 hover:scale-105 transition-transform duration-500">
+                <img 
+                  src={feedbackHero}
+                  alt="Feedback management dashboard illustration"
+                  className="relative w-full"
+                  loading="eager"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10 pointer-events-none" />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
       {/* Stats Section */}
-      <section 
-        ref={statsSection.ref}
-        className="relative container mx-auto px-4 sm:px-6 lg:px-8 pb-8"
-      >
+      {feedback.length > 0 && (
+        <section 
+          ref={statsSection.ref}
+          className="relative container mx-auto px-4 sm:px-6 lg:px-8 pb-8"
+        >
         <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 transition-all duration-1000 ${
           statsSection.isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
         }`}>
@@ -491,13 +504,15 @@ const AdminFeedback = () => {
             </CardContent>
           </Card>
         </div>
-      </section>
+        </section>
+      )}
 
       {/* Charts Section */}
-      <section 
-        ref={chartsSection.ref}
-        className="relative container mx-auto px-4 sm:px-6 lg:px-8 pb-8"
-      >
+      {feedback.length > 0 && (
+        <section 
+          ref={chartsSection.ref}
+          className="relative container mx-auto px-4 sm:px-6 lg:px-8 pb-8"
+        >
         <div className={`transition-all duration-1000 ${
           chartsSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         }`}>
@@ -658,11 +673,34 @@ const AdminFeedback = () => {
             </CardContent>
           </Card>
         </div>
-      </section>
+        </section>
+      )}
 
       <main className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Filters */}
-        <Card className="mb-8 border-border/50 shadow-lg">
+        {/* Show empty state prominently when no feedback */}
+        {feedback.length === 0 ? (
+          <Card className="border-border/50 shadow-xl max-w-2xl mx-auto">
+            <CardContent className="py-16 text-center">
+              <div className="relative inline-block mb-6">
+                <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl animate-glow-pulse" />
+                <MessageSquare className="relative h-20 w-20 mx-auto text-muted-foreground/30" />
+              </div>
+              <h3 className="text-2xl font-bold mb-3">No feedback yet</h3>
+              <p className="text-muted-foreground max-w-md mx-auto mb-6">
+                Once users start submitting feedback through the feedback form, it will appear here for you to review and manage.
+              </p>
+              <Button
+                onClick={() => navigate('/feedback')}
+                className="rounded-full"
+              >
+                View Feedback Form
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            {/* Filters */}
+            <Card className="mb-8 border-border/50 shadow-lg">
           <CardContent className="pt-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="relative">
@@ -860,6 +898,8 @@ const AdminFeedback = () => {
             </Card>
           )}
         </div>
+          </>
+        )}
       </main>
     </div>
   );
