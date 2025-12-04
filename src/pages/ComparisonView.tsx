@@ -43,7 +43,8 @@ const ComparisonView = () => {
   const [subscriptionStatus, setSubscriptionStatus] = useState<{
     subscribed: boolean;
     product_id: string | null;
-  }>({ subscribed: false, product_id: null });
+    is_trialing?: boolean;
+  }>({ subscribed: false, product_id: null, is_trialing: false });
 
   useEffect(() => {
     checkAuth();
@@ -162,8 +163,9 @@ const ComparisonView = () => {
   };
 
   const analyzeApplication = async (app: ApplicationWithScore) => {
-    // Check subscription status
-    if (!subscriptionStatus.subscribed) {
+    // Check subscription status (allow if subscribed OR trialing)
+    const hasAccess = subscriptionStatus.subscribed || subscriptionStatus.is_trialing;
+    if (!hasAccess) {
       toast({
         title: "Pro Feature",
         description: "AI role fit comparison is available with Qraft Pro. Upgrade to compare opportunities.",
