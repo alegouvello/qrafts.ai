@@ -432,7 +432,7 @@ const Settings = () => {
               </div>
             </CardHeader>
             <CardContent className="relative">
-              {subscriptionStatus.subscribed ? (
+              {(subscriptionStatus.subscribed || subscriptionStatus.is_trialing) ? (
                 <div className="space-y-6">
                   <div className="relative p-8 rounded-2xl bg-gradient-to-br from-success/10 via-primary/5 to-transparent border border-success/20 overflow-hidden group hover:border-success/40 transition-all">
                     <div className="absolute top-0 right-0 opacity-10 group-hover:opacity-20 transition-opacity">

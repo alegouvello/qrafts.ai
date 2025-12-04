@@ -125,7 +125,8 @@ export default function Profile() {
   const [subscriptionStatus, setSubscriptionStatus] = useState<{
     subscribed: boolean;
     product_id: string | null;
-  }>({ subscribed: false, product_id: null });
+    is_trialing?: boolean;
+  }>({ subscribed: false, product_id: null, is_trialing: false });
 
   useEffect(() => {
     checkAuth();
@@ -1363,7 +1364,7 @@ export default function Profile() {
         open={showReviewDialog} 
         onOpenChange={setShowReviewDialog}
         onProfileUpdate={fetchProfile}
-        subscribed={subscriptionStatus.subscribed}
+        subscribed={subscriptionStatus.subscribed || subscriptionStatus.is_trialing}
         onUpgrade={handleUpgrade}
       />
 

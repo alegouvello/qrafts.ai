@@ -16,6 +16,7 @@ export const useSubscription = () => {
     subscribed: false,
     product_id: null,
     subscription_end: null,
+    is_trialing: false,
   });
   const [checking, setChecking] = useState(false);
   const { toast } = useToast();

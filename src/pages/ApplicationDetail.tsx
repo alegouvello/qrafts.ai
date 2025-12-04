@@ -186,7 +186,8 @@ const ApplicationDetail = () => {
   const [subscriptionStatus, setSubscriptionStatus] = useState<{
     subscribed: boolean;
     product_id: string | null;
-  }>({ subscribed: false, product_id: null });
+    is_trialing?: boolean;
+  }>({ subscribed: false, product_id: null, is_trialing: false });
   const [interviewers, setInterviewers] = useState<Interviewer[]>([]);
   const [roleDetailsOpen, setRoleDetailsOpen] = useState(() => {
     // Default to open on desktop (width > 768px), closed on mobile
@@ -646,8 +647,9 @@ const ApplicationDetail = () => {
   const handleGetSuggestion = async (questionId: string, questionText: string) => {
     if (!application) return;
     
-    // Check subscription status
-    if (!subscriptionStatus.subscribed) {
+    // Check subscription status (allow if subscribed OR trialing)
+    const hasAccess = subscriptionStatus.subscribed || subscriptionStatus.is_trialing;
+    if (!hasAccess) {
       toast({
         title: "Pro Feature",
         description: "AI answer suggestions are available with Qraft Pro. Upgrade to get AI-powered answer suggestions.",
@@ -707,8 +709,9 @@ const ApplicationDetail = () => {
   const handleImproveAnswer = async (questionId: string, questionText: string, userInstructions?: string) => {
     if (!application) return;
 
-    // Check subscription status
-    if (!subscriptionStatus.subscribed) {
+    // Check subscription status (allow if subscribed OR trialing)
+    const hasAccess = subscriptionStatus.subscribed || subscriptionStatus.is_trialing;
+    if (!hasAccess) {
       toast({
         title: "Pro Feature",
         description: "AI answer improvements are available with Qraft Pro. Upgrade to enhance your answers with AI.",
@@ -926,8 +929,9 @@ const ApplicationDetail = () => {
   const handleCalculateConfidence = async (questionId: string, questionText: string) => {
     if (!application) return;
 
-    // Check subscription status
-    if (!subscriptionStatus.subscribed) {
+    // Check subscription status (allow if subscribed OR trialing)
+    const hasAccess = subscriptionStatus.subscribed || subscriptionStatus.is_trialing;
+    if (!hasAccess) {
       toast({
         title: "Pro Feature",
         description: "AI answer confidence scoring is available with Qraft Pro. Upgrade to evaluate your answers.",
@@ -1862,7 +1866,7 @@ const ApplicationDetail = () => {
               position={application.position}
               roleDetails={application.role_summary} 
               resumeText={userProfile?.resume_text || null}
-              subscribed={subscriptionStatus.subscribed}
+              subscribed={subscriptionStatus.subscribed || subscriptionStatus.is_trialing}
               onUpgrade={handleUpgrade}
               hideButton={true}
             />

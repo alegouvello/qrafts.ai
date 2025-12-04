@@ -260,11 +260,12 @@ const Dashboard = () => {
   };
 
   const handleAddApplication = async (data: { company?: string; position?: string; url: string }) => {
-    // Check if user has reached application limit (free users: 5 apps)
-    if (!subscriptionStatus.subscribed && applications.length >= 5) {
+    // Check if user has reached application limit (free users: 10 apps)
+    const hasAccess = subscriptionStatus.subscribed || subscriptionStatus.is_trialing;
+    if (!hasAccess && applications.length >= 10) {
       toast({
         title: "Application Limit Reached",
-        description: "Free users can track up to 5 applications. Upgrade to Pro for unlimited tracking.",
+        description: "Free users can track up to 10 applications. Upgrade to Pro for unlimited tracking.",
         variant: "destructive",
       });
       return;
@@ -447,10 +448,11 @@ const Dashboard = () => {
         subscriptionStatus={subscriptionStatus}
         applicationsCount={applications.length}
         onAddApplication={() => {
-          if (!subscriptionStatus.subscribed && applications.length >= 5) {
+          const hasAccess = subscriptionStatus.subscribed || subscriptionStatus.is_trialing;
+          if (!hasAccess && applications.length >= 10) {
             toast({
               title: "Application Limit Reached",
-              description: "Free users can track up to 5 applications. Upgrade to Pro for unlimited tracking.",
+              description: "Free users can track up to 10 applications. Upgrade to Pro for unlimited tracking.",
               variant: "destructive",
             });
           } else {
@@ -472,7 +474,7 @@ const Dashboard = () => {
       >
         <main className="relative container mx-auto px-4 py-6 sm:py-8">
         {/* Subscription Banner */}
-        {!checkingSubscription && !loading && !subscriptionStatus.subscribed && (
+        {!checkingSubscription && !loading && !subscriptionStatus.subscribed && !subscriptionStatus.is_trialing && (
           <div className="mb-6 sm:mb-8 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 border border-primary/20 backdrop-blur-sm">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex-1">
@@ -510,7 +512,7 @@ const Dashboard = () => {
         )}
 
         {/* Free tier limit warning */}
-        {!checkingSubscription && !loading && !subscriptionStatus.subscribed && applications.length >= 4 && (
+        {!checkingSubscription && !loading && !subscriptionStatus.subscribed && !subscriptionStatus.is_trialing && applications.length >= 8 && (
           <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-warning/10 via-warning/5 to-primary/10 border border-warning/20 backdrop-blur-sm">
             <div className="flex items-start gap-3">
               <div className="p-2 rounded-full bg-warning/20 flex-shrink-0">
@@ -519,23 +521,23 @@ const Dashboard = () => {
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-sm font-semibold text-warning">
-                    {applications.length >= 5 ? 'Application Limit Reached' : 'Almost at Your Limit'}
+                    {applications.length >= 10 ? 'Application Limit Reached' : 'Almost at Your Limit'}
                   </h3>
                   <span className="text-xs font-medium text-muted-foreground">
-                    {applications.length}/5 apps
+                    {applications.length}/10 apps
                   </span>
                 </div>
                 {/* Progress Bar */}
                 <div className="w-full bg-muted/50 rounded-full h-2 mb-3 overflow-hidden">
                   <div 
                     className="h-full bg-gradient-to-r from-warning to-primary transition-all duration-500 rounded-full"
-                    style={{ width: `${(applications.length / 5) * 100}%` }}
+                    style={{ width: `${(applications.length / 10) * 100}%` }}
                   />
                 </div>
                 <p className="text-xs text-muted-foreground mb-3">
-                  {applications.length >= 5 
-                    ? 'You\'ve reached the free tier limit of 5 applications. Upgrade to Pro for unlimited tracking and AI-powered features.'
-                    : `You're using ${applications.length} of 5 free applications. Upgrade to Pro for unlimited tracking and AI-powered features.`
+                  {applications.length >= 10 
+                    ? 'You\'ve reached the free tier limit of 10 applications. Upgrade to Pro for unlimited tracking and AI-powered features.'
+                    : `You're using ${applications.length} of 10 free applications. Upgrade to Pro for unlimited tracking and AI-powered features.`
                   }
                 </p>
                 <Button 

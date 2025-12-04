@@ -127,8 +127,9 @@ export const ChatAssistant = () => {
   const handleSend = () => {
     if (!input.trim() || isLoading) return;
     
-    // Check subscription status
-    if (!subscriptionStatus.subscribed) {
+    // Check subscription status (allow if subscribed OR trialing)
+    const hasAccess = subscriptionStatus.subscribed || subscriptionStatus.is_trialing;
+    if (!hasAccess) {
       toast({
         title: "Pro Feature",
         description: "AI chat assistant is available with Qraft Pro. Upgrade to get personalized AI assistance.",
@@ -225,7 +226,7 @@ export const ChatAssistant = () => {
             size="icon"
           >
             <MessageCircle className="h-6 w-6" />
-            {!subscriptionStatus.subscribed && (
+            {!subscriptionStatus.subscribed && !subscriptionStatus.is_trialing && (
               <div className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary flex items-center justify-center border-2 border-background">
                 <Crown className="h-3 w-3 text-primary-foreground" />
               </div>
@@ -248,12 +249,12 @@ export const ChatAssistant = () => {
                 <div>
                   <DrawerTitle className="flex items-center gap-2">
                     Qrafts Assistant
-                    {!subscriptionStatus.subscribed && (
+                    {!subscriptionStatus.subscribed && !subscriptionStatus.is_trialing && (
                       <Crown className="h-3.5 w-3.5 text-primary" />
                     )}
                   </DrawerTitle>
                   <p className="text-xs text-muted-foreground">
-                    {subscriptionStatus.subscribed ? "Here to help" : "Pro feature"}
+                    {(subscriptionStatus.subscribed || subscriptionStatus.is_trialing) ? "Here to help" : "Pro feature"}
                   </p>
                 </div>
               </div>
@@ -278,12 +279,12 @@ export const ChatAssistant = () => {
                 <div>
                   <h3 className="font-semibold flex items-center gap-2">
                     Qrafts Assistant
-                    {!subscriptionStatus.subscribed && (
+                    {!subscriptionStatus.subscribed && !subscriptionStatus.is_trialing && (
                       <Crown className="h-3.5 w-3.5 text-primary" />
                     )}
                   </h3>
                   <p className="text-xs text-muted-foreground">
-                    {subscriptionStatus.subscribed ? "Here to help" : "Pro feature"}
+                    {(subscriptionStatus.subscribed || subscriptionStatus.is_trialing) ? "Here to help" : "Pro feature"}
                   </p>
                 </div>
               </div>
