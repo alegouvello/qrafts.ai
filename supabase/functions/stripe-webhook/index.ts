@@ -250,8 +250,15 @@ serve(async (req) => {
         const customer = await stripe.customers.retrieve(subscription.customer as string);
         
         if ('email' in customer && customer.email) {
-          const periodEnd = new Date(subscription.current_period_end * 1000);
-          const template = getEmailTemplate("subscription_canceled", customer.name || "there", undefined, periodEnd.toLocaleDateString());
+          let periodEndStr = "your current billing period ends";
+          if (subscription.current_period_end && typeof subscription.current_period_end === 'number') {
+            const periodEnd = new Date(subscription.current_period_end * 1000);
+            periodEndStr = periodEnd.toLocaleDateString();
+          } else if (subscription.canceled_at && typeof subscription.canceled_at === 'number') {
+            const canceledAt = new Date(subscription.canceled_at * 1000);
+            periodEndStr = canceledAt.toLocaleDateString();
+          }
+          const template = getEmailTemplate("subscription_canceled", customer.name || "there", undefined, periodEndStr);
           await sendEmail(customer.email, template.subject, template.html);
         }
         break;
