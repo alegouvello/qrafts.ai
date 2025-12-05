@@ -270,6 +270,21 @@ const Pricing = () => {
           </Card>
         </div>
 
+        {/* Satisfaction Guarantee */}
+        <div className="max-w-2xl mx-auto mb-16 sm:mb-20">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 p-6 rounded-2xl bg-muted/30 border border-border/50 backdrop-blur">
+            <div className="flex items-center justify-center w-14 h-14 rounded-full bg-green-500/10 border border-green-500/20 flex-shrink-0">
+              <Shield className="h-7 w-7 text-green-500" />
+            </div>
+            <div className="text-center sm:text-left">
+              <h3 className="font-semibold text-lg mb-1">30-Day Money-Back Guarantee</h3>
+              <p className="text-sm text-muted-foreground">
+                Not satisfied? Get a full refund within 30 days, no questions asked. We're confident you'll love QRAFTS.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Feature Comparison Table */}
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8">
