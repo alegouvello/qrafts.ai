@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight, FileText, Sparkles, TrendingUp, Menu, MessageSquare, Zap, Brain } from "lucide-react";
+import { ArrowRight, FileText, Sparkles, TrendingUp, Menu, MessageSquare, Zap, Brain, Crown } from "lucide-react";
 import TryChatWidget from "@/components/TryChatWidget";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -124,6 +124,11 @@ const Index = () => {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-3 lg:gap-4">
             <SocialProof />
+            <Link to="/pricing">
+              <Button variant="ghost" size="sm" className="rounded-full hover:bg-accent/10 min-h-[44px] md:min-h-[48px] px-6 text-base">
+                Pricing
+              </Button>
+            </Link>
             <Link to="/blog">
               <Button variant="ghost" size="sm" className="rounded-full hover:bg-accent/10 min-h-[44px] md:min-h-[48px] px-6 text-base">
                 Blog
@@ -151,6 +156,15 @@ const Index = () => {
                 </SheetTitle>
               </SheetHeader>
               <div className="flex flex-col gap-4 mt-8">
+                <Link to="/pricing" onClick={() => setMobileMenuOpen(false)} className="w-full">
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start text-base rounded-full min-h-[48px]"
+                  >
+                    <Crown className="h-5 w-5 mr-3 flex-shrink-0" />
+                    Pricing
+                  </Button>
+                </Link>
                 <Button 
                   variant="ghost" 
                   onClick={scrollToFeatures}
