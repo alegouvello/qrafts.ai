@@ -6,6 +6,37 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Rate limiting configuration
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const MAX_REQUESTS_PER_HOUR = 10;
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+
+function getRateLimitKey(req: Request): string {
+  // Use IP address or forwarded header for rate limiting
+  const forwarded = req.headers.get("x-forwarded-for");
+  const realIp = req.headers.get("x-real-ip");
+  const cfConnectingIp = req.headers.get("cf-connecting-ip");
+  
+  return cfConnectingIp || realIp || forwarded?.split(",")[0]?.trim() || "unknown";
+}
+
+function checkRateLimit(clientKey: string): { allowed: boolean; remaining: number } {
+  const now = Date.now();
+  const record = rateLimitMap.get(clientKey);
+  
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(clientKey, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+    return { allowed: true, remaining: MAX_REQUESTS_PER_HOUR - 1 };
+  }
+  
+  if (record.count >= MAX_REQUESTS_PER_HOUR) {
+    return { allowed: false, remaining: 0 };
+  }
+  
+  record.count++;
+  return { allowed: true, remaining: MAX_REQUESTS_PER_HOUR - record.count };
+}
+
 // Input validation schema
 const emailRequestSchema = z.object({
   to: z.string()
@@ -50,6 +81,26 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Apply rate limiting
+  const clientKey = getRateLimitKey(req);
+  const { allowed, remaining } = checkRateLimit(clientKey);
+  
+  if (!allowed) {
+    console.warn(`Rate limit exceeded for client: ${clientKey}`);
+    return new Response(
+      JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
+      {
+        headers: { 
+          ...corsHeaders, 
+          "Content-Type": "application/json",
+          "X-RateLimit-Remaining": "0",
+          "X-RateLimit-Reset": String(Math.ceil(RATE_LIMIT_WINDOW_MS / 1000))
+        },
+        status: 429,
+      }
+    );
+  }
+
   try {
     const body = await req.json();
     
@@ -74,7 +125,11 @@ serve(async (req) => {
     console.log("Email sent successfully:", emailResponse);
 
     return new Response(JSON.stringify({ success: true, data: emailResponse }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { 
+        ...corsHeaders, 
+        "Content-Type": "application/json",
+        "X-RateLimit-Remaining": String(remaining)
+      },
       status: 200,
     });
   } catch (error) {
