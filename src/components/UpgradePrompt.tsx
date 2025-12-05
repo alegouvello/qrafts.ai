@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Crown, Lock, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 
 interface UpgradePromptProps {
   type: "application-limit" | "ai-feature";
@@ -78,13 +79,20 @@ export const UpgradePrompt = ({
               : "You've reached the 10 application limit on the free plan. Upgrade to Pro for unlimited applications."}
           </p>
         </div>
-        <Button 
-          onClick={handleUpgrade}
-          className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
-        >
-          <Crown className="h-4 w-4 mr-2" />
-          Upgrade to Pro - $5/month
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button 
+            onClick={handleUpgrade}
+            className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+          >
+            <Crown className="h-4 w-4 mr-2" />
+            Upgrade to Pro - $5/month
+          </Button>
+          <Link to="/pricing">
+            <Button variant="outline" className="w-full">
+              View All Features
+            </Button>
+          </Link>
+        </div>
       </div>
     );
   }
