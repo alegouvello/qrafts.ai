@@ -473,8 +473,8 @@ const Dashboard = () => {
         }
       >
         <main className="relative container mx-auto px-4 py-6 sm:py-8">
-        {/* Subscription Banner */}
-        {!checkingSubscription && !loading && !subscriptionStatus.subscribed && !subscriptionStatus.is_trialing && (
+        {/* Subscription Banner - only show if under the application limit */}
+        {!checkingSubscription && !loading && !subscriptionStatus.subscribed && !subscriptionStatus.is_trialing && applications.length < 10 && (
           <div className="mb-6 sm:mb-8 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 border border-primary/20 backdrop-blur-sm">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex-1">
