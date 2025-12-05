@@ -209,6 +209,12 @@ const Pricing = () => {
                 <span className="text-4xl font-bold">$29.99</span>
                 <span className="text-muted-foreground">/month</span>
               </div>
+              <div className="pt-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 text-sm font-medium rounded-full">
+                  <Zap className="h-3.5 w-3.5" />
+                  7-day free trial
+                </span>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <ul className="space-y-3">
