@@ -70,6 +70,7 @@ const feedbackSchema = z.object({
   }),
   message: z.string().trim().min(10, "Message must be at least 10 characters").max(2000, "Message must be less than 2000 characters"),
   user_id: z.string().uuid().optional().nullable(),
+  honeypot: z.string().optional(), // Honeypot field - should be empty
 });
 
 serve(async (req) => {
@@ -123,7 +124,20 @@ serve(async (req) => {
       );
     }
 
-    const { name, email, category, message, user_id } = validationResult.data;
+    const { name, email, category, message, user_id, honeypot } = validationResult.data;
+
+    // Check honeypot - if filled, silently reject (bot detected)
+    if (honeypot && honeypot.trim().length > 0) {
+      console.log(`[SUBMIT-FEEDBACK] Honeypot triggered - bot detected from IP: ${clientIP.substring(0, 10)}...`);
+      // Return fake success to not alert bots
+      return new Response(
+        JSON.stringify({ success: true, id: "blocked" }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
 
     // Create Supabase client with service role to bypass RLS
     const supabaseAdmin = createClient(
