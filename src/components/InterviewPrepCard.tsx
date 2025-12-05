@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import DOMPurify from "dompurify";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,9 +36,9 @@ interface InterviewPrepCardProps {
   onPrepGenerated: () => void;
 }
 
-// Component to safely render HTML content
+// Component to safely render HTML content with XSS protection
 const RichText = ({ content }: { content: string }) => {
-  return <span dangerouslySetInnerHTML={{ __html: content }} />;
+  return <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }} />;
 };
 
 export const InterviewPrepCard = ({ interviewer, onDelete, onPrepGenerated }: InterviewPrepCardProps) => {
