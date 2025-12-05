@@ -31,6 +31,7 @@ const feedbackSchema = z.object({
     .trim()
     .min(10, "Message must be at least 10 characters")
     .max(2000, "Message must be less than 2000 characters"),
+  website: z.string().max(0, "Bot detected").optional(), // Honeypot field
 });
 
 type FeedbackFormData = z.infer<typeof feedbackSchema>;
@@ -44,6 +45,7 @@ const Feedback = () => {
     email: "",
     category: "feature",
     message: "",
+    website: "", // Honeypot field - should remain empty
   });
   const [errors, setErrors] = useState<Partial<Record<keyof FeedbackFormData, string>>>({});
 
@@ -56,6 +58,25 @@ const Feedback = () => {
       // Validate form data
       const validatedData = feedbackSchema.parse(formData);
 
+      // Check honeypot - if filled, silently reject (bot detected)
+      if (validatedData.website) {
+        console.log("Honeypot triggered - bot detected");
+        // Fake success to not alert bots
+        toast({
+          title: "Feedback Submitted!",
+          description: "Thank you for helping us improve Qrafts. We appreciate your input!",
+        });
+        setFormData({
+          name: "",
+          email: "",
+          category: "feature",
+          message: "",
+          website: "",
+        });
+        setTimeout(() => navigate(-1), 1500);
+        return;
+      }
+
       // Get current user if logged in
       const { data: { user } } = await supabase.auth.getUser();
 
@@ -67,6 +88,7 @@ const Feedback = () => {
           email: validatedData.email || null,
           category: validatedData.category,
           message: validatedData.message,
+          honeypot: validatedData.website || "",
         },
       });
 
@@ -87,6 +109,7 @@ const Feedback = () => {
         email: "",
         category: "feature",
         message: "",
+        website: "",
       });
 
       // Navigate back after a short delay
@@ -177,6 +200,20 @@ const Feedback = () => {
           <Card className="border-border/50 shadow-2xl backdrop-blur-sm bg-card/50">
             <CardContent className="p-6 sm:p-8 lg:p-12">
               <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Honeypot field - hidden from humans, bots will fill it */}
+                <div className="absolute -left-[9999px] opacity-0 pointer-events-none" aria-hidden="true">
+                  <Label htmlFor="website">Website</Label>
+                  <Input
+                    id="website"
+                    name="website"
+                    type="text"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={formData.website}
+                    onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                  />
+                </div>
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Name (Optional) */}
                   <div className="space-y-2">
