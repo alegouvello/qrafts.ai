@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import DOMPurify from "dompurify";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -636,7 +637,7 @@ export default function Profile() {
               </div>
               <div 
                 className="prose prose-sm max-w-none text-foreground/80 [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:space-y-1 [&_li]:leading-relaxed [&_strong]:font-semibold [&_strong]:text-foreground [&_a]:text-primary [&_a]:underline [&_a]:hover:text-primary/80 [&_p]:leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: parsedData.summary }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(parsedData.summary) }}
               />
             </CardContent>
           </Card>
@@ -676,7 +677,7 @@ export default function Profile() {
                       </div>
                       <div 
                         className="prose prose-sm max-w-none text-foreground/80 [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:space-y-1 [&_ul_ul]:list-circle [&_ul_ul]:ml-6 [&_li]:leading-relaxed [&_strong]:font-semibold [&_strong]:text-foreground [&_a]:text-primary [&_a]:underline [&_a]:hover:text-primary/80"
-                        dangerouslySetInnerHTML={{ __html: exp.description }}
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(exp.description) }}
                       />
                     </div>
                   </div>

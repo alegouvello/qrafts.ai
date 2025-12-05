@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CheckCircle2, XCircle, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
+import DOMPurify from "dompurify";
 
 interface ResumeItem {
   [key: string]: string | string[] | undefined;
@@ -211,7 +212,7 @@ export function EnhancementPreviewDialog({
                           {formatted.isHTML ? (
                             <div 
                               className="prose prose-sm max-w-none [&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-2 [&_li]:my-1 [&_ul_ul]:list-circle [&_ul_ul]:ml-6"
-                              dangerouslySetInnerHTML={{ __html: formatted.description }}
+                              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(formatted.description) }}
                             />
                           ) : (
                             <pre className="whitespace-pre-wrap font-sans">{formatted.description}</pre>
@@ -253,7 +254,7 @@ export function EnhancementPreviewDialog({
                           {formatted.isHTML ? (
                             <div 
                               className="prose prose-sm max-w-none [&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-2 [&_li]:my-1 [&_ul_ul]:list-circle [&_ul_ul]:ml-6"
-                              dangerouslySetInnerHTML={{ __html: formatted.description }}
+                              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(formatted.description) }}
                             />
                           ) : (
                             <pre className="whitespace-pre-wrap font-sans">{formatted.description}</pre>
@@ -308,7 +309,7 @@ export function EnhancementPreviewDialog({
                 currentIsHTML ? (
                   <div 
                     className="prose prose-sm max-w-none [&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-2 [&_li]:my-1 [&_ul_ul]:list-circle [&_ul_ul]:ml-6 [&_p]:my-2"
-                    dangerouslySetInnerHTML={{ __html: current }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(current) }}
                   />
                 ) : (
                   <pre className="whitespace-pre-wrap font-sans">{current}</pre>
@@ -333,7 +334,7 @@ export function EnhancementPreviewDialog({
                 enhancedIsHTML ? (
                   <div 
                     className="prose prose-sm max-w-none [&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-2 [&_li]:my-1 [&_ul_ul]:list-circle [&_ul_ul]:ml-6 [&_p]:my-2"
-                    dangerouslySetInnerHTML={{ __html: enhanced }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(enhanced) }}
                   />
                 ) : (
                   <pre className="whitespace-pre-wrap font-sans">{enhanced}</pre>
