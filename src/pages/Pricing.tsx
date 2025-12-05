@@ -206,7 +206,7 @@ const Pricing = () => {
               </CardTitle>
               <CardDescription>For serious job seekers</CardDescription>
               <div className="pt-4">
-                <span className="text-4xl font-bold">$5</span>
+                <span className="text-4xl font-bold">$29.99</span>
                 <span className="text-muted-foreground">/month</span>
               </div>
             </CardHeader>
@@ -323,7 +323,7 @@ const Pricing = () => {
                   disabled={isLoading}
                 >
                   <Crown className="h-4 w-4 mr-2" />
-                  {isLoading ? "Loading..." : "Upgrade to Pro - $5/month"}
+                  {isLoading ? "Loading..." : "Upgrade to Pro - $29.99/month"}
                 </Button>
               )
             ) : (
