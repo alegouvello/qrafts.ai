@@ -59,16 +59,22 @@ const Feedback = () => {
       // Get current user if logged in
       const { data: { user } } = await supabase.auth.getUser();
 
-      // Insert feedback into database
-      const { error } = await supabase.from("feedback").insert({
-        user_id: user?.id || null,
-        name: validatedData.name || null,
-        email: validatedData.email || null,
-        category: validatedData.category,
-        message: validatedData.message,
+      // Submit feedback via edge function with rate limiting
+      const { data, error } = await supabase.functions.invoke("submit-feedback", {
+        body: {
+          user_id: user?.id || null,
+          name: validatedData.name || null,
+          email: validatedData.email || null,
+          category: validatedData.category,
+          message: validatedData.message,
+        },
       });
 
       if (error) throw error;
+      
+      if (data?.error) {
+        throw new Error(data.error);
+      }
 
       toast({
         title: "Feedback Submitted!",
