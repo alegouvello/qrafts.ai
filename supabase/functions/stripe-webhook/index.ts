@@ -23,6 +23,7 @@ const sendEmail = async (to: string, subject: string, html: string) => {
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`,
+        "x-internal-secret": Deno.env.get("INTERNAL_API_SECRET") || "",
       },
       body: JSON.stringify({ to, subject, html }),
     });
