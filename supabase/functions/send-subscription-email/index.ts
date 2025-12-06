@@ -81,6 +81,21 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Verify internal API secret for service-to-service calls
+  const internalSecret = req.headers.get("x-internal-secret");
+  const expectedSecret = Deno.env.get("INTERNAL_API_SECRET");
+  
+  if (!internalSecret || internalSecret !== expectedSecret) {
+    console.warn("Unauthorized request to send-subscription-email");
+    return new Response(
+      JSON.stringify({ error: "Unauthorized" }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401,
+      }
+    );
+  }
+
   // Apply rate limiting
   const clientKey = getRateLimitKey(req);
   const { allowed, remaining } = checkRateLimit(clientKey);
