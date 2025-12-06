@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, X, Send, Loader2, Crown } from "lucide-react";
+import { MessageCircle, X, Send, Loader2, Crown, Mic, MicOff } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -18,6 +18,34 @@ import ReactMarkdown from 'react-markdown';
 import { useSubscription } from "@/hooks/useSubscription";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+// Web Speech API types
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+  resultIndex: number;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
+
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start(): void;
+  stop(): void;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+  onend: (() => void) | null;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition: new () => SpeechRecognition;
+    webkitSpeechRecognition: new () => SpeechRecognition;
+  }
+}
+
 type Message = {
   role: "user" | "assistant";
   content: string;
@@ -34,11 +62,85 @@ export const ChatAssistant = () => {
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const { subscriptionStatus, handleUpgrade } = useSubscription();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-assistant`;
+
+  // Check if speech recognition is supported
+  const isSpeechSupported = typeof window !== 'undefined' && 
+    (window.SpeechRecognition || window.webkitSpeechRecognition);
+
+  // Initialize speech recognition
+  useEffect(() => {
+    if (!isSpeechSupported) return;
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognitionRef.current = new SpeechRecognition();
+    recognitionRef.current.continuous = false;
+    recognitionRef.current.interimResults = true;
+    recognitionRef.current.lang = i18n.language === 'fr' ? 'fr-FR' : i18n.language === 'es' ? 'es-ES' : 'en-US';
+
+    recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
+      const transcript = Array.from(event.results)
+        .map(result => result[0].transcript)
+        .join('');
+      setInput(transcript);
+    };
+
+    recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
+      console.error('Speech recognition error:', event.error);
+      setIsListening(false);
+      if (event.error !== 'aborted') {
+        toast({
+          title: t('chat.voiceError', 'Voice Error'),
+          description: t('chat.voiceErrorDesc', 'Could not recognize speech. Please try again.'),
+          variant: "destructive",
+        });
+      }
+    };
+
+    recognitionRef.current.onend = () => {
+      setIsListening(false);
+    };
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, [isSpeechSupported, i18n.language, toast, t]);
+
+  const toggleListening = () => {
+    if (!isSpeechSupported) {
+      toast({
+        title: t('chat.voiceNotSupported', 'Not Supported'),
+        description: t('chat.voiceNotSupportedDesc', 'Voice input is not supported in your browser.'),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+    } else {
+      try {
+        recognitionRef.current?.start();
+        setIsListening(true);
+      } catch (error) {
+        console.error('Failed to start speech recognition:', error);
+        toast({
+          title: t('chat.voiceError', 'Voice Error'),
+          description: t('chat.voiceErrorDesc', 'Could not start voice input. Please try again.'),
+          variant: "destructive",
+        });
+      }
+    }
+  };
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -194,11 +296,23 @@ export const ChatAssistant = () => {
       {/* Input */}
       <div className="p-4 border-t">
         <div className="flex gap-2">
+          {isSpeechSupported && (
+            <Button
+              onClick={toggleListening}
+              disabled={isLoading}
+              size="icon"
+              variant={isListening ? "destructive" : "outline"}
+              className={`rounded-full shrink-0 ${isListening ? 'animate-pulse' : ''}`}
+              title={isListening ? t('chat.stopListening', 'Stop listening') : t('chat.startListening', 'Start voice input')}
+            >
+              {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+            </Button>
+          )}
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder={t('chat.placeholder')}
+            placeholder={isListening ? t('chat.listening', 'Listening...') : t('chat.placeholder')}
             disabled={isLoading}
             className="flex-1"
           />
