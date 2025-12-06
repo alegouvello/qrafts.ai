@@ -153,7 +153,7 @@ export const ChatAssistant = () => {
     }
   };
 
-  const ChatContent = () => (
+  const chatContent = (
     <>
       <ScrollArea className="flex-1 p-4" ref={scrollRef}>
         <div className="space-y-4">
@@ -260,7 +260,7 @@ export const ChatAssistant = () => {
               </div>
             </DrawerHeader>
             <div className="flex flex-col h-full">
-              <ChatContent />
+              {chatContent}
             </div>
           </DrawerContent>
         </Drawer>
@@ -298,7 +298,7 @@ export const ChatAssistant = () => {
               </Button>
             </div>
 
-            <ChatContent />
+            {chatContent}
           </Card>
         )
       )}
