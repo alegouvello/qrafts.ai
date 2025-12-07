@@ -1,55 +1,63 @@
 import { Capacitor } from '@capacitor/core';
-import { Browser } from '@capacitor/browser';
-import { App } from '@capacitor/app';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import { supabase } from '@/integrations/supabase/client';
 
 // Check if running in a native Capacitor environment
 export const isNative = () => Capacitor.isNativePlatform();
 
-// Custom URL scheme for the app
-const APP_SCHEME = 'qrafts';
+// Google OAuth Client ID (Web Client ID from Google Cloud Console)
+const GOOGLE_WEB_CLIENT_ID = '205344056886-ckkqqu7l4cslur15g59nj49qsq1s36fh.apps.googleusercontent.com';
+
+// Initialize Google Auth for native platforms
+export const initGoogleAuth = async () => {
+  if (!isNative()) return;
+  
+  try {
+    await GoogleAuth.initialize({
+      clientId: GOOGLE_WEB_CLIENT_ID,
+      scopes: ['profile', 'email'],
+      grantOfflineAccess: true,
+    });
+    console.log('Google Auth initialized for native platform');
+  } catch (error) {
+    console.error('Failed to initialize Google Auth:', error);
+  }
+};
 
 // Get the appropriate redirect URL based on platform
 export const getAuthRedirectUrl = () => {
-  if (isNative()) {
-    // For native apps, use the custom URL scheme
-    return `${APP_SCHEME}://auth/callback`;
-  }
   // For web, use the standard redirect
   return `${window.location.origin}/auth`;
 };
 
-// Handle Google OAuth for native apps
-export const handleNativeGoogleSignIn = async () => {
+// Handle Google OAuth for native apps using Google Sign-In SDK
+export const handleNativeGoogleSignIn = async (): Promise<{ success: boolean; error?: any }> => {
   if (!isNative()) {
-    // Fall back to standard OAuth for web
-    return null;
+    return { success: false, error: 'Not running in native environment' };
   }
 
   try {
-    // Get the OAuth URL from Supabase
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    // Sign in with Google using native SDK
+    const googleUser = await GoogleAuth.signIn();
+    console.log('Google Sign-In successful:', googleUser);
+    
+    if (!googleUser.authentication?.idToken) {
+      throw new Error('No ID token received from Google');
+    }
+
+    // Use the ID token to sign in with Supabase
+    const { data, error } = await supabase.auth.signInWithIdToken({
       provider: 'google',
-      options: {
-        redirectTo: getAuthRedirectUrl(),
-        skipBrowserRedirect: true, // Don't auto-redirect, we'll handle it
-        queryParams: {
-          access_type: 'offline',
-          prompt: 'consent',
-        }
-      }
+      token: googleUser.authentication.idToken,
+      access_token: googleUser.authentication.accessToken,
     });
 
-    if (error) throw error;
-    if (!data.url) throw new Error('No OAuth URL returned');
+    if (error) {
+      console.error('Supabase sign-in error:', error);
+      return { success: false, error };
+    }
 
-    // Open the OAuth URL in an in-app browser
-    await Browser.open({ 
-      url: data.url,
-      presentationStyle: 'popover',
-      windowName: '_blank'
-    });
-
+    console.log('Supabase sign-in successful:', data.user?.email);
     return { success: true };
   } catch (error) {
     console.error('Native Google sign-in error:', error);
@@ -57,45 +65,19 @@ export const handleNativeGoogleSignIn = async () => {
   }
 };
 
-// Set up deep link listener for OAuth callback
-export const setupDeepLinkListener = (onAuthSuccess: () => void) => {
-  if (!isNative()) return () => {};
+// Sign out from Google (for native)
+export const handleNativeGoogleSignOut = async () => {
+  if (!isNative()) return;
+  
+  try {
+    await GoogleAuth.signOut();
+    console.log('Google Sign-Out successful');
+  } catch (error) {
+    console.error('Google Sign-Out error:', error);
+  }
+};
 
-  const handleDeepLink = async (event: { url: string }) => {
-    console.log('Deep link received:', event.url);
-    
-    // Check if this is an auth callback
-    if (event.url.startsWith(`${APP_SCHEME}://auth/callback`)) {
-      // Close the browser
-      await Browser.close();
-      
-      // Extract tokens from the URL
-      const url = new URL(event.url.replace(`${APP_SCHEME}://`, 'https://'));
-      const hashParams = new URLSearchParams(url.hash.substring(1));
-      const accessToken = hashParams.get('access_token');
-      const refreshToken = hashParams.get('refresh_token');
-      
-      if (accessToken && refreshToken) {
-        // Set the session manually
-        const { error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        });
-        
-        if (!error) {
-          onAuthSuccess();
-        } else {
-          console.error('Error setting session:', error);
-        }
-      }
-    }
-  };
-
-  // Listen for app URL open events
-  App.addListener('appUrlOpen', handleDeepLink);
-
-  // Return cleanup function
-  return () => {
-    App.removeAllListeners();
-  };
+// Placeholder for deep link listener (no longer needed with native SDK approach)
+export const setupDeepLinkListener = (_onAuthSuccess: () => void) => {
+  return () => {}; // No-op cleanup function
 };

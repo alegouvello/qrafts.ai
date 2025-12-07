@@ -9,16 +9,15 @@ const config: CapacitorConfig = {
     cleartext: true
   },
   plugins: {
-    App: {
-      // Deep link configuration for OAuth
-      launchShowDuration: 0
+    GoogleAuth: {
+      scopes: ['profile', 'email'],
+      serverClientId: '205344056886-ckkqqu7l4cslur15g59nj49qsq1s36fh.apps.googleusercontent.com',
+      forceCodeForRefreshToken: true
     }
   },
-  // iOS specific configuration
   ios: {
     scheme: 'qrafts'
   },
-  // Android specific configuration  
   android: {
     allowMixedContent: true
   }
