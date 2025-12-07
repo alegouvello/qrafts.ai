@@ -15,6 +15,7 @@ import { z } from "zod";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { SEO } from "@/components/SEO";
+import { isNative, handleNativeGoogleSignIn, setupDeepLinkListener, getAuthRedirectUrl } from "@/utils/capacitorAuth";
 
 const authSchema = z.object({
   email: z.string().trim().email("Invalid email address").max(255, "Email too long"),
@@ -63,8 +64,15 @@ const Auth = () => {
       console.log('OAuth callback detected');
     }
 
+    // Set up deep link listener for native Capacitor OAuth
+    const cleanupDeepLink = setupDeepLinkListener(() => {
+      console.log('Native OAuth success, redirecting to dashboard');
+      setGoogleLoading(false);
+      navigate("/dashboard", { replace: true });
+    });
+
     // Set up auth state listener FIRST to catch OAuth callbacks
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('Auth state change:', event, session?.user?.email);
       
       if (event === 'SIGNED_IN' && session && !isPasswordReset) {
@@ -79,6 +87,7 @@ const Auth = () => {
         
         console.log('User signed in with verified email, redirecting to dashboard');
         setOauthProcessing(false);
+        setGoogleLoading(false);
         navigate("/dashboard", { replace: true });
       }
       
@@ -124,7 +133,10 @@ const Auth = () => {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      cleanupDeepLink();
+    };
   }, [navigate, toast]);
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -226,10 +238,26 @@ const Auth = () => {
     setGoogleLoading(true);
     
     try {
+      // Check if running in native Capacitor environment
+      if (isNative()) {
+        const result = await handleNativeGoogleSignIn();
+        if (result && !result.success) {
+          toast({
+            title: "Google sign in failed",
+            description: "Unable to start Google sign in",
+            variant: "destructive",
+          });
+          setGoogleLoading(false);
+        }
+        // For native, the deep link handler will complete the flow
+        return;
+      }
+
+      // Standard web OAuth flow
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth`,
+          redirectTo: getAuthRedirectUrl(),
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
