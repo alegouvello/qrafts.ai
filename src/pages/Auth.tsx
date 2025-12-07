@@ -241,15 +241,17 @@ const Auth = () => {
       // Check if running in native Capacitor environment
       if (isNative()) {
         const result = await handleNativeGoogleSignIn();
-        if (result && !result.success) {
+        if (result.success) {
+          // Native sign-in was successful, navigate to dashboard
+          navigate("/dashboard", { replace: true });
+        } else {
           toast({
             title: "Google sign in failed",
-            description: "Unable to start Google sign in",
+            description: result.error?.message || "Unable to complete Google sign in",
             variant: "destructive",
           });
-          setGoogleLoading(false);
         }
-        // For native, the deep link handler will complete the flow
+        setGoogleLoading(false);
         return;
       }
 
