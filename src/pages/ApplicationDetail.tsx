@@ -18,6 +18,7 @@ import { InterviewPrepCard } from "@/components/InterviewPrepCard";
 import { AddQuestionDialog } from "@/components/AddQuestionDialog";
 import { ResumeTailorDialog } from "@/components/ResumeTailorDialog";
 import { SavedResumesDialog } from "@/components/SavedResumesDialog";
+import { UploadCustomResumeDialog } from "@/components/UploadCustomResumeDialog";
 import { NaturalToneDialog } from "@/components/NaturalToneDialog";
 import { useToast } from "@/hooks/use-toast";
 import ReactMarkdown from "react-markdown";
@@ -51,6 +52,7 @@ import {
   Trash2,
   X,
   FileText,
+  Upload,
 } from "lucide-react";
 import {
   Select,
@@ -189,6 +191,7 @@ const ApplicationDetail = () => {
   const [showAddQuestionDialog, setShowAddQuestionDialog] = useState(false);
   const [showResumeTailorDialog, setShowResumeTailorDialog] = useState(false);
   const [showSavedResumesDialog, setShowSavedResumesDialog] = useState(false);
+  const [showUploadResumeDialog, setShowUploadResumeDialog] = useState(false);
   const [showNaturalToneDialog, setShowNaturalToneDialog] = useState(false);
   const [savedTailoredResume, setSavedTailoredResume] = useState<any>(null);
   const [loadingTailoredResume, setLoadingTailoredResume] = useState(false);
@@ -2399,7 +2402,7 @@ const ApplicationDetail = () => {
                   Get AI-powered suggestions to tailor your resume for this specific role
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <Button 
                   onClick={() => setShowSavedResumesDialog(true)}
                   variant="outline"
@@ -2407,6 +2410,14 @@ const ApplicationDetail = () => {
                 >
                   <Library className="h-4 w-4" />
                   View All
+                </Button>
+                <Button 
+                  onClick={() => setShowUploadResumeDialog(true)}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <Upload className="h-4 w-4" />
+                  Upload Resume
                 </Button>
                 <Button 
                   onClick={() => setShowResumeTailorDialog(true)}
@@ -2630,6 +2641,21 @@ const ApplicationDetail = () => {
         open={showSavedResumesDialog}
         onOpenChange={setShowSavedResumesDialog}
       />
+
+      {/* Upload Custom Resume Dialog */}
+      {application && (
+        <UploadCustomResumeDialog
+          open={showUploadResumeDialog}
+          onOpenChange={setShowUploadResumeDialog}
+          applicationId={application.id}
+          company={application.company}
+          position={application.position}
+          onResumeUploaded={() => {
+            // Refresh the tailored resume list
+            fetchTailoredResume();
+          }}
+        />
+      )}
 
       {/* Natural Tone Dialog */}
       {currentNaturalPreview && (
