@@ -43,12 +43,45 @@ const statusConfig = {
   accepted: { label: "Accepted", variant: "outline" as const },
 };
 
-function safeHostname(inputUrl: string): string | null {
+// Common job board hostnames to ignore when deriving company domain
+const JOB_BOARD_PATTERNS = [
+  /lever\.co$/i,
+  /greenhouse\.io$/i,
+  /workday\.com$/i,
+  /myworkdayjobs\.com$/i,
+  /ashbyhq\.com$/i,
+  /icims\.com$/i,
+  /smartrecruiters\.com$/i,
+  /jobvite\.com$/i,
+  /applytojob\.com$/i,
+  /breezy\.hr$/i,
+  /recruitee\.com$/i,
+  /bamboohr\.com$/i,
+  /jazz\.co$/i,
+  /linkedin\.com$/i,
+  /indeed\.com$/i,
+  /ziprecruiter\.com$/i,
+  /glassdoor\.com$/i,
+];
+
+function isJobBoardHost(hostname: string): boolean {
+  return JOB_BOARD_PATTERNS.some((pattern) => pattern.test(hostname));
+}
+
+function deriveCompanyDomain(url: string, companyName: string): string {
   try {
-    const u = new URL(inputUrl);
-    return u.hostname.replace(/^www\./, "");
+    const u = new URL(url);
+    const hostname = u.hostname.replace(/^www\./, "");
+
+    // If the hostname looks like it belongs to a job board, fall back to company name
+    if (isJobBoardHost(hostname)) {
+      return companyName.toLowerCase().replace(/\s+/g, "") + ".com";
+    }
+
+    // Otherwise use the job URL's domain directly (e.g. openai.com/careers)
+    return hostname;
   } catch {
-    return null;
+    return companyName.toLowerCase().replace(/\s+/g, "") + ".com";
   }
 }
 
@@ -71,9 +104,7 @@ export const ApplicationCard = ({ application, onDelete }: ApplicationCardProps)
   };
 
   const logoDomain = useMemo(() => {
-    const fromUrl = safeHostname(application.url);
-    if (fromUrl) return fromUrl;
-    return application.company.toLowerCase().replace(/\s+/g, "") + ".com";
+    return deriveCompanyDomain(application.url, application.company);
   }, [application.company, application.url]);
 
   // Prefer Clearbit, but fall back to Google's favicon service (much more reliable).
