@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -29,6 +30,35 @@ serve(async (req) => {
       );
     }
 
+    // Initialize Supabase client to fetch previous resumes
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Get user from auth header
+    const authHeader = req.headers.get('Authorization');
+    let previousResumes: { position: string; company: string; resume_text: string }[] = [];
+    
+    if (authHeader) {
+      const token = authHeader.replace('Bearer ', '');
+      const { data: { user } } = await supabase.auth.getUser(token);
+      
+      if (user) {
+        // Fetch up to 5 most recent tailored resumes as examples
+        const { data: resumes, error } = await supabase
+          .from('tailored_resumes')
+          .select('position, company, resume_text')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(5);
+        
+        if (!error && resumes) {
+          previousResumes = resumes;
+          console.log(`Found ${previousResumes.length} previous tailored resumes for learning`);
+        }
+      }
+    }
+
     // Build context about the role
     let roleContext = `Position: ${position} at ${company}\n\n`;
     if (roleSummary) {
@@ -41,6 +71,25 @@ serve(async (req) => {
       }
     }
 
+    // Build examples from previous resumes
+    let learningContext = '';
+    if (previousResumes.length > 0) {
+      learningContext = `\n\n## LEARNING FROM PREVIOUS RESUMES
+The user has previously created the following tailored resumes. Study these to understand their writing style, preferred formatting, how they phrase accomplishments, and what keywords they typically emphasize. Use this knowledge to make suggestions that align with their established patterns:
+
+`;
+      previousResumes.forEach((resume, index) => {
+        // Truncate to avoid token limits - take first 1500 chars of each
+        const truncatedText = resume.resume_text.length > 1500 
+          ? resume.resume_text.substring(0, 1500) + '...[truncated]'
+          : resume.resume_text;
+        learningContext += `### Example ${index + 1}: ${resume.position} at ${resume.company}
+${truncatedText}
+
+`;
+      });
+    }
+
     const systemPrompt = `You are an expert resume writer and career coach. Your job is to analyze a user's resume and suggest specific improvements to tailor it for a particular job role.
 
 CRITICAL CONSTRAINTS:
@@ -49,7 +98,14 @@ CRITICAL CONSTRAINTS:
 - DO NOT add experiences, skills, achievements, or qualifications that are not in the original resume
 - DO NOT exaggerate or embellish the candidate's actual experience
 - ONLY suggest ways to emphasize and reframe what is already present
-
+${previousResumes.length > 0 ? `
+LEARNING FROM HISTORY:
+- The user has provided ${previousResumes.length} previously tailored resumes as examples
+- Study their writing style, formatting preferences, and how they phrase accomplishments
+- Match the tone and structure they've used in past resumes
+- Incorporate similar keyword patterns and emphasis strategies they've successfully used before
+- Your suggestions should feel consistent with their established personal brand
+` : ''}
 Analyze the resume section by section and provide concrete, actionable suggestions. For each section:
 1. Identify what's currently there
 2. Suggest specific improvements that highlight relevant experience for this role by rewording existing content
@@ -60,7 +116,7 @@ Be specific and practical. Don't just say "improve this" - provide actual sugges
 
     const userPrompt = `Here is the job I'm applying for:
 ${roleContext}
-
+${learningContext}
 Here is my current resume:
 ${resumeText}
 
@@ -71,10 +127,10 @@ Please analyze my resume and provide specific, tailored suggestions for improvin
 3. Keywords or phrases from the job description I should incorporate
 4. Quantifiable achievements I could emphasize
 5. Any gaps or missing information I should address
-
+${previousResumes.length > 0 ? '\nRemember to maintain consistency with my writing style from previous resumes while adapting for this specific role.' : ''}
 Format your response in a structured way that I can easily review and implement.`;
 
-    console.log('Calling Lovable AI for resume tailoring');
+    console.log('Calling Lovable AI for resume tailoring with', previousResumes.length, 'learning examples');
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -121,7 +177,7 @@ Format your response in a structured way that I can easily review and implement.
     console.log('Resume tailoring completed successfully');
 
     return new Response(
-      JSON.stringify({ suggestions }),
+      JSON.stringify({ suggestions, examplesUsed: previousResumes.length }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
