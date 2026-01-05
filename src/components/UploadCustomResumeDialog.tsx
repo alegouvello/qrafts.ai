@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Upload, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { ParseProgressStepper, ParseStep } from "./ParseProgressStepper";
 
 interface UploadCustomResumeDialogProps {
   open: boolean;
@@ -36,7 +37,13 @@ export const UploadCustomResumeDialog = ({
   const [versionName, setVersionName] = useState("");
   const [resumeText, setResumeText] = useState("");
   const [saving, setSaving] = useState(false);
-  const [parsing, setParsing] = useState(false);
+  const [parseStep, setParseStep] = useState<ParseStep | null>(null);
+  const [parseError, setParseError] = useState<string | null>(null);
+
+  const resetParseState = () => {
+    setParseStep(null);
+    setParseError(null);
+  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -69,8 +76,10 @@ export const UploadCustomResumeDialog = ({
       return;
     }
 
-    // For PDF/Word, use the parse-resume edge function
-    setParsing(true);
+    // For PDF/Word, use the parse-resume edge function with progress tracking
+    resetParseState();
+    setParseStep('uploading');
+    
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");
@@ -84,6 +93,8 @@ export const UploadCustomResumeDialog = ({
         )
       );
 
+      setParseStep('extracting');
+
       const { data, error } = await supabase.functions.invoke("parse-resume", {
         body: {
           fileBase64: base64,
@@ -95,26 +106,44 @@ export const UploadCustomResumeDialog = ({
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        throw new Error(error.message || "Failed to parse resume");
+      }
+
+      if (data?.usedOcr) {
+        setParseStep('ocr');
+        // Small delay to show OCR step
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+      setParseStep('structuring');
+      await new Promise(resolve => setTimeout(resolve, 300));
+
       if (data?.text) {
         setResumeText(data.text);
         if (!versionName) {
           setVersionName(file.name.replace(/\.[^/.]+$/, ""));
         }
+        setParseStep('complete');
         toast({
           title: "Resume parsed",
-          description: "Your resume has been extracted successfully",
+          description: data.usedOcr 
+            ? "Your scanned resume was processed with OCR successfully" 
+            : "Your resume has been extracted successfully",
         });
+      } else {
+        throw new Error("No text could be extracted from the file");
       }
     } catch (error) {
       console.error("Error parsing resume:", error);
+      const errorMessage = error instanceof Error ? error.message : "Could not parse the resume";
+      setParseStep('error');
+      setParseError(errorMessage);
       toast({
         title: "Parse failed",
-        description: "Could not parse the resume. Please paste the text manually.",
+        description: "See error details below for next steps",
         variant: "destructive",
       });
-    } finally {
-      setParsing(false);
     }
   };
 
@@ -197,20 +226,22 @@ export const UploadCustomResumeDialog = ({
                 type="file"
                 accept=".pdf,.doc,.docx,.txt"
                 onChange={handleFileUpload}
-                disabled={parsing}
+                disabled={parseStep !== null && parseStep !== 'complete' && parseStep !== 'error'}
                 className="flex-1"
               />
-              {parsing && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Parsing...
-                </div>
-              )}
             </div>
             <p className="text-xs text-muted-foreground">
               Supports PDF, Word (.doc, .docx), and text files
             </p>
           </div>
+
+          {parseStep && (
+            <ParseProgressStepper
+              currentStep={parseStep}
+              errorMessage={parseError || undefined}
+              className="pt-2"
+            />
+          )}
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">

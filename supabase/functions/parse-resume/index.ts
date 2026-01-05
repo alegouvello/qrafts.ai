@@ -303,6 +303,7 @@ Deno.serve(async (req) => {
     let extractedText = '';
     let fileArrayBuffer: ArrayBuffer;
     let fileName: string;
+    let usedOcr = false;
 
     // Handle base64 input (from UploadCustomResumeDialog)
     if (fileBase64 && inputFileName) {
@@ -366,6 +367,7 @@ Deno.serve(async (req) => {
         if (isLikelyScannedPdf(extractedText)) {
           console.log('Detected scanned PDF, falling back to OCR...');
           extractedText = await extractTextWithOCR(pdfData, lovableApiKey);
+          usedOcr = true;
         }
       } catch (e) {
         console.error('Error with standard PDF extraction, trying OCR:', e);
@@ -373,6 +375,7 @@ Deno.serve(async (req) => {
         // If standard extraction fails, try OCR as fallback
         try {
           extractedText = await extractTextWithOCR(pdfData, lovableApiKey);
+          usedOcr = true;
         } catch (ocrError) {
           console.error('OCR also failed:', ocrError);
           throw new Error('Failed to extract text from PDF. Please paste the text manually.');
@@ -586,6 +589,7 @@ Return ONLY valid JSON with this structure:
         success: true,
         profile: extractedData,
         text: extractedText, // Return the raw extracted text for custom resume uploads
+        usedOcr, // Indicate if OCR was used for the UI progress stepper
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
