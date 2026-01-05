@@ -8,7 +8,9 @@ const corsHeaders = {
 };
 
 interface RequestBody {
-  resumeUrl: string;
+  resumeUrl?: string;
+  fileBase64?: string;
+  fileName?: string;
 }
 
 interface WordParagraph {
@@ -150,33 +152,53 @@ Deno.serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    const { resumeUrl }: RequestBody = await req.json();
+    const { resumeUrl, fileBase64, fileName: inputFileName }: RequestBody = await req.json();
     
-    console.log('Parsing resume from:', resumeUrl);
+    let extractedText = '';
+    let fileArrayBuffer: ArrayBuffer;
+    let fileName: string;
 
-    // Download the file
-    const { data: fileData, error: downloadError } = await supabase.storage
-      .from('resumes')
-      .download(resumeUrl);
+    // Handle base64 input (from UploadCustomResumeDialog)
+    if (fileBase64 && inputFileName) {
+      console.log('Processing base64 file:', inputFileName);
+      fileName = inputFileName.toLowerCase();
+      
+      // Decode base64 to ArrayBuffer
+      const binaryString = atob(fileBase64);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      fileArrayBuffer = bytes.buffer;
+    } 
+    // Handle storage URL (from UploadResumeDialog)
+    else if (resumeUrl) {
+      console.log('Parsing resume from storage:', resumeUrl);
+      fileName = resumeUrl.toLowerCase();
 
-    if (downloadError || !fileData) {
-      console.error('Error downloading file:', downloadError);
-      throw new Error('Failed to download resume file');
+      // Download the file
+      const { data: fileData, error: downloadError } = await supabase.storage
+        .from('resumes')
+        .download(resumeUrl);
+
+      if (downloadError || !fileData) {
+        console.error('Error downloading file:', downloadError);
+        throw new Error('Failed to download resume file');
+      }
+
+      fileArrayBuffer = await fileData.arrayBuffer();
+    } else {
+      throw new Error('Either resumeUrl or fileBase64 with fileName must be provided');
     }
 
-    console.log('File downloaded, detecting type and extracting text...');
-
-    let extractedText = '';
-    const fileName = resumeUrl.toLowerCase();
+    console.log('File ready, detecting type and extracting text...');
 
     // Check if it's a Word document
     if (fileName.endsWith('.docx') || fileName.endsWith('.doc')) {
       console.log('Processing Word document...');
       
-      const arrayBuffer = await fileData.arrayBuffer();
-      
       try {
-        extractedText = await extractStructuredTextFromDocx(arrayBuffer);
+        extractedText = await extractStructuredTextFromDocx(fileArrayBuffer);
         console.log('Extracted structured text from Word document, length:', extractedText.length);
       } catch (e) {
         console.error('Error processing Word document:', e);
@@ -184,8 +206,8 @@ Deno.serve(async (req) => {
       }
     } else {
       // Fallback for other formats
-      console.log('Unsupported document format');
-      throw new Error('Only DOC and DOCX files are supported');
+      console.log('Unsupported document format:', fileName);
+      throw new Error('Only DOC and DOCX files are supported. Please paste the text manually for other formats.');
     }
 
     console.log('Sending extracted text to AI for structuring...');
