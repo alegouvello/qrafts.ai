@@ -41,61 +41,90 @@ async function extractPagesText(document: any): Promise<string> {
   return fullText.trim();
 }
 
-// OCR function using AI vision for scanned PDFs
+// Convert Uint8Array to base64 without blowing the call stack (works for large files)
+function uint8ToBase64(bytes: Uint8Array): string {
+  const chunkSize = 0x8000;
+  let binary = '';
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.subarray(i, i + chunkSize);
+    binary += String.fromCharCode(...chunk);
+  }
+  return btoa(binary);
+}
+
+// OCR function using an AI vision-capable model for scanned PDFs
 async function extractTextWithOCR(pdfData: Uint8Array, lovableApiKey: string): Promise<string> {
-  console.log('Using AI vision for OCR on scanned PDF...');
-  
-  // Convert PDF bytes to base64 for the vision API
-  const base64Pdf = btoa(String.fromCharCode(...pdfData));
-  
-  // Use Lovable AI vision model to extract text from the PDF
-  const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${lovableApiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'google/gemini-2.5-flash',
-      messages: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: `This is a scanned PDF resume. Please perform OCR and extract ALL text from this document exactly as it appears. Preserve the structure including:
-- All headings and section titles
-- All bullet points and their nesting
-- All dates, locations, and contact information
-- All job titles, company names, and descriptions
-- Education details, certifications, skills
-- Any URLs or links visible
+  console.log('Using AI OCR for scanned PDF...');
 
-Output the raw text content only, preserving the original formatting and structure as much as possible. Do not add any commentary.`
-            },
-            {
-              type: 'image_url',
-              image_url: {
-                url: `data:application/pdf;base64,${base64Pdf}`
-              }
-            }
-          ]
-        }
-      ],
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('OCR API error:', response.status, errorText);
-    throw new Error('Failed to perform OCR on scanned PDF');
+  // Practical guardrail: large PDFs can exceed request/compute limits and hang.
+  // If you need larger docs later, we can implement page-by-page rendering + OCR.
+  const maxBytes = 6_000_000; // ~6MB
+  if (pdfData.byteLength > maxBytes) {
+    throw new Error(`Scanned PDF is too large for OCR (${Math.round(pdfData.byteLength / 1024 / 1024)}MB). Please upload a smaller file or paste text.`);
   }
 
-  const data = await response.json();
-  const extractedText = data.choices?.[0]?.message?.content || '';
-  
-  console.log('OCR extracted text length:', extractedText.length);
-  return extractedText;
+  const base64Pdf = uint8ToBase64(pdfData);
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 55_000);
+
+  try {
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {
+        'Authorization': `Bearer ${lovableApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        // Flash is faster for OCR; keep output bounded to reduce latency.
+        model: 'google/gemini-2.5-flash-lite',
+        max_tokens: 2500,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: `Perform OCR on this scanned resume PDF and return ONLY the extracted text. Preserve:
+- headings/sections
+- bullet points (including nesting)
+- dates, locations, contact info
+- job titles, company names, and descriptions
+- education/certifications/skills
+- URLs
+
+No commentary, no JSON—just the raw text.`
+              },
+              {
+                type: 'image_url',
+                image_url: {
+                  url: `data:application/pdf;base64,${base64Pdf}`
+                }
+              }
+            ]
+          }
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('OCR API error:', response.status, errorText);
+      throw new Error('Failed to perform OCR on scanned PDF');
+    }
+
+    const data = await response.json();
+    const extractedText = data.choices?.[0]?.message?.content || '';
+
+    console.log('OCR extracted text length:', extractedText.length);
+    return extractedText;
+  } catch (err) {
+    console.error('OCR request failed:', err);
+    throw err;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 // Check if text appears to be from a scanned PDF (too short or mostly whitespace)
