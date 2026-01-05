@@ -32,6 +32,7 @@ interface ApplicationCardProps {
     answersCompleted: number;
     avgResponseDays?: number;
     fastestResponseDays?: number;
+    companyDomain?: string | null;
   };
   onDelete: (id: string) => void;
 }
@@ -149,9 +150,11 @@ export const ApplicationCard = ({ application, onDelete }: ApplicationCardProps)
     setIsDeleting(false);
   };
 
+  // Use stored company_domain if available, otherwise derive it
   const logoDomain = useMemo(() => {
+    if (application.companyDomain) return application.companyDomain;
     return deriveCompanyDomain(application.url, application.company);
-  }, [application.company, application.url]);
+  }, [application.companyDomain, application.company, application.url]);
 
   // Prefer Clearbit, but fall back to Google's favicon service (much more reliable).
   const [logoSrc, setLogoSrc] = useState<string>(`https://logo.clearbit.com/${logoDomain}`);
