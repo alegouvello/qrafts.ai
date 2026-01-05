@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Calendar, ExternalLink, MessageSquare, Trash2, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 type ApplicationStatus = "pending" | "interview" | "rejected" | "accepted";
@@ -43,17 +43,24 @@ const statusConfig = {
   accepted: { label: "Accepted", variant: "outline" as const },
 };
 
+function safeHostname(inputUrl: string): string | null {
+  try {
+    const u = new URL(inputUrl);
+    return u.hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
+
 export const ApplicationCard = ({ application, onDelete }: ApplicationCardProps) => {
   const { t } = useTranslation();
   const statusInfo = {
-    pending: { label: t('application.status.pending'), variant: "secondary" as const },
-    interview: { label: t('application.status.interview'), variant: "default" as const },
-    rejected: { label: t('application.status.rejected'), variant: "destructive" as const },
-    accepted: { label: t('application.status.accepted'), variant: "outline" as const },
+    pending: { label: t("application.status.pending"), variant: "secondary" as const },
+    interview: { label: t("application.status.interview"), variant: "default" as const },
+    rejected: { label: t("application.status.rejected"), variant: "destructive" as const },
+    accepted: { label: t("application.status.accepted"), variant: "outline" as const },
   }[application.status];
-  const progress = application.questions > 0 
-    ? (application.answersCompleted / application.questions) * 100 
-    : 0;
+  const progress = application.questions > 0 ? (application.answersCompleted / application.questions) * 100 : 0;
   const [isDeleting, setIsDeleting] = useState(false);
   const [logoError, setLogoError] = useState(false);
 
@@ -63,10 +70,27 @@ export const ApplicationCard = ({ application, onDelete }: ApplicationCardProps)
     setIsDeleting(false);
   };
 
-  // Get company logo from Clearbit
-  const getCompanyLogo = (company: string) => {
-    const domain = company.toLowerCase().replace(/\s+/g, '') + '.com';
-    return `https://logo.clearbit.com/${domain}`;
+  const logoDomain = useMemo(() => {
+    const fromUrl = safeHostname(application.url);
+    if (fromUrl) return fromUrl;
+    return application.company.toLowerCase().replace(/\s+/g, "") + ".com";
+  }, [application.company, application.url]);
+
+  // Prefer Clearbit, but fall back to Google's favicon service (much more reliable).
+  const [logoSrc, setLogoSrc] = useState<string>(`https://logo.clearbit.com/${logoDomain}`);
+
+  useEffect(() => {
+    setLogoError(false);
+    setLogoSrc(`https://logo.clearbit.com/${logoDomain}`);
+  }, [logoDomain]);
+
+  const handleLogoError = () => {
+    const googleFavicon = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(logoDomain)}&sz=128`;
+    if (logoSrc !== googleFavicon) {
+      setLogoSrc(googleFavicon);
+      return;
+    }
+    setLogoError(true);
   };
 
   return (
@@ -76,18 +100,17 @@ export const ApplicationCard = ({ application, onDelete }: ApplicationCardProps)
         <div className="mb-4">
           {!logoError ? (
             <div className="w-14 h-14 rounded-2xl overflow-hidden bg-muted/20 flex items-center justify-center border border-border/30 transition-transform group-hover:scale-105">
-              <img 
-                src={getCompanyLogo(application.company)}
-                alt={application.company}
+              <img
+                src={logoSrc}
+                alt={`${application.company} logo`}
                 className="w-full h-full object-contain p-2"
-                onError={() => setLogoError(true)}
+                loading="lazy"
+                onError={handleLogoError}
               />
             </div>
           ) : (
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center border border-border/30 transition-transform group-hover:scale-105">
-              <span className="text-xl font-bold text-primary">
-                {application.company.charAt(0).toUpperCase()}
-              </span>
+              <span className="text-xl font-bold text-primary">{application.company.charAt(0).toUpperCase()}</span>
             </div>
           )}
         </div>
