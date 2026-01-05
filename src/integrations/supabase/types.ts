@@ -121,6 +121,7 @@ export type Database = {
         Row: {
           applied_date: string
           company: string
+          company_domain: string | null
           created_at: string
           fit_analysis: Json | null
           fit_analyzed_at: string | null
@@ -135,6 +136,7 @@ export type Database = {
         Insert: {
           applied_date?: string
           company: string
+          company_domain?: string | null
           created_at?: string
           fit_analysis?: Json | null
           fit_analyzed_at?: string | null
@@ -149,6 +151,7 @@ export type Database = {
         Update: {
           applied_date?: string
           company?: string
+          company_domain?: string | null
           created_at?: string
           fit_analysis?: Json | null
           fit_analyzed_at?: string | null

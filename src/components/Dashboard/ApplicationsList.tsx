@@ -9,6 +9,9 @@ interface Application {
   url: string;
   questions: number;
   answersCompleted: number;
+  avgResponseDays?: number;
+  fastestResponseDays?: number;
+  companyDomain?: string | null;
 }
 
 interface ApplicationsListProps {

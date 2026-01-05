@@ -27,6 +27,38 @@ function isInternalUrl(urlString: string): boolean {
   }
 }
 
+// Common job board hostnames to ignore when deriving company domain
+const JOB_BOARD_PATTERNS = [
+  /lever\.co$/i, /greenhouse\.io$/i, /workday\.com$/i, /myworkdayjobs\.com$/i,
+  /ashbyhq\.com$/i, /icims\.com$/i, /smartrecruiters\.com$/i, /jobvite\.com$/i,
+  /applytojob\.com$/i, /breezy\.hr$/i, /recruitee\.com$/i, /bamboohr\.com$/i,
+  /jazz\.co$/i, /jazzhq\.com$/i, /workable\.com$/i, /taleo\.net$/i,
+  /oraclecloud\.com$/i, /successfactors\.com$/i, /ultipro\.com$/i,
+  /paylocity\.com$/i, /paycom\.com$/i, /adp\.com$/i, /phenom\.com$/i,
+  /eightfold\.ai$/i, /avature\.net$/i, /cornerstoneondemand\.com$/i,
+  /pinpointhq\.com$/i, /teamtailor\.com$/i, /personio\.de$/i, /personio\.com$/i,
+  /gem\.com$/i, /wellfound\.com$/i, /angel\.co$/i, /ycombinator\.com$/i,
+  /workatastartup\.com$/i, /dover\.com$/i, /rippling\.com$/i, /gusto\.com$/i,
+  /deel\.com$/i, /remote\.com$/i, /oysterhr\.com$/i, /linkedin\.com$/i,
+  /indeed\.com$/i, /ziprecruiter\.com$/i, /glassdoor\.com$/i, /monster\.com$/i,
+  /careerbuilder\.com$/i, /dice\.com$/i, /simplyhired\.com$/i, /snagajob\.com$/i,
+  /flexjobs\.com$/i, /builtin\.com$/i, /themuse\.com$/i, /hired\.com$/i,
+  /triplebyte\.com$/i, /otta\.com$/i, /cord\.co$/i, /getro\.com$/i,
+];
+
+function deriveCompanyDomain(url: string, companyName: string): string {
+  try {
+    const u = new URL(url);
+    const hostname = u.hostname.replace(/^www\./, '');
+    if (JOB_BOARD_PATTERNS.some((p) => p.test(hostname))) {
+      return companyName.toLowerCase().replace(/\s+/g, '') + '.com';
+    }
+    return hostname;
+  } catch {
+    return companyName.toLowerCase().replace(/\s+/g, '') + '.com';
+  }
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -154,9 +186,13 @@ Deno.serve(async (req) => {
       throw new Error('Failed to parse job information');
     }
 
-    // Update application with extracted company, position, and summary
+    // Update application with extracted company, position, summary, and company_domain
     const updateData: any = {};
-    if (company) updateData.company = company;
+    if (company) {
+      updateData.company = company;
+      // Derive and store company domain for consistent logo lookup
+      updateData.company_domain = deriveCompanyDomain(jobUrl, company);
+    }
     if (position) updateData.position = position;
     if (roleSummary) updateData.role_summary = roleSummary;
 

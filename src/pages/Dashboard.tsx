@@ -29,6 +29,82 @@ interface Application {
   answersCompleted: number;
   avgResponseDays?: number;
   fastestResponseDays?: number;
+  companyDomain?: string | null;
+}
+
+// Helper to derive company domain from URL (mirrors ApplicationCard logic)
+const JOB_BOARD_PATTERNS = [
+  /lever\.co$/i,
+  /greenhouse\.io$/i,
+  /workday\.com$/i,
+  /myworkdayjobs\.com$/i,
+  /ashbyhq\.com$/i,
+  /icims\.com$/i,
+  /smartrecruiters\.com$/i,
+  /jobvite\.com$/i,
+  /applytojob\.com$/i,
+  /breezy\.hr$/i,
+  /recruitee\.com$/i,
+  /bamboohr\.com$/i,
+  /jazz\.co$/i,
+  /jazzhq\.com$/i,
+  /workable\.com$/i,
+  /taleo\.net$/i,
+  /oraclecloud\.com$/i,
+  /successfactors\.com$/i,
+  /ultipro\.com$/i,
+  /paylocity\.com$/i,
+  /paycom\.com$/i,
+  /adp\.com$/i,
+  /phenom\.com$/i,
+  /eightfold\.ai$/i,
+  /avature\.net$/i,
+  /cornerstoneondemand\.com$/i,
+  /pinpointhq\.com$/i,
+  /teamtailor\.com$/i,
+  /personio\.de$/i,
+  /personio\.com$/i,
+  /gem\.com$/i,
+  /wellfound\.com$/i,
+  /angel\.co$/i,
+  /ycombinator\.com$/i,
+  /workatastartup\.com$/i,
+  /dover\.com$/i,
+  /rippling\.com$/i,
+  /gusto\.com$/i,
+  /deel\.com$/i,
+  /remote\.com$/i,
+  /oysterhr\.com$/i,
+  /linkedin\.com$/i,
+  /indeed\.com$/i,
+  /ziprecruiter\.com$/i,
+  /glassdoor\.com$/i,
+  /monster\.com$/i,
+  /careerbuilder\.com$/i,
+  /dice\.com$/i,
+  /simplyhired\.com$/i,
+  /snagajob\.com$/i,
+  /flexjobs\.com$/i,
+  /builtin\.com$/i,
+  /themuse\.com$/i,
+  /hired\.com$/i,
+  /triplebyte\.com$/i,
+  /otta\.com$/i,
+  /cord\.co$/i,
+  /getro\.com$/i,
+];
+
+function deriveCompanyDomain(url: string, companyName: string): string {
+  try {
+    const u = new URL(url);
+    const hostname = u.hostname.replace(/^www\./, "");
+    if (JOB_BOARD_PATTERNS.some((p) => p.test(hostname))) {
+      return companyName.toLowerCase().replace(/\s+/g, "") + ".com";
+    }
+    return hostname;
+  } catch {
+    return companyName.toLowerCase().replace(/\s+/g, "") + ".com";
+  }
 }
 
 const Dashboard = () => {
@@ -220,6 +296,7 @@ const Dashboard = () => {
             questions: textQuestions.length,
             answersCompleted: answerCount,
             actualResponseDays,
+            companyDomain: app.company_domain,
           };
         })
       );
@@ -281,13 +358,18 @@ const Dashboard = () => {
       return;
     }
 
+    // Compute company domain for logo lookup
+    const companyName = data.company || "Unknown Company";
+    const companyDomain = deriveCompanyDomain(data.url, companyName);
+
     const { data: newApp, error } = await supabase
       .from("applications")
       .insert({
-        company: data.company || "Unknown Company",
+        company: companyName,
         position: data.position || "Unknown Position",
         url: data.url,
         user_id: user.id,
+        company_domain: companyDomain,
       })
       .select()
       .single();
