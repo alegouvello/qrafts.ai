@@ -71,6 +71,7 @@ interface Application {
   status: string;
   applied_date: string;
   url: string;
+  company_domain?: string | null;
   role_summary?: {
     location?: string;
     salary_range?: string;
@@ -79,6 +80,38 @@ interface Application {
     requirements?: string[];
     benefits?: string[];
   };
+}
+
+// Common job board hostnames to ignore when deriving company domain
+const JOB_BOARD_PATTERNS = [
+  /lever\.co$/i, /greenhouse\.io$/i, /workday\.com$/i, /myworkdayjobs\.com$/i,
+  /ashbyhq\.com$/i, /icims\.com$/i, /smartrecruiters\.com$/i, /jobvite\.com$/i,
+  /applytojob\.com$/i, /breezy\.hr$/i, /recruitee\.com$/i, /bamboohr\.com$/i,
+  /jazz\.co$/i, /jazzhq\.com$/i, /workable\.com$/i, /taleo\.net$/i,
+  /oraclecloud\.com$/i, /successfactors\.com$/i, /ultipro\.com$/i,
+  /paylocity\.com$/i, /paycom\.com$/i, /adp\.com$/i, /phenom\.com$/i,
+  /eightfold\.ai$/i, /avature\.net$/i, /cornerstoneondemand\.com$/i,
+  /pinpointhq\.com$/i, /teamtailor\.com$/i, /personio\.de$/i, /personio\.com$/i,
+  /gem\.com$/i, /wellfound\.com$/i, /angel\.co$/i, /ycombinator\.com$/i,
+  /workatastartup\.com$/i, /dover\.com$/i, /rippling\.com$/i, /gusto\.com$/i,
+  /deel\.com$/i, /remote\.com$/i, /oysterhr\.com$/i, /linkedin\.com$/i,
+  /indeed\.com$/i, /ziprecruiter\.com$/i, /glassdoor\.com$/i, /monster\.com$/i,
+  /careerbuilder\.com$/i, /dice\.com$/i, /simplyhired\.com$/i, /snagajob\.com$/i,
+  /flexjobs\.com$/i, /builtin\.com$/i, /themuse\.com$/i, /hired\.com$/i,
+  /triplebyte\.com$/i, /otta\.com$/i, /cord\.co$/i, /getro\.com$/i,
+];
+
+function deriveCompanyDomain(url: string, companyName: string): string {
+  try {
+    const u = new URL(url);
+    const hostname = u.hostname.replace(/^www\./, "");
+    if (JOB_BOARD_PATTERNS.some((p) => p.test(hostname))) {
+      return companyName.toLowerCase().replace(/\s+/g, "") + ".com";
+    }
+    return hostname;
+  } catch {
+    return companyName.toLowerCase().replace(/\s+/g, "") + ".com";
+  }
 }
 
 interface Question {
@@ -174,6 +207,7 @@ const ApplicationDetail = () => {
     naturalAnswer: string;
   } | null>(null);
   const [logoError, setLogoError] = useState(false);
+  const [logoSrc, setLogoSrc] = useState<string>("");
   const [userProfile, setUserProfile] = useState<{
     full_name?: string;
     email?: string;
@@ -1540,10 +1574,26 @@ const ApplicationDetail = () => {
   };
 
 
-  // Get company logo
-  const getCompanyLogo = (company: string) => {
-    const domain = company.toLowerCase().replace(/\s+/g, '') + '.com';
-    return `https://logo.clearbit.com/${domain}`;
+  // Get company logo domain - use stored domain or derive it
+  const logoDomain = application?.company_domain || 
+    (application ? deriveCompanyDomain(application.url, application.company) : "");
+
+  // Set up logo source when application changes
+  useEffect(() => {
+    if (logoDomain) {
+      setLogoError(false);
+      setLogoSrc(`https://logo.clearbit.com/${logoDomain}`);
+    }
+  }, [logoDomain]);
+
+  // Handle logo error with Google favicon fallback
+  const handleLogoError = () => {
+    const googleFavicon = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(logoDomain)}&sz=128`;
+    if (logoSrc !== googleFavicon) {
+      setLogoSrc(googleFavicon);
+      return;
+    }
+    setLogoError(true);
   };
 
   if (loading) {
@@ -1646,13 +1696,14 @@ const ApplicationDetail = () => {
           <div className="flex items-start gap-6 mb-6">
             {/* Company Logo */}
             <div className="shrink-0">
-              {!logoError ? (
+              {!logoError && logoSrc ? (
                 <div className="w-20 h-20 rounded-2xl overflow-hidden bg-muted/30 flex items-center justify-center border border-border/50">
                   <img 
-                    src={getCompanyLogo(application.company)}
-                    alt={application.company}
+                    src={logoSrc}
+                    alt={`${application.company} logo`}
                     className="w-full h-full object-contain p-3"
-                    onError={() => setLogoError(true)}
+                    loading="lazy"
+                    onError={handleLogoError}
                   />
                 </div>
               ) : (
