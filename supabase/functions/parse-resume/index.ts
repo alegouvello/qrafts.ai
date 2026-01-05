@@ -41,6 +41,84 @@ async function extractPagesText(document: any): Promise<string> {
   return fullText.trim();
 }
 
+// OCR function using AI vision for scanned PDFs
+async function extractTextWithOCR(pdfData: Uint8Array, lovableApiKey: string): Promise<string> {
+  console.log('Using AI vision for OCR on scanned PDF...');
+  
+  // Convert PDF bytes to base64 for the vision API
+  const base64Pdf = btoa(String.fromCharCode(...pdfData));
+  
+  // Use Lovable AI vision model to extract text from the PDF
+  const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${lovableApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'google/gemini-2.5-flash',
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: `This is a scanned PDF resume. Please perform OCR and extract ALL text from this document exactly as it appears. Preserve the structure including:
+- All headings and section titles
+- All bullet points and their nesting
+- All dates, locations, and contact information
+- All job titles, company names, and descriptions
+- Education details, certifications, skills
+- Any URLs or links visible
+
+Output the raw text content only, preserving the original formatting and structure as much as possible. Do not add any commentary.`
+            },
+            {
+              type: 'image_url',
+              image_url: {
+                url: `data:application/pdf;base64,${base64Pdf}`
+              }
+            }
+          ]
+        }
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('OCR API error:', response.status, errorText);
+    throw new Error('Failed to perform OCR on scanned PDF');
+  }
+
+  const data = await response.json();
+  const extractedText = data.choices?.[0]?.message?.content || '';
+  
+  console.log('OCR extracted text length:', extractedText.length);
+  return extractedText;
+}
+
+// Check if text appears to be from a scanned PDF (too short or mostly whitespace)
+function isLikelyScannedPdf(text: string): boolean {
+  // Remove whitespace and check if there's meaningful content
+  const cleanText = text.replace(/\s+/g, ' ').trim();
+  
+  // If text is very short (less than 100 chars), it's likely scanned
+  if (cleanText.length < 100) {
+    console.log('PDF appears to be scanned (text too short):', cleanText.length, 'chars');
+    return true;
+  }
+  
+  // Check if text has very few recognizable words
+  const words = cleanText.split(' ').filter(w => w.length > 2);
+  if (words.length < 20) {
+    console.log('PDF appears to be scanned (too few words):', words.length);
+    return true;
+  }
+  
+  return false;
+}
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -248,15 +326,30 @@ Deno.serve(async (req) => {
     else if (fileName.endsWith('.pdf')) {
       console.log('Processing PDF document...');
       
+      const pdfData = new Uint8Array(fileArrayBuffer);
+      
       try {
-        const pdfData = new Uint8Array(fileArrayBuffer);
+        // First, try standard text extraction
         extractedText = await extractTextFromPdf(pdfData);
         console.log('Extracted text from PDF, length:', extractedText.length);
+        
+        // Check if this looks like a scanned PDF (no/little text extracted)
+        if (isLikelyScannedPdf(extractedText)) {
+          console.log('Detected scanned PDF, falling back to OCR...');
+          extractedText = await extractTextWithOCR(pdfData, lovableApiKey);
+        }
       } catch (e) {
-        console.error('Error processing PDF document:', e);
-        throw new Error('Failed to extract text from PDF. Please paste the text manually.');
+        console.error('Error with standard PDF extraction, trying OCR:', e);
+        
+        // If standard extraction fails, try OCR as fallback
+        try {
+          extractedText = await extractTextWithOCR(pdfData, lovableApiKey);
+        } catch (ocrError) {
+          console.error('OCR also failed:', ocrError);
+          throw new Error('Failed to extract text from PDF. Please paste the text manually.');
+        }
       }
-    } 
+    }
     else {
       // Fallback for other formats
       console.log('Unsupported document format:', fileName);
