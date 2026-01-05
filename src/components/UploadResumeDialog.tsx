@@ -11,6 +11,7 @@ import {
 import { Upload, FileText, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { ParseProgressStepper, ParseStep } from "./ParseProgressStepper";
 
 interface UploadResumeDialogProps {
   open: boolean;
@@ -25,8 +26,15 @@ export const UploadResumeDialog = ({
 }: UploadResumeDialogProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const [parseStep, setParseStep] = useState<ParseStep | null>(null);
+  const [parseError, setParseError] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const resetState = () => {
+    setSelectedFile(null);
+    setParseStep(null);
+    setParseError(null);
+  };
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -66,6 +74,8 @@ export const UploadResumeDialog = ({
       const file = e.dataTransfer.files[0];
       if (validateFileType(file)) {
         setSelectedFile(file);
+        setParseStep(null);
+        setParseError(null);
       }
     }
   };
@@ -75,6 +85,8 @@ export const UploadResumeDialog = ({
       const file = e.target.files[0];
       if (validateFileType(file)) {
         setSelectedFile(file);
+        setParseStep(null);
+        setParseError(null);
       }
     }
   };
@@ -82,12 +94,16 @@ export const UploadResumeDialog = ({
   const handleSubmit = async () => {
     if (!selectedFile) return;
 
-    setUploading(true);
+    setParseStep('uploading');
+    setParseError(null);
+    
     const success = await onUpload(selectedFile);
     
     if (success) {
       // Call parse-resume function after successful upload
       try {
+        setParseStep('extracting');
+        
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           const filePath = `${user.id}/${selectedFile.name}`;
@@ -100,24 +116,54 @@ export const UploadResumeDialog = ({
             },
           });
 
+          if (response.error) {
+            throw new Error(response.error.message || 'Failed to parse resume');
+          }
+
+          if (response.data?.usedOcr) {
+            setParseStep('ocr');
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+
+          setParseStep('structuring');
+          await new Promise(resolve => setTimeout(resolve, 300));
+
           if (response.data?.success) {
+            setParseStep('complete');
             toast({
               title: "Resume Parsed",
-              description: "Your profile has been updated. Questions will auto-fill!",
+              description: response.data.usedOcr 
+                ? "Your scanned resume was processed with OCR. Profile updated!"
+                : "Your profile has been updated. Questions will auto-fill!",
             });
+            
+            // Auto close after success
+            setTimeout(() => {
+              resetState();
+              onOpenChange(false);
+            }, 1500);
+          } else {
+            throw new Error(response.data?.error || 'Unknown parsing error');
           }
         }
       } catch (error) {
         console.error('Error parsing resume:', error);
-        // Don't show error to user as upload was successful
+        const errorMessage = error instanceof Error ? error.message : 'Could not parse the resume';
+        setParseStep('error');
+        setParseError(errorMessage);
+        toast({
+          title: "Parse failed",
+          description: "See error details below for next steps",
+          variant: "destructive",
+        });
       }
-      
-      setSelectedFile(null);
-      onOpenChange(false);
+    } else {
+      setParseStep('error');
+      setParseError('Failed to upload file. Please try again.');
     }
-    
-    setUploading(false);
   };
+
+  const isProcessing = parseStep !== null && parseStep !== 'complete' && parseStep !== 'error';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -162,31 +208,50 @@ export const UploadResumeDialog = ({
               </label>
             </div>
           ) : (
-            <div className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50 border border-border">
-              <FileText className="h-10 w-10 text-primary" />
-              <div className="flex-1 min-w-0">
-                <p className="font-medium truncate">{selectedFile.name}</p>
-                <p className="text-sm text-muted-foreground">
-                  {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                </p>
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50 border border-border">
+                <FileText className="h-10 w-10 text-primary" />
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">{selectedFile.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                  </p>
+                </div>
+                {!isProcessing && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => resetState()}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setSelectedFile(null)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
+              
+              {parseStep && (
+                <ParseProgressStepper
+                  currentStep={parseStep}
+                  errorMessage={parseError || undefined}
+                />
+              )}
             </div>
           )}
         </div>
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={() => {
+              resetState();
+              onOpenChange(false);
+            }}
+            disabled={isProcessing}
+          >
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={!selectedFile || uploading}>
-            {uploading ? "Uploading..." : "Upload Resume"}
+          <Button onClick={handleSubmit} disabled={!selectedFile || isProcessing}>
+            {isProcessing ? "Processing..." : "Upload Resume"}
           </Button>
         </DialogFooter>
       </DialogContent>
