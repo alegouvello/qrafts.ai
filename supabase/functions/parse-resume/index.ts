@@ -2,6 +2,45 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import JSZip from 'https://esm.sh/jszip@3.10.1';
 
+// PDF text extraction function using pdfjs-serverless
+async function extractTextFromPdf(data: Uint8Array): Promise<string> {
+  // Dynamic import to avoid build issues
+  // deno-lint-ignore no-explicit-any
+  const pdfjsServerless: any = await import('https://esm.sh/pdfjs-serverless@0.4.0?bundle');
+  
+  // Try to get the function from different export patterns
+  let getDocument = pdfjsServerless.getDocument || pdfjsServerless.default?.getDocument;
+  
+  if (!getDocument && pdfjsServerless.resolvePDFJS) {
+    // Fallback: resolve PDF.js and get the function
+    const pdfjs = await pdfjsServerless.resolvePDFJS();
+    getDocument = pdfjs.getDocument;
+  }
+  
+  if (!getDocument) {
+    throw new Error('Could not load PDF.js library');
+  }
+  
+  const document = await getDocument({ data, useSystemFonts: true }).promise;
+  return await extractPagesText(document);
+}
+
+// deno-lint-ignore no-explicit-any
+async function extractPagesText(document: any): Promise<string> {
+  let fullText = '';
+  for (let i = 1; i <= document.numPages; i++) {
+    const page = await document.getPage(i);
+    const textContent = await page.getTextContent();
+    // deno-lint-ignore no-explicit-any
+    const pageText = textContent.items
+      .filter((item: any) => item.str != null)
+      .map((item: any) => item.str)
+      .join(' ');
+    fullText += pageText + '\n';
+  }
+  return fullText.trim();
+}
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -204,10 +243,24 @@ Deno.serve(async (req) => {
         console.error('Error processing Word document:', e);
         throw new Error('Failed to extract text from Word document');
       }
-    } else {
+    } 
+    // Check if it's a PDF
+    else if (fileName.endsWith('.pdf')) {
+      console.log('Processing PDF document...');
+      
+      try {
+        const pdfData = new Uint8Array(fileArrayBuffer);
+        extractedText = await extractTextFromPdf(pdfData);
+        console.log('Extracted text from PDF, length:', extractedText.length);
+      } catch (e) {
+        console.error('Error processing PDF document:', e);
+        throw new Error('Failed to extract text from PDF. Please paste the text manually.');
+      }
+    } 
+    else {
       // Fallback for other formats
       console.log('Unsupported document format:', fileName);
-      throw new Error('Only DOC and DOCX files are supported. Please paste the text manually for other formats.');
+      throw new Error('Only PDF, DOC, and DOCX files are supported. Please paste the text manually for other formats.');
     }
 
     console.log('Sending extracted text to AI for structuring...');
