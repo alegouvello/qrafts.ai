@@ -380,33 +380,37 @@ Return ONLY valid JSON with this structure:
       throw new Error('Failed to parse AI response as JSON');
     }
 
-    // Store the complete extracted data in resume_text as JSON
-    const { error: upsertError } = await supabase
-      .from('user_profiles')
-      .upsert({
-        user_id: user.id,
-        full_name: extractedData.full_name || null,
-        email: extractedData.email || null,
-        phone: extractedData.phone || null,
-        linkedin_url: extractedData.linkedin_url || null,
-        website_url: extractedData.website_url || null,
-        location: extractedData.location || null,
-        resume_text: JSON.stringify(extractedData),
-      }, {
-        onConflict: 'user_id'
-      });
+    // Only save to user_profiles if this is a storage-based upload (not for custom resume uploads)
+    if (resumeUrl) {
+      // Store the complete extracted data in resume_text as JSON
+      const { error: upsertError } = await supabase
+        .from('user_profiles')
+        .upsert({
+          user_id: user.id,
+          full_name: extractedData.full_name || null,
+          email: extractedData.email || null,
+          phone: extractedData.phone || null,
+          linkedin_url: extractedData.linkedin_url || null,
+          website_url: extractedData.website_url || null,
+          location: extractedData.location || null,
+          resume_text: JSON.stringify(extractedData),
+        }, {
+          onConflict: 'user_id'
+        });
 
-    if (upsertError) {
-      console.error('Error upserting profile:', upsertError);
-      throw new Error('Failed to save profile data');
+      if (upsertError) {
+        console.error('Error upserting profile:', upsertError);
+        throw new Error('Failed to save profile data');
+      }
+
+      console.log('Profile saved successfully');
     }
-
-    console.log('Profile saved successfully');
 
     return new Response(
       JSON.stringify({
         success: true,
         profile: extractedData,
+        text: extractedText, // Return the raw extracted text for custom resume uploads
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
