@@ -107,6 +107,15 @@ function deriveCompanyDomain(url: string, companyName: string): string {
   }
 }
 
+// Normalize company names for grouping (handles variations like "JPMorgan Chase" vs "JPMorgan Chase & Co.")
+function normalizeCompanyName(name: string): string {
+  // Remove common suffixes and normalize
+  return name
+    .replace(/[,.]?\s*(Inc\.?|LLC|Ltd\.?|Corp\.?|Corporation|Company|Co\.?|& Co\.?|Group|Holdings|International|Intl\.?)$/i, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 const Dashboard = () => {
   const { t } = useTranslation();
   const [applications, setApplications] = useState<Application[]>([]);
@@ -504,12 +513,19 @@ const Dashboard = () => {
     return matchesStatus && matchesSearch;
   });
 
-  // Group applications by company
+  // Group applications by normalized company name (consolidates variations like "JPMorgan Chase" vs "JPMorgan Chase & Co.")
   const groupedApplications = filteredApplications.reduce((acc, app) => {
-    if (!acc[app.company]) {
-      acc[app.company] = [];
+    const normalizedName = normalizeCompanyName(app.company);
+    // Use the first encountered company name as the display name for the group
+    const existingGroupKey = Object.keys(acc).find(
+      key => normalizeCompanyName(key) === normalizedName
+    );
+    const groupKey = existingGroupKey || app.company;
+    
+    if (!acc[groupKey]) {
+      acc[groupKey] = [];
     }
-    acc[app.company].push(app);
+    acc[groupKey].push(app);
     return acc;
   }, {} as Record<string, Application[]>);
 
