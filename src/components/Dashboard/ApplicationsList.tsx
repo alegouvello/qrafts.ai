@@ -16,10 +16,11 @@ interface Application {
 
 interface ApplicationsListProps {
   groupedApplications: Record<string, Application[]>;
+  groupDomains?: Record<string, string>;
   onDelete: (id: string) => void;
 }
 
-export const ApplicationsList = ({ groupedApplications, onDelete }: ApplicationsListProps) => {
+export const ApplicationsList = ({ groupedApplications, groupDomains = {}, onDelete }: ApplicationsListProps) => {
   return (
     <div className="space-y-6" role="list" aria-label="Job applications grouped by company">
       {Object.entries(groupedApplications).map(([company, apps]) => (
@@ -30,6 +31,7 @@ export const ApplicationsList = ({ groupedApplications, onDelete }: Applications
               <ApplicationCard
                 key={app.id}
                 application={app}
+                overrideDomain={groupDomains[company]}
                 onDelete={onDelete}
               />
             ))}

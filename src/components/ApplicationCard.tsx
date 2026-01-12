@@ -34,6 +34,7 @@ interface ApplicationCardProps {
     fastestResponseDays?: number;
     companyDomain?: string | null;
   };
+  overrideDomain?: string;
   onDelete: (id: string) => void;
 }
 
@@ -132,7 +133,7 @@ function deriveCompanyDomain(url: string, companyName: string): string {
   }
 }
 
-export const ApplicationCard = ({ application, onDelete }: ApplicationCardProps) => {
+export const ApplicationCard = ({ application, overrideDomain, onDelete }: ApplicationCardProps) => {
   const { t } = useTranslation();
   const statusInfo = {
     pending: { label: t("application.status.pending"), variant: "secondary" as const },
@@ -150,11 +151,12 @@ export const ApplicationCard = ({ application, onDelete }: ApplicationCardProps)
     setIsDeleting(false);
   };
 
-  // Use stored company_domain if available, otherwise derive it
+  // Use override domain (for grouped logos), then stored company_domain, then derive it
   const logoDomain = useMemo(() => {
+    if (overrideDomain) return overrideDomain;
     if (application.companyDomain) return application.companyDomain;
     return deriveCompanyDomain(application.url, application.company);
-  }, [application.companyDomain, application.company, application.url]);
+  }, [overrideDomain, application.companyDomain, application.company, application.url]);
 
   // Prefer Clearbit, but fall back to Google's favicon service (much more reliable).
   const [logoSrc, setLogoSrc] = useState<string>(`https://logo.clearbit.com/${logoDomain}`);
