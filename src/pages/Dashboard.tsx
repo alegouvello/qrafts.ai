@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -529,6 +529,34 @@ const Dashboard = () => {
     return acc;
   }, {} as Record<string, Application[]>);
 
+  // Compute the most common domain for each company group (for consistent logos)
+  const groupDomains = useMemo(() => {
+    const domains: Record<string, string> = {};
+    Object.entries(groupedApplications).forEach(([company, apps]) => {
+      // Count domain occurrences
+      const domainCounts: Record<string, number> = {};
+      apps.forEach(app => {
+        const domain = app.companyDomain || '';
+        if (domain) {
+          domainCounts[domain] = (domainCounts[domain] || 0) + 1;
+        }
+      });
+      // Find most common domain
+      let maxCount = 0;
+      let mostCommonDomain = '';
+      Object.entries(domainCounts).forEach(([domain, count]) => {
+        if (count > maxCount) {
+          maxCount = count;
+          mostCommonDomain = domain;
+        }
+      });
+      if (mostCommonDomain) {
+        domains[company] = mostCommonDomain;
+      }
+    });
+    return domains;
+  }, [groupedApplications]);
+
   return (
     <div className="min-h-screen bg-background relative">
       <SEO 
@@ -750,6 +778,7 @@ const Dashboard = () => {
         ) : (
           <ApplicationsList 
             groupedApplications={groupedApplications}
+            groupDomains={groupDomains}
             onDelete={handleDeleteApplication}
           />
         )}
