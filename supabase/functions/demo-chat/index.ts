@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,6 +10,17 @@ const corsHeaders = {
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 const MAX_REQUESTS_PER_HOUR = 10;
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+
+// Input validation schemas
+const messageSchema = z.object({
+  role: z.enum(['user', 'assistant', 'system']),
+  content: z.string().min(1).max(10000)
+});
+
+const requestSchema = z.object({
+  messages: z.array(messageSchema).min(1).max(50),
+  language: z.enum(['en', 'fr', 'es']).optional().default('en')
+});
 
 function getRateLimitKey(req: Request): string {
   // Try to get real IP from various headers (for proxies/load balancers)
@@ -89,7 +101,19 @@ serve(async (req) => {
       );
     }
 
-    const { messages, language = 'en' } = await req.json();
+    // Parse and validate input
+    const rawBody = await req.json();
+    const validationResult = requestSchema.safeParse(rawBody);
+    
+    if (!validationResult.success) {
+      console.error("Validation error:", validationResult.error);
+      return new Response(
+        JSON.stringify({ error: "Invalid input: " + validationResult.error.issues.map(i => i.message).join(", ") }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
+    const { messages, language } = validationResult.data;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -102,7 +126,7 @@ serve(async (req) => {
       es: "Responde en español."
     };
 
-    const systemPrompt = `You are a demo version of the Qrafts AI Assistant. Your role is to showcase Qrafts features and help visitors understand how the platform can help with their job search. ${languageInstructions[language as keyof typeof languageInstructions] || languageInstructions.en}
+    const systemPrompt = `You are a demo version of the Qrafts AI Assistant. Your role is to showcase Qrafts features and help visitors understand how the platform can help with their job search. ${languageInstructions[language]}
 
 Key points to emphasize:
 - Keep responses concise (2-3 paragraphs maximum)

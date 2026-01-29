@@ -1,9 +1,21 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schemas
+const messageSchema = z.object({
+  role: z.enum(['user', 'assistant', 'system']),
+  content: z.string().min(1).max(10000)
+});
+
+const requestSchema = z.object({
+  messages: z.array(messageSchema).min(1).max(50),
+  language: z.enum(['en', 'fr', 'es']).optional().default('en')
+});
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -11,7 +23,19 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, language = 'en' } = await req.json();
+    // Parse and validate input
+    const rawBody = await req.json();
+    const validationResult = requestSchema.safeParse(rawBody);
+    
+    if (!validationResult.success) {
+      console.error("Validation error:", validationResult.error);
+      return new Response(
+        JSON.stringify({ error: "Invalid input: " + validationResult.error.issues.map(i => i.message).join(", ") }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
+    const { messages, language } = validationResult.data;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -24,7 +48,7 @@ serve(async (req) => {
       es: "Responde en español."
     };
 
-    const systemPrompt = `You are the Qrafts AI Assistant, a helpful companion for job seekers using the Qrafts platform. ${languageInstructions[language as keyof typeof languageInstructions] || languageInstructions.en}
+    const systemPrompt = `You are the Qrafts AI Assistant, a helpful companion for job seekers using the Qrafts platform. ${languageInstructions[language]}
 
 Your role is to help users with:
 - Understanding how to use Qrafts features (application tracking, answer management, timeline events, role-fit analysis)
