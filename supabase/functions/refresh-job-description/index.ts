@@ -1,6 +1,5 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
-import FirecrawlApp from 'https://esm.sh/@mendable/firecrawl-js@1.0.0';
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
@@ -104,24 +103,44 @@ Deno.serve(async (req) => {
     if (!firecrawlApiKey) {
       throw new Error('FIRECRAWL_API_KEY not configured');
     }
-
-    const firecrawl = new FirecrawlApp({ apiKey: firecrawlApiKey });
     
-    // Use Firecrawl to scrape the page with JavaScript rendering
+    // Use Firecrawl API directly for better compatibility
     let pageContent = '';
     try {
-      console.log('Scraping page with Firecrawl...');
-      const scrapeResult = await firecrawl.scrapeUrl(jobUrl, {
-        formats: ['markdown'],
-        waitFor: 5000,
+      console.log('Scraping page with Firecrawl API...', jobUrl);
+      const scrapeResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${firecrawlApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url: jobUrl,
+          formats: ['markdown'],
+          onlyMainContent: true,
+          waitFor: 5000,
+        }),
       });
 
+      if (!scrapeResponse.ok) {
+        const errorText = await scrapeResponse.text();
+        console.error('Firecrawl API error:', scrapeResponse.status, errorText);
+        throw new Error(`Firecrawl API error: ${scrapeResponse.status}`);
+      }
+
+      const scrapeResult = await scrapeResponse.json();
+      
       if (!scrapeResult.success) {
+        console.error('Firecrawl scrape failed:', scrapeResult);
         throw new Error('Firecrawl scraping failed');
       }
 
-      pageContent = scrapeResult.markdown || '';
+      pageContent = scrapeResult.data?.markdown || scrapeResult.markdown || '';
       console.log('Scraped page content with Firecrawl, length:', pageContent.length);
+      
+      if (!pageContent || pageContent.length < 50) {
+        console.warn('Page content is very short, may not have extracted properly');
+      }
     } catch (error) {
       console.error('Error scraping with Firecrawl:', error);
       throw new Error('Failed to scrape job posting page with Firecrawl');
