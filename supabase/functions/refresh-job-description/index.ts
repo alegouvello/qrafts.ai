@@ -159,13 +159,13 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           model: 'google/gemini-2.5-flash',
           messages: [
-            {
+          {
               role: 'system',
-              content: 'You are an expert at analyzing job postings. Extract the company name, position/job title, and key job details. Return ONLY valid JSON with this exact structure: {"company": "Company Name", "position": "Job Title", "summary": {"location": "Location", "salary_range": "Salary range or null", "description": "Brief role description", "responsibilities": ["resp1", "resp2"], "requirements": ["req1", "req2"], "benefits": ["benefit1", "benefit2"]}}. If any field is not found, use null or empty array.'
+              content: 'You are an expert at analyzing job postings. Extract the company name, position/job title, company website, and key job details. Return ONLY valid JSON with this exact structure: {"company": "Company Name", "position": "Job Title", "website": "https://company-domain.com or null", "summary": {"location": "Location", "salary_range": "Salary range or null", "description": "Brief role description", "responsibilities": ["resp1", "resp2"], "requirements": ["req1", "req2"], "benefits": ["benefit1", "benefit2"]}}. For the website field, look for the company\'s main website URL mentioned in the posting (e.g., "Learn more at harvey.ai", "Visit us at company.com", links in the footer, or the company\'s careers page domain). Extract the root domain (e.g., "harvey.ai" not "harvey.ai/careers"). If no website is found, use null.'
             },
             {
               role: 'user',
-              content: `Extract company name, position title, and job details from this job posting:\n\n${pageContent.substring(0, 10000)}`
+              content: `Extract company name, position title, company website URL, and job details from this job posting:\n\n${pageContent.substring(0, 10000)}`
             }
           ],
           temperature: 0.3,
@@ -192,6 +192,7 @@ Deno.serve(async (req) => {
     let company = null;
     let position = null;
     let roleSummary = null;
+    let extractedWebsite = null;
 
     try {
       const cleaned = jobInfoContent.trim().replace(/```json\n?/g, '').replace(/```\n?/g, '');
@@ -199,7 +200,8 @@ Deno.serve(async (req) => {
       company = jobInfo.company;
       position = jobInfo.position;
       roleSummary = jobInfo.summary;
-      console.log('Extracted job info');
+      extractedWebsite = jobInfo.website;
+      console.log('Extracted job info, website:', extractedWebsite);
     } catch (e) {
       console.error('Failed to parse job info:', e);
       throw new Error('Failed to parse job information');
@@ -209,8 +211,20 @@ Deno.serve(async (req) => {
     const updateData: any = {};
     if (company) {
       updateData.company = company;
-      // Derive and store company domain for consistent logo lookup
-      updateData.company_domain = deriveCompanyDomain(jobUrl, company);
+      // Prefer extracted website URL for domain, otherwise derive from job URL
+      if (extractedWebsite) {
+        try {
+          const websiteUrl = new URL(extractedWebsite.startsWith('http') ? extractedWebsite : `https://${extractedWebsite}`);
+          updateData.company_domain = websiteUrl.hostname.replace(/^www\./, '');
+          console.log('Using extracted website domain:', updateData.company_domain);
+        } catch {
+          updateData.company_domain = deriveCompanyDomain(jobUrl, company);
+          console.log('Failed to parse extracted website, using derived domain:', updateData.company_domain);
+        }
+      } else {
+        updateData.company_domain = deriveCompanyDomain(jobUrl, company);
+        console.log('No website extracted, using derived domain:', updateData.company_domain);
+      }
     }
     if (position) updateData.position = position;
     if (roleSummary) updateData.role_summary = roleSummary;
