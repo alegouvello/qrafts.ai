@@ -793,7 +793,13 @@ const Dashboard = () => {
       
       <OnboardingDialog
         open={showOnboarding}
-        onComplete={() => setShowOnboarding(false)}
+        onComplete={() => {
+          setShowOnboarding(false);
+          fetchApplications();
+        }}
+        onAddApplication={async (data) => {
+          await handleAddApplication(data);
+        }}
       />
       
       <Footer />
