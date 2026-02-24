@@ -222,7 +222,44 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
         return;
       }
 
-      console.log('Fetching resume for user:', user.id);
+      // First, check for a primary resume file
+      const { data: primaryResume } = await (supabase
+        .from('resumes')
+        .select('*')
+        .eq('user_id', user.id) as any)
+        .eq('is_primary', true)
+        .maybeSingle();
+
+      if (primaryResume) {
+        console.log('Found primary resume file:', primaryResume.file_name);
+        try {
+          const { data: fileData, error: dlError } = await supabase.storage
+            .from('resumes')
+            .download(primaryResume.file_path);
+          if (!dlError && fileData) {
+            const text = await fileData.text();
+            if (text.trim()) {
+              // Try parsing as JSON first
+              try {
+                const parsedData = JSON.parse(text);
+                const formattedText = formatResumeFromJSON(parsedData);
+                setResumeText(formattedText);
+                setOriginalResume(formattedText);
+                return;
+              } catch {
+                setResumeText(text);
+                setOriginalResume(text);
+                return;
+              }
+            }
+          }
+        } catch (e) {
+          console.log('Could not read primary resume file, falling back to profile', e);
+        }
+      }
+
+      // Fallback: load from user profile
+      console.log('Fetching resume from profile for user:', user.id);
       const { data: profile, error: profileError } = await supabase
         .from('user_profiles')
         .select('resume_text')
@@ -233,7 +270,6 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
 
       if (profile?.resume_text) {
         try {
-          // Parse JSON if stored as JSON
           console.log('Attempting to parse resume_text as JSON');
           const parsedData = JSON.parse(profile.resume_text);
           console.log('Successfully parsed JSON, formatting...');
@@ -242,7 +278,6 @@ export const ResumeTailorDialog = ({ open, onOpenChange, application }: ResumeTa
           setResumeText(formattedText);
           setOriginalResume(formattedText);
         } catch (parseError) {
-          // If not JSON, use as-is
           console.log('Failed to parse as JSON, using raw text:', parseError);
           setResumeText(profile.resume_text);
           setOriginalResume(profile.resume_text);

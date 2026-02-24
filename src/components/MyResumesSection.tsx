@@ -11,7 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { FileText, Upload, Trash2, Loader2, Download, Clock } from "lucide-react";
+import { FileText, Upload, Trash2, Loader2, Download, Clock, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -22,6 +22,7 @@ interface ResumeFile {
   file_path: string;
   file_size: number | null;
   created_at: string;
+  is_primary: boolean;
 }
 
 interface MyResumesSectionProps {
@@ -60,10 +61,45 @@ export const MyResumesSection = ({ onUploadClick }: MyResumesSectionProps) => {
     fetchResumes();
   }, []);
 
+  const handleSetPrimary = async (resume: ResumeFile) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Clear existing primary
+      await supabase
+        .from("resumes")
+        .update({ is_primary: false } as any)
+        .eq("user_id", user.id);
+
+      // Set new primary
+      const { error } = await supabase
+        .from("resumes")
+        .update({ is_primary: true } as any)
+        .eq("id", resume.id);
+
+      if (error) throw error;
+
+      setResumes((prev) =>
+        prev.map((r) => ({ ...r, is_primary: r.id === resume.id }))
+      );
+      toast({
+        title: "Default Resume Set",
+        description: `"${resume.file_name}" is now your default resume`,
+      });
+    } catch (error) {
+      console.error("Error setting primary resume:", error);
+      toast({
+        title: "Error",
+        description: "Could not set default resume",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleDelete = async (resume: ResumeFile) => {
     setDeleting(true);
     try {
-      // Delete from storage
       const { error: storageError } = await supabase.storage
         .from("resumes")
         .remove([resume.file_path]);
@@ -72,7 +108,6 @@ export const MyResumesSection = ({ onUploadClick }: MyResumesSectionProps) => {
         console.error("Storage delete error:", storageError);
       }
 
-      // Delete from database
       const { error: dbError } = await supabase
         .from("resumes")
         .delete()
@@ -182,7 +217,15 @@ export const MyResumesSection = ({ onUploadClick }: MyResumesSectionProps) => {
                     <FileText className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">{resume.file_name}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-sm truncate">{resume.file_name}</p>
+                      {resume.is_primary && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-primary/10 text-primary flex-shrink-0">
+                          <Star className="h-3 w-3 fill-current" />
+                          Default
+                        </span>
+                      )}
+                    </div>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
                       <span>{formatFileSize(resume.file_size)}</span>
                       <span className="flex items-center gap-1">
@@ -192,6 +235,17 @@ export const MyResumesSection = ({ onUploadClick }: MyResumesSectionProps) => {
                     </div>
                   </div>
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {!resume.is_primary && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handleSetPrimary(resume)}
+                        title="Set as default"
+                      >
+                        <Star className="h-4 w-4" />
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="icon"
