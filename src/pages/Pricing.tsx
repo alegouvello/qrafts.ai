@@ -248,23 +248,21 @@ const Pricing = () => {
                   <Crown className="h-4 w-4 mr-2" />
                   Current Plan
                 </Button>
-              ) : (
+              ) : isAuthenticated ? (
                 <Button 
                   className="w-full rounded-full bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
-                  onClick={isAuthenticated ? handleUpgrade : undefined}
+                  onClick={handleUpgrade}
                   disabled={isLoading}
                 >
-                  {isAuthenticated ? (
-                    <>
-                      <Crown className="h-4 w-4 mr-2" />
-                      {isLoading ? "Loading..." : "Upgrade to Pro"}
-                    </>
-                  ) : (
-                    <Link to="/auth" className="flex items-center justify-center w-full">
-                      Get Started with Pro
-                    </Link>
-                  )}
+                  <Crown className="h-4 w-4 mr-2" />
+                  {isLoading ? "Loading..." : "Upgrade to Pro"}
                 </Button>
+              ) : (
+                <Link to="/auth" className="block w-full">
+                  <Button className="w-full rounded-full bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity">
+                    Get Started with Pro
+                  </Button>
+                </Link>
               )}
             </CardContent>
           </Card>
