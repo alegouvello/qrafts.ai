@@ -1990,7 +1990,14 @@ const ApplicationDetail = () => {
         {/* Tabs */}
         <Tabs defaultValue="questions" className="space-y-6">
           <TabsList className="bg-muted/30">
-            <TabsTrigger value="questions">Questions</TabsTrigger>
+            <TabsTrigger value="questions" className="relative">
+              Questions
+              {sharedQuestions.length > 0 && (
+                <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 px-1 text-xs">
+                  +{sharedQuestions.length}
+                </Badge>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="resume">Resume</TabsTrigger>
             <TabsTrigger value="interviewers">Interviewers</TabsTrigger>
             <TabsTrigger value="timeline">
