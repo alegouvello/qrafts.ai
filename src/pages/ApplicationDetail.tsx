@@ -226,6 +226,8 @@ const ApplicationDetail = () => {
     is_trialing?: boolean;
   }>({ subscribed: false, product_id: null, is_trialing: false });
   const [interviewers, setInterviewers] = useState<Interviewer[]>([]);
+  const [sharedQuestions, setSharedQuestions] = useState<{ question_text: string; created_at: string }[]>([]);
+  const [showSharedQuestions, setShowSharedQuestions] = useState(false);
   const [roleDetailsOpen, setRoleDetailsOpen] = useState(() => {
     // Default to open on desktop (width > 768px), closed on mobile
     if (typeof window !== 'undefined') {
@@ -283,6 +285,7 @@ const ApplicationDetail = () => {
       fetchTimelineEvents();
       fetchStatusHistory();
       fetchInterviewers();
+      fetchSharedQuestions();
       fetchTailoredResume();
       checkSubscription();
     }
@@ -1576,6 +1579,63 @@ const ApplicationDetail = () => {
     setRefreshingDescription(false);
   };
 
+  const fetchSharedQuestions = async () => {
+    if (!application && !id) return;
+    // We need app data; if not loaded yet, fetch it
+    const { data: appData } = await supabase
+      .from("applications")
+      .select("company, position")
+      .eq("id", id)
+      .single();
+
+    if (!appData) return;
+
+    const { data, error } = await (supabase as any)
+      .from("shared_questions")
+      .select("question_text, created_at")
+      .eq("company", appData.company)
+      .eq("position", appData.position)
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching shared questions:", error);
+    } else {
+      // Filter out questions that already exist in this application's questions
+      const existingTexts = new Set(questions.map(q => q.question_text.toLowerCase().trim()));
+      const unique = (data || []).filter(
+        (sq: any) => !existingTexts.has(sq.question_text.toLowerCase().trim())
+      );
+      setSharedQuestions(unique);
+    }
+  };
+
+            {/* Shared Questions from Community */}
+            {sharedQuestions.length > 0 && (
+              <Collapsible open={showSharedQuestions} onOpenChange={setShowSharedQuestions}>
+                <Card className="p-4 border-dashed border-primary/30 bg-primary/5">
+                  <CollapsibleTrigger className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="h-4 w-4 text-primary" />
+                      <span className="font-medium text-sm">
+                        {sharedQuestions.length} additional question{sharedQuestions.length > 1 ? 's' : ''} reported by other applicants
+                      </span>
+                    </div>
+                    {showSharedQuestions ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-3 space-y-2">
+                    {sharedQuestions.map((sq, i) => (
+                      <div key={i} className="flex items-start gap-2 text-sm p-2 rounded bg-background">
+                        <span className="text-muted-foreground font-mono text-xs mt-0.5">{i + 1}.</span>
+                        <span>{sq.question_text}</span>
+                      </div>
+                    ))}
+                    <p className="text-xs text-muted-foreground mt-2">
+                      These questions were encountered by other users applying to this role.
+                    </p>
+                  </CollapsibleContent>
+                </Card>
+              </Collapsible>
+            )}
 
   // Get company logo domain - use stored domain or derive it
   const logoDomain = application?.company_domain || 

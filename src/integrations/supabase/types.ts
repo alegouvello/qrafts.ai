@@ -379,6 +379,36 @@ export type Database = {
         }
         Relationships: []
       }
+      shared_questions: {
+        Row: {
+          company: string
+          contributed_by: string
+          created_at: string
+          id: string
+          position: string
+          question_text: string
+          source_url: string | null
+        }
+        Insert: {
+          company: string
+          contributed_by: string
+          created_at?: string
+          id?: string
+          position: string
+          question_text: string
+          source_url?: string | null
+        }
+        Update: {
+          company?: string
+          contributed_by?: string
+          created_at?: string
+          id?: string
+          position?: string
+          question_text?: string
+          source_url?: string | null
+        }
+        Relationships: []
+      }
       tailored_resumes: {
         Row: {
           application_id: string | null
