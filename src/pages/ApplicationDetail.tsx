@@ -1753,14 +1753,14 @@ const ApplicationDetail = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 py-8 max-w-5xl">
+      <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 max-w-5xl">
         {/* Application Header */}
         <div className="mb-8">
-          <div className="flex items-start gap-6 mb-6">
+          <div className="flex items-start gap-3 sm:gap-6 mb-6">
             {/* Company Logo */}
             <div className="shrink-0">
               {!logoError && logoSrc ? (
-                <div className="w-20 h-20 rounded-2xl overflow-hidden bg-muted/30 flex items-center justify-center border border-border/50">
+                <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-muted/30 flex items-center justify-center border border-border/50">
                   <img 
                     src={logoSrc}
                     alt={`${application.company} logo`}
@@ -1770,8 +1770,8 @@ const ApplicationDetail = () => {
                   />
                 </div>
               ) : (
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center border border-border/50">
-                  <span className="text-3xl font-bold text-primary">
+                <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center border border-border/50">
+                  <span className="text-2xl sm:text-3xl font-bold text-primary">
                     {application.company.charAt(0).toUpperCase()}
                   </span>
                 </div>
@@ -1780,11 +1780,11 @@ const ApplicationDetail = () => {
 
             {/* Company & Position Info */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-4 mb-3">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4 mb-3">
                 <div className="flex-1 min-w-0">
-                  <h1 className="text-3xl font-bold mb-2 truncate">{application.position}</h1>
+                  <h1 className="text-xl sm:text-3xl font-bold mb-1 sm:mb-2 truncate">{application.position}</h1>
                   <Link to={`/company/${encodeURIComponent(application.company)}`}>
-                    <p className="text-xl text-muted-foreground mb-3 hover:text-primary transition-colors">
+                    <p className="text-base sm:text-xl text-muted-foreground mb-2 sm:mb-3 hover:text-primary transition-colors">
                       {application.company}
                     </p>
                   </Link>
@@ -1989,7 +1989,7 @@ const ApplicationDetail = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="questions" className="space-y-6">
-          <TabsList className="bg-muted/30">
+          <TabsList className="bg-muted/30 w-full justify-start overflow-x-auto">
             <TabsTrigger value="questions" className="relative">
               Questions
               {sharedQuestions.length > 0 && (
@@ -2008,9 +2008,9 @@ const ApplicationDetail = () => {
 
           {/* Questions Tab */}
           <TabsContent value="questions" className="space-y-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold">Application Questions</h2>
-              <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+              <h2 className="text-xl sm:text-2xl font-bold">Application Questions</h2>
+              <div className="flex gap-2 w-full sm:w-auto">
                 <Button
                   onClick={() => setShowAddQuestionDialog(true)}
                   variant="default"

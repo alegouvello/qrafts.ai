@@ -47,7 +47,7 @@ export const DashboardHeader = ({
             <img 
               src={qraftLogo} 
               alt="Qrafts logo" 
-              className="h-20 transition-all duration-300 hover:scale-105 hover:drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.5)] dark:invert" 
+              className="h-14 sm:h-20 transition-all duration-300 hover:scale-105 hover:drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.5)] dark:invert" 
             />
           </div>
           
