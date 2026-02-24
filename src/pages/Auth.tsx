@@ -42,6 +42,7 @@ const Auth = () => {
   const [verificationEmail, setVerificationEmail] = useState("");
   const [resendingVerification, setResendingVerification] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; newPassword?: string; confirmPassword?: string }>({});
+  const [activeTab, setActiveTab] = useState("signin");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -548,14 +549,14 @@ const Auth = () => {
 
           <div className="text-center mb-5 sm:mb-8 md:mb-10 space-y-2 sm:space-y-3 md:space-y-4">
             <div className="inline-block px-3 sm:px-4 md:px-5 py-1 sm:py-1.5 md:py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm md:text-base font-medium mb-2 sm:mb-4 animate-fade-in" style={{ animationDelay: '0.1s', animationFillMode: 'backwards' }}>
-              Welcome Back
+              {activeTab === 'signup' ? 'Get Started' : 'Welcome Back'}
             </div>
             <img src={qraftLogo} alt="Qrafts" className="h-14 sm:h-16 md:h-20 lg:h-24 mx-auto dark:invert animate-fade-in" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }} />
             <p className="text-xs sm:text-sm md:text-base lg:text-lg text-muted-foreground animate-fade-in" style={{ animationDelay: '0.3s', animationFillMode: 'backwards' }}>Your journey to success starts here</p>
           </div>
           
           {!resetPasswordMode ? (
-            <Tabs defaultValue="signin" className="w-full animate-fade-in" style={{ animationDelay: '0.4s', animationFillMode: 'backwards' }}>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full animate-fade-in" style={{ animationDelay: '0.4s', animationFillMode: 'backwards' }}>
               <TabsList className="grid w-full grid-cols-2 bg-muted/50 p-1 rounded-full text-sm md:text-base h-12 md:h-14">
                 <TabsTrigger value="signin" className="rounded-full data-[state=active]:shadow-md h-10 md:h-12">Sign In</TabsTrigger>
                 <TabsTrigger value="signup" className="rounded-full data-[state=active]:shadow-md h-10 md:h-12">Sign Up</TabsTrigger>

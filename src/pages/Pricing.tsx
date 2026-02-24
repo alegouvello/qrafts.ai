@@ -89,8 +89,8 @@ const Pricing = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO 
-        title="Pricing - QRAFTS"
-        description="Compare QRAFTS Free and Pro plans. Unlock unlimited applications and AI-powered features to supercharge your job search."
+        title="Pricing - Qrafts"
+        description="Compare Qrafts Free and Pro plans. Unlock unlimited applications and AI-powered features to supercharge your job search."
       />
       
       {/* Decorative background */}
@@ -100,7 +100,7 @@ const Pricing = () => {
       <header className="relative border-b border-border/40 bg-background/80 backdrop-blur-xl sticky top-0 z-50">
         <nav className="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <img src={qraftLogo} alt="QRAFTS" className="h-12 sm:h-14 dark:invert" />
+            <img src={qraftLogo} alt="Qrafts" className="h-12 sm:h-14 dark:invert" />
           </Link>
           <div className="flex items-center gap-3">
             <Link to="/">
@@ -279,7 +279,7 @@ const Pricing = () => {
             <div className="text-center sm:text-left">
               <h3 className="font-semibold text-lg mb-1">30-Day Money-Back Guarantee</h3>
               <p className="text-sm text-muted-foreground">
-                Not satisfied? Get a full refund within 30 days, no questions asked. We're confident you'll love QRAFTS.
+                Not satisfied? Get a full refund within 30 days, no questions asked. We're confident you'll love Qrafts.
               </p>
             </div>
           </div>
@@ -326,7 +326,7 @@ const Pricing = () => {
             Ready to supercharge your job search?
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Join thousands of job seekers using QRAFTS to land their dream jobs faster
+            Join thousands of job seekers using Qrafts to land their dream jobs faster
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {isAuthenticated ? (
