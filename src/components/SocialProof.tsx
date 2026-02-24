@@ -89,17 +89,6 @@ export const SocialProof = () => {
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
       }`}
     >
-      {/* Total Users */}
-      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm">
-        <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center">
-          <Users className="h-3 w-3 text-primary" />
-        </div>
-        <div className="flex flex-col">
-          <span className="text-[10px] text-muted-foreground">{t('landing.socialProof.totalUsers', { defaultValue: 'Active Users' })}</span>
-          <span className="text-xs font-bold text-foreground">{totalUsers}+</span>
-        </div>
-      </div>
-
       {/* Live Indicator */}
       <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 backdrop-blur-sm">
         <div className="relative">
