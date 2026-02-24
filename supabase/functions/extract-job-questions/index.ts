@@ -111,23 +111,23 @@ Deno.serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `Extract form fields from the APPLICATION FORM section only. Look for input fields, file uploads, dropdowns, radio buttons where users enter data.
+            content: `You extract application form fields from job posting pages. Your goal is to find ONLY the fields that appear in the actual APPLICATION FORM — the part where a candidate fills in their information to apply.
 
-DO extract if you see:
-- "Name", "Email", "Resume" (upload), "LinkedIn", "Github", "Personal Website"
-- Work authorization questions, visa sponsorship questions
-- Office location preferences
+STRICT RULES:
+1. ONLY extract fields from the application/apply form section of the page
+2. Look for: input fields, textareas, file uploads, dropdowns, radio buttons, checkboxes that candidates must fill out
+3. DO extract: Name, Email, Phone, Resume/CV upload, Cover Letter, LinkedIn URL, Portfolio/Website, work authorization questions, visa sponsorship, salary expectations, start date, referral source, custom screening questions
+4. DO NOT extract: job description content, requirements, responsibilities, qualifications, benefits, company info, navigation links, footer content, cookie notices
+5. DO NOT invent or assume fields exist — only return fields you can actually see in the page content
+6. Strip asterisks (*) and "Required" labels from field names
+7. If the page content does NOT contain an application form (e.g., it's just a job description with an "Apply" button linking elsewhere), return an EMPTY array []
 
-DO NOT extract:
-- Questions from job description text
-- Requirements or qualifications lists
-- Standard fields unless explicitly shown (don't assume "First Name", "Last Name", "Phone" exist)
-
-Return a JSON array of the exact field labels you see. Strip asterisks (*).`
+Return ONLY a valid JSON array of strings with the exact field labels. Example: ["First Name", "Last Name", "Resume", "Are you authorized to work in the US?"]
+If no application form fields are found, return: []`
           },
           {
             role: 'user',
-            content: `Find the application form fields in this page:\n\n${pageContent}`
+            content: `Extract ONLY the application form fields (not job description content) from this page. If there is no application form on this page, return an empty array.\n\n${pageContent.substring(0, 12000)}`
           }
         ],
         temperature: 0.2,
@@ -178,6 +178,35 @@ Return a JSON array of the exact field labels you see. Strip asterisks (*).`
       if (insertError) {
         console.error('Error inserting questions:', insertError);
         throw new Error('Failed to save questions to database');
+      }
+
+      // Also populate shared_questions for community use
+      // Fetch application to get company + position
+      const { data: appData } = await supabase
+        .from('applications')
+        .select('company, position, url')
+        .eq('id', applicationId)
+        .single();
+
+      if (appData) {
+        const sharedToInsert = questions.map((q) => ({
+          company: appData.company,
+          position: appData.position,
+          question_text: q,
+          contributed_by: user.id,
+          source_url: appData.url,
+        }));
+
+        // Use upsert with onConflict to skip duplicates
+        const { error: sharedError } = await supabase
+          .from('shared_questions')
+          .upsert(sharedToInsert, { onConflict: 'company,position,question_text', ignoreDuplicates: true });
+
+        if (sharedError) {
+          console.warn('Error inserting shared questions (non-fatal):', sharedError);
+        } else {
+          console.log('Shared questions populated for', appData.company, appData.position);
+        }
       }
     }
 
