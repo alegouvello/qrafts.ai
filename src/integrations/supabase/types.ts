@@ -359,6 +359,7 @@ export type Database = {
           file_path: string
           file_size: number | null
           id: string
+          is_primary: boolean
           user_id: string
         }
         Insert: {
@@ -367,6 +368,7 @@ export type Database = {
           file_path: string
           file_size?: number | null
           id?: string
+          is_primary?: boolean
           user_id: string
         }
         Update: {
@@ -375,6 +377,7 @@ export type Database = {
           file_path?: string
           file_size?: number | null
           id?: string
+          is_primary?: boolean
           user_id?: string
         }
         Relationships: []
