@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User, Mail, Phone, MapPin, Linkedin, Briefcase, GraduationCap, Award, ArrowLeft, Upload, Edit, Sparkles, BookOpen, Trophy, BookMarked, Lightbulb, Globe, Heart, Settings, Camera, Image as ImageIcon, ExternalLink, FileDown, MoreHorizontal } from "lucide-react";
 import { UploadResumeDialog } from "@/components/UploadResumeDialog";
+import { MyResumesSection } from "@/components/MyResumesSection";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { ProfileReviewDialog } from "@/components/ProfileReviewDialog";
 import { MasterAnswersDialog } from "@/components/MasterAnswersDialog";
@@ -1315,6 +1316,9 @@ export default function Profile() {
 
           {/* Render sections dynamically based on saved order */}
           {renderSectionsInOrder()}
+
+          {/* My Resumes Library */}
+          <MyResumesSection onUploadClick={() => setShowUploadDialog(true)} />
 
 
           {/* Empty State */}
