@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, Mail, Phone, MapPin, Linkedin, Briefcase, GraduationCap, Award, ArrowLeft, Upload, Edit, Sparkles, BookOpen, Trophy, BookMarked, Lightbulb, Globe, Heart, Settings, Camera, Image as ImageIcon, ExternalLink, FileDown, MoreHorizontal } from "lucide-react";
+import { User, Mail, Phone, MapPin, Linkedin, Briefcase, GraduationCap, Award, ArrowLeft, Upload, Edit, Sparkles, BookOpen, Trophy, BookMarked, Lightbulb, Globe, Heart, Settings, Camera, Image as ImageIcon, ExternalLink, FileDown, MoreHorizontal, ArrowLeftRight } from "lucide-react";
 import { UploadResumeDialog } from "@/components/UploadResumeDialog";
 import { MyResumesSection } from "@/components/MyResumesSection";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
@@ -22,6 +22,7 @@ import { EnhancementPreviewDialog } from "@/components/EnhancementPreviewDialog"
 import { ManualEnhancementDialog } from "@/components/ManualEnhancementDialog";
 import { ExportPDFDialog } from "@/components/ExportPDFDialog";
 import { ResumeOrderAnalysisDialog } from "@/components/ResumeOrderAnalysisDialog";
+import { ResumeComparisonDialog } from "@/components/ResumeComparisonDialog";
 import { Footer } from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 import { convertBulletsToHTML } from "@/utils/bulletFormatter";
@@ -115,6 +116,7 @@ export default function Profile() {
   const [showTargetRoleDialog, setShowTargetRoleDialog] = useState(false);
   const [showExportPDFDialog, setShowExportPDFDialog] = useState(false);
   const [showOrderAnalysis, setShowOrderAnalysis] = useState(false);
+  const [showComparisonDialog, setShowComparisonDialog] = useState(false);
   const [orderAnalysis, setOrderAnalysis] = useState<any>(null);
   const [analyzingOrder, setAnalyzingOrder] = useState(false);
   const [applyingOrder, setApplyingOrder] = useState(false);
@@ -1165,6 +1167,11 @@ export default function Profile() {
                     <FileDown className="h-4 w-4 mr-2" />
                     Export PDF
                   </DropdownMenuItem>
+
+                  <DropdownMenuItem onClick={() => setShowComparisonDialog(true)}>
+                    <ArrowLeftRight className="h-4 w-4 mr-2" />
+                    Compare Resumes
+                  </DropdownMenuItem>
                   
                   <DropdownMenuSeparator />
                   
@@ -1519,6 +1526,11 @@ export default function Profile() {
         currentOrder={getCurrentSectionOrder()}
         onApplyOrder={handleApplyOrder}
         isApplying={applyingOrder}
+      />
+
+      <ResumeComparisonDialog
+        open={showComparisonDialog}
+        onOpenChange={setShowComparisonDialog}
       />
       
       <Footer />
