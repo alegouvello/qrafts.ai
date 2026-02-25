@@ -333,13 +333,13 @@ export const ChatAssistant = () => {
     <>
       {/* Floating Button */}
       {!isOpen && (
-        <div className="fixed bottom-6 right-6 z-50">
+        <div className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-50">
           <Button
             onClick={() => setIsOpen(true)}
-            className="h-14 w-14 rounded-full shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all relative"
+            className="h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all relative"
             size="icon"
           >
-            <MessageCircle className="h-6 w-6" />
+            <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6" />
             {!subscriptionStatus.subscribed && !subscriptionStatus.is_trialing && (
               <div className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary flex items-center justify-center border-2 border-background">
                 <Crown className="h-3 w-3 text-primary-foreground" />
