@@ -78,8 +78,8 @@ async function extractTextWithOCR(pdfData: Uint8Array, lovableApiKey: string): P
       },
       body: JSON.stringify({
         // Flash is faster for OCR; keep output bounded to reduce latency.
-        model: 'google/gemini-2.5-flash-lite',
-        max_tokens: 2500,
+        model: 'google/gemini-2.5-flash',
+        max_tokens: 4000,
         messages: [
           {
             role: 'user',
@@ -125,6 +125,32 @@ No commentary, no JSON—just the raw text.`
   } finally {
     clearTimeout(timeout);
   }
+}
+
+// Detect ligature corruption from PDF.js (e.g. "solu-ons" instead of "solutions")
+// Common missing ligatures: ti, fi, fl, ff, ffi, ffl
+function hasLigatureCorruption(text: string): boolean {
+  // Pattern: word fragments separated by hyphens where ligatures were dropped
+  // e.g. "solu-ons", "consul-ng", "opera-ng", "implementa-ons"
+  const suspiciousPatterns = [
+    /\b\w{2,}(?:ti|fi|fl|ff)\w{2,}\b/g, // control: normal words with ligatures
+    /\b\w{2,}-(?:ons?|ng|on|ve|onal|ons|ed|er|es|al|le|ly|fy|ne|ty|me|ce|de)\b/gi, // broken words
+  ];
+
+  const brokenWordPattern = /\b[a-z]{2,}-[a-z]{2,}\b/gi;
+  const brokenMatches = text.match(brokenWordPattern) || [];
+  
+  // Filter to likely ligature breaks (not real hyphenated words)
+  const likelyCorrupted = brokenMatches.filter(w => {
+    // Common ligature-break suffixes
+    return /-(ons?|ng|on|ve|onal|ed|er|es|al|le|ly|fy|ne|ty|me|ce|de|cal|ble|ment|ness|ful|ous|ive|ant|ent|ary|ory)$/i.test(w);
+  });
+
+  if (likelyCorrupted.length >= 3) {
+    console.log('Detected ligature corruption in PDF text. Broken words:', likelyCorrupted.slice(0, 10));
+    return true;
+  }
+  return false;
 }
 
 // Check if text appears to be from a scanned PDF (too short or mostly whitespace)
@@ -363,9 +389,9 @@ Deno.serve(async (req) => {
         extractedText = await extractTextFromPdf(pdfData);
         console.log('Extracted text from PDF, length:', extractedText.length);
         
-        // Check if this looks like a scanned PDF (no/little text extracted)
-        if (isLikelyScannedPdf(extractedText)) {
-          console.log('Detected scanned PDF, falling back to OCR...');
+        // Check if this looks like a scanned PDF or has ligature corruption
+        if (isLikelyScannedPdf(extractedText) || hasLigatureCorruption(extractedText)) {
+          console.log('PDF text unusable (scanned or ligature corruption), falling back to OCR...');
           extractedText = await extractTextWithOCR(pdfData, lovableApiKey);
           usedOcr = true;
         }
