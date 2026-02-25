@@ -54,17 +54,17 @@ export const DashboardHeader = ({
           <nav className="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto" role="navigation" aria-label="Main navigation">
             <Button 
               onClick={onAddApplication}
-              className="flex-1 sm:flex-none rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all text-sm"
+              className="flex-1 sm:flex-none rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all text-sm sm:flex hidden"
               aria-label="Add new application"
             >
               <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
               Add
             </Button>
             
-            <Link to="/profile" className="flex-1 sm:flex-none">
+            <Link to="/profile" className="hidden sm:block">
               <Button 
                 variant="ghost" 
-                className="w-full rounded-full hover:bg-primary/5 transition-all text-sm flex items-center justify-center gap-2"
+                className="rounded-full hover:bg-primary/5 transition-all text-sm flex items-center justify-center gap-2"
                 aria-label={`View profile${userProfile?.full_name ? ` for ${userProfile.full_name}` : ''}`}
               >
                 {userProfile?.avatar_url ? (
@@ -84,15 +84,14 @@ export const DashboardHeader = ({
               </Button>
             </Link>
             
-            <Link to="/comparison" className="flex-1 sm:flex-none">
+            <Link to="/comparison" className="hidden sm:block">
               <Button 
                 variant="ghost" 
-                className="w-full rounded-full hover:bg-accent/5 transition-all text-sm"
+                className="rounded-full hover:bg-accent/5 transition-all text-sm"
                 aria-label="View comparison and statistics"
               >
                 <BarChart3 className="h-4 w-4 mr-2" aria-hidden="true" />
-                <span className="hidden sm:inline">Compare</span>
-                <span className="sm:hidden">Stats</span>
+                Compare
               </Button>
             </Link>
             
@@ -118,7 +117,7 @@ export const DashboardHeader = ({
             <LanguageSwitcher />
             <ThemeToggle />
             
-            <Link to="/settings">
+            <Link to="/settings" className="hidden sm:block">
               <Button 
                 variant="ghost" 
                 className="rounded-full hover:bg-primary/5 transition-all" 
@@ -132,7 +131,7 @@ export const DashboardHeader = ({
             <Button 
               variant="ghost" 
               onClick={onSignOut} 
-              className="rounded-full hover:bg-destructive/5 transition-all" 
+              className="rounded-full hover:bg-destructive/5 transition-all hidden sm:flex" 
               size="icon"
               aria-label="Sign out"
             >
