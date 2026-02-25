@@ -16,6 +16,7 @@ import { DashboardHeader } from "@/components/Dashboard/DashboardHeader";
 import { DashboardStats } from "@/components/Dashboard/DashboardStats";
 import { WeeklyChart } from "@/components/Dashboard/WeeklyChart";
 import { ApplicationsList } from "@/components/Dashboard/ApplicationsList";
+import { MobileBottomNav } from "@/components/Dashboard/MobileBottomNav";
 import { SEO } from "@/components/SEO";
 
 interface Application {
@@ -803,6 +804,9 @@ const Dashboard = () => {
       />
       
       <Footer />
+      <MobileBottomNav onAddApplication={() => setShowAddDialog(true)} />
+      {/* Bottom padding for mobile nav */}
+      <div className="h-16 sm:hidden" />
     </div>
   );
 };
