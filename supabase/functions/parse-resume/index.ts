@@ -127,29 +127,33 @@ No commentary, no JSON—just the raw text.`
   }
 }
 
-// Detect ligature corruption from PDF.js (e.g. "solu-ons" instead of "solutions")
-// Common missing ligatures: ti, fi, fl, ff, ffi, ffl
+// Detect ligature corruption from PDF.js
+// Common patterns: semicolons replacing ligature chars (solu;ons, execu;ve, func;onal)
+// or hyphens (solu-ons), or dropped chars entirely
 function hasLigatureCorruption(text: string): boolean {
-  // Pattern: word fragments separated by hyphens where ligatures were dropped
-  // e.g. "solu-ons", "consul-ng", "opera-ng", "implementa-ons"
-  const suspiciousPatterns = [
-    /\b\w{2,}(?:ti|fi|fl|ff)\w{2,}\b/g, // control: normal words with ligatures
-    /\b\w{2,}-(?:ons?|ng|on|ve|onal|ons|ed|er|es|al|le|ly|fy|ne|ty|me|ce|de)\b/gi, // broken words
-  ];
+  // Pattern 1: semicolons replacing ligatures (most common in this project)
+  // e.g. "solu;ons", "execu;ve", "func;onal", "produc;on", "consul;ng", "automo;ve"
+  const semicolonPattern = /\b[a-z]{2,};[a-z]{2,}\b/gi;
+  const semicolonMatches = text.match(semicolonPattern) || [];
+  
+  if (semicolonMatches.length >= 3) {
+    console.log('Detected semicolon ligature corruption. Broken words:', semicolonMatches.slice(0, 10));
+    return true;
+  }
 
+  // Pattern 2: hyphens replacing ligatures  
+  // e.g. "solu-ons", "consul-ng", "opera-ng"
   const brokenWordPattern = /\b[a-z]{2,}-[a-z]{2,}\b/gi;
   const brokenMatches = text.match(brokenWordPattern) || [];
-  
-  // Filter to likely ligature breaks (not real hyphenated words)
   const likelyCorrupted = brokenMatches.filter(w => {
-    // Common ligature-break suffixes
     return /-(ons?|ng|on|ve|onal|ed|er|es|al|le|ly|fy|ne|ty|me|ce|de|cal|ble|ment|ness|ful|ous|ive|ant|ent|ary|ory)$/i.test(w);
   });
 
   if (likelyCorrupted.length >= 3) {
-    console.log('Detected ligature corruption in PDF text. Broken words:', likelyCorrupted.slice(0, 10));
+    console.log('Detected hyphen ligature corruption. Broken words:', likelyCorrupted.slice(0, 10));
     return true;
   }
+  
   return false;
 }
 
@@ -584,20 +588,83 @@ Return ONLY valid JSON with this structure:
       throw new Error('Failed to parse AI response as JSON');
     }
 
-    // Only save to user_profiles if this is a storage-based upload (not for custom resume uploads)
+    // Save to user_profiles – merge with existing data from previous resumes
     if (resumeUrl) {
-      // Store the complete extracted data in resume_text as JSON
+      // Fetch existing profile to merge
+      const { data: existingProfile } = await supabase
+        .from('user_profiles')
+        .select('resume_text')
+        .eq('user_id', user.id)
+        .single();
+
+      let mergedData = extractedData;
+
+      if (existingProfile?.resume_text) {
+        try {
+          const existingData = JSON.parse(existingProfile.resume_text);
+          console.log('Merging new resume data with existing profile...');
+
+          // Use AI to intelligently merge the two resume datasets
+          const mergeResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${lovableApiKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              model: 'google/gemini-2.5-flash',
+              max_tokens: 6000,
+              messages: [
+                {
+                  role: 'system',
+                  content: `You are a resume data merger. You receive two JSON objects representing parsed resume data from the same person (different resume versions).
+
+Your job is to produce ONE merged JSON object that is the BEST, most COMPLETE version by:
+1. Keeping the most detailed/recent version of each field (name, email, phone, location, etc.)
+2. MERGING experience entries – deduplicate by company+position, keep the most detailed description
+3. MERGING education entries – deduplicate by institution+degree, keep the most complete info
+4. MERGING skills – combine all unique skills without duplicates
+5. MERGING certifications, publications, projects, awards, languages, volunteer work – deduplicate and keep the most complete entries
+6. For the summary – pick the longer/more comprehensive version, or combine them if they cover different aspects
+7. NEVER invent or hallucinate new information – only combine what exists
+
+Return ONLY valid JSON with the same structure as the inputs. No markdown, no commentary.`
+                },
+                {
+                  role: 'user',
+                  content: `Existing profile data:\n${JSON.stringify(existingData)}\n\nNew resume data:\n${JSON.stringify(extractedData)}\n\nMerge these into one comprehensive profile.`
+                }
+              ],
+            }),
+          });
+
+          if (mergeResponse.ok) {
+            const mergeResult = await mergeResponse.json();
+            const mergeContent = mergeResult.choices?.[0]?.message?.content;
+            if (mergeContent) {
+              const jsonText = mergeContent.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+              mergedData = JSON.parse(jsonText);
+              console.log('Successfully merged resume data from multiple uploads');
+            }
+          } else {
+            console.error('Merge AI call failed, using new data only');
+          }
+        } catch (mergeErr) {
+          console.error('Error merging resume data, using new data:', mergeErr);
+        }
+      }
+
       const { error: upsertError } = await supabase
         .from('user_profiles')
         .upsert({
           user_id: user.id,
-          full_name: extractedData.full_name || null,
-          email: extractedData.email || null,
-          phone: extractedData.phone || null,
-          linkedin_url: extractedData.linkedin_url || null,
-          website_url: extractedData.website_url || null,
-          location: extractedData.location || null,
-          resume_text: JSON.stringify(extractedData),
+          full_name: mergedData.full_name || null,
+          email: mergedData.email || null,
+          phone: mergedData.phone || null,
+          linkedin_url: mergedData.linkedin_url || null,
+          website_url: mergedData.website_url || null,
+          location: mergedData.location || null,
+          resume_text: JSON.stringify(mergedData),
         }, {
           onConflict: 'user_id'
         });
@@ -607,7 +674,7 @@ Return ONLY valid JSON with this structure:
         throw new Error('Failed to save profile data');
       }
 
-      console.log('Profile saved successfully');
+      console.log('Profile saved successfully (merged from all resumes)');
     }
 
     return new Response(
