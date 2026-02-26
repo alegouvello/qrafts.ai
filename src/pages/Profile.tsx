@@ -127,6 +127,7 @@ export default function Profile() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [reparsingResumes, setReparsingResumes] = useState(false);
+  const [reparseProgress, setReparseProgress] = useState({ current: 0, total: 0, fileName: '' });
   const [subscriptionStatus, setSubscriptionStatus] = useState<{
     subscribed: boolean;
     product_id: string | null;
@@ -655,7 +656,14 @@ export default function Profile() {
       }
 
       // Re-parse each resume file through the parse-resume function
-      for (const resume of resumes) {
+      for (let i = 0; i < resumes.length; i++) {
+        const resume = resumes[i];
+        setReparseProgress({ current: i + 1, total: resumes.length, fileName: resume.file_name });
+        toast({
+          title: `Processing ${i + 1} of ${resumes.length}`,
+          description: resume.file_name,
+        });
+
         // Download the file from storage
         const { data: fileData, error: downloadError } = await supabase.storage
           .from("resumes")
@@ -688,13 +696,6 @@ export default function Profile() {
         if (parseError) {
           console.error(`Error parsing ${resume.file_name}:`, parseError);
           continue;
-        }
-
-        if (parseResult?.success) {
-          toast({
-            title: `Parsed: ${resume.file_name}`,
-            description: "Successfully re-processed",
-          });
         }
       }
 
@@ -1268,7 +1269,9 @@ export default function Profile() {
 
                   <DropdownMenuItem onClick={handleReparseResumes} disabled={reparsingResumes}>
                     <RefreshCw className={`h-4 w-4 mr-2 ${reparsingResumes ? 'animate-spin' : ''}`} />
-                    {reparsingResumes ? "Re-parsing..." : "Re-parse Resumes"}
+                    {reparsingResumes 
+                      ? `Re-parsing ${reparseProgress.current}/${reparseProgress.total}...` 
+                      : "Re-parse Resumes"}
                   </DropdownMenuItem>
                   
                   <DropdownMenuSeparator />
