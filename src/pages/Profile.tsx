@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, Mail, Phone, MapPin, Linkedin, Briefcase, GraduationCap, Award, ArrowLeft, Upload, Edit, Sparkles, BookOpen, Trophy, BookMarked, Lightbulb, Globe, Heart, Settings, Camera, Image as ImageIcon, ExternalLink, FileDown, MoreHorizontal, ArrowLeftRight } from "lucide-react";
+import { User, Mail, Phone, MapPin, Linkedin, Briefcase, GraduationCap, Award, ArrowLeft, Upload, Edit, Sparkles, BookOpen, Trophy, BookMarked, Lightbulb, Globe, Heart, Settings, Camera, Image as ImageIcon, ExternalLink, FileDown, MoreHorizontal, ArrowLeftRight, RefreshCw } from "lucide-react";
 import { UploadResumeDialog } from "@/components/UploadResumeDialog";
 import { MyResumesSection } from "@/components/MyResumesSection";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
@@ -126,6 +126,7 @@ export default function Profile() {
   const [applyingEnhancement, setApplyingEnhancement] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const [reparsingResumes, setReparsingResumes] = useState(false);
   const [subscriptionStatus, setSubscriptionStatus] = useState<{
     subscribed: boolean;
     product_id: string | null;
@@ -620,6 +621,98 @@ export default function Profile() {
         description: "Could not reset the section order",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleReparseResumes = async () => {
+    setReparsingResumes(true);
+    toast({
+      title: "Re-parsing Resumes",
+      description: "Fetching all uploaded resumes and re-processing them with improved parsing...",
+    });
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("No user found");
+
+      // Fetch all uploaded resumes
+      const { data: resumes, error: resumesError } = await supabase
+        .from("resumes")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (resumesError) throw resumesError;
+
+      if (!resumes || resumes.length === 0) {
+        toast({
+          title: "No Resumes Found",
+          description: "Upload a resume first before re-parsing",
+          variant: "destructive",
+        });
+        setReparsingResumes(false);
+        return;
+      }
+
+      // Re-parse each resume file through the parse-resume function
+      for (const resume of resumes) {
+        // Download the file from storage
+        const { data: fileData, error: downloadError } = await supabase.storage
+          .from("resumes")
+          .download(resume.file_path);
+
+        if (downloadError) {
+          console.error(`Error downloading ${resume.file_name}:`, downloadError);
+          continue;
+        }
+
+        // Convert to base64
+        const arrayBuffer = await fileData.arrayBuffer();
+        const base64 = btoa(
+          new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+        );
+
+        const fileType = resume.file_name.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 
+                         resume.file_name.toLowerCase().endsWith('.docx') ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' : 
+                         'application/octet-stream';
+
+        // Call parse-resume with the file data
+        const { data: parseResult, error: parseError } = await supabase.functions.invoke('parse-resume', {
+          body: {
+            fileBase64: base64,
+            fileName: resume.file_name,
+            fileType: fileType,
+          }
+        });
+
+        if (parseError) {
+          console.error(`Error parsing ${resume.file_name}:`, parseError);
+          continue;
+        }
+
+        if (parseResult?.success) {
+          toast({
+            title: `Parsed: ${resume.file_name}`,
+            description: "Successfully re-processed",
+          });
+        }
+      }
+
+      // Refresh profile to show merged results
+      await fetchProfile();
+      toast({
+        title: "Re-parse Complete!",
+        description: `Successfully re-processed ${resumes.length} resume${resumes.length > 1 ? 's' : ''} with improved parsing`,
+      });
+    } catch (error: any) {
+      console.error('Error re-parsing resumes:', error);
+      toast({
+        title: "Re-parse Failed",
+        description: error.message || "Could not re-parse resumes",
+        variant: "destructive",
+      });
+    } finally {
+      setReparsingResumes(false);
     }
   };
 
@@ -1171,6 +1264,11 @@ export default function Profile() {
                   <DropdownMenuItem onClick={() => setShowComparisonDialog(true)}>
                     <ArrowLeftRight className="h-4 w-4 mr-2" />
                     Compare Resumes
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem onClick={handleReparseResumes} disabled={reparsingResumes}>
+                    <RefreshCw className={`h-4 w-4 mr-2 ${reparsingResumes ? 'animate-spin' : ''}`} />
+                    {reparsingResumes ? "Re-parsing..." : "Re-parse Resumes"}
                   </DropdownMenuItem>
                   
                   <DropdownMenuSeparator />
