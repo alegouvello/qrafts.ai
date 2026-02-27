@@ -589,7 +589,8 @@ Return ONLY valid JSON with this structure:
     }
 
     // Save to user_profiles – merge with existing data from previous resumes
-    if (resumeUrl) {
+    // Run for both resumeUrl (upload) and fileBase64 (re-parse) paths
+    {
       // Fetch existing profile to merge
       const { data: existingProfile } = await supabase
         .from('user_profiles')
