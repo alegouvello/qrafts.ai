@@ -195,7 +195,22 @@ Deno.serve(async (req) => {
     let extractedWebsite = null;
 
     try {
-      const cleaned = jobInfoContent.trim().replace(/```json\n?/g, '').replace(/```\n?/g, '');
+      let cleaned = jobInfoContent.trim()
+        .replace(/```json\n?/g, '')
+        .replace(/```\n?/g, '')
+        .trim();
+      
+      // Extract JSON object if there's extra text around it
+      const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        cleaned = jsonMatch[0];
+      }
+
+      // Fix common AI JSON issues: trailing commas
+      cleaned = cleaned
+        .replace(/,\s*}/g, '}')
+        .replace(/,\s*]/g, ']');
+
       const jobInfo = JSON.parse(cleaned);
       company = jobInfo.company;
       position = jobInfo.position;
@@ -204,6 +219,7 @@ Deno.serve(async (req) => {
       console.log('Extracted job info, website:', extractedWebsite);
     } catch (e) {
       console.error('Failed to parse job info:', e);
+      console.error('Raw AI content:', jobInfoContent?.substring(0, 500));
       throw new Error('Failed to parse job information');
     }
 
