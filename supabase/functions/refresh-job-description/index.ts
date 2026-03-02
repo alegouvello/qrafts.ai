@@ -103,10 +103,11 @@ Deno.serve(async (req) => {
     if (!firecrawlApiKey) {
       throw new Error('FIRECRAWL_API_KEY not configured');
     }
-    
-    // Use Firecrawl API directly for better compatibility
-    let pageContent = '';
-    try {
+
+    // Core extraction logic wrapped for retry
+    async function extractJobInfo(): Promise<{ company: string | null; position: string | null; roleSummary: any; extractedWebsite: string | null }> {
+      // Scrape with Firecrawl
+      let pageContent = '';
       console.log('Scraping page with Firecrawl API...', jobUrl);
       const scrapeResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
         method: 'POST',
@@ -129,28 +130,21 @@ Deno.serve(async (req) => {
       }
 
       const scrapeResult = await scrapeResponse.json();
-      
       if (!scrapeResult.success) {
         console.error('Firecrawl scrape failed:', scrapeResult);
         throw new Error('Firecrawl scraping failed');
       }
 
       pageContent = scrapeResult.data?.markdown || scrapeResult.markdown || '';
-      console.log('Scraped page content with Firecrawl, length:', pageContent.length);
-      
-      if (!pageContent || pageContent.length < 50) {
-        console.warn('Page content is very short, may not have extracted properly');
-      }
-    } catch (error) {
-      console.error('Error scraping with Firecrawl:', error);
-      throw new Error('Failed to scrape job posting page with Firecrawl');
-    }
+      console.log('Scraped page content length:', pageContent.length);
 
-    // Extract job information (company, position, summary) using AI
-    console.log('Calling AI to extract job information...');
-    let jobInfoResponse;
-    try {
-      jobInfoResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      if (!pageContent || pageContent.length < 50) {
+        throw new Error('Page content too short — extraction may have failed');
+      }
+
+      // AI extraction
+      console.log('Calling AI to extract job information...');
+      const jobInfoResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${lovableApiKey}`,
@@ -159,7 +153,7 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           model: 'google/gemini-2.5-flash',
           messages: [
-          {
+            {
               role: 'system',
               content: 'You are an expert at analyzing job postings. Extract the company name, position/job title, company website, and key job details. Return ONLY valid JSON with this exact structure: {"company": "Company Name", "position": "Job Title", "website": "https://company-domain.com or null", "summary": {"location": "Location", "salary_range": "Salary range or null", "description": "Brief role description", "responsibilities": ["resp1", "resp2"], "requirements": ["req1", "req2"], "benefits": ["benefit1", "benefit2"]}}. For the website field, look for the company\'s main website URL mentioned in the posting (e.g., "Learn more at harvey.ai", "Visit us at company.com", links in the footer, or the company\'s careers page domain). Extract the root domain (e.g., "harvey.ai" not "harvey.ai/careers"). If no website is found, use null.'
             },
@@ -172,55 +166,67 @@ Deno.serve(async (req) => {
           max_tokens: 1500,
         }),
       });
-    } catch (fetchError) {
-      console.error('Network error calling AI API:', fetchError);
-      throw new Error('Network error while calling AI service');
-    }
 
-    if (!jobInfoResponse.ok) {
-      const errorText = await jobInfoResponse.text();
-      console.error('Job info AI API error status:', jobInfoResponse.status);
-      console.error('Job info AI API error body:', errorText);
-      throw new Error(`AI API returned status ${jobInfoResponse.status}: ${errorText}`);
-    }
+      if (!jobInfoResponse.ok) {
+        const errorText = await jobInfoResponse.text();
+        console.error('AI API error:', jobInfoResponse.status, errorText);
+        throw new Error(`AI API returned status ${jobInfoResponse.status}`);
+      }
 
-    console.log('AI response received, parsing...');
-    const jobInfoData = await jobInfoResponse.json();
-    console.log('AI response parsed successfully');
-    const jobInfoContent = jobInfoData.choices[0].message.content;
-    
-    let company = null;
-    let position = null;
-    let roleSummary = null;
-    let extractedWebsite = null;
+      const jobInfoData = await jobInfoResponse.json();
+      const jobInfoContent = jobInfoData.choices[0].message.content;
 
-    try {
+      // Parse JSON response
       let cleaned = jobInfoContent.trim()
         .replace(/```json\n?/g, '')
         .replace(/```\n?/g, '')
         .trim();
-      
-      // Extract JSON object if there's extra text around it
+
       const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         cleaned = jsonMatch[0];
       }
 
-      // Fix common AI JSON issues: trailing commas
       cleaned = cleaned
         .replace(/,\s*}/g, '}')
         .replace(/,\s*]/g, ']');
 
-      const jobInfo = JSON.parse(cleaned);
-      company = jobInfo.company;
-      position = jobInfo.position;
-      roleSummary = jobInfo.summary;
-      extractedWebsite = jobInfo.website;
-      console.log('Extracted job info, website:', extractedWebsite);
-    } catch (e) {
-      console.error('Failed to parse job info:', e);
-      console.error('Raw AI content:', jobInfoContent?.substring(0, 500));
-      throw new Error('Failed to parse job information');
+      try {
+        const jobInfo = JSON.parse(cleaned);
+        return {
+          company: jobInfo.company,
+          position: jobInfo.position,
+          roleSummary: jobInfo.summary,
+          extractedWebsite: jobInfo.website,
+        };
+      } catch (e) {
+        console.error('Failed to parse job info JSON:', e);
+        console.error('Raw AI content:', jobInfoContent?.substring(0, 500));
+        throw new Error('Failed to parse job information');
+      }
+    }
+
+    // Attempt extraction with one automatic retry
+    let company: string | null = null;
+    let position: string | null = null;
+    let roleSummary: any = null;
+    let extractedWebsite: string | null = null;
+
+    try {
+      const result = await extractJobInfo();
+      company = result.company;
+      position = result.position;
+      roleSummary = result.roleSummary;
+      extractedWebsite = result.extractedWebsite;
+    } catch (firstError) {
+      console.warn('First extraction attempt failed, retrying in 2s...', firstError instanceof Error ? firstError.message : firstError);
+      await new Promise((r) => setTimeout(r, 2000));
+      const result = await extractJobInfo();
+      company = result.company;
+      position = result.position;
+      roleSummary = result.roleSummary;
+      extractedWebsite = result.extractedWebsite;
+      console.log('Retry succeeded');
     }
 
     // Update application with extracted company, position, summary, and company_domain
