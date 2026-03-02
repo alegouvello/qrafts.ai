@@ -59,10 +59,20 @@ serve(async (req) => {
       }
     }
 
-    console.log(`Crawling careers for ${companyName}: ${targetUrl}`);
+    // Extract domain for scoping searches
+    const companyDomain = (() => {
+      try { return new URL(targetUrl).hostname; } catch { return null; }
+    })();
 
-    // ─── Strategy 1: Firecrawl search for job listings ───
+    console.log(`Crawling careers for ${companyName}: ${targetUrl} (domain: ${companyDomain})`);
+
+    // Job aggregator domains to exclude from search results
+    const aggregatorDomains = ["indeed.com", "glassdoor.com", "linkedin.com", "ziprecruiter.com", "monster.com", "careerbuilder.com", "simplyhired.com"];
+
+    // ─── Strategy 1: Firecrawl search scoped to company domain ───
     console.log("Strategy 1: Searching for job listings via Firecrawl search...");
+    // Use site: filter to scope search to the company's actual domain
+    const siteFilter = companyDomain ? `site:${companyDomain}` : "";
     const searchResponse = await fetch("https://api.firecrawl.dev/v1/search", {
       method: "POST",
       headers: {
@@ -70,7 +80,7 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        query: `${companyName} individual job openings hiring positions apply now`,
+        query: `${siteFilter} ${companyName} careers jobs openings apply`,
         limit: 5,
         scrapeOptions: { formats: ["markdown"] },
       }),
@@ -83,10 +93,16 @@ serve(async (req) => {
       const searchData = await searchResponse.json();
       const results = searchData.data || searchData.results || [];
       for (const r of results) {
+        // Skip results from job aggregator sites
+        const isAggregator = aggregatorDomains.some(d => r.url?.includes(d));
+        if (isAggregator) {
+          console.log(`Skipping aggregator result: ${r.url}`);
+          continue;
+        }
         if (r.markdown) allMarkdown += "\n\n---\n" + r.markdown;
         if (r.url) allLinks.push(r.url);
       }
-      console.log(`Search returned ${results.length} results, ${allMarkdown.length} chars`);
+      console.log(`Search returned ${results.length} results (after filtering), ${allMarkdown.length} chars`);
     }
 
     // ─── Strategy 2: Scrape careers page directly ───
