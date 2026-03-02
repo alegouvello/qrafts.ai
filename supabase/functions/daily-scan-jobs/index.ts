@@ -84,38 +84,35 @@ serve(async (req) => {
       }
     }
 
-    // Now score for each user
+    // Now score unscored jobs for each user using the dedicated scoring function
     let scoredUsers = 0;
-    for (const [userId, companies] of userCompanies) {
-      const { data: profile } = await supabase
-        .from("user_profiles")
-        .select("resume_text, location")
-        .eq("user_id", userId)
-        .maybeSingle();
-
-      if (!profile?.resume_text) continue;
-
-      for (const company of companies) {
-        try {
-          await fetch(`${supabaseUrl}/functions/v1/crawl-job-openings`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${supabaseKey}`,
-              "apikey": anonKey,
-            },
-            body: JSON.stringify({
-              companyName: company,
-              userResumeText: profile.resume_text,
-              userId,
-              userLocation: profile.location || null,
-            }),
-          });
-        } catch (e) {
-          console.error(`Score error for ${userId}/${company}: ${e}`);
+    for (const [userId] of userCompanies) {
+      try {
+        const resp = await fetch(`${supabaseUrl}/functions/v1/score-unscored-jobs`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${supabaseKey}`,
+            "apikey": anonKey,
+          },
+          body: JSON.stringify({ userId }),
+        });
+        if (resp.ok) {
+          // Read through the stream to completion
+          const text = await resp.text();
+          const lines = text.split("\n").filter(l => l.trim());
+          const lastLine = lines[lines.length - 1];
+          try {
+            const result = JSON.parse(lastLine);
+            console.log(`Scored ${result.scored || 0} jobs for user ${userId}`);
+          } catch {}
+          scoredUsers++;
+        } else {
+          console.error(`Score function failed for ${userId}: HTTP ${resp.status}`);
         }
+      } catch (e) {
+        console.error(`Score error for ${userId}: ${e}`);
       }
-      scoredUsers++;
     }
 
     console.log(`Daily scan complete: ${scanned} companies, ${totalJobs} jobs, ${scoredUsers} users scored`);
