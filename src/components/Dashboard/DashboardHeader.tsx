@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Plus, BarChart3, Crown, Settings, LogOut } from "lucide-react";
+import { ArrowLeft, Plus, BarChart3, Crown, Settings, LogOut, Briefcase } from "lucide-react";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import qraftLogo from "@/assets/qrafts-logo.png";
@@ -81,6 +81,17 @@ export const DashboardHeader = ({
                 ) : (
                   "Profile"
                 )}
+              </Button>
+            </Link>
+            
+            <Link to="/jobs" className="hidden sm:block">
+              <Button 
+                variant="ghost" 
+                className="rounded-full hover:bg-primary/5 transition-all text-sm"
+                aria-label="View recommended jobs"
+              >
+                <Briefcase className="h-4 w-4 mr-2" aria-hidden="true" />
+                Jobs
               </Button>
             </Link>
             

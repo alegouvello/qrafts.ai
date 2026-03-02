@@ -68,3 +68,6 @@ verify_jwt = false
 
 [functions.fetch-company-info]
 verify_jwt = true
+
+[functions.scan-all-companies]
+verify_jwt = true
