@@ -20,6 +20,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import qraftLogo from "@/assets/qrafts-logo.png";
+import { CheckCircle } from "lucide-react";
 
 interface JobWithScore {
   id: string;
@@ -37,6 +38,7 @@ const RecommendedJobs = () => {
   const [jobs, setJobs] = useState<JobWithScore[]>([]);
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
+  const [appliedPositions, setAppliedPositions] = useState<Set<string>>(new Set());
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -55,6 +57,21 @@ const RecommendedJobs = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+
+      // Get user's applied positions to flag them
+      const { data: applications } = await supabase
+        .from("applications")
+        .select("company, position")
+        .eq("user_id", user.id);
+
+      const appliedSet = new Set<string>();
+      if (applications) {
+        for (const app of applications) {
+          // Normalize: lowercase company+position for fuzzy matching
+          appliedSet.add(`${app.company.toLowerCase()}::${app.position.toLowerCase()}`);
+        }
+      }
+      setAppliedPositions(appliedSet);
 
       // Get all match scores for this user with job details
       const { data: scores, error } = await supabase
@@ -136,6 +153,25 @@ const RecommendedJobs = () => {
 
   const now = Date.now();
   const ONE_DAY = 24 * 60 * 60 * 1000;
+
+  // Check if a job title roughly matches an applied position at that company
+  const isJobApplied = (job: JobWithScore) => {
+    const jobTitle = job.title.toLowerCase();
+    const company = job.company_name.toLowerCase();
+    for (const key of appliedPositions) {
+      const [appCompany, appPosition] = key.split("::");
+      if (company.includes(appCompany) || appCompany.includes(company)) {
+        // Fuzzy title match: check if significant words overlap
+        const jobWords = jobTitle.split(/[\s\-\/,]+/).filter(w => w.length > 2);
+        const posWords = appPosition.split(/[\s\-\/,]+/).filter(w => w.length > 2);
+        const overlap = jobWords.filter(w => posWords.includes(w)).length;
+        if (overlap >= Math.min(2, posWords.length) || jobTitle.includes(appPosition) || appPosition.includes(jobTitle)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
 
   // Group jobs by company
   const companiesMap = new Map<string, JobWithScore[]>();
@@ -238,7 +274,7 @@ const RecommendedJobs = () => {
                 </h2>
                 <div className="space-y-1.5">
                   {newJobs.slice(0, 10).map(job => (
-                    <JobRow key={job.id} job={job} isNew />
+                    <JobRow key={job.id} job={job} isNew isApplied={isJobApplied(job)} />
                   ))}
                 </div>
               </div>
@@ -253,7 +289,7 @@ const RecommendedJobs = () => {
               <div className="space-y-1.5">
                 {topJobs.map(job => {
                   const isNew = (now - new Date(job.first_seen_at).getTime()) < ONE_DAY;
-                  return <JobRow key={job.id} job={job} isNew={isNew} />;
+                  return <JobRow key={job.id} job={job} isNew={isNew} isApplied={isJobApplied(job)} />;
                 })}
               </div>
               {jobs.length > 20 && (
@@ -316,27 +352,34 @@ const RecommendedJobs = () => {
   );
 };
 
-const JobRow = ({ job, isNew }: { job: JobWithScore; isNew: boolean }) => {
+const JobRow = ({ job, isNew, isApplied }: { job: JobWithScore; isNew: boolean; isApplied?: boolean }) => {
   const isHighMatch = job.match_score >= 80;
   const isMedMatch = job.match_score >= 60 && job.match_score < 80;
 
   return (
     <div
       className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-all ${
-        isNew
-          ? "border-green-500/30 bg-green-500/5"
-          : isHighMatch
-            ? "border-primary/20 bg-primary/5"
-            : "border-transparent hover:bg-muted/40"
+        isApplied
+          ? "border-muted-foreground/20 bg-muted/30 opacity-75"
+          : isNew
+            ? "border-green-500/30 bg-green-500/5"
+            : isHighMatch
+              ? "border-primary/20 bg-primary/5"
+              : "border-transparent hover:bg-muted/40"
       }`}
     >
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
-          <p className="text-[13px] font-medium truncate">{job.title}</p>
-          {isNew && (
+          <p className={`text-[13px] font-medium truncate ${isApplied ? "line-through text-muted-foreground" : ""}`}>{job.title}</p>
+          {isApplied && (
+            <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-muted-foreground/40 text-muted-foreground bg-muted/50 shrink-0 flex items-center gap-0.5">
+              <CheckCircle className="h-2.5 w-2.5" /> Applied
+            </Badge>
+          )}
+          {isNew && !isApplied && (
             <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-green-500/40 text-green-600 dark:text-green-400 bg-green-500/10 shrink-0">New</Badge>
           )}
-          {isHighMatch && <Sparkles className="h-3 w-3 text-primary shrink-0" />}
+          {isHighMatch && !isApplied && <Sparkles className="h-3 w-3 text-primary shrink-0" />}
         </div>
         <div className="flex items-center gap-2 mt-0.5">
           <span className="text-[11px] text-muted-foreground font-medium">{job.company_name}</span>
