@@ -93,14 +93,14 @@ const StatCard = ({
   sub?: string;
   accent?: string;
 }) => (
-  <div className="flex items-center gap-3 p-3 rounded-xl bg-background/60 border border-border/30">
-    <div className={`p-2 rounded-lg bg-${accent}/10 shrink-0`}>
-      <Icon className={`h-4 w-4 text-${accent}`} />
+  <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-muted/30">
+    <div className={`p-1.5 rounded-md bg-${accent}/10 shrink-0`}>
+      <Icon className={`h-3.5 w-3.5 text-${accent}`} />
     </div>
     <div className="min-w-0">
-      <p className="text-xs text-muted-foreground truncate">{label}</p>
-      <p className="text-lg font-bold leading-tight">{value}</p>
-      {sub && <p className="text-[11px] text-muted-foreground">{sub}</p>}
+      <p className="text-[11px] text-muted-foreground leading-none mb-0.5">{label}</p>
+      <p className="text-sm font-semibold leading-tight">{value}</p>
+      {sub && <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">{sub}</p>}
     </div>
   </div>
 );
@@ -546,275 +546,246 @@ const CompanyProfile = () => {
 
       {/* Header */}
       <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center gap-3">
-            <Link to="/dashboard">
-              <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-            </Link>
-            <Link to="/dashboard" className="transition-all duration-300 hover:scale-105">
-              <img src={qraftLogo} alt="Qraft" className="h-16 dark:invert" />
-            </Link>
-          </div>
+        <div className="container mx-auto px-4 py-2.5 flex items-center gap-3">
+          <Link to="/dashboard">
+            <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <Link to="/dashboard" className="transition-all duration-300 hover:scale-105">
+            <img src={qraftLogo} alt="Qraft" className="h-12 dark:invert" />
+          </Link>
         </div>
       </header>
 
-      {/* Compact Hero */}
+      {/* Hero — Compact inline */}
       <div className="border-b border-border/40 bg-gradient-to-r from-primary/5 via-background to-background">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center gap-6">
-            {/* Logo */}
+        <div className="container mx-auto px-4 py-5 max-w-7xl">
+          <div className="flex items-center gap-5">
             {!logoError ? (
-              <div className="w-20 h-20 rounded-xl overflow-hidden bg-background/80 flex items-center justify-center border border-border/50 shadow-lg shrink-0">
+              <div className="w-14 h-14 rounded-xl overflow-hidden bg-background flex items-center justify-center border border-border/50 shadow-md shrink-0">
                 <img
                   src={logoFallback ? `https://www.google.com/s2/favicons?domain=${companyDomain}&sz=128` : getCompanyLogo()}
                   alt={decodedCompany}
-                  className="w-full h-full object-contain p-3"
-                  onError={() => {
-                    if (!logoFallback) setLogoFallback(true);
-                    else setLogoError(true);
-                  }}
+                  className="w-full h-full object-contain p-2"
+                  onError={() => { if (!logoFallback) setLogoFallback(true); else setLogoError(true); }}
                 />
               </div>
             ) : (
-              <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-border/50 shadow-lg shrink-0">
-                <span className="text-3xl font-bold text-primary">{decodedCompany.charAt(0).toUpperCase()}</span>
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-border/50 shadow-md shrink-0">
+                <span className="text-xl font-bold text-primary">{decodedCompany.charAt(0).toUpperCase()}</span>
               </div>
             )}
 
-            {/* Title + meta */}
             <div className="flex-1 min-w-0">
-              <h1 className="text-3xl font-bold tracking-tight truncate">{decodedCompany}</h1>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                {metrics.totalApps} {metrics.totalApps === 1 ? 'application' : 'applications'} tracked
-                {communityStats && communityStats.total_applications > metrics.totalApps && (
-                  <span> · {communityStats.total_applications} across community</span>
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="text-2xl font-bold tracking-tight">{decodedCompany}</h1>
+                {companyProfileData?.industry && (
+                  <Badge variant="secondary" className="text-[11px]">{companyProfileData.industry}</Badge>
                 )}
-              </p>
-              <div className="flex flex-wrap items-center gap-2 mt-2">
-                <a href={`https://${companyDomain}`} target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors px-2.5 py-1 rounded-full border border-border/50 hover:border-primary/30">
-                  <Globe className="h-3 w-3" /> Website
-                </a>
-                <a href={`https://www.linkedin.com/company/${decodedCompany.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`} target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors px-2.5 py-1 rounded-full border border-border/50 hover:border-primary/30">
-                  <Linkedin className="h-3 w-3" /> LinkedIn
-                </a>
-                <a href={`https://${companyDomain}/careers`} target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors px-2.5 py-1 rounded-full border border-border/50 hover:border-primary/30">
-                  <Briefcase className="h-3 w-3" /> Careers
-                </a>
+              </div>
+              <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                <span className="text-xs text-muted-foreground">
+                  {metrics.totalApps} application{metrics.totalApps !== 1 ? 's' : ''} tracked
+                  {communityStats && communityStats.total_applications > metrics.totalApps && (
+                    <> · {communityStats.total_applications} community</>
+                  )}
+                </span>
+                <span className="text-border">|</span>
+                <div className="flex items-center gap-1.5">
+                  <a href={`https://${companyDomain}`} target="_blank" rel="noopener noreferrer"
+                    className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-0.5">
+                    <Globe className="h-3 w-3" /> Website
+                  </a>
+                  <span className="text-border">·</span>
+                  <a href={`https://www.linkedin.com/company/${decodedCompany.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`} target="_blank" rel="noopener noreferrer"
+                    className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-0.5">
+                    <Linkedin className="h-3 w-3" /> LinkedIn
+                  </a>
+                  <span className="text-border">·</span>
+                  <a href={`https://${companyDomain}/careers`} target="_blank" rel="noopener noreferrer"
+                    className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-0.5">
+                    <Briefcase className="h-3 w-3" /> Careers
+                  </a>
+                </div>
               </div>
             </div>
+
+            {/* Watch button in hero */}
+            <Button
+              variant={isWatching ? "default" : "outline"}
+              size="sm"
+              className="shrink-0 h-8 text-xs gap-1.5"
+              onClick={handleToggleWatch}
+              disabled={togglingWatch}
+            >
+              {togglingWatch ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : isWatching ? <Bell className="h-3.5 w-3.5" /> : <BellOff className="h-3.5 w-3.5" />}
+              {isWatching ? "Watching" : "Watch"}
+            </Button>
           </div>
         </div>
       </div>
 
-      <main className="container mx-auto px-4 py-6 max-w-7xl">
-        {/* Two-column grid for desktop */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <main className="container mx-auto px-4 py-5 max-w-7xl">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
           {/* ─── Left column (2/3) ─── */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4">
 
-            {/* About */}
+            {/* About + Tags — Inline */}
             {companyDescription && (
-              <Card className="border-border/40 bg-card/50">
-                <div className="p-5">
-                  <h2 className="text-base font-semibold mb-2 flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-primary" />
-                    About {decodedCompany}
-                  </h2>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{companyDescription}</p>
-                  {companyProfileData?.industry && (
-                    <div className="flex flex-wrap gap-1.5 mt-3">
-                      {companyProfileData.industry && <Badge variant="secondary" className="text-xs">{companyProfileData.industry}</Badge>}
-                      {companyProfileData.size && <Badge variant="secondary" className="text-xs">{companyProfileData.size}</Badge>}
-                      {companyProfileData.headquarters && <Badge variant="secondary" className="text-xs">{companyProfileData.headquarters}</Badge>}
-                    </div>
-                  )}
-                </div>
-              </Card>
+              <div className="rounded-xl border border-border/40 bg-card/50 p-4">
+                <h2 className="text-sm font-semibold mb-2 flex items-center gap-1.5">
+                  <Building2 className="h-3.5 w-3.5 text-primary" />
+                  About
+                </h2>
+                <p className="text-[13px] text-muted-foreground leading-relaxed">{companyDescription}</p>
+                {(companyProfileData?.size || companyProfileData?.headquarters) && (
+                  <div className="flex flex-wrap gap-1.5 mt-2.5">
+                    {companyProfileData.size && <Badge variant="outline" className="text-[10px] font-normal">{companyProfileData.size}</Badge>}
+                    {companyProfileData.headquarters && <Badge variant="outline" className="text-[10px] font-normal">{companyProfileData.headquarters}</Badge>}
+                  </div>
+                )}
+              </div>
             )}
 
             {/* Application History */}
-            <Card className="border-border/40 bg-card/50">
-              <div className="p-5">
-                <h2 className="text-base font-semibold mb-4 flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4 text-primary" />
-                  Application History
-                </h2>
-                <div className="space-y-2">
-                  {applications.map((app) => {
-                    const StatusIcon = statusConfig[app.status as keyof typeof statusConfig]?.icon || AlertCircle;
-                    const responseTime = app.history.length > 0
-                      ? differenceInDays(new Date(app.history[0].changed_at), new Date(app.applied_date))
-                      : null;
+            <div className="rounded-xl border border-border/40 bg-card/50 p-4">
+              <h2 className="text-sm font-semibold mb-3 flex items-center gap-1.5">
+                <BarChart3 className="h-3.5 w-3.5 text-primary" />
+                Application History
+                <Badge variant="secondary" className="text-[10px] ml-auto font-normal">{applications.length}</Badge>
+              </h2>
+              <div className="space-y-1.5">
+                {applications.map((app) => {
+                  const StatusIcon = statusConfig[app.status as keyof typeof statusConfig]?.icon || AlertCircle;
+                  const responseTime = app.history.length > 0
+                    ? differenceInDays(new Date(app.history[0].changed_at), new Date(app.applied_date))
+                    : null;
 
-                    return (
-                      <Link key={app.id} to={`/application/${app.id}`} className="block">
-                        <div className="flex items-center gap-3 p-3 rounded-lg bg-background/50 border border-border/30 hover:border-primary/30 hover:bg-background/80 transition-all group">
-                          <div className="p-1.5 bg-primary/10 rounded-md shrink-0">
-                            <StatusIcon className="h-3.5 w-3.5 text-primary" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate group-hover:text-primary transition-colors">{app.position}</p>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                              <span>{format(new Date(app.applied_date), "MMM d, yyyy")}</span>
-                              {responseTime !== null && <span>· {responseTime}d response</span>}
-                            </div>
-                          </div>
-                          <Badge
-                            variant={statusConfig[app.status as keyof typeof statusConfig]?.variant || "secondary"}
-                            className="text-xs shrink-0"
-                          >
-                            {statusConfig[app.status as keyof typeof statusConfig]?.label || app.status}
-                          </Badge>
+                  return (
+                    <Link key={app.id} to={`/application/${app.id}`} className="block">
+                      <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-muted/40 transition-colors group">
+                        <StatusIcon className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-medium truncate group-hover:text-primary transition-colors">{app.position}</p>
+                          <p className="text-[11px] text-muted-foreground mt-0.5">
+                            {format(new Date(app.applied_date), "MMM d, yyyy")}
+                            {responseTime !== null && responseTime > 0 && <> · {responseTime}d response</>}
+                          </p>
                         </div>
-                      </Link>
-                    );
-                  })}
-                </div>
+                        <Badge
+                          variant={statusConfig[app.status as keyof typeof statusConfig]?.variant || "secondary"}
+                          className="text-[10px] shrink-0"
+                        >
+                          {statusConfig[app.status as keyof typeof statusConfig]?.label || app.status}
+                        </Badge>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
-            </Card>
+            </div>
 
-            {/* Job Openings */}
-            <Card className="border-border/40 bg-card/50">
-              <div className="p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-base font-semibold flex items-center gap-2">
-                    <Briefcase className="h-4 w-4 text-primary" />
-                    Open Positions
-                    {jobOpenings.length > 0 && (
-                      <Badge variant="secondary" className="text-xs ml-1">{jobOpenings.length}</Badge>
-                    )}
-                  </h2>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant={isWatching ? "default" : "outline"}
-                      size="sm"
-                      className="h-7 text-xs"
-                      onClick={handleToggleWatch}
-                      disabled={togglingWatch}
-                    >
-                      {togglingWatch ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : isWatching ? <Bell className="h-3 w-3 mr-1" /> : <BellOff className="h-3 w-3 mr-1" />}
-                      {isWatching ? "Watching" : "Watch"}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-7 text-xs"
-                      onClick={handleScanJobs}
-                      disabled={loadingJobs}
-                    >
-                      {loadingJobs ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <RefreshCw className="h-3 w-3 mr-1" />}
-                      {loadingJobs ? "Scanning..." : "Scan Jobs"}
-                    </Button>
-                  </div>
+            {/* Open Positions */}
+            <div className="rounded-xl border border-border/40 bg-card/50 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-sm font-semibold flex items-center gap-1.5">
+                  <Briefcase className="h-3.5 w-3.5 text-primary" />
+                  Open Positions
+                  {jobOpenings.length > 0 && (
+                    <Badge variant="secondary" className="text-[10px] font-normal">{jobOpenings.length}</Badge>
+                  )}
+                </h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-[11px] gap-1"
+                  onClick={handleScanJobs}
+                  disabled={loadingJobs}
+                >
+                  {loadingJobs ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+                  {loadingJobs ? "Scanning…" : "Scan"}
+                </Button>
+              </div>
+
+              {loadingJobs && jobOpenings.length === 0 ? (
+                <div className="text-center py-6">
+                  <Loader2 className="h-5 w-5 animate-spin text-primary mx-auto mb-1.5" />
+                  <p className="text-xs text-muted-foreground">Scanning careers page…</p>
                 </div>
+              ) : jobOpenings.length === 0 ? (
+                <div className="text-center py-5">
+                  <Briefcase className="h-6 w-6 text-muted-foreground/20 mx-auto mb-1" />
+                  <p className="text-xs text-muted-foreground">No openings found. Click Scan to crawl careers page.</p>
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  {jobOpenings
+                    .sort((a, b) => (jobMatchScores[b.id]?.match_score || 0) - (jobMatchScores[a.id]?.match_score || 0))
+                    .map((job) => {
+                      const matchData = jobMatchScores[job.id];
+                      const score = matchData?.match_score;
+                      const isHighMatch = score && score >= 80;
+                      const isMedMatch = score && score >= 60 && score < 80;
 
-                {loadingJobs && jobOpenings.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground">Scanning careers page...</p>
-                  </div>
-                ) : jobOpenings.length === 0 ? (
-                  <div className="text-center py-6">
-                    <Briefcase className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground">No job openings found yet</p>
-                    <p className="text-xs text-muted-foreground mt-1">Click "Scan Jobs" to crawl the careers page</p>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {jobOpenings
-                      .sort((a, b) => {
-                        const scoreA = jobMatchScores[a.id]?.match_score || 0;
-                        const scoreB = jobMatchScores[b.id]?.match_score || 0;
-                        return scoreB - scoreA;
-                      })
-                      .map((job) => {
-                        const matchData = jobMatchScores[job.id];
-                        const score = matchData?.match_score;
-                        const isHighMatch = score && score >= 80;
-                        const isMedMatch = score && score >= 60 && score < 80;
-
-                        return (
-                          <div
-                            key={job.id}
-                            className={`p-3 rounded-lg border transition-all ${
-                              isHighMatch
-                                ? "border-green-500/30 bg-green-500/5"
-                                : isMedMatch
-                                ? "border-yellow-500/20 bg-yellow-500/5"
-                                : "border-border/30 bg-background/50"
-                            } hover:border-primary/30`}
-                          >
-                            <div className="flex items-start gap-3">
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <p className="text-sm font-medium truncate">{job.title}</p>
-                                  {isHighMatch && (
-                                    <Badge className="bg-green-500/20 text-green-600 border-green-500/30 text-[10px] shrink-0">
-                                      <Sparkles className="h-2.5 w-2.5 mr-0.5" /> Recommended
-                                    </Badge>
-                                  )}
-                                </div>
-                                <div className="flex flex-wrap items-center gap-2 mt-1">
-                                  {job.location && (
-                                    <span className="text-xs text-muted-foreground flex items-center gap-0.5">
-                                      <MapPin className="h-3 w-3" /> {job.location}
-                                    </span>
-                                  )}
-                                  {job.department && (
-                                    <Badge variant="secondary" className="text-[10px]">{job.department}</Badge>
-                                  )}
-                                </div>
-                                {matchData?.match_reasons?.length > 0 && (
-                                  <p className="text-xs text-muted-foreground mt-1.5 line-clamp-1">
-                                    {matchData.match_reasons.join(" · ")}
-                                  </p>
-                                )}
-                              </div>
-                              <div className="flex flex-col items-end gap-1 shrink-0">
-                                {score != null && (
-                                  <div className="text-right">
-                                    <span className={`text-sm font-bold ${
-                                      isHighMatch ? "text-green-600" : isMedMatch ? "text-yellow-600" : "text-muted-foreground"
-                                    }`}>
-                                      {score}%
-                                    </span>
-                                    <Progress
-                                      value={score}
-                                      className="w-16 h-1.5 mt-0.5"
-                                    />
-                                  </div>
-                                )}
-                                {job.url && (
-                                  <a
-                                    href={job.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-[10px] text-primary hover:underline flex items-center gap-0.5 mt-1"
-                                  >
-                                    Apply <ExternalLink className="h-2.5 w-2.5" />
-                                  </a>
-                                )}
-                              </div>
+                      return (
+                        <div
+                          key={job.id}
+                          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-all ${
+                            isHighMatch
+                              ? "border-primary/20 bg-primary/5"
+                              : "border-transparent hover:bg-muted/40"
+                          }`}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <p className="text-[13px] font-medium truncate">{job.title}</p>
+                              {isHighMatch && (
+                                <Sparkles className="h-3 w-3 text-primary shrink-0" />
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              {job.location && (
+                                <span className="text-[11px] text-muted-foreground flex items-center gap-0.5">
+                                  <MapPin className="h-2.5 w-2.5" /> {job.location}
+                                </span>
+                              )}
+                              {job.department && (
+                                <span className="text-[11px] text-muted-foreground">{job.department}</span>
+                              )}
                             </div>
                           </div>
-                        );
-                      })}
-                  </div>
-                )}
+                          <div className="flex items-center gap-2.5 shrink-0">
+                            {score != null && (
+                              <div className="flex items-center gap-1.5">
+                                <Progress value={score} className="w-12 h-1.5" />
+                                <span className={`text-xs font-semibold tabular-nums ${
+                                  isHighMatch ? "text-primary" : isMedMatch ? "text-yellow-600" : "text-muted-foreground"
+                                }`}>
+                                  {score}%
+                                </span>
+                              </div>
+                            )}
+                            {job.url && (
+                              <a href={job.url} target="_blank" rel="noopener noreferrer"
+                                className="text-muted-foreground hover:text-primary transition-colors">
+                                <ExternalLink className="h-3.5 w-3.5" />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
 
-                {isWatching && (
-                  <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
-                    <Bell className="h-3 w-3" /> Daily alerts enabled for 80%+ matches
-                  </p>
-                )}
-              </div>
-            </Card>
+              {isWatching && (
+                <p className="text-[11px] text-muted-foreground mt-2.5 flex items-center gap-1 border-t border-border/30 pt-2.5">
+                  <Bell className="h-3 w-3 text-primary" /> Daily email alerts enabled for 80%+ matches
+                </p>
+              )}
+            </div>
 
             {/* Community Experiences */}
             <CompanyExperiences
@@ -832,150 +803,120 @@ const CompanyProfile = () => {
           </div>
 
           {/* ─── Right sidebar (1/3) ─── */}
-          <div className="space-y-6">
+          <div className="space-y-4">
 
-            {/* Community Stats */}
-            <Card className="border-border/40 bg-card/50">
-              <div className="p-5">
-                <h2 className="text-base font-semibold mb-3 flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-primary" />
-                  Community Stats
-                </h2>
-                <div className="grid grid-cols-2 gap-2">
-                  <StatCard
-                    icon={Clock}
-                    label="Avg Response"
+            {/* Stats — Unified card with tabs-like sections */}
+            <div className="rounded-xl border border-border/40 bg-card/50 p-4 space-y-4">
+              {/* Community */}
+              <div>
+                <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Community</h3>
+                <div className="grid grid-cols-2 gap-1.5">
+                  <StatCard icon={Clock} label="Avg Response"
                     value={communityStats?.avg_response_days && communityStats.avg_response_days > 0 ? `${Math.round(communityStats.avg_response_days)}d` : "—"}
                     sub={communityStats?.fastest_response_days && communityStats.fastest_response_days > 0 ? `Fastest: ${communityStats.fastest_response_days}d` : undefined}
                   />
-                  <StatCard
-                    icon={TrendingUp}
-                    label="Interview Rate"
+                  <StatCard icon={TrendingUp} label="Interview Rate"
                     value={`${communityStats?.interview_rate || 0}%`}
                     sub={`${communityStats?.interview_count || 0} of ${communityStats?.total_applications || 0}`}
                   />
-                  <StatCard
-                    icon={Target}
-                    label="Acceptance"
+                  <StatCard icon={Target} label="Acceptance"
                     value={`${communityStats?.acceptance_rate || 0}%`}
                     sub={`${communityStats?.accepted_count || 0} accepted`}
                   />
-                  <StatCard
-                    icon={XCircle}
-                    label="Rejection"
+                  <StatCard icon={XCircle} label="Rejection"
                     value={`${communityStats?.rejection_rate || 0}%`}
                     sub={`${communityStats?.rejected_count || 0} rejected`}
                     accent="destructive"
                   />
                 </div>
               </div>
-            </Card>
 
-            {/* Your Stats */}
-            <Card className="border-border/40 bg-card/50">
-              <div className="p-5">
-                <h2 className="text-base font-semibold mb-3 flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4 text-primary" />
-                  Your Stats
-                </h2>
-                <div className="grid grid-cols-2 gap-2">
-                  <StatCard
-                    icon={Clock}
-                    label="Avg Response"
+              {/* Divider */}
+              <div className="border-t border-border/30" />
+
+              {/* Your stats */}
+              <div>
+                <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Your Stats</h3>
+                <div className="grid grid-cols-2 gap-1.5">
+                  <StatCard icon={Clock} label="Avg Response"
                     value={metrics.avgResponseDays != null && metrics.avgResponseDays > 0 ? `${metrics.avgResponseDays}d` : "—"}
                     sub={metrics.fastestResponseDays != null && metrics.fastestResponseDays > 0 ? `Fastest: ${metrics.fastestResponseDays}d` : undefined}
                   />
-                  <StatCard
-                    icon={TrendingUp}
-                    label="Interview Rate"
+                  <StatCard icon={TrendingUp} label="Interview Rate"
                     value={`${metrics.interviewRate}%`}
                     sub={`${applications.filter(a => a.status === "interview" || a.history.some(h => h.status === "interview")).length} of ${metrics.totalApps}`}
                   />
-                  <StatCard
-                    icon={Target}
-                    label="Acceptance"
+                  <StatCard icon={Target} label="Acceptance"
                     value={`${metrics.acceptanceRate}%`}
                     sub={`${applications.filter(a => a.status === "accepted").length} accepted`}
                   />
-                  <StatCard
-                    icon={XCircle}
-                    label="Rejection"
+                  <StatCard icon={XCircle} label="Rejection"
                     value={`${metrics.rejectionRate}%`}
                     sub={`${applications.filter(a => a.status === "rejected").length} rejected`}
                     accent="destructive"
                   />
                 </div>
               </div>
-            </Card>
+            </div>
 
-            {/* Company Notes */}
-            <Card className="border-border/40 bg-card/50">
-              <div className="p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-base font-semibold flex items-center gap-2">
-                    <Edit className="h-4 w-4 text-primary" />
-                    Notes
-                  </h2>
-                  {!editingNotes ? (
-                    <Button onClick={() => setEditingNotes(true)} variant="ghost" size="sm" className="h-7 text-xs">
-                      <Edit className="h-3 w-3 mr-1" /> Edit
-                    </Button>
-                  ) : (
-                    <div className="flex gap-1">
-                      <Button onClick={() => { setCompanyNotes(savedNotes); setEditingNotes(false); }} variant="ghost" size="sm" className="h-7 text-xs">Cancel</Button>
-                      <Button onClick={handleSaveNotes} disabled={savingNotes} size="sm" className="h-7 text-xs">
-                        <Save className="h-3 w-3 mr-1" /> {savingNotes ? "..." : "Save"}
-                      </Button>
-                    </div>
-                  )}
-                </div>
-                {editingNotes ? (
-                  <Textarea
-                    value={companyNotes}
-                    onChange={(e) => setCompanyNotes(e.target.value)}
-                    placeholder="Add notes about this company..."
-                    className="min-h-24 text-sm bg-background/50"
-                  />
+            {/* Notes */}
+            <div className="rounded-xl border border-border/40 bg-card/50 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Notes</h3>
+                {!editingNotes ? (
+                  <Button onClick={() => setEditingNotes(true)} variant="ghost" size="sm" className="h-6 text-[11px] px-2">
+                    <Edit className="h-3 w-3 mr-1" /> Edit
+                  </Button>
                 ) : (
-                  <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                    {companyNotes || "No notes yet. Click Edit to add notes."}
-                  </p>
+                  <div className="flex gap-1">
+                    <Button onClick={() => { setCompanyNotes(savedNotes); setEditingNotes(false); }} variant="ghost" size="sm" className="h-6 text-[11px] px-2">Cancel</Button>
+                    <Button onClick={handleSaveNotes} disabled={savingNotes} size="sm" className="h-6 text-[11px] px-2">
+                      <Save className="h-3 w-3 mr-1" /> {savingNotes ? "…" : "Save"}
+                    </Button>
+                  </div>
                 )}
               </div>
-            </Card>
+              {editingNotes ? (
+                <Textarea
+                  value={companyNotes}
+                  onChange={(e) => setCompanyNotes(e.target.value)}
+                  placeholder="Add notes about this company…"
+                  className="min-h-20 text-[13px] bg-background/50"
+                />
+              ) : (
+                <p className="text-[13px] text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                  {companyNotes || "No notes yet. Click Edit to add."}
+                </p>
+              )}
+            </div>
 
-            {/* Community Insights */}
+            {/* Insights */}
             {communityStats && (communityStats.avg_response_days || communityStats.interview_rate > 0 || metrics.totalApps > 0) && (
-              <Card className="border-border/40 bg-gradient-to-br from-primary/5 to-card/50">
-                <div className="p-5">
-                  <h2 className="text-base font-semibold mb-3 flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 text-primary" />
-                    Insights
-                  </h2>
-                  <div className="space-y-2.5 text-sm text-muted-foreground">
-                    {communityStats.avg_response_days != null && communityStats.avg_response_days > 0 && (
-                      <p className="flex gap-1.5">
-                        <span className="text-primary shrink-0">•</span>
-                        Typically responds within <span className="font-medium text-foreground">{Math.round(communityStats.avg_response_days)} days</span>
-                      </p>
-                    )}
-                    {communityStats.interview_rate > 0 && (
-                      <p className="flex gap-1.5">
-                        <span className="text-primary shrink-0">•</span>
-                        Interview rate: <span className="font-medium text-foreground">{communityStats.interview_rate}%</span>
-                        {communityStats.interview_rate >= 30 ? " — excellent!" : communityStats.interview_rate >= 15 ? " — decent" : " — highly selective"}
-                      </p>
-                    )}
-                    {metrics.totalApps > 0 && (
-                      <p className="flex gap-1.5">
-                        <span className="text-primary shrink-0">•</span>
-                        You've applied to {metrics.totalApps} position{metrics.totalApps > 1 ? 's' : ''}
-                        {metrics.interviewRate > (communityStats.interview_rate || 0) && " — above avg!"}
-                      </p>
-                    )}
-                  </div>
+              <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-4">
+                <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2.5">Insights</h3>
+                <div className="space-y-2 text-[13px] text-muted-foreground">
+                  {communityStats.avg_response_days != null && communityStats.avg_response_days > 0 && (
+                    <p className="flex gap-1.5 items-start">
+                      <span className="text-primary mt-0.5 shrink-0">•</span>
+                      Typically responds within <span className="font-medium text-foreground">{Math.round(communityStats.avg_response_days)}d</span>
+                    </p>
+                  )}
+                  {communityStats.interview_rate > 0 && (
+                    <p className="flex gap-1.5 items-start">
+                      <span className="text-primary mt-0.5 shrink-0">•</span>
+                      Interview rate: <span className="font-medium text-foreground">{communityStats.interview_rate}%</span>
+                      {communityStats.interview_rate >= 30 ? " — excellent" : communityStats.interview_rate >= 15 ? " — decent" : " — selective"}
+                    </p>
+                  )}
+                  {metrics.totalApps > 0 && (
+                    <p className="flex gap-1.5 items-start">
+                      <span className="text-primary mt-0.5 shrink-0">•</span>
+                      You've applied to {metrics.totalApps} position{metrics.totalApps > 1 ? 's' : ''}
+                      {metrics.interviewRate > (communityStats.interview_rate || 0) && " — above avg!"}
+                    </p>
+                  )}
                 </div>
-              </Card>
+              </div>
             )}
           </div>
         </div>
