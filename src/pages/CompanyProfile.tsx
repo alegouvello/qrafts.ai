@@ -81,6 +81,7 @@ const CompanyProfile = () => {
   const [editingNotes, setEditingNotes] = useState(false);
   const [savingNotes, setSavingNotes] = useState(false);
   const [logoError, setLogoError] = useState(false);
+  const [logoFallback, setLogoFallback] = useState(false);
   const [communityStats, setCommunityStats] = useState<CompanyStats | null>(null);
 
   useEffect(() => {
@@ -355,10 +356,16 @@ const CompanyProfile = () => {
             {!logoError ? (
               <div className="w-32 h-32 rounded-2xl overflow-hidden bg-background/80 backdrop-blur-sm flex items-center justify-center border border-border/50 shadow-2xl shadow-primary/10 transition-all duration-300 hover:scale-105 hover:shadow-primary/20">
                 <img 
-                  src={getCompanyLogo()}
+                  src={logoFallback ? `https://www.google.com/s2/favicons?domain=${companyDomain}&sz=128` : getCompanyLogo()}
                   alt={decodedCompany}
                   className="w-full h-full object-contain p-6"
-                  onError={() => setLogoError(true)}
+                  onError={() => {
+                    if (!logoFallback) {
+                      setLogoFallback(true);
+                    } else {
+                      setLogoError(true);
+                    }
+                  }}
                 />
               </div>
             ) : (
