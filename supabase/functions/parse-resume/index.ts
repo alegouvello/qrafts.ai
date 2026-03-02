@@ -622,12 +622,19 @@ Return ONLY valid JSON with this structure:
 
 Your job is to produce ONE merged JSON object that is the BEST, most COMPLETE version by:
 1. Keeping the most detailed/recent version of each field (name, email, phone, location, etc.)
-2. MERGING experience entries – deduplicate by company+position, keep the most detailed description
+2. MERGING experience entries – match by company+position (fuzzy match, ignore minor wording differences). For each matched role, produce ONE entry with ONE description that contains ONLY UNIQUE bullet points. If two bullets say essentially the same thing with different wording, KEEP ONLY THE BETTER/MORE DETAILED VERSION. Never repeat the same achievement twice.
 3. MERGING education entries – deduplicate by institution+degree, keep the most complete info
-4. MERGING skills – combine all unique skills without duplicates
+4. MERGING skills – combine all unique skills, remove exact and near-duplicates (e.g. "Project Management" and "Project management" are the same)
 5. MERGING certifications, publications, projects, awards, languages, volunteer work – deduplicate and keep the most complete entries
-6. For the summary – pick the longer/more comprehensive version, or combine them if they cover different aspects
+6. For the summary – pick the longer/more comprehensive version. Do NOT concatenate both.
 7. NEVER invent or hallucinate new information – only combine what exists
+
+DEDUPLICATION IS CRITICAL:
+- Two bullet points are duplicates if they describe the same achievement, responsibility, or outcome, even if worded differently
+- Example duplicates: "Built dual GTM (direct + partner co-sell)" and "Drove dual GTM (founder-led sales + consulting partner co-sell)" → keep the more detailed one
+- Example duplicates: "Balanced studio company-building (60%) with portfolio guidance (40%)" and "Balanced studio company-building with portfolio guidance on enterprise onboarding" → keep the more specific one
+- When in doubt, keep the version with more specific metrics, numbers, or details
+- The final merged experience description should have NO redundant bullets
 
 Return ONLY valid JSON with the same structure as the inputs. No markdown, no commentary.`
                 },
