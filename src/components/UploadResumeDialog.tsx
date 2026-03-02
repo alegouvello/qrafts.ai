@@ -268,8 +268,8 @@ export const UploadResumeDialog = ({
 
           {/* File list */}
           {hasFiles && (
-            <ScrollArea className={files.length > 3 ? "h-48" : ""}>
-              <div className="space-y-2">
+            <ScrollArea className="max-h-48">
+              <div className="space-y-2 pr-3">
                 {files.map((entry) => (
                   <div
                     key={entry.file.name}
