@@ -406,10 +406,10 @@ const CompanyProfile = () => {
 
       const decodedCompany = decodeURIComponent(companyName || "");
 
-      // Get user resume
+      // Get user resume and location
       const { data: profile } = await supabase
         .from("user_profiles")
-        .select("resume_text")
+        .select("resume_text, location")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -418,6 +418,7 @@ const CompanyProfile = () => {
           companyName: decodedCompany,
           userResumeText: profile?.resume_text || null,
           userId: user.id,
+          userLocation: profile?.location || null,
         },
       });
 
