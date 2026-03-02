@@ -202,19 +202,24 @@ export default function Profile() {
         try {
           const parsed = JSON.parse(data.resume_text);
           
-          // Convert plain text bullet points to HTML if needed for summary
-          if (parsed.summary && !parsed.summary.includes('<')) {
-            parsed.summary = convertBulletsToHTML(parsed.summary);
+          // Convert summary to HTML safely
+          if (parsed.summary) {
+            if (Array.isArray(parsed.summary)) {
+              parsed.summary = '<ul>' + parsed.summary.map((item: string) => `<li>${String(item)}</li>`).join('') + '</ul>';
+            } else if (typeof parsed.summary === 'string' && !parsed.summary.includes('<')) {
+              parsed.summary = convertBulletsToHTML(parsed.summary);
+            }
           }
           
-          // Convert plain text bullet points to HTML if needed for experience
-          if (parsed.experience) {
+          // Convert experience descriptions to HTML safely
+          if (parsed.experience && Array.isArray(parsed.experience)) {
             parsed.experience = parsed.experience.map((exp: any) => {
-              // Handle description being an array (from AI merge) instead of a string
               if (Array.isArray(exp.description)) {
-                exp.description = '<ul>' + exp.description.map((item: string) => `<li>${item}</li>`).join('') + '</ul>';
+                exp.description = '<ul>' + exp.description.map((item: any) => `<li>${String(item)}</li>`).join('') + '</ul>';
               } else if (exp.description && typeof exp.description === 'string' && !exp.description.includes('<')) {
                 exp.description = convertBulletsToHTML(exp.description);
+              } else if (exp.description && typeof exp.description !== 'string') {
+                exp.description = String(exp.description);
               }
               return exp;
             });
