@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { User, BarChart3, Settings, Plus, LayoutDashboard } from "lucide-react";
+import { User, Briefcase, Settings, Plus, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface MobileBottomNavProps {
@@ -11,9 +11,9 @@ export const MobileBottomNav = ({ onAddApplication }: MobileBottomNavProps) => {
 
   const navItems = [
     { icon: LayoutDashboard, label: "Home", path: "/dashboard" },
-    { icon: User, label: "Profile", path: "/profile" },
+    { icon: Briefcase, label: "Jobs", path: "/jobs" },
     { icon: "add", label: "Add", action: onAddApplication },
-    { icon: BarChart3, label: "Compare", path: "/comparison" },
+    { icon: User, label: "Profile", path: "/profile" },
     { icon: Settings, label: "Settings", path: "/settings" },
   ] as const;
 
