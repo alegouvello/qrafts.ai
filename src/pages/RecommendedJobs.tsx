@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Footer } from "@/components/Footer";
@@ -20,12 +22,14 @@ import {
   Building2,
   TrendingUp,
   Filter,
+  Check,
   CheckCircle,
   AlertTriangle,
   ChevronDown,
   ChevronUp,
   XCircle,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import qraftLogo from "@/assets/qrafts-logo.png";
 
 interface JobWithScore {
@@ -53,6 +57,7 @@ const RecommendedJobs = () => {
   const [scanProgress, setScanProgress] = useState<{ completed: number; total: number; currentCompany: string } | null>(null);
   const [appliedPositions, setAppliedPositions] = useState<Set<string>>(new Set());
   const [locationFilter, setLocationFilter] = useState<string>("all");
+  const [locationOpen, setLocationOpen] = useState(false);
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const [scanResults, setScanResults] = useState<ScanResult[]>([]);
   const [showScanResults, setShowScanResults] = useState(false);
@@ -575,24 +580,47 @@ const RecommendedJobs = () => {
               <div className="flex flex-wrap items-center gap-2 mb-6">
                 <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
                 {locationGroups.length > 0 && (
-                  <Select value={locationFilter} onValueChange={setLocationFilter}>
-                    <SelectTrigger className="w-[200px] h-8 text-xs">
-                      <SelectValue placeholder="Location" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Locations</SelectItem>
-                      {locationGroups.map(({ group, cities }) => (
-                        <SelectGroup key={group}>
-                          {group !== "Remote" && group !== "Hybrid" && (
-                            <SelectLabel className="text-xs text-muted-foreground">{group}</SelectLabel>
-                          )}
-                          {cities.map(c => (
-                            <SelectItem key={c.label} value={c.label}>{c.label} ({c.count})</SelectItem>
+                  <Popover open={locationOpen} onOpenChange={setLocationOpen}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className="w-[200px] h-8 text-xs justify-between font-normal">
+                        {locationFilter === "all" ? "All Locations" : locationFilter}
+                        <ChevronDown className="ml-1 h-3 w-3 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[240px] p-0" align="start">
+                      <Command>
+                        <CommandInput placeholder="Search locations..." className="h-8 text-xs" />
+                        <CommandList>
+                          <CommandEmpty>No locations found.</CommandEmpty>
+                          <CommandGroup>
+                            <CommandItem
+                              value="all"
+                              onSelect={() => { setLocationFilter("all"); setLocationOpen(false); }}
+                              className="text-xs"
+                            >
+                              <Check className={cn("mr-2 h-3 w-3", locationFilter === "all" ? "opacity-100" : "opacity-0")} />
+                              All Locations
+                            </CommandItem>
+                          </CommandGroup>
+                          {locationGroups.map(({ group, cities }) => (
+                            <CommandGroup key={group} heading={group !== "Remote" && group !== "Hybrid" ? group : undefined}>
+                              {cities.map(c => (
+                                <CommandItem
+                                  key={c.label}
+                                  value={c.label}
+                                  onSelect={() => { setLocationFilter(c.label); setLocationOpen(false); }}
+                                  className="text-xs"
+                                >
+                                  <Check className={cn("mr-2 h-3 w-3", locationFilter === c.label ? "opacity-100" : "opacity-0")} />
+                                  {c.label} ({c.count})
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
                           ))}
-                        </SelectGroup>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 )}
                 {departments.length > 0 && (
                   <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
