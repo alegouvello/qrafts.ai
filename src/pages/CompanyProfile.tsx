@@ -22,6 +22,9 @@ import {
   XCircle,
   AlertCircle,
   BarChart3,
+  Globe,
+  Linkedin,
+  Briefcase,
 } from "lucide-react";
 import { differenceInDays, format } from "date-fns";
 import qraftLogo from "@/assets/qrafts-logo.png";
@@ -290,11 +293,6 @@ const CompanyProfile = () => {
 
   const metrics = calculateMetrics();
 
-  // Get company logo from Clearbit
-  const getCompanyLogo = (company: string) => {
-    const domain = company.toLowerCase().replace(/\s+/g, '') + '.com';
-    return `https://logo.clearbit.com/${domain}`;
-  };
 
   if (loading) {
     return (
@@ -308,6 +306,22 @@ const CompanyProfile = () => {
   }
 
   const decodedCompany = decodeURIComponent(companyName || "");
+
+  // Get the best company domain from applications data
+  const getCompanyDomain = (): string | null => {
+    const domainsFromApps = applications
+      .map(a => (a as any).company_domain)
+      .filter(Boolean) as string[];
+    if (domainsFromApps.length > 0) {
+      const freq = domainsFromApps.reduce((acc, d) => { acc[d] = (acc[d] || 0) + 1; return acc; }, {} as Record<string, number>);
+      return Object.entries(freq).sort((a, b) => b[1] - a[1])[0][0];
+    }
+    return null;
+  };
+
+  const companyDomain = getCompanyDomain() || `${decodedCompany.toLowerCase().replace(/\s+/g, '')}.com`;
+
+  const getCompanyLogo = () => `https://logo.clearbit.com/${companyDomain}`;
 
   return (
     <div className="min-h-screen bg-background">
@@ -341,7 +355,7 @@ const CompanyProfile = () => {
             {!logoError ? (
               <div className="w-32 h-32 rounded-2xl overflow-hidden bg-background/80 backdrop-blur-sm flex items-center justify-center border border-border/50 shadow-2xl shadow-primary/10 transition-all duration-300 hover:scale-105 hover:shadow-primary/20">
                 <img 
-                  src={getCompanyLogo(decodedCompany)}
+                  src={getCompanyLogo()}
                   alt={decodedCompany}
                   className="w-full h-full object-contain p-6"
                   onError={() => setLogoError(true)}
@@ -354,7 +368,7 @@ const CompanyProfile = () => {
                 </span>
               </div>
             )}
-            <div className="space-y-2">
+            <div className="space-y-3">
               <h1 className="text-5xl font-bold tracking-tight">{decodedCompany}</h1>
               <p className="text-lg text-muted-foreground">
                 {metrics.totalApps} {metrics.totalApps === 1 ? 'Application' : 'Applications'} Tracked
@@ -364,6 +378,36 @@ const CompanyProfile = () => {
                   {communityStats.total_applications} total applications tracked across the community
                 </p>
               )}
+              {/* Quick Links */}
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                <a
+                  href={`https://${companyDomain}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors px-3 py-1.5 rounded-full border border-border/50 hover:border-primary/30 bg-background/50"
+                >
+                  <Globe className="h-3.5 w-3.5" />
+                  Website
+                </a>
+                <a
+                  href={`https://www.linkedin.com/company/${decodedCompany.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors px-3 py-1.5 rounded-full border border-border/50 hover:border-primary/30 bg-background/50"
+                >
+                  <Linkedin className="h-3.5 w-3.5" />
+                  LinkedIn
+                </a>
+                <a
+                  href={`https://${companyDomain}/careers`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors px-3 py-1.5 rounded-full border border-border/50 hover:border-primary/30 bg-background/50"
+                >
+                  <Briefcase className="h-3.5 w-3.5" />
+                  Careers
+                </a>
+              </div>
             </div>
           </div>
         </div>
