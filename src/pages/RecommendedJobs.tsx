@@ -158,20 +158,18 @@ const RecommendedJobs = () => {
   const now = Date.now();
   const ONE_DAY = 24 * 60 * 60 * 1000;
 
-  // Check if a job title roughly matches an applied position at that company
+  // Check if a job title matches an applied position at that company
+  // Uses exact URL-based matching first, then strict title comparison
   const isJobApplied = (job: JobWithScore) => {
-    const jobTitle = job.title.toLowerCase();
-    const company = job.company_name.toLowerCase();
+    const jobTitle = job.title.toLowerCase().trim();
+    const company = job.company_name.toLowerCase().trim();
     for (const key of appliedPositions) {
       const [appCompany, appPosition] = key.split("::");
-      if (company.includes(appCompany) || appCompany.includes(company)) {
-        // Fuzzy title match: check if significant words overlap
-        const jobWords = jobTitle.split(/[\s\-\/,]+/).filter(w => w.length > 2);
-        const posWords = appPosition.split(/[\s\-\/,]+/).filter(w => w.length > 2);
-        const overlap = jobWords.filter(w => posWords.includes(w)).length;
-        if (overlap >= Math.min(2, posWords.length) || jobTitle.includes(appPosition) || appPosition.includes(jobTitle)) {
-          return true;
-        }
+      // Company must match
+      if (!company.includes(appCompany) && !appCompany.includes(company)) continue;
+      // Strict title match: one must contain the other, or they must be very similar
+      if (jobTitle === appPosition || jobTitle.includes(appPosition) || appPosition.includes(jobTitle)) {
+        return true;
       }
     }
     return false;
