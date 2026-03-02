@@ -56,10 +56,40 @@ Deno.serve(async (req) => {
       .replace(/,?\s*(inc\.?|llc\.?|corp\.?|ltd\.?|gmbh|s\.?a\.?|plc)$/i, "")
       .replace(/[^a-zA-Z0-9\s-]/g, "")
       .trim()
-      .toLowerCase()
-      .replace(/\s+/g, "");
-    const targetDomain = domain || `${cleanName}.com`;
-    const targetUrl = `https://${targetDomain}`;
+      .toLowerCase();
+
+    // Try hyphenated version first (e.g. "porsche-consulting.com"), then no-space version
+    const hyphenatedName = cleanName.replace(/\s+/g, "-");
+    const compactName = cleanName.replace(/\s+/g, "");
+    
+    let targetDomain = domain;
+    let targetUrl: string;
+    
+    if (targetDomain) {
+      targetUrl = `https://${targetDomain}`;
+    } else {
+      // Try hyphenated first, fallback to compact
+      const tryDomains = [hyphenatedName, compactName];
+      let foundUrl = "";
+      for (const name of tryDomains) {
+        const testUrl = `https://${name}.com`;
+        try {
+          const testResp = await fetch(testUrl, { method: "HEAD", redirect: "follow" });
+          await testResp.text();
+          if (testResp.ok || testResp.status < 500) {
+            foundUrl = testUrl;
+            targetDomain = `${name}.com`;
+            break;
+          }
+        } catch {
+          // domain doesn't resolve, try next
+        }
+      }
+      if (!foundUrl) {
+        targetDomain = `${hyphenatedName}.com`;
+      }
+      targetUrl = `https://${targetDomain}`;
+    }
 
     console.log("Scraping company info from:", targetUrl);
 
