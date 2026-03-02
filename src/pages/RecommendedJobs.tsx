@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Footer } from "@/components/Footer";
@@ -18,6 +19,7 @@ import {
   RefreshCw,
   Building2,
   TrendingUp,
+  Filter,
 } from "lucide-react";
 import qraftLogo from "@/assets/qrafts-logo.png";
 import { CheckCircle } from "lucide-react";
@@ -39,6 +41,8 @@ const RecommendedJobs = () => {
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
   const [appliedPositions, setAppliedPositions] = useState<Set<string>>(new Set());
+  const [locationFilter, setLocationFilter] = useState<string>("all");
+  const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -173,16 +177,39 @@ const RecommendedJobs = () => {
     return false;
   };
 
+  // Extract unique locations and departments for filters
+  const locations = useMemo(() => {
+    const set = new Set<string>();
+    jobs.forEach(j => { if (j.location) set.add(j.location); });
+    return [...set].sort();
+  }, [jobs]);
+
+  const departments = useMemo(() => {
+    const set = new Set<string>();
+    jobs.forEach(j => { if (j.department) set.add(j.department); });
+    return [...set].sort();
+  }, [jobs]);
+
+  // Apply filters
+  const filteredJobs = useMemo(() => {
+    return jobs.filter(j => {
+      if (locationFilter !== "all" && j.location !== locationFilter) return false;
+      if (departmentFilter !== "all" && j.department !== departmentFilter) return false;
+      return true;
+    });
+  }, [jobs, locationFilter, departmentFilter]);
+
   // Group jobs by company
   const companiesMap = new Map<string, JobWithScore[]>();
-  for (const job of jobs) {
+  for (const job of filteredJobs) {
     const existing = companiesMap.get(job.company_name) || [];
     existing.push(job);
     companiesMap.set(job.company_name, existing);
   }
 
-  const topJobs = jobs.slice(0, 20);
-  const newJobs = jobs.filter(j => (now - new Date(j.first_seen_at).getTime()) < ONE_DAY);
+  const topJobs = filteredJobs.slice(0, 20);
+  const newJobs = filteredJobs.filter(j => (now - new Date(j.first_seen_at).getTime()) < ONE_DAY);
+  const hasActiveFilters = locationFilter !== "all" || departmentFilter !== "all";
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -227,20 +254,65 @@ const RecommendedJobs = () => {
 
         {/* Summary stats */}
         {!loading && jobs.length > 0 && (
-          <div className="grid grid-cols-3 gap-3 mb-6">
-            <div className="rounded-xl border border-border/40 bg-card/50 p-4 text-center">
-              <p className="text-2xl font-bold text-primary">{jobs.length}</p>
-              <p className="text-xs text-muted-foreground">Total Matches</p>
+          <>
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              <div className="rounded-xl border border-border/40 bg-card/50 p-4 text-center">
+                <p className="text-2xl font-bold text-primary">{filteredJobs.length}</p>
+                <p className="text-xs text-muted-foreground">Total Matches</p>
+              </div>
+              <div className="rounded-xl border border-border/40 bg-card/50 p-4 text-center">
+                <p className="text-2xl font-bold text-primary">{newJobs.length}</p>
+                <p className="text-xs text-muted-foreground">New Today</p>
+              </div>
+              <div className="rounded-xl border border-border/40 bg-card/50 p-4 text-center">
+                <p className="text-2xl font-bold">{companiesMap.size}</p>
+                <p className="text-xs text-muted-foreground">Companies</p>
+              </div>
             </div>
-            <div className="rounded-xl border border-border/40 bg-card/50 p-4 text-center">
-              <p className="text-2xl font-bold text-green-600 dark:text-green-400">{newJobs.length}</p>
-              <p className="text-xs text-muted-foreground">New Today</p>
-            </div>
-            <div className="rounded-xl border border-border/40 bg-card/50 p-4 text-center">
-              <p className="text-2xl font-bold">{companiesMap.size}</p>
-              <p className="text-xs text-muted-foreground">Companies</p>
-            </div>
-          </div>
+
+            {/* Filters */}
+            {(locations.length > 0 || departments.length > 0) && (
+              <div className="flex flex-wrap items-center gap-2 mb-6">
+                <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
+                {locations.length > 0 && (
+                  <Select value={locationFilter} onValueChange={setLocationFilter}>
+                    <SelectTrigger className="w-[160px] h-8 text-xs">
+                      <SelectValue placeholder="Location" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Locations</SelectItem>
+                      {locations.map(loc => (
+                        <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+                {departments.length > 0 && (
+                  <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+                    <SelectTrigger className="w-[160px] h-8 text-xs">
+                      <SelectValue placeholder="Department" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Departments</SelectItem>
+                      {departments.map(dep => (
+                        <SelectItem key={dep} value={dep}>{dep}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+                {hasActiveFilters && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 text-xs text-muted-foreground"
+                    onClick={() => { setLocationFilter("all"); setDepartmentFilter("all"); }}
+                  >
+                    Clear filters
+                  </Button>
+                )}
+              </div>
+            )}
+          </>
         )}
 
         {loading ? (
@@ -292,9 +364,9 @@ const RecommendedJobs = () => {
                   return <JobRow key={job.id} job={job} isNew={isNew} isApplied={isJobApplied(job)} />;
                 })}
               </div>
-              {jobs.length > 20 && (
+              {filteredJobs.length > 20 && (
                 <p className="text-xs text-muted-foreground text-center mt-3">
-                  Showing top 20 of {jobs.length} matches. Visit individual company profiles for full listings.
+                  Showing top 20 of {filteredJobs.length} matches. Visit individual company profiles for full listings.
                 </p>
               )}
             </div>
