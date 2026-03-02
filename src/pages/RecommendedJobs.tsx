@@ -79,12 +79,25 @@ const RecommendedJobs = () => {
       setAppliedPositions(appliedSet);
 
       // Get all match scores for this user with job details
-      const { data: scores, error } = await supabase
-        .from("job_match_scores")
-        .select("match_score, match_reasons, job_opening_id")
-        .eq("user_id", user.id)
-        .order("match_score", { ascending: false })
-        .limit(500);
+      // Fetch all match scores using pagination to avoid the 1000-row default limit
+      const PAGE_SIZE = 1000;
+      let allScores: { match_score: number; match_reasons: string[] | null; job_opening_id: string }[] = [];
+      let page = 0;
+      while (true) {
+        const { data: pageScores, error: pageError } = await supabase
+          .from("job_match_scores")
+          .select("match_score, match_reasons, job_opening_id")
+          .eq("user_id", user.id)
+          .order("match_score", { ascending: false })
+          .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+        if (pageError) throw pageError;
+        if (!pageScores || pageScores.length === 0) break;
+        allScores.push(...pageScores);
+        if (pageScores.length < PAGE_SIZE) break;
+        page++;
+      }
+      const scores = allScores;
+      const error = null;
 
       if (error) throw error;
       if (!scores || scores.length === 0) {
