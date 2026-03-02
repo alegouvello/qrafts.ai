@@ -593,17 +593,17 @@ const CompanyProfile = () => {
                 </span>
                 <span className="text-border">|</span>
                 <div className="flex items-center gap-1.5">
-                  <a href={`https://${companyDomain}`} target="_blank" rel="noopener noreferrer"
+                  <a href={companyProfileData?.website_url || `https://${companyDomain}`} target="_blank" rel="noopener noreferrer"
                     className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-0.5">
                     <Globe className="h-3 w-3" /> Website
                   </a>
                   <span className="text-border">·</span>
-                  <a href={`https://www.linkedin.com/company/${decodedCompany.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`} target="_blank" rel="noopener noreferrer"
+                  <a href={companyProfileData?.linkedin_url || `https://www.linkedin.com/search/results/companies/?keywords=${encodeURIComponent(decodedCompany)}`} target="_blank" rel="noopener noreferrer"
                     className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-0.5">
                     <Linkedin className="h-3 w-3" /> LinkedIn
                   </a>
                   <span className="text-border">·</span>
-                  <a href={`https://${companyDomain}/careers`} target="_blank" rel="noopener noreferrer"
+                  <a href={companyProfileData?.careers_url || `https://www.google.com/search?q=${encodeURIComponent(decodedCompany + ' careers jobs')}`} target="_blank" rel="noopener noreferrer"
                     className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-0.5">
                     <Briefcase className="h-3 w-3" /> Careers
                   </a>
