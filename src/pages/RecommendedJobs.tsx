@@ -274,47 +274,152 @@ const RecommendedJobs = () => {
     return false;
   };
 
-  // Normalize a raw location string to a canonical city name
-  const normalizeLocation = (raw: string): string => {
+  // Normalize a single city token to a canonical name
+  const normalizeCityToken = (raw: string): string => {
     if (!raw) return "Other";
     let s = raw.trim();
     // Remove parenthetical qualifiers like (onsite), (remote), (hybrid)
     s = s.replace(/\s*\(.*?\)\s*/g, "").trim();
-    // Common aliases
+    if (!s) return "Other";
+
+    const lower = s.toLowerCase().replace(/['']/g, "'");
+
+    // Extensive alias map
     const aliases: Record<string, string> = {
-      "nyc": "New York City",
-      "ny": "New York City",
-      "new york": "New York City",
-      "new york city": "New York City",
-      "new york city, ny": "New York City",
+      // New York
+      "nyc": "New York",
+      "ny": "New York",
+      "new york": "New York",
+      "new york city": "New York",
+      "new york city, ny": "New York",
+      "new york, ny": "New York",
+      "manhattan": "New York",
+      "brooklyn": "New York",
+      // San Francisco
       "sf": "San Francisco",
+      "san francisco": "San Francisco",
       "san francisco, ca": "San Francisco",
+      "san francisco bay area": "San Francisco",
+      "bay area": "San Francisco",
+      // Los Angeles
       "la": "Los Angeles",
+      "los angeles": "Los Angeles",
       "los angeles, ca": "Los Angeles",
+      // Seattle
+      "seattle": "Seattle",
       "seattle, wa": "Seattle",
+      "seattle, washington": "Seattle",
+      // Chicago
+      "chicago": "Chicago",
       "chicago, il": "Chicago",
+      "chicago, illinois": "Chicago",
+      // Austin
+      "austin": "Austin",
       "austin, tx": "Austin",
+      "austin, texas": "Austin",
+      // Boston
+      "boston": "Boston",
       "boston, ma": "Boston",
+      "boston, massachusetts": "Boston",
+      // Denver
+      "denver": "Denver",
       "denver, co": "Denver",
+      "denver, colorado": "Denver",
+      // DC
       "dc": "Washington DC",
+      "washington dc": "Washington DC",
       "washington, dc": "Washington DC",
+      "washington d.c.": "Washington DC",
+      // London
+      "london": "London",
       "london, uk": "London",
       "london, england": "London",
+      "london, united kingdom": "London",
+      // Dublin
+      "dublin": "Dublin",
+      "dublin, ireland": "Dublin",
+      // San Diego
+      "san diego": "San Diego",
+      "san diego, ca": "San Diego",
+      // Miami
+      "miami": "Miami",
+      "miami, fl": "Miami",
+      "miami, florida": "Miami",
+      // Atlanta
+      "atlanta": "Atlanta",
+      "atlanta, ga": "Atlanta",
+      // Dallas
+      "dallas": "Dallas",
+      "dallas, tx": "Dallas",
+      // Portland
+      "portland": "Portland",
+      "portland, or": "Portland",
+      // São Paulo
+      "sao paulo": "São Paulo",
+      "são paulo": "São Paulo",
+      "sao paulo, brazil": "São Paulo",
+      "são paulo, brazil": "São Paulo",
+      // Remote
+      "remote": "Remote",
+      "anywhere": "Remote",
+      "worldwide": "Remote",
+      "global": "Remote",
+      // Hybrid
+      "hybrid": "Hybrid",
     };
-    const lower = s.toLowerCase();
+
     if (aliases[lower]) return aliases[lower];
-    // Strip state suffix like ", CA" / ", NY" for US cities
-    const stateMatch = s.match(/^(.+),\s*([A-Z]{2})$/);
-    if (stateMatch) return stateMatch[1].trim();
+
+    // Strip US state suffix ", California" / ", CA" etc.
+    const stateFullMatch = s.match(/^(.+),\s*(Alabama|Alaska|Arizona|Arkansas|California|Colorado|Connecticut|Delaware|Florida|Georgia|Hawaii|Idaho|Illinois|Indiana|Iowa|Kansas|Kentucky|Louisiana|Maine|Maryland|Massachusetts|Michigan|Minnesota|Mississippi|Missouri|Montana|Nebraska|Nevada|New Hampshire|New Jersey|New Mexico|New York|North Carolina|North Dakota|Ohio|Oklahoma|Oregon|Pennsylvania|Rhode Island|South Carolina|South Dakota|Tennessee|Texas|Utah|Vermont|Virginia|Washington|West Virginia|Wisconsin|Wyoming)$/i);
+    if (stateFullMatch) {
+      const city = stateFullMatch[1].trim();
+      // Re-check aliases with just the city
+      const cityLower = city.toLowerCase();
+      return aliases[cityLower] || city;
+    }
+    const stateAbbrMatch = s.match(/^(.+),\s*([A-Z]{2})$/);
+    if (stateAbbrMatch) {
+      const city = stateAbbrMatch[1].trim();
+      const cityLower = city.toLowerCase();
+      return aliases[cityLower] || city;
+    }
+    // Strip country suffix like ", Brazil", ", UK", etc.
+    const countryMatch = s.match(/^(.+),\s*\w[\w\s]*$/);
+    if (countryMatch) {
+      const city = countryMatch[1].trim();
+      const cityLower = city.toLowerCase();
+      if (aliases[cityLower]) return aliases[cityLower];
+    }
     return s;
   };
 
   // Split multi-location strings and normalize each
   const getJobLocations = (loc: string | null): string[] => {
     if (!loc) return ["Other"];
-    // Split on ; or |
-    const parts = loc.split(/[;|]/).map(p => p.trim()).filter(Boolean);
-    const normalized = new Set(parts.map(normalizeLocation));
+    // First split on ; | and "or"
+    const parts = loc
+      .split(/[;|]/)
+      .flatMap(p => p.split(/\bor\b/i))
+      .flatMap(p => {
+        // Also split on comma BUT only if it separates cities (not "City, State")
+        // Heuristic: if after comma there's a 2-letter state code or known state name, don't split
+        const trimmed = p.trim();
+        if (!trimmed) return [];
+        // Check if it's "City, State" pattern — don't split those
+        if (/^[^,]+,\s*([A-Z]{2}|[A-Z][a-z]+(\s[A-Z][a-z]+)?)$/.test(trimmed)) {
+          return [trimmed];
+        }
+        // If there are multiple commas, split on all of them
+        if ((trimmed.match(/,/g) || []).length > 1) {
+          return trimmed.split(",").map(s => s.trim()).filter(Boolean);
+        }
+        return [trimmed];
+      })
+      .filter(Boolean);
+    const normalized = new Set(parts.map(normalizeCityToken));
+    normalized.delete("Other");
+    if (normalized.size === 0) return ["Other"];
     return [...normalized];
   };
 
