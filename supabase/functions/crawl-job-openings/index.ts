@@ -10,7 +10,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { companyName, careersUrl, userResumeText, userId } = await req.json();
+    const { companyName, careersUrl, userResumeText, userId, userLocation } = await req.json();
 
     if (!companyName) {
       return new Response(JSON.stringify({ error: "companyName is required" }), {
@@ -61,8 +61,7 @@ serve(async (req) => {
 
     console.log(`Crawling careers for ${companyName}: ${targetUrl}`);
 
-    // Strategy 1: Use Firecrawl search to find real job listings
-    // This is more reliable than scraping a JS-heavy careers page
+    // ─── Strategy 1: Firecrawl search for job listings ───
     console.log("Strategy 1: Searching for job listings via Firecrawl search...");
     const searchResponse = await fetch("https://api.firecrawl.dev/v1/search", {
       method: "POST",
@@ -90,7 +89,7 @@ serve(async (req) => {
       console.log(`Search returned ${results.length} results, ${allMarkdown.length} chars`);
     }
 
-    // Strategy 2: Also try scraping the careers page directly with waitFor for JS
+    // ─── Strategy 2: Scrape careers page directly ───
     console.log("Strategy 2: Scraping careers page directly...");
     const scrapeResponse = await fetch("https://api.firecrawl.dev/v1/scrape", {
       method: "POST",
@@ -102,7 +101,7 @@ serve(async (req) => {
         url: targetUrl,
         formats: ["markdown", "links"],
         onlyMainContent: true,
-        waitFor: 3000, // Wait for JS to render
+        waitFor: 3000,
       }),
     });
 
@@ -115,7 +114,7 @@ serve(async (req) => {
       console.log(`Scrape returned ${scrapedMarkdown.length} chars, ${scrapedLinks.length} links`);
     }
 
-    // Strategy 3: Try mapping the careers subdomain to find job URLs
+    // ─── Strategy 3: Map careers URLs ───
     console.log("Strategy 3: Mapping careers URLs...");
     const mapResponse = await fetch("https://api.firecrawl.dev/v1/map", {
       method: "POST",
@@ -131,15 +130,59 @@ serve(async (req) => {
       }),
     });
 
+    let jobDetailLinks: string[] = [];
     if (mapResponse.ok) {
       const mapData = await mapResponse.json();
       const mappedLinks = mapData.links || mapData.data?.links || [];
-      // Filter for job-like URLs
       const jobLinks = mappedLinks.filter((l: string) =>
         /job|position|opening|career|role|apply/i.test(l) && !/blog|news|about|privacy|terms/i.test(l)
       );
       allLinks = [...allLinks, ...jobLinks];
-      console.log(`Map returned ${mappedLinks.length} total, ${jobLinks.length} job-like URLs`);
+      // Identify individual job detail pages (URLs with IDs/slugs at the end)
+      jobDetailLinks = jobLinks.filter((l: string) =>
+        /\/[a-f0-9-]{8,}|\/\d{4,}|\/[a-z]+-[a-z]+-[a-z]+/i.test(l)
+      );
+      console.log(`Map returned ${mappedLinks.length} total, ${jobLinks.length} job-like, ${jobDetailLinks.length} detail pages`);
+    }
+
+    // ─── Strategy 4: Deep crawl individual job pages for richer data ───
+    // Scrape up to 15 individual job detail pages to get titles, descriptions, locations
+    const detailPages = [...new Set(jobDetailLinks)].slice(0, 15);
+    if (detailPages.length > 0) {
+      console.log(`Strategy 4: Deep-scraping ${detailPages.length} individual job pages...`);
+      const batchPromises = detailPages.map(async (url) => {
+        try {
+          const resp = await fetch("https://api.firecrawl.dev/v1/scrape", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              url,
+              formats: ["markdown"],
+              onlyMainContent: true,
+              waitFor: 2000,
+            }),
+          });
+          if (resp.ok) {
+            const d = await resp.json();
+            const md = d.data?.markdown || d.markdown || "";
+            return { url, markdown: md.slice(0, 3000) }; // cap per page
+          }
+        } catch (e) {
+          console.error(`Failed to scrape ${url}:`, e);
+        }
+        return null;
+      });
+
+      const detailResults = (await Promise.all(batchPromises)).filter(Boolean);
+      for (const r of detailResults) {
+        if (r) {
+          allMarkdown += `\n\n---\nINDIVIDUAL JOB PAGE (${r.url}):\n${r.markdown}`;
+        }
+      }
+      console.log(`Deep-scraped ${detailResults.length} job detail pages`);
     }
 
     // Deduplicate links
@@ -152,19 +195,23 @@ serve(async (req) => {
       });
     }
 
-    // Step 3: Use AI to extract job listings
-    const extractPrompt = `Extract ALL job openings/positions from this content about ${companyName}. 
-Look for job titles, roles, positions mentioned anywhere in the text.
-For each job, extract:
-- title: the exact job title
-- url: the application/detail URL if available (match from the links list)
-- location: where the job is located (remote, city, etc.)
-- department: the team or department if mentioned
+    // ─── Step 3: AI extraction - individual roles, not departments ───
+    const extractPrompt = `Extract ALL individual job openings/positions from this content about ${companyName}.
 
-Be thorough - extract EVERY job title you can find, even if partially mentioned.
+IMPORTANT RULES:
+- Extract INDIVIDUAL JOB ROLES, not department/team names.
+- "Sales" or "Engineering" alone is a DEPARTMENT, not a job. Look for specific titles like "Account Executive", "Software Engineer", "Sales Manager", etc.
+- If you see a department heading (e.g. "Business Development") with individual roles listed under it, extract EACH individual role separately with the department noted.
+- If a department page was scraped, extract each specific position from it.
+- For each job, extract:
+  - title: the specific job title (e.g. "Financial Partnerships Manager, International" NOT "Business Development")
+  - url: the application/detail URL if available
+  - location: where the job is located (city, state, remote, etc.)
+  - department: the team or department
+  - description: a 1-2 sentence summary of the role if available
 
-Content (from multiple sources):
-${allMarkdown.slice(0, 15000)}
+Content (from multiple sources including individual job pages):
+${allMarkdown.slice(0, 25000)}
 
 Available URLs found:
 ${allLinks.slice(0, 100).join("\n")}
@@ -180,7 +227,7 @@ Return ONLY a valid JSON array of objects. If no jobs found, return [].`;
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You extract job listings from careers page content. Always respond with valid JSON array only, no markdown fences." },
+          { role: "system", content: "You extract individual job listings from careers page content. Always respond with valid JSON array only, no markdown fences. Extract specific role titles, NOT department/team names." },
           { role: "user", content: extractPrompt },
         ],
       }),
@@ -208,9 +255,9 @@ Return ONLY a valid JSON array of objects. If no jobs found, return [].`;
       jobs = [];
     }
 
-    console.log(`Found ${jobs.length} jobs for ${companyName}`);
+    console.log(`Found ${jobs.length} individual jobs for ${companyName}`);
 
-    // Step 4: Upsert jobs into job_openings
+    // ─── Step 4: Upsert jobs into job_openings ───
     const now = new Date().toISOString();
     for (const job of jobs) {
       if (!job.title) continue;
@@ -239,16 +286,30 @@ Return ONLY a valid JSON array of objects. If no jobs found, return [].`;
       .eq("company_name", companyName)
       .lt("last_seen_at", now);
 
-    // Step 5: If user resume provided, score jobs
+    // ─── Step 5: Score jobs with resume AND location preference ───
     let scoredJobs: any[] = [];
     if (userResumeText && userId && jobs.length > 0) {
-      const scorePrompt = `Given this resume and list of job openings, score each job on a 0-100 scale for how well the candidate matches. Consider skills, experience level, and role alignment.
+      const locationContext = userLocation
+        ? `\n\nIMPORTANT - LOCATION PREFERENCE: The candidate is based in "${userLocation}". Jobs in or near this location should receive a significant boost (+10-15 points). Remote jobs should also get a small boost (+5 points). Jobs far from this location should not be penalized but should not get the location bonus.`
+        : "";
+
+      const scorePrompt = `Given this resume and list of job openings, score each job on a 0-100 scale for how well the candidate matches. Consider:
+1. Skills and experience alignment with the SPECIFIC role (not just department)
+2. Experience level match
+3. Role responsibilities fit
+${locationContext}
 
 Resume:
 ${userResumeText.slice(0, 3000)}
 
 Jobs:
-${JSON.stringify(jobs.map((j: any, i: number) => ({ index: i, title: j.title, location: j.location, department: j.department })))}
+${JSON.stringify(jobs.map((j: any, i: number) => ({
+  index: i,
+  title: j.title,
+  location: j.location,
+  department: j.department,
+  description: j.description || null,
+})))}
 
 Return a JSON array with objects: { index: number, score: number, reasons: string[] }
 Only return the JSON array, no markdown.`;
@@ -262,7 +323,7 @@ Only return the JSON array, no markdown.`;
         body: JSON.stringify({
           model: "google/gemini-2.5-flash",
           messages: [
-            { role: "system", content: "You score job-resume match quality. Respond with JSON array only." },
+            { role: "system", content: "You score job-resume match quality considering role specifics and location preferences. Respond with JSON array only." },
             { role: "user", content: scorePrompt },
           ],
         }),
@@ -284,9 +345,7 @@ Only return the JSON array, no markdown.`;
             for (const score of scores) {
               const job = jobs[score.index];
               if (!job) continue;
-              const dbJob = dbJobs?.find(
-                (dj: any) => dj.title === job.title
-              );
+              const dbJob = dbJobs?.find((dj: any) => dj.title === job.title);
               if (!dbJob) continue;
 
               await supabase.from("job_match_scores").upsert(
