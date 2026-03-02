@@ -64,6 +64,7 @@ const RecommendedJobs = () => {
   const [scanResults, setScanResults] = useState<ScanResult[]>([]);
   const [showScanResults, setShowScanResults] = useState(false);
   const [totalActiveJobs, setTotalActiveJobs] = useState(0);
+  const [totalCompanies, setTotalCompanies] = useState(0);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -80,12 +81,23 @@ const RecommendedJobs = () => {
   const fetchRecommendedJobs = async () => {
     setLoading(true);
     try {
-      // Fetch total active jobs count for stats
+      // Fetch total active jobs count and unique companies for stats
       const { count } = await supabase
         .from("job_openings")
         .select("*", { count: "exact", head: true })
         .eq("is_active", true);
       setTotalActiveJobs(count || 0);
+
+      // Get distinct company count from all active job openings
+      const { data: companyRows } = await supabase
+        .from("job_openings")
+        .select("company_name")
+        .eq("is_active", true);
+      if (companyRows) {
+        const uniqueCompanies = new Set(companyRows.map(r => r.company_name));
+        setTotalCompanies(uniqueCompanies.size);
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
@@ -646,20 +658,23 @@ const RecommendedJobs = () => {
           <>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
               <div className="rounded-xl border border-border/40 bg-card/50 p-4 text-center">
-                <p className="text-2xl font-bold text-primary">{filteredJobs.length}</p>
+                <p className="text-2xl font-bold text-primary">{jobs.length}</p>
                 <p className="text-xs text-muted-foreground">Scored Matches</p>
-              </div>
-              <div className="rounded-xl border border-border/40 bg-card/50 p-4 text-center">
-                <p className="text-2xl font-bold text-primary">{newJobs.length}</p>
-                <p className="text-xs text-muted-foreground">New Today</p>
               </div>
               <div className="rounded-xl border border-border/40 bg-card/50 p-4 text-center">
                 <p className="text-2xl font-bold">{totalActiveJobs}</p>
                 <p className="text-xs text-muted-foreground">Total Openings</p>
+                {totalActiveJobs > jobs.length && (
+                  <p className="text-[10px] text-warning mt-0.5">{totalActiveJobs - jobs.length} unscored</p>
+                )}
               </div>
               <div className="rounded-xl border border-border/40 bg-card/50 p-4 text-center">
-                <p className="text-2xl font-bold">{companiesMap.size}</p>
+                <p className="text-2xl font-bold">{totalCompanies}</p>
                 <p className="text-xs text-muted-foreground">Companies</p>
+              </div>
+              <div className="rounded-xl border border-border/40 bg-card/50 p-4 text-center">
+                <p className="text-2xl font-bold text-primary">{newJobs.length}</p>
+                <p className="text-xs text-muted-foreground">New Today</p>
               </div>
             </div>
 
