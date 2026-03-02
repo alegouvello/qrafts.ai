@@ -54,6 +54,8 @@ const RecommendedJobs = () => {
   const [jobs, setJobs] = useState<JobWithScore[]>([]);
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
+  const [scoring, setScoring] = useState(false);
+  const [scoreProgress, setScoreProgress] = useState<{ scored: number; total: number } | null>(null);
   const [scanProgress, setScanProgress] = useState<{ completed: number; total: number; currentCompany: string } | null>(null);
   const [appliedPositions, setAppliedPositions] = useState<Set<string>>(new Set());
   const [locationFilter, setLocationFilter] = useState<string>("all");
@@ -61,6 +63,7 @@ const RecommendedJobs = () => {
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const [scanResults, setScanResults] = useState<ScanResult[]>([]);
   const [showScanResults, setShowScanResults] = useState(false);
+  const [totalActiveJobs, setTotalActiveJobs] = useState(0);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -77,6 +80,12 @@ const RecommendedJobs = () => {
   const fetchRecommendedJobs = async () => {
     setLoading(true);
     try {
+      // Fetch total active jobs count for stats
+      const { count } = await supabase
+        .from("job_openings")
+        .select("*", { count: "exact", head: true })
+        .eq("is_active", true);
+      setTotalActiveJobs(count || 0);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
@@ -246,8 +255,11 @@ const RecommendedJobs = () => {
 
       toast({
         title: "Scan Complete",
-        description: `Scanned ${finalData.scanned || 0} companies, found ${finalData.totalJobs || 0} total openings${failedCount > 0 ? ` (${failedCount} had issues)` : ""}`,
+        description: `Scanned ${finalData.scanned || 0} companies, found ${finalData.totalJobs || 0} total openings${failedCount > 0 ? ` (${failedCount} had issues)` : ""}. Now scoring matches...`,
       });
+
+      // Automatically score unscored jobs after scan
+      await handleScoreUnscored(session.access_token);
 
       await fetchRecommendedJobs();
     } catch (err) {
@@ -256,6 +268,76 @@ const RecommendedJobs = () => {
     } finally {
       setScanning(false);
       setScanProgress(null);
+    }
+  };
+
+  const handleScoreUnscored = async (accessToken?: string) => {
+    setScoring(true);
+    setScoreProgress(null);
+    try {
+      let token = accessToken;
+      if (!token) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) throw new Error("Not authenticated");
+        token = session.access_token;
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/score-unscored-jobs`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+            "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.body) {
+        // Non-streaming response (e.g. "all scored already")
+        const data = await response.json();
+        toast({ title: "Scoring Complete", description: data.message || `Scored ${data.scored || 0} jobs` });
+        setScoring(false);
+        return;
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          try {
+            const event = JSON.parse(line);
+            if (event.type === "progress") {
+              setScoreProgress({ scored: event.scored, total: event.total });
+            } else if (event.type === "complete") {
+              toast({
+                title: "Scoring Complete",
+                description: `Scored ${event.scored} out of ${event.total} unscored jobs`,
+              });
+            }
+          } catch {}
+        }
+      }
+
+      await fetchRecommendedJobs();
+    } catch (err) {
+      console.error("Error scoring:", err);
+      toast({ title: "Error", description: "Failed to score jobs", variant: "destructive" });
+    } finally {
+      setScoring(false);
+      setScoreProgress(null);
     }
   };
 
@@ -507,14 +589,16 @@ const RecommendedJobs = () => {
             </div>
             <Button
               onClick={handleScanAll}
-              disabled={scanning}
+              disabled={scanning || scoring}
               className="rounded-full shadow-lg shadow-primary/20"
             >
-              {scanning ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+              {scanning ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : scoring ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
               {scanning
                 ? scanProgress
                   ? `${scanProgress.completed}/${scanProgress.total}`
                   : "Starting…"
+                : scoring
+                ? "Scoring..."
                 : "Scan All Companies"}
             </Button>
           </div>
@@ -560,20 +644,51 @@ const RecommendedJobs = () => {
         {/* Summary stats */}
         {!loading && jobs.length > 0 && (
           <>
-            <div className="grid grid-cols-3 gap-3 mb-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
               <div className="rounded-xl border border-border/40 bg-card/50 p-4 text-center">
                 <p className="text-2xl font-bold text-primary">{filteredJobs.length}</p>
-                <p className="text-xs text-muted-foreground">Total Matches</p>
+                <p className="text-xs text-muted-foreground">Scored Matches</p>
               </div>
               <div className="rounded-xl border border-border/40 bg-card/50 p-4 text-center">
                 <p className="text-2xl font-bold text-primary">{newJobs.length}</p>
                 <p className="text-xs text-muted-foreground">New Today</p>
               </div>
               <div className="rounded-xl border border-border/40 bg-card/50 p-4 text-center">
+                <p className="text-2xl font-bold">{totalActiveJobs}</p>
+                <p className="text-xs text-muted-foreground">Total Openings</p>
+              </div>
+              <div className="rounded-xl border border-border/40 bg-card/50 p-4 text-center">
                 <p className="text-2xl font-bold">{companiesMap.size}</p>
                 <p className="text-xs text-muted-foreground">Companies</p>
               </div>
             </div>
+
+            {/* Unscored jobs banner */}
+            {totalActiveJobs > jobs.length && !scoring && (
+              <div className="flex items-center justify-between gap-3 mb-6 p-3 rounded-lg border border-warning/30 bg-warning/5">
+                <div className="flex items-center gap-2 text-sm">
+                  <AlertTriangle className="h-4 w-4 text-warning shrink-0" />
+                  <span className="text-muted-foreground">
+                    <span className="font-medium text-foreground">{totalActiveJobs - jobs.length}</span> jobs haven't been scored against your resume yet
+                  </span>
+                </div>
+                <Button size="sm" variant="outline" className="shrink-0 h-7 text-xs" onClick={() => handleScoreUnscored()}>
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  Score Now
+                </Button>
+              </div>
+            )}
+
+            {/* Scoring progress */}
+            {scoring && scoreProgress && (
+              <div className="mb-6 p-3 rounded-lg border border-primary/30 bg-primary/5">
+                <div className="flex items-center gap-2 text-sm mb-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  <span>Scoring jobs... {scoreProgress.scored}/{scoreProgress.total}</span>
+                </div>
+                <Progress value={(scoreProgress.scored / scoreProgress.total) * 100} className="h-1.5" />
+              </div>
+            )}
 
             {/* Filters */}
             {(locationGroups.length > 0 || departments.length > 0) && (

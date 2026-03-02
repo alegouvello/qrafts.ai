@@ -74,3 +74,6 @@ verify_jwt = true
 
 [functions.daily-scan-jobs]
 verify_jwt = false
+
+[functions.score-unscored-jobs]
+verify_jwt = false
