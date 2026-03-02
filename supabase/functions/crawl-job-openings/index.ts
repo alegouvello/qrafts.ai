@@ -70,7 +70,7 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        query: `${companyName} open jobs careers current openings`,
+        query: `${companyName} individual job openings hiring positions apply now`,
         limit: 5,
         scrapeOptions: { formats: ["markdown"] },
       }),
@@ -112,6 +112,47 @@ serve(async (req) => {
       allMarkdown += "\n\n---\nDIRECT CAREERS PAGE:\n" + scrapedMarkdown;
       allLinks = [...allLinks, ...scrapedLinks];
       console.log(`Scrape returned ${scrapedMarkdown.length} chars, ${scrapedLinks.length} links`);
+    }
+
+    // ─── Strategy 2.5: Try known job board platforms ───
+    const companySlug = companyName.toLowerCase().replace(/\s+/g, "");
+    const jobBoardUrls = [
+      `https://boards.greenhouse.io/${companySlug}`,
+      `https://jobs.lever.co/${companySlug}`,
+      `https://jobs.ashbyhq.com/${companySlug}`,
+      `https://${companySlug}.jobs.personio.com`,
+    ];
+
+    for (const boardUrl of jobBoardUrls) {
+      try {
+        console.log(`Strategy 2.5: Trying job board: ${boardUrl}`);
+        const boardResp = await fetch("https://api.firecrawl.dev/v1/scrape", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            url: boardUrl,
+            formats: ["markdown", "links"],
+            onlyMainContent: true,
+            waitFor: 2000,
+          }),
+        });
+        if (boardResp.ok) {
+          const boardData = await boardResp.json();
+          const boardMd = boardData.data?.markdown || boardData.markdown || "";
+          const boardLinks = boardData.data?.links || boardData.links || [];
+          if (boardMd.length > 200) {
+            allMarkdown += `\n\n---\nJOB BOARD (${boardUrl}):\n${boardMd}`;
+            allLinks = [...allLinks, ...boardLinks];
+            console.log(`Job board ${boardUrl} returned ${boardMd.length} chars, ${boardLinks.length} links`);
+            break; // Found a working job board, no need to try others
+          }
+        }
+      } catch (e) {
+        // Job board URL didn't work, try next
+      }
     }
 
     // ─── Strategy 3: Map careers URLs ───
@@ -198,29 +239,28 @@ serve(async (req) => {
     // ─── Step 3: AI extraction - individual roles, not departments ───
     const extractPrompt = `Extract ALL individual job openings/positions from this content about ${companyName}.
 
-CRITICAL RULES - READ CAREFULLY:
-- Extract ONLY specific, real job titles that a person would apply to (e.g. "Senior Software Engineer", "Financial Partnerships Manager", "Marketing Analyst").
-- DO NOT extract any of the following — these are NOT jobs:
-  - Career program categories (e.g. "Experienced Professionals", "Students", "Young Professionals", "Internships")
-  - Department or team names (e.g. "Sales", "Engineering", "Corporate Functions", "Business Development", "Consulting")
-  - Generic labels (e.g. "Consultant", "Experienced Hire", "New Graduate")
-  - Page section headings or navigation items
-- If a department heading has individual roles listed under it, extract EACH individual role with the department noted.
-- If the content only shows departments/categories with no specific role titles underneath, return an EMPTY array [].
-- For each job, extract:
-  - title: the specific job title
-  - url: the application/detail URL if available
-  - location: where the job is located (city, state, remote, etc.)
-  - department: the team or department
-  - description: a 1-2 sentence summary of the role if available
+RULES:
+1. Extract SPECIFIC job titles that a real person would apply to. Good examples: "Senior Software Engineer", "Account Executive, Mid-Market", "Financial Partnerships Manager, International", "Staff Product Designer".
+2. SKIP these — they are NOT job titles:
+   - Career program categories: "Experienced Professionals", "Students", "Young Professionals"
+   - Standalone department/team names used as section headers: "Sales", "Engineering", "Business Development"
+   - Generic one-word labels: "Consulting", "Corporate Functions"
+3. However, if a title looks like a real role even if short (e.g. "Data Analyst", "Product Manager", "Solutions Architect"), DO include it.
+4. If content shows departments with individual roles underneath, extract each individual role with its department.
+5. For each job, extract:
+   - title: the specific job title
+   - url: the application/detail URL if available (match from links list)
+   - location: city, state, country, or "Remote" if mentioned
+   - department: the team or department if known
+   - description: a 1-2 sentence summary if available from the content
 
-Content (from multiple sources including individual job pages):
-${allMarkdown.slice(0, 25000)}
+Content from multiple sources:
+${allMarkdown.slice(0, 40000)}
 
-Available URLs found:
-${allLinks.slice(0, 100).join("\n")}
+Available URLs:
+${allLinks.slice(0, 150).join("\n")}
 
-Return ONLY a valid JSON array of objects. If no jobs found, return [].`;
+Return ONLY a valid JSON array. If genuinely no specific job titles found, return [].`;
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
