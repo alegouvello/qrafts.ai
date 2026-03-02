@@ -59,3 +59,12 @@ verify_jwt = true
 
 [functions.submit-feedback]
 verify_jwt = false
+
+[functions.crawl-job-openings]
+verify_jwt = true
+
+[functions.send-job-alerts]
+verify_jwt = false
+
+[functions.fetch-company-info]
+verify_jwt = true
