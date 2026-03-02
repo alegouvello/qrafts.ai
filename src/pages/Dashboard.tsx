@@ -296,6 +296,9 @@ const Dashboard = () => {
             actualResponseDays = daysDiff;
           }
 
+          const everInterviewed = app.status === "interview" || 
+            (statusHistory || []).some((h: any) => h.status === "interview");
+
           return {
             id: app.id,
             company: app.company,
@@ -307,6 +310,7 @@ const Dashboard = () => {
             answersCompleted: answerCount,
             actualResponseDays,
             companyDomain: app.company_domain,
+            everInterviewed,
           };
         })
       );
@@ -500,6 +504,7 @@ const Dashboard = () => {
     newToday: applications.filter((a) => a.appliedDate === today).length,
     pending: applications.filter((a) => a.status === "pending").length,
     interviews: applications.filter((a) => a.status === "interview").length,
+    totalEverInterviewed: applications.filter((a: any) => a.everInterviewed).length,
     responseRate: applications.length > 0 
       ? Math.round(((applications.filter((a) => a.status !== "pending").length) / applications.length) * 100)
       : 0,

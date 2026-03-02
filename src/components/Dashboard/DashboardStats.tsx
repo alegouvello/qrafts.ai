@@ -7,6 +7,7 @@ interface DashboardStatsProps {
     newToday: number;
     pending: number;
     interviews: number;
+    totalEverInterviewed: number;
     responseRate: number;
   };
 }
@@ -37,7 +38,8 @@ export const DashboardStats = ({ stats }: DashboardStatsProps) => {
     {
       icon: Users,
       label: "Interviews",
-      value: stats.interviews,
+      value: stats.totalEverInterviewed,
+      sub: stats.interviews > 0 ? `${stats.interviews} active` : undefined,
       color: "text-success",
       bgColor: "bg-success/10",
     },
@@ -68,6 +70,9 @@ export const DashboardStats = ({ stats }: DashboardStatsProps) => {
               <div>
                 <p className="text-xs sm:text-sm text-muted-foreground">{stat.label}</p>
                 <p className="text-xl sm:text-2xl font-bold">{stat.value}</p>
+                {stat.sub && (
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground">{stat.sub}</p>
+                )}
               </div>
             </div>
           </Card>
