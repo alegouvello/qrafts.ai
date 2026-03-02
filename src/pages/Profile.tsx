@@ -210,7 +210,10 @@ export default function Profile() {
           // Convert plain text bullet points to HTML if needed for experience
           if (parsed.experience) {
             parsed.experience = parsed.experience.map((exp: any) => {
-              if (exp.description && !exp.description.includes('<')) {
+              // Handle description being an array (from AI merge) instead of a string
+              if (Array.isArray(exp.description)) {
+                exp.description = '<ul>' + exp.description.map((item: string) => `<li>${item}</li>`).join('') + '</ul>';
+              } else if (exp.description && typeof exp.description === 'string' && !exp.description.includes('<')) {
                 exp.description = convertBulletsToHTML(exp.description);
               }
               return exp;
