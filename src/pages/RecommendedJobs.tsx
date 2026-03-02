@@ -20,9 +20,13 @@ import {
   Building2,
   TrendingUp,
   Filter,
+  CheckCircle,
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp,
+  XCircle,
 } from "lucide-react";
 import qraftLogo from "@/assets/qrafts-logo.png";
-import { CheckCircle } from "lucide-react";
 
 interface JobWithScore {
   id: string;
@@ -36,6 +40,12 @@ interface JobWithScore {
   match_reasons: string[] | null;
 }
 
+interface ScanResult {
+  company: string;
+  jobsFound: number;
+  error?: string;
+}
+
 const RecommendedJobs = () => {
   const [jobs, setJobs] = useState<JobWithScore[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,6 +54,8 @@ const RecommendedJobs = () => {
   const [appliedPositions, setAppliedPositions] = useState<Set<string>>(new Set());
   const [locationFilter, setLocationFilter] = useState<string>("all");
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
+  const [scanResults, setScanResults] = useState<ScanResult[]>([]);
+  const [showScanResults, setShowScanResults] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -160,6 +172,9 @@ const RecommendedJobs = () => {
   const handleScanAll = async () => {
     setScanning(true);
     setScanProgress(null);
+    setScanResults([]);
+    setShowScanResults(false);
+    const results: ScanResult[] = [];
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");
@@ -204,6 +219,11 @@ const RecommendedJobs = () => {
                 total: event.total,
                 currentCompany: event.company,
               });
+              results.push({
+                company: event.company,
+                jobsFound: event.jobsFound || 0,
+                error: event.error || undefined,
+              });
             } else if (event.type === "complete") {
               finalData = event;
             }
@@ -213,9 +233,15 @@ const RecommendedJobs = () => {
         }
       }
 
+      setScanResults(results);
+      const failedCount = results.filter(r => r.error || r.jobsFound === 0).length;
+      if (failedCount > 0) {
+        setShowScanResults(true);
+      }
+
       toast({
         title: "Scan Complete",
-        description: `Scanned ${finalData.scanned || 0} companies, found ${finalData.totalJobs || 0} total openings`,
+        description: `Scanned ${finalData.scanned || 0} companies, found ${finalData.totalJobs || 0} total openings${failedCount > 0 ? ` (${failedCount} had issues)` : ""}`,
       });
 
       await fetchRecommendedJobs();
@@ -339,6 +365,15 @@ const RecommendedJobs = () => {
       )}
 
       <main className="relative container mx-auto px-4 py-6 sm:py-8 max-w-4xl flex-1">
+        {/* Scan Results Summary */}
+        {scanResults.length > 0 && !scanning && (
+          <ScanResultsSummary
+            results={scanResults}
+            show={showScanResults}
+            onToggle={() => setShowScanResults(!showScanResults)}
+          />
+        )}
+
         <div className="mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold mb-1">Recommended Jobs</h1>
           <p className="text-sm text-muted-foreground">
@@ -514,6 +549,75 @@ const RecommendedJobs = () => {
       <Footer />
       <MobileBottomNav onAddApplication={() => navigate("/dashboard")} />
       <div className="h-16 sm:hidden" />
+    </div>
+  );
+};
+
+const ScanResultsSummary = ({ results, show, onToggle }: { results: ScanResult[]; show: boolean; onToggle: () => void }) => {
+  const succeeded = results.filter(r => !r.error && r.jobsFound > 0);
+  const noJobs = results.filter(r => !r.error && r.jobsFound === 0);
+  const failed = results.filter(r => !!r.error);
+
+  return (
+    <div className="mb-6 rounded-xl border border-border/40 bg-card/50 overflow-hidden">
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between px-4 py-3 hover:bg-muted/40 transition-colors text-left"
+      >
+        <div className="flex items-center gap-3 text-sm flex-wrap">
+          <span className="flex items-center gap-1.5 text-primary font-medium">
+            <CheckCircle className="h-4 w-4" /> {succeeded.length} found jobs
+          </span>
+          {noJobs.length > 0 && (
+            <span className="flex items-center gap-1.5 text-muted-foreground">
+              <AlertTriangle className="h-4 w-4" /> {noJobs.length} no jobs
+            </span>
+          )}
+          {failed.length > 0 && (
+            <span className="flex items-center gap-1.5 text-destructive">
+              <XCircle className="h-4 w-4" /> {failed.length} failed
+            </span>
+          )}
+        </div>
+        {show ? <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0" /> : <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />}
+      </button>
+      {show && (
+        <div className="border-t border-border/40 px-4 py-3 space-y-1 max-h-64 overflow-y-auto">
+          {failed.length > 0 && (
+            <div className="mb-3">
+              <p className="text-xs font-semibold text-destructive mb-1.5">Failed ({failed.length})</p>
+              {failed.map(r => (
+                <div key={r.company} className="flex items-center justify-between py-1 text-xs">
+                  <span className="font-medium">{r.company}</span>
+                  <span className="text-destructive/80 truncate ml-2">{r.error}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          {noJobs.length > 0 && (
+            <div className="mb-3">
+              <p className="text-xs font-semibold text-muted-foreground mb-1.5">No jobs found ({noJobs.length})</p>
+              {noJobs.map(r => (
+                <div key={r.company} className="flex items-center justify-between py-1 text-xs">
+                  <span className="font-medium">{r.company}</span>
+                  <span className="text-muted-foreground">0 jobs</span>
+                </div>
+              ))}
+            </div>
+          )}
+          {succeeded.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold text-primary mb-1.5">Successful ({succeeded.length})</p>
+              {succeeded.sort((a, b) => b.jobsFound - a.jobsFound).map(r => (
+                <div key={r.company} className="flex items-center justify-between py-1 text-xs">
+                  <span className="font-medium">{r.company}</span>
+                  <span className="text-primary">{r.jobsFound} jobs</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
