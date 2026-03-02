@@ -51,7 +51,14 @@ Deno.serve(async (req) => {
       );
     }
 
-    const targetDomain = domain || `${companyName.toLowerCase().replace(/\s+/g, "")}.com`;
+    // Clean company name: remove suffixes like Inc, LLC, Corp, and strip non-alpha chars
+    const cleanName = companyName
+      .replace(/,?\s*(inc\.?|llc\.?|corp\.?|ltd\.?|gmbh|s\.?a\.?|plc)$/i, "")
+      .replace(/[^a-zA-Z0-9\s-]/g, "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "");
+    const targetDomain = domain || `${cleanName}.com`;
     const targetUrl = `https://${targetDomain}`;
 
     console.log("Scraping company info from:", targetUrl);
