@@ -42,7 +42,6 @@ serve(async (req) => {
     // Step 1: Determine careers URL
     let targetUrl = careersUrl;
     if (!targetUrl) {
-      // Try to get from company_profiles
       const { data: profile } = await supabase
         .from("company_profiles")
         .select("careers_url, website_url, domain")
@@ -60,9 +59,39 @@ serve(async (req) => {
       }
     }
 
-    console.log(`Crawling careers page for ${companyName}: ${targetUrl}`);
+    console.log(`Crawling careers for ${companyName}: ${targetUrl}`);
 
-    // Step 2: Scrape careers page
+    // Strategy 1: Use Firecrawl search to find real job listings
+    // This is more reliable than scraping a JS-heavy careers page
+    console.log("Strategy 1: Searching for job listings via Firecrawl search...");
+    const searchResponse = await fetch("https://api.firecrawl.dev/v1/search", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: `${companyName} open jobs careers current openings`,
+        limit: 5,
+        scrapeOptions: { formats: ["markdown"] },
+      }),
+    });
+
+    let allMarkdown = "";
+    let allLinks: string[] = [];
+
+    if (searchResponse.ok) {
+      const searchData = await searchResponse.json();
+      const results = searchData.data || searchData.results || [];
+      for (const r of results) {
+        if (r.markdown) allMarkdown += "\n\n---\n" + r.markdown;
+        if (r.url) allLinks.push(r.url);
+      }
+      console.log(`Search returned ${results.length} results, ${allMarkdown.length} chars`);
+    }
+
+    // Strategy 2: Also try scraping the careers page directly with waitFor for JS
+    console.log("Strategy 2: Scraping careers page directly...");
     const scrapeResponse = await fetch("https://api.firecrawl.dev/v1/scrape", {
       method: "POST",
       headers: {
@@ -73,42 +102,74 @@ serve(async (req) => {
         url: targetUrl,
         formats: ["markdown", "links"],
         onlyMainContent: true,
+        waitFor: 3000, // Wait for JS to render
       }),
     });
 
-    const scrapeData = await scrapeResponse.json();
-    if (!scrapeResponse.ok) {
-      console.error("Firecrawl error:", scrapeData);
-      return new Response(JSON.stringify({ error: "Failed to scrape careers page", details: scrapeData }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (scrapeResponse.ok) {
+      const scrapeData = await scrapeResponse.json();
+      const scrapedMarkdown = scrapeData.data?.markdown || scrapeData.markdown || "";
+      const scrapedLinks = scrapeData.data?.links || scrapeData.links || [];
+      allMarkdown += "\n\n---\nDIRECT CAREERS PAGE:\n" + scrapedMarkdown;
+      allLinks = [...allLinks, ...scrapedLinks];
+      console.log(`Scrape returned ${scrapedMarkdown.length} chars, ${scrapedLinks.length} links`);
     }
 
-    const markdown = scrapeData.data?.markdown || scrapeData.markdown || "";
-    const links = scrapeData.data?.links || scrapeData.links || [];
+    // Strategy 3: Try mapping the careers subdomain to find job URLs
+    console.log("Strategy 3: Mapping careers URLs...");
+    const mapResponse = await fetch("https://api.firecrawl.dev/v1/map", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        url: targetUrl,
+        search: "jobs positions openings careers",
+        limit: 100,
+        includeSubdomains: true,
+      }),
+    });
 
-    if (!markdown || markdown.length < 100) {
-      return new Response(JSON.stringify({ error: "Insufficient content found on careers page", jobs: [] }), {
+    if (mapResponse.ok) {
+      const mapData = await mapResponse.json();
+      const mappedLinks = mapData.links || mapData.data?.links || [];
+      // Filter for job-like URLs
+      const jobLinks = mappedLinks.filter((l: string) =>
+        /job|position|opening|career|role|apply/i.test(l) && !/blog|news|about|privacy|terms/i.test(l)
+      );
+      allLinks = [...allLinks, ...jobLinks];
+      console.log(`Map returned ${mappedLinks.length} total, ${jobLinks.length} job-like URLs`);
+    }
+
+    // Deduplicate links
+    allLinks = [...new Set(allLinks)];
+
+    if (!allMarkdown || allMarkdown.length < 50) {
+      return new Response(JSON.stringify({ error: "Insufficient content found", jobs: [] }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     // Step 3: Use AI to extract job listings
-    const extractPrompt = `Extract all job openings from this careers page content. For each job, extract:
-- title: the job title
-- url: the application/detail URL if available (look in the links list too)
+    const extractPrompt = `Extract ALL job openings/positions from this content about ${companyName}. 
+Look for job titles, roles, positions mentioned anywhere in the text.
+For each job, extract:
+- title: the exact job title
+- url: the application/detail URL if available (match from the links list)
 - location: where the job is located (remote, city, etc.)
 - department: the team or department if mentioned
 
-Return ONLY a JSON array of objects. If no jobs found, return an empty array [].
+Be thorough - extract EVERY job title you can find, even if partially mentioned.
 
-Careers page content:
-${markdown.slice(0, 8000)}
+Content (from multiple sources):
+${allMarkdown.slice(0, 15000)}
 
-Available links on the page:
-${links.slice(0, 50).join("\n")}`;
+Available URLs found:
+${allLinks.slice(0, 100).join("\n")}
+
+Return ONLY a valid JSON array of objects. If no jobs found, return [].`;
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -119,7 +180,7 @@ ${links.slice(0, 50).join("\n")}`;
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You extract job listings from careers page content. Always respond with valid JSON array only, no markdown." },
+          { role: "system", content: "You extract job listings from careers page content. Always respond with valid JSON array only, no markdown fences." },
           { role: "user", content: extractPrompt },
         ],
       }),
@@ -143,7 +204,7 @@ ${links.slice(0, 50).join("\n")}`;
       jobs = JSON.parse(cleaned);
       if (!Array.isArray(jobs)) jobs = [];
     } catch {
-      console.error("Failed to parse jobs:", rawContent);
+      console.error("Failed to parse jobs:", rawContent.slice(0, 500));
       jobs = [];
     }
 
@@ -166,12 +227,12 @@ ${links.slice(0, 50).join("\n")}`;
             last_seen_at: now,
             is_active: true,
           },
-          { onConflict: "company_name,title,url" }
+          { onConflict: "company_name,title" }
         );
       if (error) console.error("Upsert error:", error);
     }
 
-    // Mark jobs not seen in this crawl as inactive
+    // Mark old jobs as inactive
     await supabase
       .from("job_openings")
       .update({ is_active: false })
@@ -214,7 +275,6 @@ Only return the JSON array, no markdown.`;
           const cleaned = scoreContent.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
           const scores = JSON.parse(cleaned);
           if (Array.isArray(scores)) {
-            // Get job_opening IDs
             const { data: dbJobs } = await supabase
               .from("job_openings")
               .select("id, title, url")
@@ -225,7 +285,7 @@ Only return the JSON array, no markdown.`;
               const job = jobs[score.index];
               if (!job) continue;
               const dbJob = dbJobs?.find(
-                (dj: any) => dj.title === job.title && (dj.url === job.url || (!dj.url && !job.url))
+                (dj: any) => dj.title === job.title
               );
               if (!dbJob) continue;
 
@@ -253,7 +313,6 @@ Only return the JSON array, no markdown.`;
       }
     }
 
-    // Return jobs with scores
     return new Response(
       JSON.stringify({
         success: true,
