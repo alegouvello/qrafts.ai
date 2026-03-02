@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Footer } from "@/components/Footer";
@@ -27,6 +28,12 @@ import {
   Globe,
   Linkedin,
   Briefcase,
+  Bell,
+  BellOff,
+  Sparkles,
+  MapPin,
+  Loader2,
+  RefreshCw,
 } from "lucide-react";
 import { differenceInDays, format } from "date-fns";
 import qraftLogo from "@/assets/qrafts-logo.png";
@@ -116,6 +123,11 @@ const CompanyProfile = () => {
   const [experiences, setExperiences] = useState<any[]>([]);
   const [sharedQuestions, setSharedQuestions] = useState<any[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [jobOpenings, setJobOpenings] = useState<any[]>([]);
+  const [jobMatchScores, setJobMatchScores] = useState<Record<string, any>>({});
+  const [loadingJobs, setLoadingJobs] = useState(false);
+  const [isWatching, setIsWatching] = useState(false);
+  const [togglingWatch, setTogglingWatch] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -125,6 +137,8 @@ const CompanyProfile = () => {
       fetchCommunityStats();
       fetchExperiences();
       fetchSharedQuestions();
+      fetchJobOpenings();
+      fetchWatchStatus();
     }
   }, [companyName]);
 
@@ -298,6 +312,129 @@ const CompanyProfile = () => {
       }).catch(console.error);
     } catch (error) {
       console.error("Error fetching company profile:", error);
+    }
+  };
+
+  const fetchJobOpenings = async () => {
+    try {
+      const decodedCompany = decodeURIComponent(companyName || "");
+      const { data, error } = await supabase
+        .from("job_openings")
+        .select("*")
+        .eq("company_name", decodedCompany)
+        .eq("is_active", true)
+        .order("first_seen_at", { ascending: false });
+
+      if (!error && data) {
+        setJobOpenings(data);
+        // Fetch match scores for current user
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user && data.length > 0) {
+          const jobIds = data.map((j: any) => j.id);
+          const { data: scores } = await supabase
+            .from("job_match_scores")
+            .select("*")
+            .eq("user_id", user.id)
+            .in("job_opening_id", jobIds);
+
+          if (scores) {
+            const scoreMap: Record<string, any> = {};
+            scores.forEach((s: any) => { scoreMap[s.job_opening_id] = s; });
+            setJobMatchScores(scoreMap);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching job openings:", error);
+    }
+  };
+
+  const fetchWatchStatus = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const decodedCompany = decodeURIComponent(companyName || "");
+      const { data } = await supabase
+        .from("company_watchlist")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("company_name", decodedCompany)
+        .maybeSingle();
+      setIsWatching(!!data);
+    } catch (error) {
+      console.error("Error fetching watch status:", error);
+    }
+  };
+
+  const handleToggleWatch = async () => {
+    setTogglingWatch(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const decodedCompany = decodeURIComponent(companyName || "");
+
+      if (isWatching) {
+        await supabase
+          .from("company_watchlist")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("company_name", decodedCompany);
+        setIsWatching(false);
+        toast({ title: "Unwatched", description: `You'll no longer receive job alerts for ${decodedCompany}` });
+      } else {
+        await supabase
+          .from("company_watchlist")
+          .insert({ user_id: user.id, company_name: decodedCompany });
+        setIsWatching(true);
+        toast({ title: "Watching!", description: `You'll receive daily alerts for high-match jobs at ${decodedCompany}` });
+      }
+    } catch (error) {
+      console.error("Error toggling watch:", error);
+      toast({ title: "Error", description: "Failed to update watch status", variant: "destructive" });
+    } finally {
+      setTogglingWatch(false);
+    }
+  };
+
+  const handleScanJobs = async () => {
+    setLoadingJobs(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const decodedCompany = decodeURIComponent(companyName || "");
+
+      // Get user resume
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("resume_text")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      const { data, error } = await supabase.functions.invoke("crawl-job-openings", {
+        body: {
+          companyName: decodedCompany,
+          userResumeText: profile?.resume_text || null,
+          userId: user.id,
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Scan Complete",
+        description: `Found ${data?.totalFound || 0} job openings at ${decodedCompany}`,
+      });
+
+      // Refresh the list
+      await fetchJobOpenings();
+    } catch (error) {
+      console.error("Error scanning jobs:", error);
+      toast({ title: "Error", description: "Failed to scan for job openings", variant: "destructive" });
+    } finally {
+      setLoadingJobs(false);
     }
   };
 
@@ -539,6 +676,143 @@ const CompanyProfile = () => {
                     );
                   })}
                 </div>
+              </div>
+            </Card>
+
+            {/* Job Openings */}
+            <Card className="border-border/40 bg-card/50">
+              <div className="p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-base font-semibold flex items-center gap-2">
+                    <Briefcase className="h-4 w-4 text-primary" />
+                    Open Positions
+                    {jobOpenings.length > 0 && (
+                      <Badge variant="secondary" className="text-xs ml-1">{jobOpenings.length}</Badge>
+                    )}
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant={isWatching ? "default" : "outline"}
+                      size="sm"
+                      className="h-7 text-xs"
+                      onClick={handleToggleWatch}
+                      disabled={togglingWatch}
+                    >
+                      {togglingWatch ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : isWatching ? <Bell className="h-3 w-3 mr-1" /> : <BellOff className="h-3 w-3 mr-1" />}
+                      {isWatching ? "Watching" : "Watch"}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs"
+                      onClick={handleScanJobs}
+                      disabled={loadingJobs}
+                    >
+                      {loadingJobs ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <RefreshCw className="h-3 w-3 mr-1" />}
+                      {loadingJobs ? "Scanning..." : "Scan Jobs"}
+                    </Button>
+                  </div>
+                </div>
+
+                {loadingJobs && jobOpenings.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">Scanning careers page...</p>
+                  </div>
+                ) : jobOpenings.length === 0 ? (
+                  <div className="text-center py-6">
+                    <Briefcase className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">No job openings found yet</p>
+                    <p className="text-xs text-muted-foreground mt-1">Click "Scan Jobs" to crawl the careers page</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {jobOpenings
+                      .sort((a, b) => {
+                        const scoreA = jobMatchScores[a.id]?.match_score || 0;
+                        const scoreB = jobMatchScores[b.id]?.match_score || 0;
+                        return scoreB - scoreA;
+                      })
+                      .map((job) => {
+                        const matchData = jobMatchScores[job.id];
+                        const score = matchData?.match_score;
+                        const isHighMatch = score && score >= 80;
+                        const isMedMatch = score && score >= 60 && score < 80;
+
+                        return (
+                          <div
+                            key={job.id}
+                            className={`p-3 rounded-lg border transition-all ${
+                              isHighMatch
+                                ? "border-green-500/30 bg-green-500/5"
+                                : isMedMatch
+                                ? "border-yellow-500/20 bg-yellow-500/5"
+                                : "border-border/30 bg-background/50"
+                            } hover:border-primary/30`}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm font-medium truncate">{job.title}</p>
+                                  {isHighMatch && (
+                                    <Badge className="bg-green-500/20 text-green-600 border-green-500/30 text-[10px] shrink-0">
+                                      <Sparkles className="h-2.5 w-2.5 mr-0.5" /> Recommended
+                                    </Badge>
+                                  )}
+                                </div>
+                                <div className="flex flex-wrap items-center gap-2 mt-1">
+                                  {job.location && (
+                                    <span className="text-xs text-muted-foreground flex items-center gap-0.5">
+                                      <MapPin className="h-3 w-3" /> {job.location}
+                                    </span>
+                                  )}
+                                  {job.department && (
+                                    <Badge variant="secondary" className="text-[10px]">{job.department}</Badge>
+                                  )}
+                                </div>
+                                {matchData?.match_reasons?.length > 0 && (
+                                  <p className="text-xs text-muted-foreground mt-1.5 line-clamp-1">
+                                    {matchData.match_reasons.join(" · ")}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="flex flex-col items-end gap-1 shrink-0">
+                                {score != null && (
+                                  <div className="text-right">
+                                    <span className={`text-sm font-bold ${
+                                      isHighMatch ? "text-green-600" : isMedMatch ? "text-yellow-600" : "text-muted-foreground"
+                                    }`}>
+                                      {score}%
+                                    </span>
+                                    <Progress
+                                      value={score}
+                                      className="w-16 h-1.5 mt-0.5"
+                                    />
+                                  </div>
+                                )}
+                                {job.url && (
+                                  <a
+                                    href={job.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-[10px] text-primary hover:underline flex items-center gap-0.5 mt-1"
+                                  >
+                                    Apply <ExternalLink className="h-2.5 w-2.5" />
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                )}
+
+                {isWatching && (
+                  <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
+                    <Bell className="h-3 w-3" /> Daily alerts enabled for 80%+ matches
+                  </p>
+                )}
               </div>
             </Card>
 

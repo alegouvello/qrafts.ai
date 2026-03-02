@@ -282,6 +282,27 @@ export type Database = {
         }
         Relationships: []
       }
+      company_watchlist: {
+        Row: {
+          company_name: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          company_name: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          company_name?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       feedback: {
         Row: {
           category: string
@@ -379,6 +400,92 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      job_match_scores: {
+        Row: {
+          alerted: boolean
+          created_at: string
+          id: string
+          job_opening_id: string
+          match_reasons: string[] | null
+          match_score: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          alerted?: boolean
+          created_at?: string
+          id?: string
+          job_opening_id: string
+          match_reasons?: string[] | null
+          match_score?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          alerted?: boolean
+          created_at?: string
+          id?: string
+          job_opening_id?: string
+          match_reasons?: string[] | null
+          match_score?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_match_scores_job_opening_id_fkey"
+            columns: ["job_opening_id"]
+            isOneToOne: false
+            referencedRelation: "job_openings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_openings: {
+        Row: {
+          company_name: string
+          created_at: string
+          department: string | null
+          description_snippet: string | null
+          first_seen_at: string
+          id: string
+          is_active: boolean
+          last_seen_at: string
+          location: string | null
+          title: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          company_name: string
+          created_at?: string
+          department?: string | null
+          description_snippet?: string | null
+          first_seen_at?: string
+          id?: string
+          is_active?: boolean
+          last_seen_at?: string
+          location?: string | null
+          title: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          company_name?: string
+          created_at?: string
+          department?: string | null
+          description_snippet?: string | null
+          first_seen_at?: string
+          id?: string
+          is_active?: boolean
+          last_seen_at?: string
+          location?: string | null
+          title?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: []
       }
       master_answers: {
         Row: {
