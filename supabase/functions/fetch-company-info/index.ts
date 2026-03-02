@@ -6,6 +6,72 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+async function findCompanyUrl(companyName: string, domain: string | null, firecrawlKey: string): Promise<string> {
+  // If domain provided, use it directly
+  if (domain) return `https://${domain}`;
+
+  // Clean company name for domain guessing
+  const cleanName = companyName
+    .replace(/,?\s*(inc\.?|llc\.?|corp\.?|ltd\.?|gmbh|s\.?a\.?|plc)$/i, "")
+    .replace(/\s*\([^)]*\)\s*/g, " ") // remove parenthetical like (AWS)
+    .replace(/&/g, "and")
+    .replace(/[^a-zA-Z0-9\s-]/g, "")
+    .trim()
+    .toLowerCase();
+
+  const hyphenated = cleanName.replace(/\s+/g, "-");
+  const compact = cleanName.replace(/\s+/g, "");
+
+  // Try common domain patterns with HEAD requests
+  const candidates = [`${compact}.com`, `${hyphenated}.com`];
+  for (const d of candidates) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 3000);
+      const resp = await fetch(`https://${d}`, { method: "HEAD", redirect: "follow", signal: controller.signal });
+      clearTimeout(timeout);
+      await resp.text();
+      if (resp.ok || resp.status < 500) {
+        console.log(`Domain resolved: ${d}`);
+        return `https://${d}`;
+      }
+    } catch { /* domain doesn't resolve or timed out */ }
+  }
+
+  // Fallback: use Firecrawl search to find the real website
+  console.log(`Domain guessing failed, searching for "${companyName}" website...`);
+  try {
+    const searchResp = await fetch("https://api.firecrawl.dev/v1/search", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${firecrawlKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: `${companyName} official website`,
+        limit: 3,
+      }),
+    });
+    const searchData = await searchResp.json();
+    if (searchResp.ok && searchData.data?.length > 0) {
+      const url = searchData.data[0].url;
+      console.log(`Found via search: ${url}`);
+      // Extract just the origin
+      try {
+        const parsed = new URL(url);
+        return parsed.origin;
+      } catch {
+        return url;
+      }
+    }
+  } catch (e) {
+    console.error("Search fallback failed:", e);
+  }
+
+  // Last resort
+  return `https://${compact}.com`;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -41,56 +107,16 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Use Firecrawl to scrape company website
     const firecrawlKey = Deno.env.get("FIRECRAWL_API_KEY");
     if (!firecrawlKey) {
-      // Return existing or empty if no Firecrawl
       return new Response(
         JSON.stringify({ success: true, profile: existing || null, cached: !!existing }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Clean company name: remove suffixes like Inc, LLC, Corp, and strip non-alpha chars
-    const cleanName = companyName
-      .replace(/,?\s*(inc\.?|llc\.?|corp\.?|ltd\.?|gmbh|s\.?a\.?|plc)$/i, "")
-      .replace(/[^a-zA-Z0-9\s-]/g, "")
-      .trim()
-      .toLowerCase();
-
-    // Try hyphenated version first (e.g. "porsche-consulting.com"), then no-space version
-    const hyphenatedName = cleanName.replace(/\s+/g, "-");
-    const compactName = cleanName.replace(/\s+/g, "");
-    
-    let targetDomain = domain;
-    let targetUrl: string;
-    
-    if (targetDomain) {
-      targetUrl = `https://${targetDomain}`;
-    } else {
-      // Try hyphenated first, fallback to compact
-      const tryDomains = [hyphenatedName, compactName];
-      let foundUrl = "";
-      for (const name of tryDomains) {
-        const testUrl = `https://${name}.com`;
-        try {
-          const testResp = await fetch(testUrl, { method: "HEAD", redirect: "follow" });
-          await testResp.text();
-          if (testResp.ok || testResp.status < 500) {
-            foundUrl = testUrl;
-            targetDomain = `${name}.com`;
-            break;
-          }
-        } catch {
-          // domain doesn't resolve, try next
-        }
-      }
-      if (!foundUrl) {
-        targetDomain = `${hyphenatedName}.com`;
-      }
-      targetUrl = `https://${targetDomain}`;
-    }
-
+    const targetUrl = await findCompanyUrl(companyName, domain, firecrawlKey);
+    const targetDomain = new URL(targetUrl).hostname;
     console.log("Scraping company info from:", targetUrl);
 
     const scrapeResponse = await fetch("https://api.firecrawl.dev/v1/scrape", {
@@ -109,19 +135,23 @@ Deno.serve(async (req) => {
     const scrapeData = await scrapeResponse.json();
 
     if (!scrapeResponse.ok) {
-      console.error("Firecrawl error:", scrapeData);
+      console.error("Firecrawl scrape error:", scrapeData);
       return new Response(
         JSON.stringify({ success: true, profile: existing || null, cached: !!existing }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Extract info
-    const summary = scrapeData.data?.summary || scrapeData.summary || null;
+    // Extract info — filter out error-like content
+    const rawSummary = scrapeData.data?.summary || scrapeData.summary || null;
     const metadata = scrapeData.data?.metadata || scrapeData.metadata || {};
     const links = scrapeData.data?.links || scrapeData.links || [];
+    
+    // Don't use summaries that look like error/access-denied messages
+    const isErrorContent = rawSummary && /access denied|restricted|blocked|forbidden|error|reference number/i.test(rawSummary);
+    const summary = isErrorContent ? null : rawSummary;
 
-    // Try to find careers and linkedin links — only use real URLs found on the page
+    // Only use real URLs found on the page
     const careersUrl = links.find((l: string) =>
       /career|jobs|join|hiring|work-with-us|openings/i.test(l)
     ) || null;
@@ -140,7 +170,6 @@ Deno.serve(async (req) => {
       fetched_at: new Date().toISOString(),
     };
 
-    // Upsert into company_profiles
     const { data: upserted, error: upsertError } = await supabase
       .from("company_profiles")
       .upsert(profile, { onConflict: "company_name" })
