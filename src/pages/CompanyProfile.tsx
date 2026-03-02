@@ -571,8 +571,8 @@ const CompanyProfile = () => {
                   <StatCard
                     icon={Clock}
                     label="Avg Response"
-                    value={communityStats?.avg_response_days ? `${Math.round(communityStats.avg_response_days)}d` : "—"}
-                    sub={communityStats?.fastest_response_days ? `Fastest: ${communityStats.fastest_response_days}d` : undefined}
+                    value={communityStats?.avg_response_days && communityStats.avg_response_days > 0 ? `${Math.round(communityStats.avg_response_days)}d` : "—"}
+                    sub={communityStats?.fastest_response_days && communityStats.fastest_response_days > 0 ? `Fastest: ${communityStats.fastest_response_days}d` : undefined}
                   />
                   <StatCard
                     icon={TrendingUp}
@@ -608,8 +608,8 @@ const CompanyProfile = () => {
                   <StatCard
                     icon={Clock}
                     label="Avg Response"
-                    value={metrics.avgResponseDays !== null ? `${metrics.avgResponseDays}d` : "—"}
-                    sub={metrics.fastestResponseDays !== null ? `Fastest: ${metrics.fastestResponseDays}d` : undefined}
+                    value={metrics.avgResponseDays != null && metrics.avgResponseDays > 0 ? `${metrics.avgResponseDays}d` : "—"}
+                    sub={metrics.fastestResponseDays != null && metrics.fastestResponseDays > 0 ? `Fastest: ${metrics.fastestResponseDays}d` : undefined}
                   />
                   <StatCard
                     icon={TrendingUp}
