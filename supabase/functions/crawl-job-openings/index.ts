@@ -198,13 +198,17 @@ serve(async (req) => {
     // ─── Step 3: AI extraction - individual roles, not departments ───
     const extractPrompt = `Extract ALL individual job openings/positions from this content about ${companyName}.
 
-IMPORTANT RULES:
-- Extract INDIVIDUAL JOB ROLES, not department/team names.
-- "Sales" or "Engineering" alone is a DEPARTMENT, not a job. Look for specific titles like "Account Executive", "Software Engineer", "Sales Manager", etc.
-- If you see a department heading (e.g. "Business Development") with individual roles listed under it, extract EACH individual role separately with the department noted.
-- If a department page was scraped, extract each specific position from it.
+CRITICAL RULES - READ CAREFULLY:
+- Extract ONLY specific, real job titles that a person would apply to (e.g. "Senior Software Engineer", "Financial Partnerships Manager", "Marketing Analyst").
+- DO NOT extract any of the following — these are NOT jobs:
+  - Career program categories (e.g. "Experienced Professionals", "Students", "Young Professionals", "Internships")
+  - Department or team names (e.g. "Sales", "Engineering", "Corporate Functions", "Business Development", "Consulting")
+  - Generic labels (e.g. "Consultant", "Experienced Hire", "New Graduate")
+  - Page section headings or navigation items
+- If a department heading has individual roles listed under it, extract EACH individual role with the department noted.
+- If the content only shows departments/categories with no specific role titles underneath, return an EMPTY array [].
 - For each job, extract:
-  - title: the specific job title (e.g. "Financial Partnerships Manager, International" NOT "Business Development")
+  - title: the specific job title
   - url: the application/detail URL if available
   - location: where the job is located (city, state, remote, etc.)
   - department: the team or department
