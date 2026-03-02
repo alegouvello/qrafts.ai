@@ -165,6 +165,45 @@ export type Database = {
         }
         Relationships: []
       }
+      company_experiences: {
+        Row: {
+          company_name: string
+          created_at: string
+          experience_text: string
+          experience_type: string
+          id: string
+          is_anonymous: boolean
+          rating: number | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_name: string
+          created_at?: string
+          experience_text: string
+          experience_type?: string
+          id?: string
+          is_anonymous?: boolean
+          rating?: number | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_name?: string
+          created_at?: string
+          experience_text?: string
+          experience_type?: string
+          id?: string
+          is_anonymous?: boolean
+          rating?: number | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       company_notes: {
         Row: {
           company_name: string
@@ -189,6 +228,57 @@ export type Database = {
           notes?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      company_profiles: {
+        Row: {
+          careers_url: string | null
+          company_name: string
+          created_at: string
+          description: string | null
+          domain: string | null
+          fetched_at: string | null
+          headquarters: string | null
+          id: string
+          industry: string | null
+          linkedin_url: string | null
+          logo_url: string | null
+          size: string | null
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          careers_url?: string | null
+          company_name: string
+          created_at?: string
+          description?: string | null
+          domain?: string | null
+          fetched_at?: string | null
+          headquarters?: string | null
+          id?: string
+          industry?: string | null
+          linkedin_url?: string | null
+          logo_url?: string | null
+          size?: string | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          careers_url?: string | null
+          company_name?: string
+          created_at?: string
+          description?: string | null
+          domain?: string | null
+          fetched_at?: string | null
+          headquarters?: string | null
+          id?: string
+          industry?: string | null
+          linkedin_url?: string | null
+          logo_url?: string | null
+          size?: string | null
+          updated_at?: string
+          website_url?: string | null
         }
         Relationships: []
       }

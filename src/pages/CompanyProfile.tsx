@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Footer } from "@/components/Footer";
 import { SEO } from "@/components/SEO";
+import { CompanyExperiences } from "@/components/CompanyExperiences";
+import { CompanySharedQuestions } from "@/components/CompanySharedQuestions";
 import {
   ArrowLeft,
   Building2,
@@ -83,6 +85,11 @@ const CompanyProfile = () => {
   const [logoError, setLogoError] = useState(false);
   const [logoFallback, setLogoFallback] = useState(false);
   const [communityStats, setCommunityStats] = useState<CompanyStats | null>(null);
+  const [companyDescription, setCompanyDescription] = useState<string | null>(null);
+  const [companyProfileData, setCompanyProfileData] = useState<any>(null);
+  const [experiences, setExperiences] = useState<any[]>([]);
+  const [sharedQuestions, setSharedQuestions] = useState<any[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -90,8 +97,16 @@ const CompanyProfile = () => {
       fetchCompanyData();
       fetchCompanyNotes();
       fetchCommunityStats();
+      fetchExperiences();
+      fetchSharedQuestions();
     }
   }, [companyName]);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setCurrentUserId(user?.id || null);
+    });
+  }, []);
 
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -138,6 +153,8 @@ const CompanyProfile = () => {
       }));
 
       setApplications(appsWithHistory);
+      // Fetch company profile after we have apps (for domain info)
+      fetchCompanyProfile();
     } catch (error) {
       console.error("Error fetching company data:", error);
       toast({
@@ -196,6 +213,72 @@ const CompanyProfile = () => {
       }
     } catch (error) {
       console.error("Error fetching community stats:", error);
+    }
+  };
+
+  const fetchExperiences = async () => {
+    try {
+      const decodedCompany = decodeURIComponent(companyName || "");
+      const { data, error } = await (supabase as any)
+        .from("company_experiences")
+        .select("*")
+        .eq("company_name", decodedCompany)
+        .order("created_at", { ascending: false });
+      if (!error) setExperiences(data || []);
+    } catch (error) {
+      console.error("Error fetching experiences:", error);
+    }
+  };
+
+  const fetchSharedQuestions = async () => {
+    try {
+      const decodedCompany = decodeURIComponent(companyName || "");
+      const { data, error } = await supabase
+        .from("shared_questions")
+        .select("*")
+        .eq("company", decodedCompany)
+        .order("position", { ascending: true });
+      if (!error) setSharedQuestions(data || []);
+    } catch (error) {
+      console.error("Error fetching shared questions:", error);
+    }
+  };
+
+  const fetchCompanyProfile = async () => {
+    try {
+      const decodedCompany = decodeURIComponent(companyName || "");
+      // Check cache first
+      const { data: cached } = await (supabase as any)
+        .from("company_profiles")
+        .select("*")
+        .eq("company_name", decodedCompany)
+        .maybeSingle();
+
+      if (cached?.description) {
+        setCompanyDescription(cached.description);
+        setCompanyProfileData(cached);
+        return;
+      }
+
+      // Fetch from edge function in background
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const domain = applications.length > 0
+        ? (applications[0] as any).company_domain
+        : undefined;
+
+      supabase.functions.invoke("fetch-company-info", {
+        body: { companyName: decodedCompany, domain },
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      }).then(({ data }) => {
+        if (data?.profile?.description) {
+          setCompanyDescription(data.profile.description);
+          setCompanyProfileData(data.profile);
+        }
+      }).catch(console.error);
+    } catch (error) {
+      console.error("Error fetching company profile:", error);
     }
   };
 
@@ -421,6 +504,34 @@ const CompanyProfile = () => {
       </div>
 
       <main className="container mx-auto px-4 py-12 space-y-12 max-w-7xl">
+
+        {/* Company Description */}
+        {companyDescription && (
+          <Card className="border-border/40 bg-card/50 backdrop-blur-sm">
+            <div className="p-8">
+              <h2 className="text-2xl font-semibold mb-4 flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Building2 className="h-5 w-5 text-primary" />
+                </div>
+                About {decodedCompany}
+              </h2>
+              <p className="text-muted-foreground leading-relaxed">{companyDescription}</p>
+              {companyProfileData?.industry && (
+                <div className="flex flex-wrap gap-2 mt-4">
+                  {companyProfileData.industry && (
+                    <Badge variant="secondary">{companyProfileData.industry}</Badge>
+                  )}
+                  {companyProfileData.size && (
+                    <Badge variant="secondary">{companyProfileData.size}</Badge>
+                  )}
+                  {companyProfileData.headquarters && (
+                    <Badge variant="secondary">{companyProfileData.headquarters}</Badge>
+                  )}
+                </div>
+              )}
+            </div>
+          </Card>
+        )}
 
         {/* Key Metrics - Community Stats */}
         <div>
@@ -734,6 +845,20 @@ const CompanyProfile = () => {
             </div>
           </div>
         </Card>
+
+        {/* Community Experiences */}
+        <CompanyExperiences
+          companyName={decodedCompany}
+          experiences={experiences}
+          currentUserId={currentUserId}
+          onRefresh={fetchExperiences}
+        />
+
+        {/* Shared Interview Questions */}
+        <CompanySharedQuestions
+          companyName={decodedCompany}
+          questions={sharedQuestions}
+        />
 
         {/* Insights */}
         {communityStats && (
