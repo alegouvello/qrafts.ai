@@ -401,6 +401,8 @@ const RecommendedJobs = () => {
     const parts = loc
       .split(/[;|]/)
       .flatMap(p => p.split(/\bor\b/i))
+      .flatMap(p => p.split(/\s*[-–—\/&]\s*/))
+      .flatMap(p => p.split(/\s*\+\s*/))
       .flatMap(p => {
         // Also split on comma BUT only if it separates cities (not "City, State")
         // Heuristic: if after comma there's a 2-letter state code or known state name, don't split
