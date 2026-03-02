@@ -6,6 +6,105 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// ─── Known company slug mappings for job board APIs ───
+// Maps company names (lowercased) to their actual slugs on various platforms
+const KNOWN_COMPANY_SLUGS: Record<string, { greenhouse?: string[]; lever?: string[]; ashby?: string[]; smartrecruiters?: string[]; workday?: { subdomain: string; instance: string; path: string }[] }> = {
+  "netflix": { greenhouse: ["netflix"], lever: ["netflix"] },
+  "stripe": { greenhouse: ["stripe"], lever: ["stripe"] },
+  "airbnb": { greenhouse: ["airbnb"], lever: ["airbnb"] },
+  "twitch": { greenhouse: ["twitch"], lever: ["twitch"] },
+  "coinbase": { greenhouse: ["coinbase"], lever: ["coinbase"] },
+  "figma": { greenhouse: ["figma"], lever: ["figma"] },
+  "notion": { greenhouse: ["notion"], lever: ["notion"] },
+  "discord": { greenhouse: ["discord"], lever: ["discord"] },
+  "datadog": { greenhouse: ["datadog"], lever: ["datadog"] },
+  "square": { greenhouse: ["squareup", "square"], lever: ["square"] },
+  "block": { greenhouse: ["squareup", "block"], lever: ["block"] },
+  "plaid": { greenhouse: ["plaid"], lever: ["plaid"] },
+  "dropbox": { greenhouse: ["dropbox"], lever: ["dropbox"] },
+  "instacart": { greenhouse: ["instacart"], lever: ["instacart"] },
+  "doordash": { greenhouse: ["doordash"], lever: ["doordash"] },
+  "lyft": { greenhouse: ["lyft"], lever: ["lyft"] },
+  "uber": { greenhouse: ["uber"], lever: ["uber"] },
+  "snap": { greenhouse: ["snap"], lever: ["snap"] },
+  "snapchat": { greenhouse: ["snap"], lever: ["snap"] },
+  "pinterest": { greenhouse: ["pinterest"], lever: ["pinterest"] },
+  "reddit": { greenhouse: ["reddit"], lever: ["reddit"] },
+  "robinhood": { greenhouse: ["robinhood"], lever: ["robinhood"] },
+  "shopify": { greenhouse: ["shopify"], lever: ["shopify"] },
+  "spotify": { greenhouse: ["spotify"], lever: ["spotify"] },
+  "tiktok": { lever: ["bytedance"] },
+  "bytedance": { lever: ["bytedance"] },
+  "twilio": { greenhouse: ["twilio"], lever: ["twilio"] },
+  "cloudflare": { greenhouse: ["cloudflare"], lever: ["cloudflare"] },
+  "databricks": { greenhouse: ["databricks"], lever: ["databricks"] },
+  "snowflake": { greenhouse: ["snowflakecomputing"], lever: ["snowflake"] },
+  "palantir": { greenhouse: ["palantir"], lever: ["palantir"] },
+  "scale ai": { greenhouse: ["scaleai"], lever: ["scaleai"] },
+  "anduril": { greenhouse: ["andurilindustries"], lever: ["anduril"] },
+  "openai": { greenhouse: ["openai"], lever: ["openai"] },
+  "anthropic": { greenhouse: ["anthropic"], lever: ["anthropic"] },
+  "meta": { smartrecruiters: ["Facebook2"] },
+  "facebook": { smartrecruiters: ["Facebook2"] },
+  "amazon": { smartrecruiters: ["AmazonCareers"] },
+  "amazon web services": { smartrecruiters: ["AmazonCareers"] },
+  "amazon web services (aws)": { smartrecruiters: ["AmazonCareers"] },
+  "aws": { smartrecruiters: ["AmazonCareers"] },
+  "google": { smartrecruiters: ["Google"] },
+  "alphabet": { smartrecruiters: ["Google"] },
+  "microsoft": { smartrecruiters: ["Microsoft"] },
+  "apple": { smartrecruiters: ["apple"] },
+  "nvidia": { smartrecruiters: ["NVIDIA"] },
+  "salesforce": { smartrecruiters: ["Salesforce2"] },
+  "adobe": { smartrecruiters: ["Adobe"] },
+  "ibm": { smartrecruiters: ["IBMCareers"] },
+  "oracle": { smartrecruiters: ["Oracle"] },
+  "intel": { smartrecruiters: ["Intel"] },
+  "cisco": { smartrecruiters: ["Cisco"] },
+  "vmware": { smartrecruiters: ["VMware"] },
+  "dell": { smartrecruiters: ["Dell"] },
+  "hp": { smartrecruiters: ["HP"] },
+  "qualcomm": { smartrecruiters: ["Qualcomm"] },
+  "sony": { smartrecruiters: ["Sony"] },
+  "samsung": { smartrecruiters: ["Samsung"] },
+  "tesla": { smartrecruiters: ["Tesla"] },
+  "spacex": { smartrecruiters: ["SpaceX"] },
+  "walmart": { workday: [{ subdomain: "walmart", instance: "wd5", path: "WalmartExternal" }] },
+  "jpmorgan": { smartrecruiters: ["JPMorganChase"] },
+  "jpmorgan chase": { smartrecruiters: ["JPMorganChase"] },
+  "jp morgan chase": { smartrecruiters: ["JPMorganChase"] },
+  "jp morgan": { smartrecruiters: ["JPMorganChase"] },
+  "goldman sachs": { smartrecruiters: ["GoldmanSachs"] },
+  "morgan stanley": { smartrecruiters: ["MorganStanley"] },
+  "deloitte": { smartrecruiters: ["Deloitte2"] },
+  "mckinsey": { smartrecruiters: ["McKinsey"] },
+  "boston consulting group": { smartrecruiters: ["BCG"] },
+  "bcg": { smartrecruiters: ["BCG"] },
+  "bain": { smartrecruiters: ["Bain"] },
+  "visa": { smartrecruiters: ["Visa"] },
+  "mastercard": { smartrecruiters: ["Mastercard"] },
+  "paypal": { smartrecruiters: ["PayPal"] },
+};
+
+// Generate slug variations to try for unknown companies
+function generateSlugVariations(companyName: string): string[] {
+  const base = companyName.toLowerCase();
+  const slugs = new Set<string>();
+  // As-is without spaces
+  slugs.add(base.replace(/\s+/g, ""));
+  // Hyphenated
+  slugs.add(base.replace(/\s+/g, "-"));
+  // Remove common suffixes
+  for (const suffix of [" inc", " inc.", " llc", " ltd", " ltd.", " corp", " corp.", " co", " co.", " group", " technologies", " technology", " labs", " ai"]) {
+    if (base.endsWith(suffix)) {
+      const stripped = base.slice(0, -suffix.length).trim();
+      slugs.add(stripped.replace(/\s+/g, ""));
+      slugs.add(stripped.replace(/\s+/g, "-"));
+    }
+  }
+  return [...slugs];
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -66,71 +165,134 @@ serve(async (req) => {
 
     console.log(`Crawling careers for ${companyName}: ${targetUrl} (domain: ${companyDomain})`);
 
+    const companyLower = companyName.toLowerCase();
+    const knownSlugs = KNOWN_COMPANY_SLUGS[companyLower];
+    const slugVariations = knownSlugs ? [] : generateSlugVariations(companyName);
     const companySlug = companyName.toLowerCase().replace(/\s+/g, "");
 
     // ─── Strategy 0: Direct job board APIs (structured data, no scraping needed) ───
     let apiJobs: any[] = [];
-    const jobBoardApis = [
-      {
-        name: "Ashby",
-        url: `https://api.ashbyhq.com/posting-api/job-board/${companySlug}?includeCompensation=true`,
-        parse: (data: any) => (data.jobs || []).filter((j: any) => j.isListed !== false).map((j: any) => ({
-          title: j.title,
-          url: j.jobUrl || j.applyUrl || null,
-          location: j.location || j.locationName || null,
-          department: j.departmentName || j.department || null,
-          description: j.descriptionPlain?.slice(0, 200) || null,
-          compensation: j.compensation ? `${j.compensation.compensationTierSummary || ''}`.trim() || null : null,
-        })),
-      },
-      {
-        name: "Greenhouse",
-        url: `https://boards-api.greenhouse.io/v1/boards/${companySlug}/jobs`,
-        parse: (data: any) => (data.jobs || []).map((j: any) => ({
-          title: j.title,
-          url: j.absolute_url || null,
-          location: j.location?.name || null,
-          department: j.departments?.[0]?.name || null,
-          description: null,
-        })),
-      },
-      {
-        name: "Lever",
-        url: `https://api.lever.co/v0/postings/${companySlug}?mode=json`,
-        parse: (data: any) => (Array.isArray(data) ? data : []).map((j: any) => ({
-          title: j.text,
-          url: j.hostedUrl || j.applyUrl || null,
-          location: j.categories?.location || null,
-          department: j.categories?.department || j.categories?.team || null,
-          description: j.descriptionPlain?.slice(0, 200) || null,
-        })),
-      },
-    ];
 
-    console.log("Strategy 0: Trying direct job board APIs...");
-    const apiPromises = jobBoardApis.map(async (board) => {
-      try {
-        const resp = await fetch(board.url, {
-          headers: { "Accept": "application/json" },
-        });
-        if (resp.ok) {
-          const data = await resp.json();
-          const parsed = board.parse(data);
-          console.log(`${board.name} API: ${parsed.length} jobs found`);
-          if (parsed.length > 0) return { name: board.name, jobs: parsed };
+    // 0a: SmartRecruiters public Posting API (no auth required) — used by Google, Amazon, Meta, etc.
+    const smartrecruitersIds = knownSlugs?.smartrecruiters || [];
+    if (smartrecruitersIds.length > 0) {
+      console.log(`Strategy 0a: Trying SmartRecruiters for ${companyName} with IDs: ${smartrecruitersIds.join(", ")}`);
+      for (const srId of smartrecruitersIds) {
+        if (apiJobs.length > 0) break;
+        try {
+          // SmartRecruiters paginates — fetch up to 500 jobs
+          let offset = 0;
+          const limit = 100;
+          let allSrJobs: any[] = [];
+          while (true) {
+            const srUrl = `https://api.smartrecruiters.com/v1/companies/${srId}/postings?offset=${offset}&limit=${limit}`;
+            const resp = await fetch(srUrl, { headers: { "Accept": "application/json" } });
+            if (!resp.ok) break;
+            const data = await resp.json();
+            const content = data.content || [];
+            if (content.length === 0) break;
+            for (const j of content) {
+              allSrJobs.push({
+                title: j.name || j.title,
+                url: j.ref || j.applyUrl || `https://jobs.smartrecruiters.com/${srId}/${j.id}`,
+                location: j.location?.city ? `${j.location.city}${j.location.region ? ", " + j.location.region : ""}${j.location.country ? ", " + j.location.country : ""}` : (j.location?.remote ? "Remote" : null),
+                department: j.department?.label || j.department?.id || null,
+                description: (j.customField?.find((f: any) => f.fieldId === "description")?.valueLabel || "")?.slice(0, 200) || null,
+              });
+            }
+            if (content.length < limit || allSrJobs.length >= 500) break;
+            offset += limit;
+          }
+          if (allSrJobs.length > 0) {
+            apiJobs = allSrJobs;
+            console.log(`SmartRecruiters (${srId}): ${apiJobs.length} jobs found`);
+          }
+        } catch (e) {
+          console.log(`SmartRecruiters (${srId}) failed:`, e);
         }
-      } catch (e) {
-        // API not available for this company
       }
-      return null;
-    });
+    }
 
-    const apiResults = (await Promise.all(apiPromises)).filter(Boolean);
-    // Pick the API with the most jobs
-    const bestApi = apiResults.sort((a, b) => b!.jobs.length - a!.jobs.length)[0];
-    if (bestApi && bestApi.jobs.length > 0) {
-      apiJobs = bestApi.jobs;
-      console.log(`Best API: ${bestApi.name} with ${apiJobs.length} jobs — skipping scraping`);
+    // 0b: Standard job board APIs (Greenhouse, Lever, Ashby) with known slugs + variations
+    if (apiJobs.length === 0) {
+      const greenhouseSlugs = knownSlugs?.greenhouse || slugVariations;
+      const leverSlugs = knownSlugs?.lever || slugVariations;
+      const ashbySlugs = knownSlugs?.ashby || [companySlug];
+
+      const jobBoardApis: { name: string; url: string; parse: (data: any) => any[] }[] = [];
+
+      for (const slug of [...new Set(greenhouseSlugs)]) {
+        jobBoardApis.push({
+          name: `Greenhouse(${slug})`,
+          url: `https://boards-api.greenhouse.io/v1/boards/${slug}/jobs`,
+          parse: (data: any) => (data.jobs || []).map((j: any) => ({
+            title: j.title,
+            url: j.absolute_url || null,
+            location: j.location?.name || null,
+            department: j.departments?.[0]?.name || null,
+            description: null,
+          })),
+        });
+      }
+
+      for (const slug of [...new Set(leverSlugs)]) {
+        jobBoardApis.push({
+          name: `Lever(${slug})`,
+          url: `https://api.lever.co/v0/postings/${slug}?mode=json`,
+          parse: (data: any) => (Array.isArray(data) ? data : []).map((j: any) => ({
+            title: j.text,
+            url: j.hostedUrl || j.applyUrl || null,
+            location: j.categories?.location || null,
+            department: j.categories?.department || j.categories?.team || null,
+            description: j.descriptionPlain?.slice(0, 200) || null,
+          })),
+        });
+      }
+
+      for (const slug of [...new Set(ashbySlugs)]) {
+        jobBoardApis.push({
+          name: `Ashby(${slug})`,
+          url: `https://api.ashbyhq.com/posting-api/job-board/${slug}?includeCompensation=true`,
+          parse: (data: any) => (data.jobs || []).filter((j: any) => j.isListed !== false).map((j: any) => ({
+            title: j.title,
+            url: j.jobUrl || j.applyUrl || null,
+            location: j.location || j.locationName || null,
+            department: j.departmentName || j.department || null,
+            description: j.descriptionPlain?.slice(0, 200) || null,
+          })),
+        });
+      }
+
+      console.log(`Strategy 0b: Trying ${jobBoardApis.length} job board API endpoints...`);
+      const apiPromises = jobBoardApis.map(async (board) => {
+        try {
+          const ctrl = new AbortController();
+          const timeout = setTimeout(() => ctrl.abort(), 8000);
+          const resp = await fetch(board.url, {
+            headers: { "Accept": "application/json" },
+            signal: ctrl.signal,
+          });
+          clearTimeout(timeout);
+          if (resp.ok) {
+            const data = await resp.json();
+            const parsed = board.parse(data);
+            if (parsed.length > 0) {
+              console.log(`${board.name}: ${parsed.length} jobs found`);
+              return { name: board.name, jobs: parsed };
+            }
+          }
+        } catch {
+          // API not available for this company
+        }
+        return null;
+      });
+
+      const apiResults = (await Promise.all(apiPromises)).filter(Boolean);
+      const bestApi = apiResults.sort((a, b) => b!.jobs.length - a!.jobs.length)[0];
+      if (bestApi && bestApi.jobs.length > 0) {
+        apiJobs = bestApi.jobs;
+        console.log(`Best API: ${bestApi.name} with ${apiJobs.length} jobs — skipping scraping`);
+      }
     }
 
     // Job aggregator domains to exclude from search results
@@ -170,6 +332,30 @@ serve(async (req) => {
           if (r.url) allLinks.push(r.url);
         }
         console.log(`Search: ${results.length} results, ${allMarkdown.length} chars`);
+      }
+
+      // Strategy 1b: If site-scoped search yielded little, try broader search
+      if (allMarkdown.length < 200) {
+        console.log("Site-scoped search insufficient, trying broader search...");
+        const broadResponse = await fetch("https://api.firecrawl.dev/v1/search", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${FIRECRAWL_API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: `"${companyName}" careers jobs openings "apply now" -site:indeed.com -site:linkedin.com -site:glassdoor.com`,
+            limit: 5,
+            scrapeOptions: { formats: ["markdown"] },
+          }),
+        });
+        if (broadResponse.ok) {
+          const broadData = await broadResponse.json();
+          const results = broadData.data || broadData.results || [];
+          for (const r of results) {
+            if (aggregatorDomains.some(d => r.url?.includes(d))) continue;
+            if (r.markdown) allMarkdown += "\n\n---\n" + r.markdown;
+            if (r.url) allLinks.push(r.url);
+          }
+          console.log(`Broad search: ${results.length} results, total ${allMarkdown.length} chars`);
+        }
       }
 
       // Strategy 2: Scrape careers page directly
