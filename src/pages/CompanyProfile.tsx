@@ -126,6 +126,7 @@ const CompanyProfile = () => {
   const [jobOpenings, setJobOpenings] = useState<any[]>([]);
   const [jobMatchScores, setJobMatchScores] = useState<Record<string, any>>({});
   const [loadingJobs, setLoadingJobs] = useState(false);
+  const [showAllJobs, setShowAllJobs] = useState(false);
   const [isWatching, setIsWatching] = useState(false);
   const [togglingWatch, setTogglingWatch] = useState(false);
 
@@ -729,64 +730,90 @@ const CompanyProfile = () => {
                   <p className="text-xs text-muted-foreground">No openings found. Click Scan to crawl careers page.</p>
                 </div>
               ) : (
-                <div className="space-y-1.5">
-                  {jobOpenings
-                    .sort((a, b) => (jobMatchScores[b.id]?.match_score || 0) - (jobMatchScores[a.id]?.match_score || 0))
-                    .map((job) => {
-                      const matchData = jobMatchScores[job.id];
-                      const score = matchData?.match_score;
-                      const isHighMatch = score && score >= 80;
-                      const isMedMatch = score && score >= 60 && score < 80;
+                (() => {
+                  const sortedJobs = [...jobOpenings]
+                    .sort((a, b) => (jobMatchScores[b.id]?.match_score || 0) - (jobMatchScores[a.id]?.match_score || 0));
+                  const displayedJobs = showAllJobs ? sortedJobs : sortedJobs.slice(0, 10);
+                  const now = Date.now();
+                  const ONE_DAY = 24 * 60 * 60 * 1000;
 
-                      return (
-                        <div
-                          key={job.id}
-                          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-all ${
-                            isHighMatch
-                              ? "border-primary/20 bg-primary/5"
-                              : "border-transparent hover:bg-muted/40"
-                          }`}
-                        >
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              <p className="text-[13px] font-medium truncate">{job.title}</p>
-                              {isHighMatch && (
-                                <Sparkles className="h-3 w-3 text-primary shrink-0" />
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              {job.location && (
-                                <span className="text-[11px] text-muted-foreground flex items-center gap-0.5">
-                                  <MapPin className="h-2.5 w-2.5" /> {job.location}
-                                </span>
-                              )}
-                              {job.department && (
-                                <span className="text-[11px] text-muted-foreground">{job.department}</span>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2.5 shrink-0">
-                            {score != null && (
-                              <div className="flex items-center gap-1.5">
-                                <Progress value={score} className="w-12 h-1.5" />
-                                <span className={`text-xs font-semibold tabular-nums ${
-                                  isHighMatch ? "text-primary" : isMedMatch ? "text-yellow-600" : "text-muted-foreground"
-                                }`}>
-                                  {score}%
-                                </span>
+                  return (
+                    <>
+                      <div className="space-y-1.5">
+                        {displayedJobs.map((job) => {
+                          const matchData = jobMatchScores[job.id];
+                          const score = matchData?.match_score;
+                          const isHighMatch = score && score >= 80;
+                          const isMedMatch = score && score >= 60 && score < 80;
+                          const isNew = job.first_seen_at && (now - new Date(job.first_seen_at).getTime()) < ONE_DAY;
+
+                          return (
+                            <div
+                              key={job.id}
+                              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-all ${
+                                isNew
+                                  ? "border-green-500/30 bg-green-500/5"
+                                  : isHighMatch
+                                    ? "border-primary/20 bg-primary/5"
+                                    : "border-transparent hover:bg-muted/40"
+                              }`}
+                            >
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1.5">
+                                  <p className="text-[13px] font-medium truncate">{job.title}</p>
+                                  {isNew && (
+                                    <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-green-500/40 text-green-600 dark:text-green-400 bg-green-500/10 shrink-0">New</Badge>
+                                  )}
+                                  {isHighMatch && (
+                                    <Sparkles className="h-3 w-3 text-primary shrink-0" />
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  {job.location && (
+                                    <span className="text-[11px] text-muted-foreground flex items-center gap-0.5">
+                                      <MapPin className="h-2.5 w-2.5" /> {job.location}
+                                    </span>
+                                  )}
+                                  {job.department && (
+                                    <span className="text-[11px] text-muted-foreground">{job.department}</span>
+                                  )}
+                                </div>
                               </div>
-                            )}
-                            {job.url && (
-                              <a href={job.url} target="_blank" rel="noopener noreferrer"
-                                className="text-muted-foreground hover:text-primary transition-colors">
-                                <ExternalLink className="h-3.5 w-3.5" />
-                              </a>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                </div>
+                              <div className="flex items-center gap-2.5 shrink-0">
+                                {score != null && (
+                                  <div className="flex items-center gap-1.5">
+                                    <Progress value={score} className="w-12 h-1.5" />
+                                    <span className={`text-xs font-semibold tabular-nums ${
+                                      isHighMatch ? "text-primary" : isMedMatch ? "text-yellow-600" : "text-muted-foreground"
+                                    }`}>
+                                      {score}%
+                                    </span>
+                                  </div>
+                                )}
+                                {job.url && (
+                                  <a href={job.url} target="_blank" rel="noopener noreferrer"
+                                    className="text-muted-foreground hover:text-primary transition-colors">
+                                    <ExternalLink className="h-3.5 w-3.5" />
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {sortedJobs.length > 10 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full mt-2 text-xs text-muted-foreground h-7"
+                          onClick={() => setShowAllJobs(!showAllJobs)}
+                        >
+                          {showAllJobs ? "Show top 10 only" : `Show all ${sortedJobs.length} positions`}
+                        </Button>
+                      )}
+                    </>
+                  );
+                })()
               )}
 
               {isWatching && (
