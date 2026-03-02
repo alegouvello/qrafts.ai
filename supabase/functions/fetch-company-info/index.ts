@@ -84,14 +84,14 @@ Deno.serve(async (req) => {
     const metadata = scrapeData.data?.metadata || scrapeData.metadata || {};
     const links = scrapeData.data?.links || scrapeData.links || [];
 
-    // Try to find careers and linkedin links
+    // Try to find careers and linkedin links — only use real URLs found on the page
     const careersUrl = links.find((l: string) =>
-      /career|jobs|join|hiring|work-with-us/i.test(l)
-    ) || `${targetUrl}/careers`;
+      /career|jobs|join|hiring|work-with-us|openings/i.test(l)
+    ) || null;
 
     const linkedinUrl = links.find((l: string) =>
       /linkedin\.com\/company/i.test(l)
-    ) || `https://www.linkedin.com/company/${companyName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+    ) || null;
 
     const profile = {
       company_name: companyName,
