@@ -71,3 +71,6 @@ verify_jwt = true
 
 [functions.scan-all-companies]
 verify_jwt = true
+
+[functions.daily-scan-jobs]
+verify_jwt = false
