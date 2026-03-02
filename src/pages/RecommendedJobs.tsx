@@ -851,11 +851,7 @@ const RecommendedJobs = () => {
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[...companiesMap.entries()]
-                  .sort((a, b) => {
-                    const aMax = Math.max(...a[1].map(j => j.match_score));
-                    const bMax = Math.max(...b[1].map(j => j.match_score));
-                    return bMax - aMax;
-                  })
+                  .sort((a, b) => a[0].localeCompare(b[0]))
                   .map(([company, companyJobs]) => {
                     const topScore = Math.max(...companyJobs.map(j => j.match_score));
                     const newCount = companyJobs.filter(j => (now - new Date(j.first_seen_at).getTime()) < ONE_DAY).length;
