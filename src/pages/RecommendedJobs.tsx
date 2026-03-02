@@ -40,6 +40,7 @@ const RecommendedJobs = () => {
   const [jobs, setJobs] = useState<JobWithScore[]>([]);
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
+  const [scanProgress, setScanProgress] = useState<{ completed: number; total: number; currentCompany: string } | null>(null);
   const [appliedPositions, setAppliedPositions] = useState<Set<string>>(new Set());
   const [locationFilter, setLocationFilter] = useState<string>("all");
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
@@ -136,14 +137,63 @@ const RecommendedJobs = () => {
 
   const handleScanAll = async () => {
     setScanning(true);
+    setScanProgress(null);
     try {
-      const { data, error } = await supabase.functions.invoke("scan-all-companies");
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
 
-      if (error) throw error;
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/scan-all-companies`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.access_token}`,
+            "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.body) throw new Error("No response body");
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let finalData: { scanned?: number; totalJobs?: number } = {};
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          try {
+            const event = JSON.parse(line);
+            if (event.type === "start") {
+              setScanProgress({ completed: 0, total: event.total, currentCompany: "" });
+            } else if (event.type === "progress") {
+              setScanProgress({
+                completed: event.completed,
+                total: event.total,
+                currentCompany: event.company,
+              });
+            } else if (event.type === "complete") {
+              finalData = event;
+            }
+          } catch {
+            // skip malformed lines
+          }
+        }
+      }
 
       toast({
         title: "Scan Complete",
-        description: `Scanned ${data?.scanned || 0} companies, found ${data?.totalJobs || 0} total openings`,
+        description: `Scanned ${finalData.scanned || 0} companies, found ${finalData.totalJobs || 0} total openings`,
       });
 
       await fetchRecommendedJobs();
@@ -152,6 +202,7 @@ const RecommendedJobs = () => {
       toast({ title: "Error", description: "Failed to scan companies", variant: "destructive" });
     } finally {
       setScanning(false);
+      setScanProgress(null);
     }
   };
 
@@ -236,11 +287,34 @@ const RecommendedJobs = () => {
               className="rounded-full shadow-lg shadow-primary/20"
             >
               {scanning ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
-              {scanning ? "Scanning…" : "Scan All Companies"}
+              {scanning
+                ? scanProgress
+                  ? `${scanProgress.completed}/${scanProgress.total}`
+                  : "Starting…"
+                : "Scan All Companies"}
             </Button>
           </div>
         </div>
       </header>
+
+      {/* Scan progress bar */}
+      {scanning && scanProgress && scanProgress.total > 0 && (
+        <div className="sticky top-[73px] sm:top-[89px] z-10 bg-background/90 backdrop-blur-sm border-b border-border/40 px-4 sm:px-6 py-3">
+          <div className="container mx-auto max-w-4xl">
+            <div className="flex items-center gap-3">
+              <div className="flex-1">
+                <Progress value={(scanProgress.completed / scanProgress.total) * 100} className="h-2" />
+              </div>
+              <span className="text-xs tabular-nums text-muted-foreground shrink-0">
+                {scanProgress.completed}/{scanProgress.total}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1 truncate">
+              Scanning {scanProgress.currentCompany || "…"}
+            </p>
+          </div>
+        </div>
+      )}
 
       <main className="relative container mx-auto px-4 py-6 sm:py-8 max-w-4xl">
         <div className="mb-6">
