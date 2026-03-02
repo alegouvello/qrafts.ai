@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Footer } from "@/components/Footer";
@@ -274,169 +274,175 @@ const RecommendedJobs = () => {
     return false;
   };
 
+  // City → country mapping for grouping
+  const CITY_COUNTRY: Record<string, string> = {
+    "New York": "United States", "San Francisco": "United States", "Los Angeles": "United States",
+    "Seattle": "United States", "Chicago": "United States", "Austin": "United States",
+    "Boston": "United States", "Denver": "United States", "Washington DC": "United States",
+    "San Diego": "United States", "Miami": "United States", "Atlanta": "United States",
+    "Dallas": "United States", "Portland": "United States", "Phoenix": "United States",
+    "Minneapolis": "United States", "Detroit": "United States", "Philadelphia": "United States",
+    "Pittsburgh": "United States", "San Jose": "United States", "Palo Alto": "United States",
+    "Mountain View": "United States", "Sunnyvale": "United States", "Menlo Park": "United States",
+    "Cupertino": "United States", "Redmond": "United States", "Bellevue": "United States",
+    "Raleigh": "United States", "Nashville": "United States", "Salt Lake City": "United States",
+    "London": "United Kingdom", "Manchester": "United Kingdom", "Edinburgh": "United Kingdom",
+    "Dublin": "Ireland", "Paris": "France", "Berlin": "Germany", "Munich": "Germany",
+    "Hamburg": "Germany", "Amsterdam": "Netherlands", "Stockholm": "Sweden",
+    "Copenhagen": "Denmark", "Oslo": "Norway", "Helsinki": "Finland",
+    "Zurich": "Switzerland", "Geneva": "Switzerland", "Milan": "Italy", "Rome": "Italy",
+    "Madrid": "Spain", "Barcelona": "Spain", "Lisbon": "Portugal",
+    "Tokyo": "Japan", "Singapore": "Singapore", "Sydney": "Australia",
+    "Melbourne": "Australia", "Toronto": "Canada", "Vancouver": "Canada",
+    "Montreal": "Canada", "São Paulo": "Brazil", "Tel Aviv": "Israel",
+    "Bangalore": "India", "Mumbai": "India", "Hyderabad": "India",
+    "New Delhi": "India", "Seoul": "South Korea", "Taipei": "Taiwan",
+    "Hong Kong": "Hong Kong", "Shanghai": "China", "Beijing": "China",
+    "Warsaw": "Poland", "Prague": "Czech Republic", "Budapest": "Hungary",
+    "Bucharest": "Romania", "Riyadh": "Saudi Arabia", "Dubai": "UAE",
+  };
+
+  // Aliases: lowercase → canonical city
+  const CITY_ALIASES: Record<string, string> = {
+    "nyc": "New York", "ny": "New York", "new york": "New York",
+    "new york city": "New York", "manhattan": "New York", "brooklyn": "New York",
+    "sf": "San Francisco", "san francisco": "San Francisco", "bay area": "San Francisco",
+    "san francisco bay area": "San Francisco",
+    "la": "Los Angeles", "los angeles": "Los Angeles",
+    "seattle": "Seattle", "chicago": "Chicago", "austin": "Austin",
+    "boston": "Boston", "denver": "Denver",
+    "dc": "Washington DC", "washington dc": "Washington DC", "washington d.c.": "Washington DC",
+    "london": "London", "dublin": "Dublin", "paris": "Paris", "berlin": "Berlin",
+    "munich": "Munich", "amsterdam": "Amsterdam", "stockholm": "Stockholm",
+    "milan": "Milan", "rome": "Rome", "madrid": "Madrid", "barcelona": "Barcelona",
+    "tokyo": "Tokyo", "singapore": "Singapore", "sydney": "Sydney",
+    "toronto": "Toronto", "vancouver": "Vancouver", "montreal": "Montreal",
+    "sao paulo": "São Paulo", "são paulo": "São Paulo",
+    "tel aviv": "Tel Aviv", "bangalore": "Bangalore", "mumbai": "Mumbai",
+    "hyderabad": "Hyderabad", "new delhi": "New Delhi",
+    "san diego": "San Diego", "miami": "Miami", "atlanta": "Atlanta",
+    "dallas": "Dallas", "portland": "Portland",
+    "palo alto": "Palo Alto", "mountain view": "Mountain View",
+    "sunnyvale": "Sunnyvale", "menlo park": "Menlo Park",
+    "cupertino": "Cupertino", "redmond": "Redmond", "bellevue": "Bellevue",
+    "remote": "Remote", "anywhere": "Remote", "worldwide": "Remote", "global": "Remote",
+    "hybrid": "Hybrid",
+  };
+
+  // Check if a string looks like a valid city (not an address, nonsense, etc.)
+  const isValidLocation = (s: string): boolean => {
+    if (!s || s.length < 3) return false;
+    // Filter out street addresses (start with numbers)
+    if (/^\d+\s/.test(s)) return false;
+    // Filter out entries that are just numbers
+    if (/^\d+$/.test(s)) return false;
+    // Filter out things like "3 other locations", "multiple locations"
+    if (/other\s*location/i.test(s) || /multiple/i.test(s)) return false;
+    // Filter out things that look like descriptions, not places
+    if (/\b(travel|friendly|flexible|competitive|tbd|n\/a|various)\b/i.test(s)) return false;
+    // Filter out very long strings (likely descriptions)
+    if (s.length > 40) return false;
+    return true;
+  };
+
   // Normalize a single city token to a canonical name
-  const normalizeCityToken = (raw: string): string => {
-    if (!raw) return "Other";
+  const normalizeCityToken = (raw: string): string | null => {
+    if (!raw) return null;
     let s = raw.trim();
-    // Remove parenthetical qualifiers like (onsite), (remote), (hybrid)
+    // Remove parenthetical qualifiers
     s = s.replace(/\s*\(.*?\)\s*/g, "").trim();
-    if (!s) return "Other";
+    if (!s || !isValidLocation(s)) return null;
 
     const lower = s.toLowerCase().replace(/['']/g, "'");
 
-    // Extensive alias map
-    const aliases: Record<string, string> = {
-      // New York
-      "nyc": "New York",
-      "ny": "New York",
-      "new york": "New York",
-      "new york city": "New York",
-      "new york city, ny": "New York",
-      "new york, ny": "New York",
-      "manhattan": "New York",
-      "brooklyn": "New York",
-      // San Francisco
-      "sf": "San Francisco",
-      "san francisco": "San Francisco",
-      "san francisco, ca": "San Francisco",
-      "san francisco bay area": "San Francisco",
-      "bay area": "San Francisco",
-      // Los Angeles
-      "la": "Los Angeles",
-      "los angeles": "Los Angeles",
-      "los angeles, ca": "Los Angeles",
-      // Seattle
-      "seattle": "Seattle",
-      "seattle, wa": "Seattle",
-      "seattle, washington": "Seattle",
-      // Chicago
-      "chicago": "Chicago",
-      "chicago, il": "Chicago",
-      "chicago, illinois": "Chicago",
-      // Austin
-      "austin": "Austin",
-      "austin, tx": "Austin",
-      "austin, texas": "Austin",
-      // Boston
-      "boston": "Boston",
-      "boston, ma": "Boston",
-      "boston, massachusetts": "Boston",
-      // Denver
-      "denver": "Denver",
-      "denver, co": "Denver",
-      "denver, colorado": "Denver",
-      // DC
-      "dc": "Washington DC",
-      "washington dc": "Washington DC",
-      "washington, dc": "Washington DC",
-      "washington d.c.": "Washington DC",
-      // London
-      "london": "London",
-      "london, uk": "London",
-      "london, england": "London",
-      "london, united kingdom": "London",
-      // Dublin
-      "dublin": "Dublin",
-      "dublin, ireland": "Dublin",
-      // San Diego
-      "san diego": "San Diego",
-      "san diego, ca": "San Diego",
-      // Miami
-      "miami": "Miami",
-      "miami, fl": "Miami",
-      "miami, florida": "Miami",
-      // Atlanta
-      "atlanta": "Atlanta",
-      "atlanta, ga": "Atlanta",
-      // Dallas
-      "dallas": "Dallas",
-      "dallas, tx": "Dallas",
-      // Portland
-      "portland": "Portland",
-      "portland, or": "Portland",
-      // São Paulo
-      "sao paulo": "São Paulo",
-      "são paulo": "São Paulo",
-      "sao paulo, brazil": "São Paulo",
-      "são paulo, brazil": "São Paulo",
-      // Remote
-      "remote": "Remote",
-      "anywhere": "Remote",
-      "worldwide": "Remote",
-      "global": "Remote",
-      // Hybrid
-      "hybrid": "Hybrid",
-    };
+    // Check direct alias
+    if (CITY_ALIASES[lower]) return CITY_ALIASES[lower];
 
-    if (aliases[lower]) return aliases[lower];
+    // Strip state suffixes (full name or abbreviation)
+    const stateStripped = s.replace(/,\s*(Alabama|Alaska|Arizona|Arkansas|California|Colorado|Connecticut|Delaware|Florida|Georgia|Hawaii|Idaho|Illinois|Indiana|Iowa|Kansas|Kentucky|Louisiana|Maine|Maryland|Massachusetts|Michigan|Minnesota|Mississippi|Missouri|Montana|Nebraska|Nevada|New Hampshire|New Jersey|New Mexico|New York|North Carolina|North Dakota|Ohio|Oklahoma|Oregon|Pennsylvania|Rhode Island|South Carolina|South Dakota|Tennessee|Texas|Utah|Vermont|Virginia|Washington|West Virginia|Wisconsin|Wyoming|[A-Z]{2})$/i, "").trim();
+    const strippedLower = stateStripped.toLowerCase();
+    if (CITY_ALIASES[strippedLower]) return CITY_ALIASES[strippedLower];
 
-    // Strip US state suffix ", California" / ", CA" etc.
-    const stateFullMatch = s.match(/^(.+),\s*(Alabama|Alaska|Arizona|Arkansas|California|Colorado|Connecticut|Delaware|Florida|Georgia|Hawaii|Idaho|Illinois|Indiana|Iowa|Kansas|Kentucky|Louisiana|Maine|Maryland|Massachusetts|Michigan|Minnesota|Mississippi|Missouri|Montana|Nebraska|Nevada|New Hampshire|New Jersey|New Mexico|New York|North Carolina|North Dakota|Ohio|Oklahoma|Oregon|Pennsylvania|Rhode Island|South Carolina|South Dakota|Tennessee|Texas|Utah|Vermont|Virginia|Washington|West Virginia|Wisconsin|Wyoming)$/i);
-    if (stateFullMatch) {
-      const city = stateFullMatch[1].trim();
-      // Re-check aliases with just the city
-      const cityLower = city.toLowerCase();
-      return aliases[cityLower] || city;
-    }
-    const stateAbbrMatch = s.match(/^(.+),\s*([A-Z]{2})$/);
-    if (stateAbbrMatch) {
-      const city = stateAbbrMatch[1].trim();
-      const cityLower = city.toLowerCase();
-      return aliases[cityLower] || city;
-    }
-    // Strip country suffix like ", Brazil", ", UK", etc.
-    const countryMatch = s.match(/^(.+),\s*\w[\w\s]*$/);
-    if (countryMatch) {
-      const city = countryMatch[1].trim();
-      const cityLower = city.toLowerCase();
-      if (aliases[cityLower]) return aliases[cityLower];
-    }
-    return s;
+    // Strip country suffix
+    const countryStripped = s.replace(/,\s*\w[\w\s]*$/, "").trim();
+    const countryStrippedLower = countryStripped.toLowerCase();
+    if (CITY_ALIASES[countryStrippedLower]) return CITY_ALIASES[countryStrippedLower];
+
+    // If the stripped version is in CITY_COUNTRY, use it
+    if (CITY_COUNTRY[stateStripped]) return stateStripped;
+    if (CITY_COUNTRY[countryStripped]) return countryStripped;
+
+    // If still valid, return as-is
+    if (isValidLocation(stateStripped) && stateStripped.length >= 3) return stateStripped;
+    return null;
   };
 
   // Split multi-location strings and normalize each
   const getJobLocations = (loc: string | null): string[] => {
-    if (!loc) return ["Other"];
-    // First split on ; | and "or"
+    if (!loc) return [];
     const parts = loc
       .split(/[;|]/)
       .flatMap(p => p.split(/\bor\b/i))
       .flatMap(p => p.split(/\s*[-–—\/&]\s*/))
       .flatMap(p => p.split(/\s*\+\s*/))
       .flatMap(p => {
-        // Also split on comma BUT only if it separates cities (not "City, State")
-        // Heuristic: if after comma there's a 2-letter state code or known state name, don't split
         const trimmed = p.trim();
         if (!trimmed) return [];
-        // Check if it's "City, State" pattern — don't split those
         if (/^[^,]+,\s*([A-Z]{2}|[A-Z][a-z]+(\s[A-Z][a-z]+)?)$/.test(trimmed)) {
           return [trimmed];
         }
-        // If there are multiple commas, split on all of them
         if ((trimmed.match(/,/g) || []).length > 1) {
           return trimmed.split(",").map(s => s.trim()).filter(Boolean);
         }
         return [trimmed];
       })
       .filter(Boolean);
-    const normalized = new Set(parts.map(normalizeCityToken));
-    normalized.delete("Other");
-    if (normalized.size === 0) return ["Other"];
+    const normalized = new Set(parts.map(normalizeCityToken).filter(Boolean) as string[]);
     return [...normalized];
   };
 
-  // Extract unique normalized locations and departments for filters
-  const locations = useMemo(() => {
+  // Extract locations grouped by country
+  const locationGroups = useMemo(() => {
     const counts = new Map<string, number>();
     jobs.forEach(j => {
       for (const loc of getJobLocations(j.location)) {
         counts.set(loc, (counts.get(loc) || 0) + 1);
       }
     });
-    // Sort by frequency descending, then alphabetically
-    return [...counts.entries()]
-      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-      .map(([loc, count]) => ({ label: loc, count }));
+
+    // Group by country
+    const groups = new Map<string, { label: string; count: number }[]>();
+    for (const [loc, count] of counts) {
+      if (loc === "Remote" || loc === "Hybrid") {
+        const key = loc;
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key)!.push({ label: loc, count });
+      } else {
+        const country = CITY_COUNTRY[loc] || "Other";
+        if (!groups.has(country)) groups.set(country, []);
+        groups.get(country)!.push({ label: loc, count });
+      }
+    }
+
+    // Sort cities within each group by count desc
+    for (const cities of groups.values()) {
+      cities.sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+    }
+
+    // Order groups: Remote first, then Hybrid, then countries by total count
+    const groupOrder: { group: string; cities: { label: string; count: number }[] }[] = [];
+    if (groups.has("Remote")) { groupOrder.push({ group: "Remote", cities: groups.get("Remote")! }); groups.delete("Remote"); }
+    if (groups.has("Hybrid")) { groupOrder.push({ group: "Hybrid", cities: groups.get("Hybrid")! }); groups.delete("Hybrid"); }
+
+    const sortedCountries = [...groups.entries()]
+      .map(([group, cities]) => ({ group, cities, total: cities.reduce((s, c) => s + c.count, 0) }))
+      .sort((a, b) => b.total - a.total || a.group.localeCompare(b.group));
+
+    for (const { group, cities } of sortedCountries) {
+      groupOrder.push({ group, cities });
+    }
+
+    return groupOrder;
   }, [jobs]);
 
   const departments = useMemo(() => {
@@ -565,18 +571,25 @@ const RecommendedJobs = () => {
             </div>
 
             {/* Filters */}
-            {(locations.length > 0 || departments.length > 0) && (
+            {(locationGroups.length > 0 || departments.length > 0) && (
               <div className="flex flex-wrap items-center gap-2 mb-6">
                 <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
-                {locations.length > 0 && (
+                {locationGroups.length > 0 && (
                   <Select value={locationFilter} onValueChange={setLocationFilter}>
-                    <SelectTrigger className="w-[160px] h-8 text-xs">
+                    <SelectTrigger className="w-[200px] h-8 text-xs">
                       <SelectValue placeholder="Location" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Locations</SelectItem>
-                      {locations.map(loc => (
-                        <SelectItem key={loc.label} value={loc.label}>{loc.label} ({loc.count})</SelectItem>
+                      {locationGroups.map(({ group, cities }) => (
+                        <SelectGroup key={group}>
+                          {group !== "Remote" && group !== "Hybrid" && (
+                            <SelectLabel className="text-xs text-muted-foreground">{group}</SelectLabel>
+                          )}
+                          {cities.map(c => (
+                            <SelectItem key={c.label} value={c.label}>{c.label} ({c.count})</SelectItem>
+                          ))}
+                        </SelectGroup>
                       ))}
                     </SelectContent>
                   </Select>
