@@ -130,18 +130,20 @@ serve(async (req) => {
       console.log(`Scrape returned ${scrapedMarkdown.length} chars, ${scrapedLinks.length} links`);
     }
 
-    // ─── Strategy 2.5: Try known job board platforms ───
+    // ─── Strategy 2.5: Try known job board platforms (in parallel, pick best) ───
     const companySlug = companyName.toLowerCase().replace(/\s+/g, "");
     const jobBoardUrls = [
       `https://boards.greenhouse.io/${companySlug}`,
       `https://jobs.lever.co/${companySlug}`,
       `https://jobs.ashbyhq.com/${companySlug}`,
       `https://${companySlug}.jobs.personio.com`,
+      `https://${companySlug}.workable.com`,
+      `https://apply.workable.com/${companySlug}`,
     ];
 
-    for (const boardUrl of jobBoardUrls) {
+    console.log("Strategy 2.5: Trying all job board platforms in parallel...");
+    const boardPromises = jobBoardUrls.map(async (boardUrl) => {
       try {
-        console.log(`Strategy 2.5: Trying job board: ${boardUrl}`);
         const boardResp = await fetch("https://api.firecrawl.dev/v1/scrape", {
           method: "POST",
           headers: {
@@ -152,54 +154,65 @@ serve(async (req) => {
             url: boardUrl,
             formats: ["markdown", "links"],
             onlyMainContent: true,
-            waitFor: 2000,
+            waitFor: 3000,
           }),
         });
         if (boardResp.ok) {
           const boardData = await boardResp.json();
           const boardMd = boardData.data?.markdown || boardData.markdown || "";
           const boardLinks = boardData.data?.links || boardData.links || [];
-          if (boardMd.length > 200) {
-            allMarkdown += `\n\n---\nJOB BOARD (${boardUrl}):\n${boardMd}`;
-            allLinks = [...allLinks, ...boardLinks];
-            console.log(`Job board ${boardUrl} returned ${boardMd.length} chars, ${boardLinks.length} links`);
-            break; // Found a working job board, no need to try others
-          }
+          console.log(`Job board ${boardUrl}: ${boardMd.length} chars, ${boardLinks.length} links`);
+          return { url: boardUrl, markdown: boardMd, links: boardLinks };
         }
-      } catch (e) {
-        // Job board URL didn't work, try next
-      }
-    }
-
-    // ─── Strategy 3: Map careers URLs ───
-    console.log("Strategy 3: Mapping careers URLs...");
-    const mapResponse = await fetch("https://api.firecrawl.dev/v1/map", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        url: targetUrl,
-        search: "jobs positions openings careers",
-        limit: 100,
-        includeSubdomains: true,
-      }),
+      } catch (e) { /* skip */ }
+      return null;
     });
 
+    const boardResults = (await Promise.all(boardPromises)).filter(Boolean);
+    // Pick the board with the most content (not just >200 chars)
+    const bestBoard = boardResults.sort((a, b) => (b!.markdown.length - a!.markdown.length))[0];
+    if (bestBoard && bestBoard.markdown.length > 500) {
+      allMarkdown += `\n\n---\nJOB BOARD (${bestBoard.url}):\n${bestBoard.markdown}`;
+      allLinks = [...allLinks, ...bestBoard.links];
+      console.log(`Best job board: ${bestBoard.url} with ${bestBoard.markdown.length} chars`);
+    }
+
+    // ─── Strategy 3: Map careers URLs + job board URLs ───
+    const urlsToMap = [targetUrl];
+    if (bestBoard && bestBoard.markdown.length > 500) {
+      urlsToMap.push(bestBoard.url);
+    }
+
     let jobDetailLinks: string[] = [];
-    if (mapResponse.ok) {
-      const mapData = await mapResponse.json();
-      const mappedLinks = mapData.links || mapData.data?.links || [];
-      const jobLinks = mappedLinks.filter((l: string) =>
-        /job|position|opening|career|role|apply/i.test(l) && !/blog|news|about|privacy|terms/i.test(l)
-      );
-      allLinks = [...allLinks, ...jobLinks];
-      // Identify individual job detail pages (URLs with IDs/slugs at the end)
-      jobDetailLinks = jobLinks.filter((l: string) =>
-        /\/[a-f0-9-]{8,}|\/\d{4,}|\/[a-z]+-[a-z]+-[a-z]+/i.test(l)
-      );
-      console.log(`Map returned ${mappedLinks.length} total, ${jobLinks.length} job-like, ${jobDetailLinks.length} detail pages`);
+    for (const mapUrl of urlsToMap) {
+      console.log(`Strategy 3: Mapping URLs from ${mapUrl}...`);
+      const mapResponse = await fetch("https://api.firecrawl.dev/v1/map", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url: mapUrl,
+          search: "jobs positions openings careers",
+          limit: 200,
+          includeSubdomains: true,
+        }),
+      });
+
+      if (mapResponse.ok) {
+        const mapData = await mapResponse.json();
+        const mappedLinks = mapData.links || mapData.data?.links || [];
+        const jobLinks = mappedLinks.filter((l: string) =>
+          /job|position|opening|career|role|apply/i.test(l) && !/blog|news|about|privacy|terms/i.test(l)
+        );
+        allLinks = [...allLinks, ...jobLinks];
+        const detailLinks = jobLinks.filter((l: string) =>
+          /\/[a-f0-9-]{8,}|\/\d{4,}|\/[a-z]+-[a-z]+-[a-z]+/i.test(l)
+        );
+        jobDetailLinks = [...jobDetailLinks, ...detailLinks];
+        console.log(`Map ${mapUrl}: ${mappedLinks.length} total, ${jobLinks.length} job-like, ${detailLinks.length} detail pages`);
+      }
     }
 
     // ─── Strategy 4: Deep crawl individual job pages for richer data ───
