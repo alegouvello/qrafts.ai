@@ -283,7 +283,7 @@ const RecommendedJobs = () => {
   const hasActiveFilters = locationFilter !== "all" || departmentFilter !== "all";
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="min-h-screen bg-background relative flex flex-col">
       <SEO
         title="Recommended Jobs - Qrafts"
         description="AI-matched job recommendations based on your resume and profile."
@@ -338,7 +338,7 @@ const RecommendedJobs = () => {
         </div>
       )}
 
-      <main className="relative container mx-auto px-4 py-6 sm:py-8 max-w-4xl">
+      <main className="relative container mx-auto px-4 py-6 sm:py-8 max-w-4xl flex-1">
         <div className="mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold mb-1">Recommended Jobs</h1>
           <p className="text-sm text-muted-foreground">
