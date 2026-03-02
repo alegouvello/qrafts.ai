@@ -274,23 +274,81 @@ const RecommendedJobs = () => {
     return false;
   };
 
-  // Extract unique locations and departments for filters
+  // Normalize a raw location string to a canonical city name
+  const normalizeLocation = (raw: string): string => {
+    if (!raw) return "Other";
+    let s = raw.trim();
+    // Remove parenthetical qualifiers like (onsite), (remote), (hybrid)
+    s = s.replace(/\s*\(.*?\)\s*/g, "").trim();
+    // Common aliases
+    const aliases: Record<string, string> = {
+      "nyc": "New York City",
+      "ny": "New York City",
+      "new york": "New York City",
+      "new york city": "New York City",
+      "new york city, ny": "New York City",
+      "sf": "San Francisco",
+      "san francisco, ca": "San Francisco",
+      "la": "Los Angeles",
+      "los angeles, ca": "Los Angeles",
+      "seattle, wa": "Seattle",
+      "chicago, il": "Chicago",
+      "austin, tx": "Austin",
+      "boston, ma": "Boston",
+      "denver, co": "Denver",
+      "dc": "Washington DC",
+      "washington, dc": "Washington DC",
+      "london, uk": "London",
+      "london, england": "London",
+    };
+    const lower = s.toLowerCase();
+    if (aliases[lower]) return aliases[lower];
+    // Strip state suffix like ", CA" / ", NY" for US cities
+    const stateMatch = s.match(/^(.+),\s*([A-Z]{2})$/);
+    if (stateMatch) return stateMatch[1].trim();
+    return s;
+  };
+
+  // Split multi-location strings and normalize each
+  const getJobLocations = (loc: string | null): string[] => {
+    if (!loc) return ["Other"];
+    // Split on ; or |
+    const parts = loc.split(/[;|]/).map(p => p.trim()).filter(Boolean);
+    const normalized = new Set(parts.map(normalizeLocation));
+    return [...normalized];
+  };
+
+  // Extract unique normalized locations and departments for filters
   const locations = useMemo(() => {
-    const set = new Set<string>();
-    jobs.forEach(j => { if (j.location) set.add(j.location); });
-    return [...set].sort();
+    const counts = new Map<string, number>();
+    jobs.forEach(j => {
+      for (const loc of getJobLocations(j.location)) {
+        counts.set(loc, (counts.get(loc) || 0) + 1);
+      }
+    });
+    // Sort by frequency descending, then alphabetically
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .map(([loc, count]) => ({ label: loc, count }));
   }, [jobs]);
 
   const departments = useMemo(() => {
-    const set = new Set<string>();
-    jobs.forEach(j => { if (j.department) set.add(j.department); });
-    return [...set].sort();
+    const counts = new Map<string, number>();
+    jobs.forEach(j => {
+      if (j.department) counts.set(j.department, (counts.get(j.department) || 0) + 1);
+    });
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .map(([dept, count]) => ({ label: dept, count }));
   }, [jobs]);
 
   // Apply filters
   const filteredJobs = useMemo(() => {
     return jobs.filter(j => {
-      if (locationFilter !== "all" && j.location !== locationFilter) return false;
+      if (locationFilter !== "all") {
+        const jobLocs = getJobLocations(j.location);
+        if (!jobLocs.includes(locationFilter)) return false;
+      }
       if (departmentFilter !== "all" && j.department !== departmentFilter) return false;
       return true;
     });
@@ -411,7 +469,7 @@ const RecommendedJobs = () => {
                     <SelectContent>
                       <SelectItem value="all">All Locations</SelectItem>
                       {locations.map(loc => (
-                        <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+                        <SelectItem key={loc.label} value={loc.label}>{loc.label} ({loc.count})</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -424,7 +482,7 @@ const RecommendedJobs = () => {
                     <SelectContent>
                       <SelectItem value="all">All Departments</SelectItem>
                       {departments.map(dep => (
-                        <SelectItem key={dep} value={dep}>{dep}</SelectItem>
+                        <SelectItem key={dep.label} value={dep.label}>{dep.label} ({dep.count})</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
