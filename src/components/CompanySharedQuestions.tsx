@@ -1,4 +1,3 @@
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { HelpCircle } from "lucide-react";
 
@@ -16,7 +15,6 @@ interface CompanySharedQuestionsProps {
 }
 
 export const CompanySharedQuestions = ({ companyName, questions }: CompanySharedQuestionsProps) => {
-  // Group questions by position
   const grouped = questions.reduce((acc, q) => {
     if (!acc[q.position]) acc[q.position] = [];
     acc[q.position].push(q);
@@ -24,40 +22,36 @@ export const CompanySharedQuestions = ({ companyName, questions }: CompanyShared
   }, {} as Record<string, SharedQuestion[]>);
 
   return (
-    <Card className="border-border/40 bg-card/50 backdrop-blur-sm">
-      <div className="p-8">
-        <h2 className="text-2xl font-semibold mb-6 flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <HelpCircle className="h-5 w-5 text-primary" />
-          </div>
-          Community Interview Questions
-          {questions.length > 0 && (
-            <Badge variant="secondary" className="ml-2">{questions.length}</Badge>
-          )}
-        </h2>
-
-        {questions.length === 0 ? (
-          <p className="text-muted-foreground text-center py-8">
-            No interview questions shared yet for {companyName}. Questions are automatically shared when applications are added.
-          </p>
-        ) : (
-          <div className="space-y-6">
-            {Object.entries(grouped).map(([position, qs]) => (
-              <div key={position}>
-                <h3 className="font-medium text-sm text-muted-foreground mb-3">{position}</h3>
-                <div className="space-y-2">
-                  {qs.map((q, i) => (
-                    <div key={q.id} className="flex gap-3 p-3 rounded-lg bg-background/50 border border-border/30">
-                      <span className="text-xs font-mono text-muted-foreground mt-0.5 shrink-0">{i + 1}.</span>
-                      <p className="text-sm">{q.question_text}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+    <div className="rounded-xl border border-border/40 bg-card/50 p-4">
+      <h2 className="text-sm font-semibold mb-3 flex items-center gap-1.5">
+        <HelpCircle className="h-3.5 w-3.5 text-primary" />
+        Community Interview Questions
+        {questions.length > 0 && (
+          <Badge variant="secondary" className="text-[10px] ml-1 font-normal">{questions.length}</Badge>
         )}
-      </div>
-    </Card>
+      </h2>
+
+      {questions.length === 0 ? (
+        <p className="text-xs text-muted-foreground text-center py-5">
+          No interview questions shared yet for {companyName}. Questions are automatically shared when applications are added.
+        </p>
+      ) : (
+        <div className="space-y-3">
+          {Object.entries(grouped).map(([position, qs]) => (
+            <div key={position}>
+              <h3 className="text-[11px] font-medium text-muted-foreground mb-1.5">{position}</h3>
+              <div className="space-y-1">
+                {qs.map((q, i) => (
+                  <div key={q.id} className="flex gap-2 px-3 py-2 rounded-lg bg-muted/30">
+                    <span className="text-[10px] font-mono text-muted-foreground mt-0.5 shrink-0">{i + 1}.</span>
+                    <p className="text-[13px]">{q.question_text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
