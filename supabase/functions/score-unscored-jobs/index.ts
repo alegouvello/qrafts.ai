@@ -109,8 +109,10 @@ serve(async (req) => {
         for (let i = 0; i < allUnscoredJobs.length; i += SCORE_BATCH) {
           const batch = allUnscoredJobs.slice(i, i + SCORE_BATCH);
 
-          try {
-            const scorePrompt = `Given this resume and list of job openings, score each job on a 0-100 scale for how well the candidate matches. Consider:
+          const MAX_RETRIES = 2;
+          for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+            try {
+              const scorePrompt = `Given this resume and list of job openings, score each job on a 0-100 scale for how well the candidate matches. Consider:
 1. Skills and experience alignment with the SPECIFIC role
 2. Experience level match
 3. Role responsibilities fit
@@ -132,31 +134,58 @@ ${JSON.stringify(batch.map((j: any, idx: number) => ({
 Return a JSON array with objects: { index: number, score: number, reasons: string[] }
 Only return the JSON array, no markdown.`;
 
-            const scoreResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${LOVABLE_API_KEY}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                model: "google/gemini-2.5-flash",
-                messages: [
-                  { role: "system", content: "You score job-resume match quality. Respond with JSON array only." },
-                  { role: "user", content: scorePrompt },
-                ],
-              }),
-            });
+              const scoreResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${LOVABLE_API_KEY}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  model: "google/gemini-2.5-flash",
+                  messages: [
+                    { role: "system", content: "You score job-resume match quality. Respond with JSON array only. No markdown fences." },
+                    { role: "user", content: scorePrompt },
+                  ],
+                }),
+              });
 
-            if (scoreResponse.ok) {
+              if (!scoreResponse.ok) {
+                console.error(`AI API error at offset ${i}, attempt ${attempt}: HTTP ${scoreResponse.status}`);
+                if (attempt < MAX_RETRIES) continue;
+                break;
+              }
+
               const scoreData = await scoreResponse.json();
               const scoreContent = scoreData.choices?.[0]?.message?.content || "[]";
               const cleaned = scoreContent.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-              const scores = JSON.parse(cleaned);
+              
+              // Try to fix truncated JSON by finding the last complete object
+              let scores: any[];
+              try {
+                scores = JSON.parse(cleaned);
+              } catch {
+                // Try to salvage partial JSON: find last complete }] or }, ]
+                const lastBracket = cleaned.lastIndexOf("}");
+                if (lastBracket > 0) {
+                  const truncated = cleaned.slice(0, lastBracket + 1) + "]";
+                  try {
+                    scores = JSON.parse(truncated);
+                    console.log(`Salvaged partial JSON at offset ${i}: ${scores.length} scores recovered`);
+                  } catch {
+                    console.error(`JSON unsalvageable at offset ${i}, attempt ${attempt}`);
+                    if (attempt < MAX_RETRIES) continue;
+                    scores = [];
+                  }
+                } else {
+                  if (attempt < MAX_RETRIES) continue;
+                  scores = [];
+                }
+              }
 
               if (Array.isArray(scores)) {
                 for (const score of scores) {
                   const job = batch[score.index];
-                  if (!job) continue;
+                  if (!job || typeof score.score !== "number") continue;
 
                   await supabase.from("job_match_scores").upsert(
                     {
@@ -170,9 +199,11 @@ Only return the JSON array, no markdown.`;
                   totalScored++;
                 }
               }
+              break; // Success, exit retry loop
+            } catch (e) {
+              console.error(`Scoring batch error at offset ${i}, attempt ${attempt}:`, e);
+              if (attempt >= MAX_RETRIES) break;
             }
-          } catch (e) {
-            console.error(`Scoring batch error at offset ${i}:`, e);
           }
 
           controller.enqueue(encoder.encode(JSON.stringify({
