@@ -66,266 +66,239 @@ serve(async (req) => {
 
     console.log(`Crawling careers for ${companyName}: ${targetUrl} (domain: ${companyDomain})`);
 
-    // Job aggregator domains to exclude from search results
-    const aggregatorDomains = ["indeed.com", "glassdoor.com", "linkedin.com", "ziprecruiter.com", "monster.com", "careerbuilder.com", "simplyhired.com"];
-
-    // ─── Strategy 1: Firecrawl search scoped to company domain ───
-    console.log("Strategy 1: Searching for job listings via Firecrawl search...");
-    // Use site: filter to scope search to the company's actual domain
-    const siteFilter = companyDomain ? `site:${companyDomain}` : "";
-    const searchResponse = await fetch("https://api.firecrawl.dev/v1/search", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query: `${siteFilter} ${companyName} careers jobs openings apply`,
-        limit: 5,
-        scrapeOptions: { formats: ["markdown"] },
-      }),
-    });
-
-    let allMarkdown = "";
-    let allLinks: string[] = [];
-
-    if (searchResponse.ok) {
-      const searchData = await searchResponse.json();
-      const results = searchData.data || searchData.results || [];
-      for (const r of results) {
-        // Skip results from job aggregator sites
-        const isAggregator = aggregatorDomains.some(d => r.url?.includes(d));
-        if (isAggregator) {
-          console.log(`Skipping aggregator result: ${r.url}`);
-          continue;
-        }
-        if (r.markdown) allMarkdown += "\n\n---\n" + r.markdown;
-        if (r.url) allLinks.push(r.url);
-      }
-      console.log(`Search returned ${results.length} results (after filtering), ${allMarkdown.length} chars`);
-    }
-
-    // ─── Strategy 2: Scrape careers page directly ───
-    console.log("Strategy 2: Scraping careers page directly...");
-    const scrapeResponse = await fetch("https://api.firecrawl.dev/v1/scrape", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        url: targetUrl,
-        formats: ["markdown", "links"],
-        onlyMainContent: true,
-        waitFor: 3000,
-      }),
-    });
-
-    if (scrapeResponse.ok) {
-      const scrapeData = await scrapeResponse.json();
-      const scrapedMarkdown = scrapeData.data?.markdown || scrapeData.markdown || "";
-      const scrapedLinks = scrapeData.data?.links || scrapeData.links || [];
-      allMarkdown += "\n\n---\nDIRECT CAREERS PAGE:\n" + scrapedMarkdown;
-      allLinks = [...allLinks, ...scrapedLinks];
-      console.log(`Scrape returned ${scrapedMarkdown.length} chars, ${scrapedLinks.length} links`);
-    }
-
-    // ─── Strategy 2.5: Try known job board platforms (in parallel, pick best) ───
     const companySlug = companyName.toLowerCase().replace(/\s+/g, "");
-    const jobBoardUrls = [
-      `https://boards.greenhouse.io/${companySlug}`,
-      `https://jobs.lever.co/${companySlug}`,
-      `https://jobs.ashbyhq.com/${companySlug}`,
-      `https://${companySlug}.jobs.personio.com`,
-      `https://${companySlug}.workable.com`,
-      `https://apply.workable.com/${companySlug}`,
+
+    // ─── Strategy 0: Direct job board APIs (structured data, no scraping needed) ───
+    let apiJobs: any[] = [];
+    const jobBoardApis = [
+      {
+        name: "Ashby",
+        url: `https://api.ashbyhq.com/posting-api/job-board/${companySlug}?includeCompensation=true`,
+        parse: (data: any) => (data.jobs || []).filter((j: any) => j.isListed !== false).map((j: any) => ({
+          title: j.title,
+          url: j.jobUrl || j.applyUrl || null,
+          location: j.location || j.locationName || null,
+          department: j.departmentName || j.department || null,
+          description: j.descriptionPlain?.slice(0, 200) || null,
+          compensation: j.compensation ? `${j.compensation.compensationTierSummary || ''}`.trim() || null : null,
+        })),
+      },
+      {
+        name: "Greenhouse",
+        url: `https://boards-api.greenhouse.io/v1/boards/${companySlug}/jobs`,
+        parse: (data: any) => (data.jobs || []).map((j: any) => ({
+          title: j.title,
+          url: j.absolute_url || null,
+          location: j.location?.name || null,
+          department: j.departments?.[0]?.name || null,
+          description: null,
+        })),
+      },
+      {
+        name: "Lever",
+        url: `https://api.lever.co/v0/postings/${companySlug}?mode=json`,
+        parse: (data: any) => (Array.isArray(data) ? data : []).map((j: any) => ({
+          title: j.text,
+          url: j.hostedUrl || j.applyUrl || null,
+          location: j.categories?.location || null,
+          department: j.categories?.department || j.categories?.team || null,
+          description: j.descriptionPlain?.slice(0, 200) || null,
+        })),
+      },
     ];
 
-    console.log("Strategy 2.5: Trying all job board platforms in parallel...");
-    const boardPromises = jobBoardUrls.map(async (boardUrl) => {
+    console.log("Strategy 0: Trying direct job board APIs...");
+    const apiPromises = jobBoardApis.map(async (board) => {
       try {
-        const boardResp = await fetch("https://api.firecrawl.dev/v1/scrape", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            url: boardUrl,
-            formats: ["markdown", "links"],
-            onlyMainContent: true,
-            waitFor: 3000,
-          }),
+        const resp = await fetch(board.url, {
+          headers: { "Accept": "application/json" },
         });
-        if (boardResp.ok) {
-          const boardData = await boardResp.json();
-          const boardMd = boardData.data?.markdown || boardData.markdown || "";
-          const boardLinks = boardData.data?.links || boardData.links || [];
-          console.log(`Job board ${boardUrl}: ${boardMd.length} chars, ${boardLinks.length} links`);
-          return { url: boardUrl, markdown: boardMd, links: boardLinks };
+        if (resp.ok) {
+          const data = await resp.json();
+          const parsed = board.parse(data);
+          console.log(`${board.name} API: ${parsed.length} jobs found`);
+          if (parsed.length > 0) return { name: board.name, jobs: parsed };
         }
-      } catch (e) { /* skip */ }
+      } catch (e) {
+        // API not available for this company
+      }
       return null;
     });
 
-    const boardResults = (await Promise.all(boardPromises)).filter(Boolean);
-    // Pick the board with the most content (not just >200 chars)
-    const bestBoard = boardResults.sort((a, b) => (b!.markdown.length - a!.markdown.length))[0];
-    if (bestBoard && bestBoard.markdown.length > 500) {
-      allMarkdown += `\n\n---\nJOB BOARD (${bestBoard.url}):\n${bestBoard.markdown}`;
-      allLinks = [...allLinks, ...bestBoard.links];
-      console.log(`Best job board: ${bestBoard.url} with ${bestBoard.markdown.length} chars`);
+    const apiResults = (await Promise.all(apiPromises)).filter(Boolean);
+    // Pick the API with the most jobs
+    const bestApi = apiResults.sort((a, b) => b!.jobs.length - a!.jobs.length)[0];
+    if (bestApi && bestApi.jobs.length > 0) {
+      apiJobs = bestApi.jobs;
+      console.log(`Best API: ${bestApi.name} with ${apiJobs.length} jobs — skipping scraping`);
     }
 
-    // ─── Strategy 3: Map careers URLs + job board URLs ───
-    const urlsToMap = [targetUrl];
-    if (bestBoard && bestBoard.markdown.length > 500) {
-      urlsToMap.push(bestBoard.url);
-    }
+    // Job aggregator domains to exclude from search results
+    const aggregatorDomains = ["indeed.com", "glassdoor.com", "linkedin.com", "ziprecruiter.com", "monster.com", "careerbuilder.com", "simplyhired.com"];
 
-    let jobDetailLinks: string[] = [];
-    for (const mapUrl of urlsToMap) {
-      console.log(`Strategy 3: Mapping URLs from ${mapUrl}...`);
-      const mapResponse = await fetch("https://api.firecrawl.dev/v1/map", {
+    let jobs: any[] = [];
+
+    if (apiJobs.length > 0) {
+      // Structured data from job board API — no scraping or AI needed
+      jobs = apiJobs;
+      console.log(`Using ${jobs.length} jobs from direct API — skipping scraping & AI`);
+    } else {
+      // ─── Fallback: Scrape + AI extraction ───
+      console.log("No API results, falling back to scraping...");
+
+      // Strategy 1: Firecrawl search scoped to company domain
+      const siteFilter = companyDomain ? `site:${companyDomain}` : "";
+      const searchResponse = await fetch("https://api.firecrawl.dev/v1/search", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
-          "Content-Type": "application/json",
-        },
+        headers: { Authorization: `Bearer ${FIRECRAWL_API_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          url: mapUrl,
-          search: "jobs positions openings careers",
-          limit: 200,
-          includeSubdomains: true,
+          query: `${siteFilter} ${companyName} careers jobs openings apply`,
+          limit: 5,
+          scrapeOptions: { formats: ["markdown"] },
         }),
       });
 
-      if (mapResponse.ok) {
-        const mapData = await mapResponse.json();
-        const mappedLinks = mapData.links || mapData.data?.links || [];
-        const jobLinks = mappedLinks.filter((l: string) =>
-          /job|position|opening|career|role|apply/i.test(l) && !/blog|news|about|privacy|terms/i.test(l)
-        );
-        allLinks = [...allLinks, ...jobLinks];
-        const detailLinks = jobLinks.filter((l: string) =>
-          /\/[a-f0-9-]{8,}|\/\d{4,}|\/[a-z]+-[a-z]+-[a-z]+/i.test(l)
-        );
-        jobDetailLinks = [...jobDetailLinks, ...detailLinks];
-        console.log(`Map ${mapUrl}: ${mappedLinks.length} total, ${jobLinks.length} job-like, ${detailLinks.length} detail pages`);
-      }
-    }
+      let allMarkdown = "";
+      let allLinks: string[] = [];
 
-    // ─── Strategy 4: Deep crawl individual job pages for richer data ───
-    // Scrape up to 15 individual job detail pages to get titles, descriptions, locations
-    const detailPages = [...new Set(jobDetailLinks)].slice(0, 15);
-    if (detailPages.length > 0) {
-      console.log(`Strategy 4: Deep-scraping ${detailPages.length} individual job pages...`);
-      const batchPromises = detailPages.map(async (url) => {
+      if (searchResponse.ok) {
+        const searchData = await searchResponse.json();
+        const results = searchData.data || searchData.results || [];
+        for (const r of results) {
+          if (aggregatorDomains.some(d => r.url?.includes(d))) continue;
+          if (r.markdown) allMarkdown += "\n\n---\n" + r.markdown;
+          if (r.url) allLinks.push(r.url);
+        }
+        console.log(`Search: ${results.length} results, ${allMarkdown.length} chars`);
+      }
+
+      // Strategy 2: Scrape careers page directly
+      const scrapeResponse = await fetch("https://api.firecrawl.dev/v1/scrape", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${FIRECRAWL_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ url: targetUrl, formats: ["markdown", "links"], onlyMainContent: true, waitFor: 3000 }),
+      });
+      if (scrapeResponse.ok) {
+        const scrapeData = await scrapeResponse.json();
+        const scrapedMarkdown = scrapeData.data?.markdown || scrapeData.markdown || "";
+        const scrapedLinks = scrapeData.data?.links || scrapeData.links || [];
+        allMarkdown += "\n\n---\nDIRECT CAREERS PAGE:\n" + scrapedMarkdown;
+        allLinks = [...allLinks, ...scrapedLinks];
+      }
+
+      // Strategy 2.5: Try job board platforms via scrape (parallel)
+      const jobBoardUrls = [
+        `https://boards.greenhouse.io/${companySlug}`,
+        `https://jobs.lever.co/${companySlug}`,
+        `https://jobs.ashbyhq.com/${companySlug}`,
+        `https://${companySlug}.jobs.personio.com`,
+        `https://apply.workable.com/${companySlug}`,
+      ];
+      const boardPromises = jobBoardUrls.map(async (boardUrl) => {
         try {
           const resp = await fetch("https://api.firecrawl.dev/v1/scrape", {
             method: "POST",
-            headers: {
-              Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              url,
-              formats: ["markdown"],
-              onlyMainContent: true,
-              waitFor: 2000,
-            }),
+            headers: { Authorization: `Bearer ${FIRECRAWL_API_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ url: boardUrl, formats: ["markdown", "links"], onlyMainContent: true, waitFor: 3000 }),
           });
           if (resp.ok) {
             const d = await resp.json();
-            const md = d.data?.markdown || d.markdown || "";
-            return { url, markdown: md.slice(0, 3000) }; // cap per page
+            return { url: boardUrl, markdown: d.data?.markdown || d.markdown || "", links: d.data?.links || d.links || [] };
           }
-        } catch (e) {
-          console.error(`Failed to scrape ${url}:`, e);
-        }
+        } catch { /* skip */ }
         return null;
       });
+      const boardResults = (await Promise.all(boardPromises)).filter(Boolean);
+      const bestBoard = boardResults.sort((a, b) => (b!.markdown.length - a!.markdown.length))[0];
+      if (bestBoard && bestBoard.markdown.length > 500) {
+        allMarkdown += `\n\n---\nJOB BOARD (${bestBoard.url}):\n${bestBoard.markdown}`;
+        allLinks = [...allLinks, ...bestBoard.links];
+      }
 
-      const detailResults = (await Promise.all(batchPromises)).filter(Boolean);
-      for (const r of detailResults) {
-        if (r) {
-          allMarkdown += `\n\n---\nINDIVIDUAL JOB PAGE (${r.url}):\n${r.markdown}`;
+      // Strategy 3: Map careers URLs
+      const urlsToMap = [targetUrl];
+      if (bestBoard && bestBoard.markdown.length > 500) urlsToMap.push(bestBoard.url);
+      let jobDetailLinks: string[] = [];
+      for (const mapUrl of urlsToMap) {
+        const mapResponse = await fetch("https://api.firecrawl.dev/v1/map", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${FIRECRAWL_API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ url: mapUrl, search: "jobs positions openings careers", limit: 200, includeSubdomains: true }),
+        });
+        if (mapResponse.ok) {
+          const mapData = await mapResponse.json();
+          const mappedLinks = mapData.links || mapData.data?.links || [];
+          const jobLinks = mappedLinks.filter((l: string) => /job|position|opening|career|role|apply/i.test(l) && !/blog|news|about|privacy|terms/i.test(l));
+          allLinks = [...allLinks, ...jobLinks];
+          jobDetailLinks = [...jobDetailLinks, ...jobLinks.filter((l: string) => /\/[a-f0-9-]{8,}|\/\d{4,}|\/[a-z]+-[a-z]+-[a-z]+/i.test(l))];
         }
       }
-      console.log(`Deep-scraped ${detailResults.length} job detail pages`);
-    }
 
-    // Deduplicate links
-    allLinks = [...new Set(allLinks)];
+      // Strategy 4: Deep crawl individual job pages
+      const detailPages = [...new Set(jobDetailLinks)].slice(0, 15);
+      if (detailPages.length > 0) {
+        const batchPromises = detailPages.map(async (url) => {
+          try {
+            const resp = await fetch("https://api.firecrawl.dev/v1/scrape", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${FIRECRAWL_API_KEY}`, "Content-Type": "application/json" },
+              body: JSON.stringify({ url, formats: ["markdown"], onlyMainContent: true, waitFor: 2000 }),
+            });
+            if (resp.ok) { const d = await resp.json(); return { url, markdown: (d.data?.markdown || d.markdown || "").slice(0, 3000) }; }
+          } catch { /* skip */ }
+          return null;
+        });
+        const detailResults = (await Promise.all(batchPromises)).filter(Boolean);
+        for (const r of detailResults) { if (r) allMarkdown += `\n\n---\nINDIVIDUAL JOB PAGE (${r.url}):\n${r.markdown}`; }
+      }
 
-    if (!allMarkdown || allMarkdown.length < 50) {
-      return new Response(JSON.stringify({ error: "Insufficient content found", jobs: [] }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+      allLinks = [...new Set(allLinks)];
+      if (!allMarkdown || allMarkdown.length < 50) {
+        return new Response(JSON.stringify({ error: "Insufficient content found", jobs: [] }), {
+          status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
-    // ─── Step 3: AI extraction - individual roles, not departments ───
-    const extractPrompt = `Extract ALL individual job openings/positions from this content about ${companyName}.
+      // AI extraction
+      const extractPrompt = `Extract ALL individual job openings from this content about ${companyName}.
+RULES: Extract SPECIFIC job titles. SKIP career categories, department headers, generic labels. Include valid short titles like "Data Analyst".
+For each job: title, url, location, department, description (1-2 sentences).
 
-RULES:
-1. Extract SPECIFIC job titles that a real person would apply to. Good examples: "Senior Software Engineer", "Account Executive, Mid-Market", "Financial Partnerships Manager, International", "Staff Product Designer".
-2. SKIP these — they are NOT job titles:
-   - Career program categories: "Experienced Professionals", "Students", "Young Professionals"
-   - Standalone department/team names used as section headers: "Sales", "Engineering", "Business Development"
-   - Generic one-word labels: "Consulting", "Corporate Functions"
-3. However, if a title looks like a real role even if short (e.g. "Data Analyst", "Product Manager", "Solutions Architect"), DO include it.
-4. If content shows departments with individual roles underneath, extract each individual role with its department.
-5. For each job, extract:
-   - title: the specific job title
-   - url: the application/detail URL if available (match from links list)
-   - location: city, state, country, or "Remote" if mentioned
-   - department: the team or department if known
-   - description: a 1-2 sentence summary if available from the content
-
-Content from multiple sources:
+Content:
 ${allMarkdown.slice(0, 40000)}
 
-Available URLs:
+URLs:
 ${allLinks.slice(0, 150).join("\n")}
 
-Return ONLY a valid JSON array. If genuinely no specific job titles found, return [].`;
+Return ONLY a valid JSON array.`;
 
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: "You extract individual job listings from careers page content. Always respond with valid JSON array only, no markdown fences. Extract specific role titles, NOT department/team names." },
-          { role: "user", content: extractPrompt },
-        ],
-      }),
-    });
-
-    if (!aiResponse.ok) {
-      const errText = await aiResponse.text();
-      console.error("AI error:", aiResponse.status, errText);
-      return new Response(JSON.stringify({ error: "AI extraction failed" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: "Extract individual job listings. Respond with JSON array only, no markdown fences." },
+            { role: "user", content: extractPrompt },
+          ],
+        }),
       });
-    }
 
-    const aiData = await aiResponse.json();
-    const rawContent = aiData.choices?.[0]?.message?.content || "[]";
+      if (!aiResponse.ok) {
+        console.error("AI error:", aiResponse.status, await aiResponse.text());
+        return new Response(JSON.stringify({ error: "AI extraction failed" }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
-    let jobs: any[] = [];
-    try {
-      const cleaned = rawContent.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-      jobs = JSON.parse(cleaned);
-      if (!Array.isArray(jobs)) jobs = [];
-    } catch {
-      console.error("Failed to parse jobs:", rawContent.slice(0, 500));
-      jobs = [];
+      const rawContent = (await aiResponse.json()).choices?.[0]?.message?.content || "[]";
+      try {
+        jobs = JSON.parse(rawContent.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim());
+        if (!Array.isArray(jobs)) jobs = [];
+      } catch {
+        console.error("Failed to parse jobs:", rawContent.slice(0, 500));
+        jobs = [];
+      }
     }
 
     console.log(`Found ${jobs.length} individual jobs for ${companyName}`);
