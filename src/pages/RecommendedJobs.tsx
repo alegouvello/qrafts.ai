@@ -83,7 +83,8 @@ const RecommendedJobs = () => {
         .from("job_match_scores")
         .select("match_score, match_reasons, job_opening_id")
         .eq("user_id", user.id)
-        .order("match_score", { ascending: false });
+        .order("match_score", { ascending: false })
+        .limit(500);
 
       if (error) throw error;
       if (!scores || scores.length === 0) {
@@ -94,13 +95,21 @@ const RecommendedJobs = () => {
 
       // Get the job openings details
       const jobIds = scores.map(s => s.job_opening_id);
-      const { data: openings } = await supabase
-        .from("job_openings")
-        .select("*")
-        .in("id", jobIds)
-        .eq("is_active", true);
+      
+      // Batch the .in() query to avoid URL length limits
+      const BATCH = 100;
+      const allOpenings: any[] = [];
+      for (let i = 0; i < jobIds.length; i += BATCH) {
+        const batch = jobIds.slice(i, i + BATCH);
+        const { data: batchOpenings } = await supabase
+          .from("job_openings")
+          .select("*")
+          .in("id", batch)
+          .eq("is_active", true);
+        if (batchOpenings) allOpenings.push(...batchOpenings);
+      }
 
-      if (!openings) {
+      if (allOpenings.length === 0) {
         setJobs([]);
         setLoading(false);
         return;
@@ -109,7 +118,7 @@ const RecommendedJobs = () => {
       // Merge scores with job data
       const merged: JobWithScore[] = [];
       for (const score of scores) {
-        const opening = openings.find(o => o.id === score.job_opening_id);
+        const opening = allOpenings.find(o => o.id === score.job_opening_id);
         if (opening) {
           merged.push({
             id: opening.id,
