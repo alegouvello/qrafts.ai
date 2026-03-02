@@ -88,15 +88,22 @@ const RecommendedJobs = () => {
         .eq("is_active", true);
       setTotalActiveJobs(count || 0);
 
-      // Get distinct company count from all active job openings
-      const { data: companyRows } = await supabase
-        .from("job_openings")
-        .select("company_name")
-        .eq("is_active", true);
-      if (companyRows) {
-        const uniqueCompanies = new Set(companyRows.map(r => r.company_name));
-        setTotalCompanies(uniqueCompanies.size);
+      // Get distinct company count from all active job openings (paginate to avoid 1000-row limit)
+      const allCompanyNames = new Set<string>();
+      let companyPage = 0;
+      const COMPANY_PAGE_SIZE = 1000;
+      while (true) {
+        const { data: companyRows } = await supabase
+          .from("job_openings")
+          .select("company_name")
+          .eq("is_active", true)
+          .range(companyPage * COMPANY_PAGE_SIZE, (companyPage + 1) * COMPANY_PAGE_SIZE - 1);
+        if (!companyRows || companyRows.length === 0) break;
+        for (const r of companyRows) allCompanyNames.add(r.company_name);
+        if (companyRows.length < COMPANY_PAGE_SIZE) break;
+        companyPage++;
       }
+      setTotalCompanies(allCompanyNames.size);
 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
