@@ -166,29 +166,83 @@ export const UploadResumeDialog = ({
 
     setIsProcessing(true);
 
-    // Process sequentially so profile updates don't conflict
-    for (const entry of pending) {
-      await processFile(entry);
+    // Upload all files to storage in parallel first
+    const uploadResults = await Promise.all(
+      pending.map(async (entry) => {
+        updateFileStatus(entry.file.name, { status: "uploading" });
+        const success = await onUpload(entry.file);
+        if (!success) {
+          updateFileStatus(entry.file.name, { status: "error", error: "Upload failed" });
+        }
+        return { entry, uploaded: success };
+      })
+    );
+
+    const uploaded = uploadResults.filter((r) => r.uploaded);
+
+    // Parse all uploaded files in parallel
+    if (uploaded.length > 0) {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (user && session) {
+        await Promise.all(
+          uploaded.map(async ({ entry }) => {
+            try {
+              updateFileStatus(entry.file.name, { status: "parsing" });
+              const filePath = `${user.id}/${entry.file.name}`;
+
+              const response = await supabase.functions.invoke("parse-resume", {
+                body: { resumeUrl: filePath },
+                headers: { Authorization: `Bearer ${session.access_token}` },
+              });
+
+              if (response.error) throw new Error(response.error.message || "Parse failed");
+
+              if (response.data?.usedOcr) {
+                updateFileStatus(entry.file.name, { status: "ocr", usedOcr: true });
+                await new Promise((r) => setTimeout(r, 400));
+              }
+
+              if (response.data?.success) {
+                updateFileStatus(entry.file.name, { status: "complete", usedOcr: response.data.usedOcr });
+              } else {
+                throw new Error(response.data?.error || "Unknown error");
+              }
+            } catch (err) {
+              const msg = err instanceof Error ? err.message : "Parse failed";
+              updateFileStatus(entry.file.name, { status: "error", error: msg });
+            }
+          })
+        );
+      }
     }
 
     setIsProcessing(false);
 
-    // Check if all done
-    const updatedFiles = files; // state may lag, but toast is best-effort
-    const allComplete = updatedFiles.every((f) => f.status === "complete" || f.status === "error");
-    if (allComplete) {
-      const successCount = updatedFiles.filter((f) => f.status === "complete").length;
-      if (successCount > 0) {
-        toast({
-          title: "Resumes Uploaded",
-          description: `${successCount} resume${successCount > 1 ? "s" : ""} parsed successfully.`,
-        });
-        setTimeout(() => {
-          resetState();
-          onOpenChange(false);
-        }, 1200);
-      }
-    }
+    // Toast and close
+    const successCount = pending.filter((f) => {
+      // Check latest state via the files array
+      return true; // will be checked below
+    }).length;
+
+    // Use a slight delay to let state settle, then check
+    setTimeout(() => {
+      setFiles((currentFiles) => {
+        const completed = currentFiles.filter((f) => f.status === "complete").length;
+        if (completed > 0) {
+          toast({
+            title: "Resumes Uploaded",
+            description: `${completed} resume${completed > 1 ? "s" : ""} parsed successfully.`,
+          });
+          setTimeout(() => {
+            resetState();
+            onOpenChange(false);
+          }, 1200);
+        }
+        return currentFiles;
+      });
+    }, 100);
   };
 
   const pendingCount = files.filter((f) => f.status === "pending").length;
