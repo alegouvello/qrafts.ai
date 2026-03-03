@@ -50,13 +50,23 @@ serve(async (req) => {
       });
     }
 
-    // Get already-scored job IDs for this user
-    const { data: scoredJobIds } = await supabase
-      .from("job_match_scores")
-      .select("job_opening_id")
-      .eq("user_id", userId);
-
-    const scoredSet = new Set((scoredJobIds || []).map(s => s.job_opening_id));
+    // Get ALL already-scored job IDs for this user (paginate past 1000-row limit)
+    const scoredSet = new Set<string>();
+    let scoredPage = 0;
+    const SCORED_PAGE_SIZE = 1000;
+    while (true) {
+      const { data: scoredBatch } = await supabase
+        .from("job_match_scores")
+        .select("job_opening_id")
+        .eq("user_id", userId)
+        .range(scoredPage * SCORED_PAGE_SIZE, (scoredPage + 1) * SCORED_PAGE_SIZE - 1);
+      
+      if (!scoredBatch || scoredBatch.length === 0) break;
+      for (const s of scoredBatch) scoredSet.add(s.job_opening_id);
+      if (scoredBatch.length < SCORED_PAGE_SIZE) break;
+      scoredPage++;
+    }
+    console.log(`User has ${scoredSet.size} already-scored jobs`);
 
     // Fetch active jobs not yet scored, up to maxJobs
     const PAGE_SIZE = 1000;
