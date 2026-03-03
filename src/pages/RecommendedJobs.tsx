@@ -335,7 +335,7 @@ const RecommendedJobs = () => {
         // Refresh token before each round to prevent expiry
         const token = await getFreshToken();
         const results = await Promise.all(
-          Array.from({ length: PARALLEL }, () => scoreBatch())
+          Array.from({ length: PARALLEL }, () => scoreBatch(token))
         );
 
         let batchFailed = 0;
