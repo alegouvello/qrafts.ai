@@ -301,54 +301,73 @@ const RecommendedJobs = () => {
         token = session.access_token;
       }
 
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/score-unscored-jobs`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-            "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          },
-        }
-      );
+      const BATCH_LIMIT = 200;
+      let totalScored = 0;
+      let keepGoing = true;
 
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      if (!response.body) {
-        // Non-streaming response (e.g. "all scored already")
-        const data = await response.json();
-        toast({ title: "Scoring Complete", description: data.message || `Scored ${data.scored || 0} jobs` });
-        setScoring(false);
-        return;
+      while (keepGoing) {
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/score-unscored-jobs`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`,
+              "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            },
+            body: JSON.stringify({ limit: BATCH_LIMIT }),
+          }
+        );
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        // Try to read streaming response
+        if (!response.body) {
+          const data = await response.json();
+          if ((data.scored || 0) === 0) keepGoing = false;
+          totalScored += data.scored || 0;
+          break;
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        let batchScored = 0;
+        let batchTotal = 0;
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            try {
+              const event = JSON.parse(line);
+              if (event.type === "progress") {
+                setScoreProgress({ scored: totalScored + event.scored, total: totalScored + event.total });
+              } else if (event.type === "complete") {
+                batchScored = event.scored;
+                batchTotal = event.total;
+              }
+            } catch {}
+          }
+        }
+
+        totalScored += batchScored;
+        // Stop if we scored less than what was available (means we're done or nearly done)
+        if (batchScored === 0 || batchTotal <= BATCH_LIMIT) {
+          keepGoing = false;
+        }
       }
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-
-        const lines = buffer.split("\n");
-        buffer = lines.pop() || "";
-
-        for (const line of lines) {
-          if (!line.trim()) continue;
-          try {
-            const event = JSON.parse(line);
-            if (event.type === "progress") {
-              setScoreProgress({ scored: event.scored, total: event.total });
-            } else if (event.type === "complete") {
-              toast({
-                title: "Scoring Complete",
-                description: `Scored ${event.scored} out of ${event.total} unscored jobs`,
-              });
-            }
-          } catch {}
-        }
-      }
+      toast({
+        title: "Scoring Complete",
+        description: `Scored ${totalScored} jobs total`,
+      });
 
       await fetchRecommendedJobs();
     } catch (err) {
