@@ -84,6 +84,28 @@ const KNOWN_COMPANY_SLUGS: Record<string, { greenhouse?: string[]; lever?: strin
   "visa": { smartrecruiters: ["Visa"] },
   "mastercard": { smartrecruiters: ["Mastercard"] },
   "paypal": { smartrecruiters: ["PayPal"] },
+  // Additional mappings for missing companies
+  "jpmorgan chase & co.": { smartrecruiters: ["JPMorganChase"] },
+  "jpmorgan chase & co": { smartrecruiters: ["JPMorganChase"] },
+  "rippling": { greenhouse: ["rippling"], ashby: ["rippling"] },
+  "glean": { greenhouse: ["glean"], ashby: ["glean"] },
+  "hugging face": { greenhouse: ["huggingface"], lever: ["huggingface"] },
+  "navan": { greenhouse: ["navan"], lever: ["navan"] },
+  "assembled": { greenhouse: ["assembled"], ashby: ["assembled"], lever: ["assembled"] },
+  "kpmg": { smartrecruiters: ["KPMG"] },
+  "ey": { smartrecruiters: ["EY"] },
+  "ey-parthenon": { smartrecruiters: ["EY"] },
+  "kkr": { smartrecruiters: ["KKR"] },
+  "apollo global management": { smartrecruiters: ["ApolloGlobal"], greenhouse: ["apolloglobalmanagement", "apollo"] },
+  "ares management": { greenhouse: ["aresmanagement"] },
+  "ares management corporation": { greenhouse: ["aresmanagement"] },
+  "alvarez & marsal": { greenhouse: ["alvarezandmarsal", "alvarez-marsal"] },
+  "universal music group": { smartrecruiters: ["UniversalMusicGroup"] },
+  "bilt": { greenhouse: ["bilt"], lever: ["bilt"], ashby: ["bilt"] },
+  "knit": { greenhouse: ["knit"], lever: ["knit"], ashby: ["knit"] },
+  "regal": { greenhouse: ["regal"], lever: ["regal"] },
+  "distyl ai": { greenhouse: ["distylai", "distyl"], ashby: ["distyl"], lever: ["distyl"] },
+  "signify technology": { greenhouse: ["signifytechnology"], lever: ["signifytechnology"] },
 };
 
 // Generate slug variations to try for unknown companies
@@ -165,8 +187,24 @@ serve(async (req) => {
 
     console.log(`Crawling careers for ${companyName}: ${targetUrl} (domain: ${companyDomain})`);
 
-    const companyLower = companyName.toLowerCase();
-    const knownSlugs = KNOWN_COMPANY_SLUGS[companyLower];
+    const companyLower = companyName.toLowerCase().trim();
+    // Try exact match first, then normalized variations
+    const normalizeForLookup = (name: string): string[] => {
+      const variants = [name];
+      // Remove trailing legal suffixes
+      const cleaned = name
+        .replace(/,?\s*(inc\.?|llc\.?|corp\.?|ltd\.?|co\.?|gmbh|s\.?a\.?|plc|corporation|& co\.?)$/i, "")
+        .trim();
+      if (cleaned !== name) variants.push(cleaned);
+      // Remove parenthetical like (AWS)
+      const noParens = cleaned.replace(/\s*\([^)]*\)\s*/g, " ").trim();
+      if (noParens !== cleaned) variants.push(noParens);
+      return [...new Set(variants)];
+    };
+    const lookupVariants = normalizeForLookup(companyLower);
+    const knownSlugs = lookupVariants.reduce<typeof KNOWN_COMPANY_SLUGS[string] | undefined>(
+      (found, v) => found || KNOWN_COMPANY_SLUGS[v], undefined
+    );
     const slugVariations = knownSlugs ? [] : generateSlugVariations(companyName);
     const companySlug = companyName.toLowerCase().replace(/\s+/g, "");
 
