@@ -15,9 +15,10 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Accept userId from body (for daily-scan service role calls) or from auth
+    // Accept userId and optional limit from body
     const body = await req.json().catch(() => ({}));
     let userId = body.userId as string | null;
+    const maxJobs = Math.min(body.limit || 200, 500); // Default 200, max 500
 
     if (!userId) {
       const authHeader = req.headers.get("Authorization");
@@ -59,11 +60,11 @@ serve(async (req) => {
 
     const scoredSet = new Set((scoredJobIds || []).map(s => s.job_opening_id));
 
-    // Fetch all active jobs in batches
+    // Fetch active jobs that aren't scored yet, up to maxJobs
     const PAGE_SIZE = 1000;
     let allUnscoredJobs: any[] = [];
     let page = 0;
-    while (true) {
+    while (allUnscoredJobs.length < maxJobs) {
       const { data: pageJobs } = await supabase
         .from("job_openings")
         .select("id, title, location, department, description_snippet, company_name")
@@ -73,7 +74,7 @@ serve(async (req) => {
       if (!pageJobs || pageJobs.length === 0) break;
 
       for (const job of pageJobs) {
-        if (!scoredSet.has(job.id)) {
+        if (!scoredSet.has(job.id) && allUnscoredJobs.length < maxJobs) {
           allUnscoredJobs.push(job);
         }
       }
