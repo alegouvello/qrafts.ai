@@ -301,7 +301,6 @@ const RecommendedJobs = () => {
         token = session.access_token;
       }
 
-      const BATCH_LIMIT = 50;
       let totalScored = 0;
       let keepGoing = true;
 
@@ -315,55 +314,23 @@ const RecommendedJobs = () => {
               "Authorization": `Bearer ${token}`,
               "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
             },
-            body: JSON.stringify({ limit: BATCH_LIMIT }),
+            body: JSON.stringify({ limit: 25 }),
           }
         );
 
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         
-        // Try to read streaming response
-        if (!response.body) {
-          const data = await response.json();
-          if ((data.scored || 0) === 0) keepGoing = false;
-          totalScored += data.scored || 0;
-          break;
-        }
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = "";
-        let batchScored = 0;
-        let batchTotal = 0;
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          buffer += decoder.decode(value, { stream: true });
-
-          const lines = buffer.split("\n");
-          buffer = lines.pop() || "";
-
-          for (const line of lines) {
-            if (!line.trim()) continue;
-            try {
-              const event = JSON.parse(line);
-              if (event.type === "progress") {
-                setScoreProgress({ scored: totalScored + event.scored, total: totalScored + event.total });
-              } else if (event.type === "complete") {
-                batchScored = event.scored;
-                batchTotal = event.total;
-              }
-            } catch {}
-          }
-        }
-
+        const data = await response.json();
+        const batchScored = data.scored || 0;
+        const batchTotal = data.total || 0;
         totalScored += batchScored;
-        // Stop if nothing was scored (all done) or fewer unscored jobs than our limit
-        if (batchScored === 0 || batchTotal < BATCH_LIMIT) {
+
+        setScoreProgress({ scored: totalScored, total: totalScored + Math.max(0, batchTotal - batchScored) });
+
+        // Stop if nothing scored or all were processed
+        if (batchScored === 0 || batchTotal < 25) {
           keepGoing = false;
         }
-        // Update progress between batches
-        setScoreProgress({ scored: totalScored, total: totalScored + (batchTotal > batchScored ? batchTotal - batchScored : 0) });
       }
 
       toast({
