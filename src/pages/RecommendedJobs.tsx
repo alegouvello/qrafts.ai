@@ -294,20 +294,19 @@ const RecommendedJobs = () => {
     setScoring(true);
     setScoreProgress(null);
     try {
-      let token = accessToken;
-      if (!token) {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) throw new Error("Not authenticated");
-        token = session.access_token;
-      }
-
       let totalScored = 0;
       let keepGoing = true;
       let consecutiveErrors = 0;
-      const PARALLEL = 3; // Run 3 scoring requests in parallel
+      const PARALLEL = 3;
       const BATCH_SIZE = 50;
 
-      const scoreBatch = async (): Promise<{ scored: number; total: number } | null> => {
+      const getFreshToken = async (): Promise<string> => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) throw new Error("Not authenticated");
+        return session.access_token;
+      };
+
+      const scoreBatch = async (currentToken: string): Promise<{ scored: number; total: number } | null> => {
         for (let attempt = 0; attempt < 3; attempt++) {
           try {
             const response = await fetch(
@@ -316,7 +315,7 @@ const RecommendedJobs = () => {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
-                  "Authorization": `Bearer ${token}`,
+                  "Authorization": `Bearer ${currentToken}`,
                   "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
                 },
                 body: JSON.stringify({ limit: BATCH_SIZE }),
@@ -333,9 +332,10 @@ const RecommendedJobs = () => {
       };
 
       while (keepGoing) {
-        // Fire PARALLEL requests at once
+        // Refresh token before each round to prevent expiry
+        const token = await getFreshToken();
         const results = await Promise.all(
-          Array.from({ length: PARALLEL }, () => scoreBatch())
+          Array.from({ length: PARALLEL }, () => scoreBatch(token))
         );
 
         let batchFailed = 0;
