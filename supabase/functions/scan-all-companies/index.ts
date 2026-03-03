@@ -109,7 +109,7 @@ serve(async (req) => {
                   },
                   body: JSON.stringify({
                     companyName: company,
-                    userResumeText: profile?.resume_text || null,
+                    userResumeText: null,
                     userId: user.id,
                     userLocation: profile?.location || null,
                   }),
