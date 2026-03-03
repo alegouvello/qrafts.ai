@@ -50,6 +50,40 @@ serve(async (req) => {
       });
     }
 
+    // Build set of companies the user cares about (applied + watchlist)
+    const userCompanies = new Set<string>();
+    let appPage = 0;
+    while (true) {
+      const { data: apps } = await supabase
+        .from("applications")
+        .select("company")
+        .eq("user_id", userId)
+        .range(appPage * 1000, (appPage + 1) * 1000 - 1);
+      if (!apps || apps.length === 0) break;
+      for (const a of apps) userCompanies.add(a.company);
+      if (apps.length < 1000) break;
+      appPage++;
+    }
+    let wlPage = 0;
+    while (true) {
+      const { data: wl } = await supabase
+        .from("company_watchlist")
+        .select("company_name")
+        .eq("user_id", userId)
+        .range(wlPage * 1000, (wlPage + 1) * 1000 - 1);
+      if (!wl || wl.length === 0) break;
+      for (const w of wl) userCompanies.add(w.company_name);
+      if (wl.length < 1000) break;
+      wlPage++;
+    }
+
+    if (userCompanies.size === 0) {
+      return new Response(JSON.stringify({ scored: 0, total: 0, message: "No companies to score" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    console.log(`User has ${userCompanies.size} companies to score`);
+
     // Get ALL already-scored job IDs for this user (paginate past 1000-row limit)
     const scoredSet = new Set<string>();
     let scoredPage = 0;
@@ -68,27 +102,34 @@ serve(async (req) => {
     }
     console.log(`User has ${scoredSet.size} already-scored jobs`);
 
-    // Fetch active jobs not yet scored, up to maxJobs
+    // Fetch active jobs from user's companies only, not yet scored, up to maxJobs
+    const companyList = Array.from(userCompanies);
     const PAGE_SIZE = 1000;
     let unscoredJobs: any[] = [];
-    let page = 0;
-    while (unscoredJobs.length < maxJobs) {
-      const { data: pageJobs } = await supabase
-        .from("job_openings")
-        .select("id, title, location, department, description_snippet, company_name")
-        .eq("is_active", true)
-        .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+    // Query in company batches to use .in() filter (max ~100 per .in())
+    const COMPANY_BATCH = 50;
+    for (let ci = 0; ci < companyList.length && unscoredJobs.length < maxJobs; ci += COMPANY_BATCH) {
+      const companyBatch = companyList.slice(ci, ci + COMPANY_BATCH);
+      let page = 0;
+      while (unscoredJobs.length < maxJobs) {
+        const { data: pageJobs } = await supabase
+          .from("job_openings")
+          .select("id, title, location, department, description_snippet, company_name")
+          .eq("is_active", true)
+          .in("company_name", companyBatch)
+          .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
 
-      if (!pageJobs || pageJobs.length === 0) break;
+        if (!pageJobs || pageJobs.length === 0) break;
 
-      for (const job of pageJobs) {
-        if (!scoredSet.has(job.id) && unscoredJobs.length < maxJobs) {
-          unscoredJobs.push(job);
+        for (const job of pageJobs) {
+          if (!scoredSet.has(job.id) && unscoredJobs.length < maxJobs) {
+            unscoredJobs.push(job);
+          }
         }
-      }
 
-      if (pageJobs.length < PAGE_SIZE) break;
-      page++;
+        if (pageJobs.length < PAGE_SIZE) break;
+        page++;
+      }
     }
 
     console.log(`Found ${unscoredJobs.length} unscored jobs for user ${userId}`);
