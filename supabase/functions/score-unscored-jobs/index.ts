@@ -150,7 +150,7 @@ Only return the JSON array, no markdown.`;
           body: JSON.stringify({
             model: "google/gemini-2.5-flash",
             messages: [
-              { role: "system", content: "You score job-resume match quality. Respond with JSON array only. No markdown fences." },
+              { role: "system", content: "You are a strict job-resume match scorer. Be realistic — most cross-functional matches should score below 50. Respond with JSON array only. No markdown fences." },
               { role: "user", content: scorePrompt },
             ],
           }),
