@@ -187,8 +187,24 @@ serve(async (req) => {
 
     console.log(`Crawling careers for ${companyName}: ${targetUrl} (domain: ${companyDomain})`);
 
-    const companyLower = companyName.toLowerCase();
-    const knownSlugs = KNOWN_COMPANY_SLUGS[companyLower];
+    const companyLower = companyName.toLowerCase().trim();
+    // Try exact match first, then normalized variations
+    const normalizeForLookup = (name: string): string[] => {
+      const variants = [name];
+      // Remove trailing legal suffixes
+      const cleaned = name
+        .replace(/,?\s*(inc\.?|llc\.?|corp\.?|ltd\.?|co\.?|gmbh|s\.?a\.?|plc|corporation|& co\.?)$/i, "")
+        .trim();
+      if (cleaned !== name) variants.push(cleaned);
+      // Remove parenthetical like (AWS)
+      const noParens = cleaned.replace(/\s*\([^)]*\)\s*/g, " ").trim();
+      if (noParens !== cleaned) variants.push(noParens);
+      return [...new Set(variants)];
+    };
+    const lookupVariants = normalizeForLookup(companyLower);
+    const knownSlugs = lookupVariants.reduce<typeof KNOWN_COMPANY_SLUGS[string] | undefined>(
+      (found, v) => found || KNOWN_COMPANY_SLUGS[v], undefined
+    );
     const slugVariations = knownSlugs ? [] : generateSlugVariations(companyName);
     const companySlug = companyName.toLowerCase().replace(/\s+/g, "");
 
