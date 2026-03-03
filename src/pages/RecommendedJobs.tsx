@@ -304,30 +304,53 @@ const RecommendedJobs = () => {
       let totalScored = 0;
       let keepGoing = true;
 
+      let consecutiveErrors = 0;
       while (keepGoing) {
-        const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/score-unscored-jobs`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`,
-              "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            },
-            body: JSON.stringify({ limit: 25 }),
-          }
-        );
+        let data: any = null;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          try {
+            const response = await fetch(
+              `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/score-unscored-jobs`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${token}`,
+                  "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+                },
+                body: JSON.stringify({ limit: 25 }),
+              }
+            );
 
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        
-        const data = await response.json();
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            data = await response.json();
+            consecutiveErrors = 0;
+            break;
+          } catch (fetchErr) {
+            console.warn(`Score batch attempt ${attempt + 1} failed:`, fetchErr);
+            if (attempt < 2) {
+              await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+            }
+          }
+        }
+
+        if (!data) {
+          consecutiveErrors++;
+          if (consecutiveErrors >= 2) {
+            console.error("Too many consecutive scoring failures, stopping");
+            keepGoing = false;
+            break;
+          }
+          await new Promise(r => setTimeout(r, 3000));
+          continue;
+        }
+
         const batchScored = data.scored || 0;
         const batchTotal = data.total || 0;
         totalScored += batchScored;
 
         setScoreProgress({ scored: totalScored, total: totalScored + Math.max(0, batchTotal - batchScored) });
 
-        // Stop if nothing scored or all were processed
         if (batchScored === 0 || batchTotal < 25) {
           keepGoing = false;
         }
