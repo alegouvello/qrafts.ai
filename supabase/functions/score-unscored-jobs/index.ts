@@ -17,7 +17,7 @@ serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     let userId = body.userId as string | null;
-    const maxJobs = Math.min(body.limit || 25, 25); // Max 25 per call to stay within timeout
+    const maxJobs = Math.min(body.limit || 50, 50); // Max 50 per call
 
     if (!userId) {
       const authHeader = req.headers.get("Authorization");
