@@ -18,7 +18,7 @@ serve(async (req) => {
     // Accept userId and optional limit from body
     const body = await req.json().catch(() => ({}));
     let userId = body.userId as string | null;
-    const maxJobs = Math.min(body.limit || 200, 500); // Default 200, max 500
+    const maxJobs = Math.min(body.limit || 50, 100); // Default 50, max 100 (to fit in timeout)
 
     if (!userId) {
       const authHeader = req.headers.get("Authorization");
