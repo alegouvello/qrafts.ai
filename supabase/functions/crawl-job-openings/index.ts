@@ -560,17 +560,27 @@ Return ONLY a valid JSON array.`;
     let scoredJobs: any[] = [];
     if (userResumeText && userId && jobs.length > 0) {
       const locationContext = userLocation
-        ? `\n\nIMPORTANT - LOCATION PREFERENCE: The candidate is based in "${userLocation}". Jobs in or near this location should receive a significant boost (+10-15 points). Remote jobs should also get a small boost (+5 points). Jobs far from this location should not be penalized but should not get the location bonus.`
+        ? `\nLOCATION PREFERENCE: The candidate is based in "${userLocation}". Jobs in or near this location get +5 points. Remote jobs get +3 points. Do NOT give location bonus otherwise.`
         : "";
 
-      const scorePrompt = `Given this resume and list of job openings, score each job on a 0-100 scale for how well the candidate matches. Consider:
-1. Skills and experience alignment with the SPECIFIC role (not just department)
-2. Experience level match
-3. Role responsibilities fit
+      const scorePrompt = `Score each job 0-100 for how well the candidate's resume matches. Be STRICT and realistic:
+
+CALIBRATION GUIDE:
+- 90-100: Near-perfect match — same role type, matching seniority, directly relevant skills and industry
+- 75-89: Strong match — closely related role, most key skills present, reasonable seniority fit
+- 55-74: Moderate match — some transferable skills, but different function, seniority gap, or missing key requirements
+- 30-54: Weak match — different field/function, significant skill gaps, wrong seniority level
+- 0-29: Poor match — completely unrelated role
+
+KEY RULES:
+- A software engineer resume should NOT score 90+ on Sales/Account Executive roles
+- Seniority mismatches (junior resume vs senior role, or vice versa) should cap at ~70
+- Different job functions (engineering vs sales, marketing vs finance) should rarely exceed 50
+- Only give 90+ when the candidate could realistically be shortlisted for the role
 ${locationContext}
 
 Resume:
-${userResumeText.slice(0, 3000)}
+${userResumeText.slice(0, 4000)}
 
 Jobs:
 ${JSON.stringify(jobs.map((j: any, i: number) => ({
@@ -578,7 +588,7 @@ ${JSON.stringify(jobs.map((j: any, i: number) => ({
   title: j.title,
   location: j.location,
   department: j.department,
-  description: j.description || null,
+  description: j.description?.slice(0, 300) || null,
 })))}
 
 Return a JSON array with objects: { index: number, score: number, reasons: string[] }
@@ -593,7 +603,7 @@ Only return the JSON array, no markdown.`;
         body: JSON.stringify({
           model: "google/gemini-2.5-flash",
           messages: [
-            { role: "system", content: "You score job-resume match quality considering role specifics and location preferences. Respond with JSON array only." },
+            { role: "system", content: "You are a strict job-resume match scorer. Be realistic — most cross-functional matches should score below 50. Respond with JSON array only. No markdown." },
             { role: "user", content: scorePrompt },
           ],
         }),
