@@ -18,7 +18,7 @@ serve(async (req) => {
     // Accept userId and optional limit from body
     const body = await req.json().catch(() => ({}));
     let userId = body.userId as string | null;
-    const maxJobs = Math.min(body.limit || 200, 500); // Default 200, max 500
+    const maxJobs = Math.min(body.limit || 50, 100); // Default 50, max 100 (to fit in timeout)
 
     if (!userId) {
       const authHeader = req.headers.get("Authorization");
@@ -91,8 +91,8 @@ serve(async (req) => {
       });
     }
 
-    // Score in batches of 50 jobs at a time (to fit in AI context)
-    const SCORE_BATCH = 50;
+    // Score in batches of 25 jobs at a time (to fit in AI context and timeout)
+    const SCORE_BATCH = 25;
     let totalScored = 0;
     const locationContext = profile.location
       ? `\n\nIMPORTANT - LOCATION PREFERENCE: The candidate is based in "${profile.location}". Jobs in or near this location should receive a significant boost (+10-15 points). Remote jobs should also get a small boost (+5 points).`

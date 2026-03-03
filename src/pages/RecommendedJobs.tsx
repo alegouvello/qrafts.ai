@@ -301,7 +301,7 @@ const RecommendedJobs = () => {
         token = session.access_token;
       }
 
-      const BATCH_LIMIT = 200;
+      const BATCH_LIMIT = 50;
       let totalScored = 0;
       let keepGoing = true;
 
@@ -358,10 +358,12 @@ const RecommendedJobs = () => {
         }
 
         totalScored += batchScored;
-        // Stop if we scored less than what was available (means we're done or nearly done)
-        if (batchScored === 0 || batchTotal <= BATCH_LIMIT) {
+        // Stop if nothing was scored (all done) or fewer unscored jobs than our limit
+        if (batchScored === 0 || batchTotal < BATCH_LIMIT) {
           keepGoing = false;
         }
+        // Update progress between batches
+        setScoreProgress({ scored: totalScored, total: totalScored + (batchTotal > batchScored ? batchTotal - batchScored : 0) });
       }
 
       toast({
