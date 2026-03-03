@@ -301,7 +301,7 @@ const RecommendedJobs = () => {
         token = session.access_token;
       }
 
-      const BATCH_LIMIT = 200;
+      const BATCH_LIMIT = 50;
       let totalScored = 0;
       let keepGoing = true;
 
