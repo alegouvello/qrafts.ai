@@ -92,7 +92,7 @@ serve(async (req) => {
 
         let completed = 0;
         let totalJobs = 0;
-        const BATCH_SIZE = 5;
+        const BATCH_SIZE = 8;
 
         for (let i = 0; i < uniqueCompanies.length; i += BATCH_SIZE) {
           const batch = uniqueCompanies.slice(i, i + BATCH_SIZE);
