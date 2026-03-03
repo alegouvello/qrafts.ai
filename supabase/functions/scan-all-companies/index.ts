@@ -114,7 +114,7 @@ serve(async (req) => {
                     userLocation: profile?.location || null,
                   }),
                 },
-                25000
+                12000
               );
 
               if (resp.ok) {
