@@ -98,49 +98,90 @@ Deno.serve(async (req) => {
     
     console.log('Refreshing job description for application:', applicationId);
 
-    // Initialize Firecrawl with API key
     const firecrawlApiKey = Deno.env.get('FIRECRAWL_API_KEY');
-    if (!firecrawlApiKey) {
-      throw new Error('FIRECRAWL_API_KEY not configured');
+
+    // Helper: strip HTML tags to plain text
+    function stripHtml(html: string): string {
+      return html
+        .replace(/<script[\s\S]*?<\/script>/gi, '')
+        .replace(/<style[\s\S]*?<\/style>/gi, '')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    // Try Firecrawl first, fall back to direct HTTP fetch
+    async function scrapePageContent(): Promise<string> {
+      // Attempt Firecrawl if key is available
+      if (firecrawlApiKey) {
+        try {
+          console.log('Trying Firecrawl API...', jobUrl);
+          const scrapeResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${firecrawlApiKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              url: jobUrl,
+              formats: ['markdown'],
+              onlyMainContent: true,
+              waitFor: 5000,
+            }),
+          });
+
+          if (scrapeResponse.ok) {
+            const scrapeResult = await scrapeResponse.json();
+            const content = scrapeResult.data?.markdown || scrapeResult.markdown || '';
+            if (content.length >= 50) {
+              console.log('Firecrawl succeeded, content length:', content.length);
+              return content;
+            }
+          } else {
+            const errorText = await scrapeResponse.text();
+            console.warn('Firecrawl failed (status', scrapeResponse.status, '), falling back to direct fetch');
+          }
+        } catch (e) {
+          console.warn('Firecrawl error, falling back to direct fetch:', e instanceof Error ? e.message : e);
+        }
+      } else {
+        console.log('No FIRECRAWL_API_KEY, using direct fetch');
+      }
+
+      // Fallback: direct HTTP fetch
+      console.log('Direct-fetching page...', jobUrl);
+      const directResponse = await fetch(jobUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.5',
+        },
+      });
+
+      if (!directResponse.ok) {
+        throw new Error(`Direct fetch failed with status ${directResponse.status}`);
+      }
+
+      const html = await directResponse.text();
+      const textContent = stripHtml(html);
+      console.log('Direct fetch content length:', textContent.length);
+
+      if (textContent.length < 50) {
+        throw new Error('Page content too short — extraction may have failed');
+      }
+
+      return textContent;
     }
 
     // Core extraction logic wrapped for retry
     async function extractJobInfo(): Promise<{ company: string | null; position: string | null; roleSummary: any; extractedWebsite: string | null }> {
-      // Scrape with Firecrawl
-      let pageContent = '';
-      console.log('Scraping page with Firecrawl API...', jobUrl);
-      const scrapeResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${firecrawlApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          url: jobUrl,
-          formats: ['markdown'],
-          onlyMainContent: true,
-          waitFor: 5000,
-        }),
-      });
-
-      if (!scrapeResponse.ok) {
-        const errorText = await scrapeResponse.text();
-        console.error('Firecrawl API error:', scrapeResponse.status, errorText);
-        throw new Error(`Firecrawl API error: ${scrapeResponse.status}`);
-      }
-
-      const scrapeResult = await scrapeResponse.json();
-      if (!scrapeResult.success) {
-        console.error('Firecrawl scrape failed:', scrapeResult);
-        throw new Error('Firecrawl scraping failed');
-      }
-
-      pageContent = scrapeResult.data?.markdown || scrapeResult.markdown || '';
-      console.log('Scraped page content length:', pageContent.length);
-
-      if (!pageContent || pageContent.length < 50) {
-        throw new Error('Page content too short — extraction may have failed');
-      }
+      const pageContent = await scrapePageContent();
 
       // AI extraction
       console.log('Calling AI to extract job information...');
