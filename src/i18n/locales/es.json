@@ -162,11 +162,13 @@
     "overview": "Resumen de solicitudes",
     "stats": {
       "total": "Total de solicitudes",
+      "newToday": "Nuevas hoy",
       "pending": "Pendientes",
       "pendingReview": "Pendiente de revisión",
       "interview": "Entrevistas",
       "accepted": "Aceptadas",
-      "responseRate": "Tasa de respuesta"
+      "responseRate": "Tasa de respuesta",
+      "active": "{{count}} activa(s)"
     },
     "recent": "Solicitudes recientes",
     "addApplication": "Añadir solicitud",
