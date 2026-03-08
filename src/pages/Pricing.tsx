@@ -7,35 +7,37 @@ import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
 import { SEO } from "@/components/SEO";
 import { Footer } from "@/components/Footer";
+import { useTranslation } from "react-i18next";
 import qraftLogo from "@/assets/qrafts-logo.png";
 
 interface FeatureItem {
-  name: string;
+  nameKey: string;
   free: boolean | string;
   pro: boolean | string;
   icon: React.ReactNode;
 }
 
-const features: FeatureItem[] = [
-  { name: "Track Applications", free: "Up to 10", pro: "Unlimited", icon: <FileText className="h-4 w-4" /> },
-  { name: "Application Status Tracking", free: true, pro: true, icon: <BarChart3 className="h-4 w-4" /> },
-  { name: "Calendar & Timeline View", free: true, pro: true, icon: <Calendar className="h-4 w-4" /> },
-  { name: "Company Notes", free: true, pro: true, icon: <FileText className="h-4 w-4" /> },
-  { name: "AI Answer Suggestions", free: false, pro: true, icon: <Brain className="h-4 w-4" /> },
-  { name: "AI Answer Improvements", free: false, pro: true, icon: <Sparkles className="h-4 w-4" /> },
-  { name: "Resume Tailoring", free: false, pro: true, icon: <FileText className="h-4 w-4" /> },
-  { name: "Role Fit Analysis", free: false, pro: true, icon: <BarChart3 className="h-4 w-4" /> },
-  { name: "Confidence Analysis", free: false, pro: true, icon: <Zap className="h-4 w-4" /> },
-  { name: "Profile Review & Enhancement", free: false, pro: true, icon: <Shield className="h-4 w-4" /> },
-  { name: "AI Chat Assistant", free: false, pro: true, icon: <MessageSquare className="h-4 w-4" /> },
-  { name: "Interview Prep Generation", free: false, pro: true, icon: <Brain className="h-4 w-4" /> },
-];
-
 const Pricing = () => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const features: FeatureItem[] = [
+    { nameKey: "trackApps", free: t("pricing.freeFeatures.apps"), pro: t("pricing.proFeatures.unlimited"), icon: <FileText className="h-4 w-4" /> },
+    { nameKey: "statusTracking", free: true, pro: true, icon: <BarChart3 className="h-4 w-4" /> },
+    { nameKey: "calendarTimeline", free: true, pro: true, icon: <Calendar className="h-4 w-4" /> },
+    { nameKey: "companyNotes", free: true, pro: true, icon: <FileText className="h-4 w-4" /> },
+    { nameKey: "aiSuggestions", free: false, pro: true, icon: <Brain className="h-4 w-4" /> },
+    { nameKey: "aiImprovements", free: false, pro: true, icon: <Sparkles className="h-4 w-4" /> },
+    { nameKey: "resumeTailoring", free: false, pro: true, icon: <FileText className="h-4 w-4" /> },
+    { nameKey: "roleFitAnalysis", free: false, pro: true, icon: <BarChart3 className="h-4 w-4" /> },
+    { nameKey: "confidenceAnalysis", free: false, pro: true, icon: <Zap className="h-4 w-4" /> },
+    { nameKey: "profileReview", free: false, pro: true, icon: <Shield className="h-4 w-4" /> },
+    { nameKey: "aiChat", free: false, pro: true, icon: <MessageSquare className="h-4 w-4" /> },
+    { nameKey: "interviewPrep", free: false, pro: true, icon: <Brain className="h-4 w-4" /> },
+  ];
 
   useEffect(() => {
     checkSubscription();
@@ -56,20 +58,12 @@ const Pricing = () => {
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout');
       if (error) {
-        toast({
-          title: "Error",
-          description: "Failed to create checkout session",
-          variant: "destructive",
-        });
+        toast({ title: t("toast.error"), description: "Failed to create checkout session", variant: "destructive" });
       } else if (data?.url) {
         window.open(data.url, '_blank');
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to initiate checkout",
-        variant: "destructive",
-      });
+      toast({ title: t("toast.error"), description: "Failed to initiate checkout", variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
@@ -93,10 +87,8 @@ const Pricing = () => {
         description="Compare Qrafts Free and Pro plans. Unlock unlimited applications and AI-powered features to supercharge your job search."
       />
       
-      {/* Decorative background */}
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-background to-background pointer-events-none" />
       
-      {/* Header */}
       <header className="relative border-b border-border/40 bg-background/80 backdrop-blur-xl sticky top-0 z-50">
         <nav className="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
@@ -106,19 +98,19 @@ const Pricing = () => {
             <Link to="/">
               <Button variant="ghost" size="sm" className="rounded-full">
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
+                {t("pricing.back")}
               </Button>
             </Link>
             {isAuthenticated ? (
               <Link to="/dashboard">
                 <Button variant="outline" size="sm" className="rounded-full">
-                  Dashboard
+                  {t("pricing.dashboard")}
                 </Button>
               </Link>
             ) : (
               <Link to="/auth">
                 <Button size="sm" className="rounded-full">
-                  Get Started
+                  {t("pricing.getStarted")}
                 </Button>
               </Link>
             )}
@@ -127,65 +119,63 @@ const Pricing = () => {
       </header>
 
       <main className="relative container mx-auto px-4 sm:px-6 py-12 sm:py-20">
-        {/* Hero */}
         <div className="text-center mb-12 sm:mb-16 space-y-4">
           <div className="inline-block px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-4">
-            Simple Pricing
+            {t("pricing.simplePricing")}
           </div>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight">
-            Choose Your{" "}
+            {t("pricing.chooseYourPlan").split(" ").slice(0, -1).join(" ")}{" "}
             <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Plan
+              {t("pricing.chooseYourPlan").split(" ").slice(-1)}
             </span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Start free and upgrade when you're ready for unlimited applications and AI-powered features
+            {t("pricing.heroSubtitle")}
           </p>
         </div>
 
-        {/* Pricing Cards */}
         <div className="grid md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto mb-16 sm:mb-20">
           {/* Free Plan */}
           <Card className="relative border-border/50 bg-card/50 backdrop-blur">
             <CardHeader className="pb-4">
-              <CardTitle className="text-2xl">Free</CardTitle>
-              <CardDescription>Perfect for getting started</CardDescription>
+              <CardTitle className="text-2xl">{t("pricing.free")}</CardTitle>
+              <CardDescription>{t("pricing.freeDesc")}</CardDescription>
               <div className="pt-4">
                 <span className="text-4xl font-bold">$0</span>
-                <span className="text-muted-foreground">/month</span>
+                <span className="text-muted-foreground">{t("pricing.month")}</span>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <ul className="space-y-3">
                 <li className="flex items-center gap-3">
                   <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
-                  <span>Up to 10 applications</span>
+                  <span>{t("pricing.freeFeatures.apps")}</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
-                  <span>Status tracking & timeline</span>
+                  <span>{t("pricing.freeFeatures.status")}</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
-                  <span>Calendar view</span>
+                  <span>{t("pricing.freeFeatures.calendar")}</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
-                  <span>Company notes</span>
+                  <span>{t("pricing.freeFeatures.notes")}</span>
                 </li>
                 <li className="flex items-center gap-3 text-muted-foreground">
                   <X className="h-5 w-5 flex-shrink-0 opacity-50" />
-                  <span>AI-powered features</span>
+                  <span>{t("pricing.freeFeatures.noAi")}</span>
                 </li>
               </ul>
               {isAuthenticated ? (
                 <Button variant="outline" className="w-full rounded-full" disabled>
-                  Current Plan
+                  {t("pricing.currentPlan")}
                 </Button>
               ) : (
                 <Link to="/auth" className="block">
                   <Button variant="outline" className="w-full rounded-full">
-                    Get Started Free
+                    {t("pricing.getStartedFree")}
                   </Button>
                 </Link>
               )}
@@ -196,23 +186,23 @@ const Pricing = () => {
           <Card className="relative border-primary/50 bg-gradient-to-b from-primary/5 to-transparent shadow-lg shadow-primary/10">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2">
               <span className="px-3 py-1 bg-gradient-to-r from-primary to-accent text-primary-foreground text-xs font-semibold rounded-full">
-                Most Popular
+                {t("pricing.mostPopular")}
               </span>
             </div>
             <CardHeader className="pb-4">
               <CardTitle className="text-2xl flex items-center gap-2">
                 <Crown className="h-5 w-5 text-primary" />
-                Pro
+                {t("pricing.pro")}
               </CardTitle>
-              <CardDescription>For serious job seekers</CardDescription>
+              <CardDescription>{t("pricing.proDesc")}</CardDescription>
               <div className="pt-4">
                 <span className="text-4xl font-bold">$29.99</span>
-                <span className="text-muted-foreground">/month</span>
+                <span className="text-muted-foreground">{t("pricing.month")}</span>
               </div>
               <div className="pt-2">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 text-sm font-medium rounded-full">
                   <Zap className="h-3.5 w-3.5" />
-                  7-day free trial
+                  {t("pricing.freeTrialBadge")}
                 </span>
               </div>
             </CardHeader>
@@ -220,33 +210,33 @@ const Pricing = () => {
               <ul className="space-y-3">
                 <li className="flex items-center gap-3">
                   <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                  <span className="font-medium">Unlimited applications</span>
+                  <span className="font-medium">{t("pricing.proFeatures.unlimited")}</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                  <span>Everything in Free</span>
+                  <span>{t("pricing.proFeatures.everything")}</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <Sparkles className="h-5 w-5 text-primary flex-shrink-0" />
-                  <span>AI answer suggestions</span>
+                  <span>{t("pricing.proFeatures.aiSuggestions")}</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <Brain className="h-5 w-5 text-primary flex-shrink-0" />
-                  <span>Resume tailoring</span>
+                  <span>{t("pricing.proFeatures.resume")}</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <BarChart3 className="h-5 w-5 text-primary flex-shrink-0" />
-                  <span>Role fit analysis</span>
+                  <span>{t("pricing.proFeatures.roleFit")}</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <MessageSquare className="h-5 w-5 text-primary flex-shrink-0" />
-                  <span>AI chat assistant</span>
+                  <span>{t("pricing.proFeatures.chatAssistant")}</span>
                 </li>
               </ul>
               {isSubscribed ? (
                 <Button className="w-full rounded-full" disabled>
                   <Crown className="h-4 w-4 mr-2" />
-                  Current Plan
+                  {t("pricing.currentPlan")}
                 </Button>
               ) : isAuthenticated ? (
                 <Button 
@@ -255,12 +245,12 @@ const Pricing = () => {
                   disabled={isLoading}
                 >
                   <Crown className="h-4 w-4 mr-2" />
-                  {isLoading ? "Loading..." : "Upgrade to Pro"}
+                  {isLoading ? t("common.loading") : t("pricing.upgradeToPro")}
                 </Button>
               ) : (
                 <Link to="/auth" className="block w-full">
                   <Button className="w-full rounded-full bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity">
-                    Get Started with Pro
+                    {t("pricing.getStartedPro")}
                   </Button>
                 </Link>
               )}
@@ -275,9 +265,9 @@ const Pricing = () => {
               <Shield className="h-7 w-7 text-green-500" />
             </div>
             <div className="text-center sm:text-left">
-              <h3 className="font-semibold text-lg mb-1">30-Day Money-Back Guarantee</h3>
+              <h3 className="font-semibold text-lg mb-1">{t("pricing.guarantee.title")}</h3>
               <p className="text-sm text-muted-foreground">
-                Not satisfied? Get a full refund within 30 days, no questions asked. We're confident you'll love Qrafts.
+                {t("pricing.guarantee.desc")}
               </p>
             </div>
           </div>
@@ -286,25 +276,25 @@ const Pricing = () => {
         {/* Feature Comparison Table */}
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8">
-            Feature Comparison
+            {t("pricing.featureComparison")}
           </h2>
           <div className="rounded-xl border border-border/50 overflow-hidden bg-card/50 backdrop-blur">
             <div className="grid grid-cols-3 gap-4 p-4 bg-muted/30 border-b border-border/50 font-medium">
-              <div>Feature</div>
-              <div className="text-center">Free</div>
-              <div className="text-center text-primary">Pro</div>
+              <div>{t("pricing.feature")}</div>
+              <div className="text-center">{t("pricing.free")}</div>
+              <div className="text-center text-primary">{t("pricing.pro")}</div>
             </div>
             <div className="divide-y divide-border/50">
               {features.map((feature, index) => (
                 <div 
-                  key={feature.name} 
+                  key={feature.nameKey} 
                   className={`grid grid-cols-3 gap-4 p-4 items-center ${
                     index % 2 === 0 ? 'bg-transparent' : 'bg-muted/10'
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-muted-foreground">{feature.icon}</span>
-                    <span className="text-sm sm:text-base">{feature.name}</span>
+                    <span className="text-sm sm:text-base">{t(`pricing.featureNames.${feature.nameKey}`)}</span>
                   </div>
                   <div className="flex justify-center">
                     {renderFeatureValue(feature.free, false)}
@@ -321,17 +311,17 @@ const Pricing = () => {
         {/* CTA Section */}
         <div className="text-center mt-16 sm:mt-20 space-y-6">
           <h2 className="text-2xl sm:text-3xl font-bold">
-            Ready to supercharge your job search?
+            {t("pricing.ctaTitle")}
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Join thousands of job seekers using Qrafts to land their dream jobs faster
+            {t("pricing.ctaSubtitle")}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {isAuthenticated ? (
               isSubscribed ? (
                 <Link to="/dashboard">
                   <Button size="lg" className="rounded-full">
-                    Go to Dashboard
+                    {t("pricing.goToDashboard")}
                   </Button>
                 </Link>
               ) : (
@@ -342,13 +332,13 @@ const Pricing = () => {
                   disabled={isLoading}
                 >
                   <Crown className="h-4 w-4 mr-2" />
-                  {isLoading ? "Loading..." : "Upgrade to Pro - $29.99/month"}
+                  {isLoading ? t("common.loading") : t("pricing.upgradePrice")}
                 </Button>
               )
             ) : (
               <Link to="/auth">
                 <Button size="lg" className="rounded-full">
-                  Get Started Free
+                  {t("pricing.getStartedFree")}
                 </Button>
               </Link>
             )}

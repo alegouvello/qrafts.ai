@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Briefcase, Clock, Users, TrendingUp, Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface DashboardStatsProps {
   stats: {
@@ -13,39 +14,41 @@ interface DashboardStatsProps {
 }
 
 export const DashboardStats = ({ stats }: DashboardStatsProps) => {
+  const { t } = useTranslation();
+
   const statCards = [
     {
       icon: Briefcase,
-      label: "Total Applications",
+      label: t("dashboard.stats.total"),
       value: stats.total,
       color: "text-primary",
       bgColor: "bg-primary/10",
     },
     {
       icon: Plus,
-      label: "New Today",
+      label: t("dashboard.stats.newToday"),
       value: stats.newToday,
       color: "text-success",
       bgColor: "bg-success/10",
     },
     {
       icon: Clock,
-      label: "Pending",
+      label: t("dashboard.stats.pending"),
       value: stats.pending,
       color: "text-warning",
       bgColor: "bg-warning/10",
     },
     {
       icon: Users,
-      label: "Interviews",
+      label: t("dashboard.stats.interview"),
       value: stats.totalEverInterviewed,
-      sub: stats.interviews > 0 ? `${stats.interviews} active` : undefined,
+      sub: stats.interviews > 0 ? t("dashboard.stats.active", { count: stats.interviews }) : undefined,
       color: "text-success",
       bgColor: "bg-success/10",
     },
     {
       icon: TrendingUp,
-      label: "Response Rate",
+      label: t("dashboard.stats.responseRate"),
       value: `${stats.responseRate}%`,
       color: "text-accent",
       bgColor: "bg-accent/10",

@@ -162,11 +162,13 @@
     "overview": "Resumen de solicitudes",
     "stats": {
       "total": "Total de solicitudes",
+      "newToday": "Nuevas hoy",
       "pending": "Pendientes",
       "pendingReview": "Pendiente de revisión",
       "interview": "Entrevistas",
       "accepted": "Aceptadas",
-      "responseRate": "Tasa de respuesta"
+      "responseRate": "Tasa de respuesta",
+      "active": "{{count}} activa(s)"
     },
     "recent": "Solicitudes recientes",
     "addApplication": "Añadir solicitud",
@@ -481,5 +483,109 @@
     "instructionsPlaceholder": "Ej: 'Hazlo más conciso', 'Añade más detalles técnicos', 'Enfócate en experiencia de liderazgo'...",
     "regenerate": "Regenerar",
     "applyChanges": "Aplicar cambios"
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "¡Bienvenido a Qrafts!",
+      "subtitle": "Configuremos tu cuenta en 2 pasos rápidos para que puedas empezar a rastrear solicitudes con insights de IA."
+    },
+    "resume": {
+      "title": "Sube tu currículum",
+      "subtitle": "Esto potencia las sugerencias de respuestas IA y la personalización del currículum en todas tus solicitudes.",
+      "uploaded": "¡Currículum subido y establecido como predeterminado!",
+      "dropzone": "Arrastra tu currículum aquí o haz clic para explorar",
+      "dropzoneHint": "DOC o DOCX (máx 10 MB)",
+      "uploading": "Subiendo...",
+      "uploadButton": "Subir currículum",
+      "uploadSuccess": "¡Currículum subido!",
+      "uploadSuccessDesc": "Tu currículum se está analizando en segundo plano.",
+      "uploadFailed": "Error al subir",
+      "uploadFailedDesc": "Inténtalo de nuevo o salta este paso.",
+      "invalidFile": "Archivo inválido",
+      "invalidFileDesc": "Por favor sube un archivo DOC o DOCX.",
+      "fileTooLarge": "Archivo demasiado grande",
+      "fileTooLargeDesc": "El tamaño máximo es 10 MB."
+    },
+    "app": {
+      "title": "Añade tu primera solicitud",
+      "subtitle": "Pega la URL de una oferta de empleo y extraeremos automáticamente la empresa, el puesto y las preguntas.",
+      "added": "¡Solicitud añadida! Los detalles se están extrayendo.",
+      "placeholder": "https://empresa.com/empleos/...",
+      "adding": "Añadiendo...",
+      "addButton": "Añadir solicitud",
+      "addSuccess": "¡Solicitud añadida!",
+      "addSuccessDesc": "Los detalles del empleo se están extrayendo.",
+      "addError": "Error",
+      "addErrorDesc": "No se pudo añadir la solicitud."
+    },
+    "complete": {
+      "title": "¡Todo listo!",
+      "both": "Tu currículum se está analizando y tu primera solicitud se está procesando. ¡Explora tu panel de control!",
+      "resumeOnly": "Tu currículum está listo. Añade solicitudes en cualquier momento desde el panel.",
+      "appOnly": "Tu solicitud se está procesando. Sube tu currículum desde tu perfil para funciones de IA.",
+      "neither": "Puedes subir tu currículum y añadir solicitudes en cualquier momento desde el panel."
+    },
+    "letsGo": "¡Vamos!",
+    "goToDashboard": "Ir al panel",
+    "skip": "Saltar",
+    "skipSetup": "Saltar configuración"
+  },
+  "pricing": {
+    "simplePricing": "Precios simples",
+    "chooseYourPlan": "Elige tu plan",
+    "heroSubtitle": "Comienza gratis y actualiza cuando estés listo para solicitudes ilimitadas y funciones con IA",
+    "free": "Gratis",
+    "freeDesc": "Perfecto para comenzar",
+    "month": "/mes",
+    "freeFeatures": {
+      "apps": "Hasta 10 solicitudes",
+      "status": "Seguimiento de estado y cronología",
+      "calendar": "Vista de calendario",
+      "notes": "Notas de empresa",
+      "noAi": "Funciones con IA"
+    },
+    "currentPlan": "Plan actual",
+    "getStartedFree": "Comenzar gratis",
+    "mostPopular": "Más popular",
+    "pro": "Pro",
+    "proDesc": "Para buscadores de empleo serios",
+    "freeTrialBadge": "Prueba gratuita de 7 días",
+    "proFeatures": {
+      "unlimited": "Solicitudes ilimitadas",
+      "everything": "Todo lo del plan gratuito",
+      "aiSuggestions": "Sugerencias de respuestas con IA",
+      "resume": "Personalización de currículum",
+      "roleFit": "Análisis de adecuación al puesto",
+      "chatAssistant": "Asistente de chat con IA"
+    },
+    "upgradeToPro": "Actualizar a Pro",
+    "getStartedPro": "Comenzar con Pro",
+    "guarantee": {
+      "title": "Garantía de devolución de 30 días",
+      "desc": "¿No estás satisfecho? Obtén un reembolso completo en 30 días, sin preguntas. Estamos seguros de que te encantará Qrafts."
+    },
+    "featureComparison": "Comparación de funciones",
+    "feature": "Función",
+    "featureNames": {
+      "trackApps": "Rastrear solicitudes",
+      "statusTracking": "Seguimiento del estado de solicitudes",
+      "calendarTimeline": "Vista de calendario y cronología",
+      "companyNotes": "Notas de empresa",
+      "aiSuggestions": "Sugerencias de respuestas con IA",
+      "aiImprovements": "Mejoras de respuestas con IA",
+      "resumeTailoring": "Personalización de currículum",
+      "roleFitAnalysis": "Análisis de adecuación al puesto",
+      "confidenceAnalysis": "Análisis de confianza",
+      "profileReview": "Revisión y mejora del perfil",
+      "aiChat": "Asistente de chat con IA",
+      "interviewPrep": "Generación de preparación de entrevistas"
+    },
+    "ctaTitle": "¿Listo para impulsar tu búsqueda de empleo?",
+    "ctaSubtitle": "Únete a miles de buscadores de empleo que usan Qrafts para conseguir su trabajo soñado más rápido",
+    "goToDashboard": "Ir al panel",
+    "upgradePrice": "Actualizar a Pro - $29.99/mes",
+    "back": "Volver",
+    "dashboard": "Panel de control",
+    "getStarted": "Comenzar"
   }
 }
