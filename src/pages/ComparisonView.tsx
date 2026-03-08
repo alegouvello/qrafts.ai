@@ -49,7 +49,7 @@ const ComparisonView = () => {
   }>({ subscribed: false, product_id: null, is_trialing: false });
 
   useEffect(() => {
-    checkAuth();
+    fetchUserProfile();
     fetchUserProfile();
     fetchApplications();
     checkSubscription();
