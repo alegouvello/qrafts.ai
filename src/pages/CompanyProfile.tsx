@@ -134,7 +134,6 @@ const CompanyProfile = () => {
 
   useEffect(() => {
     if (companyName) {
-    if (companyName) {
       fetchCompanyData();
       fetchCompanyNotes();
       fetchCommunityStats();
