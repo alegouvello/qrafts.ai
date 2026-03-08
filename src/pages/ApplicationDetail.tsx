@@ -12,18 +12,18 @@ import { AnswerImprovementDialog } from "@/components/AnswerImprovementDialog";
 import { SaveTemplateDialog } from "@/components/SaveTemplateDialog";
 import { BrowseTemplatesDialog } from "@/components/BrowseTemplatesDialog";
 import { AddTimelineEventDialog } from "@/components/AddTimelineEventDialog";
-import { TimelineView } from "@/components/TimelineView";
 import { RoleFitAnalysis, RoleFitAnalysisRef } from "@/components/RoleFitAnalysis";
-import { StatusHistoryTimeline } from "@/components/StatusHistoryTimeline";
-import { AddInterviewerDialog } from "@/components/AddInterviewerDialog";
-import { InterviewPrepCard } from "@/components/InterviewPrepCard";
 import { AddQuestionDialog } from "@/components/AddQuestionDialog";
 import { ResumeTailorDialog } from "@/components/ResumeTailorDialog";
 import { SavedResumesDialog } from "@/components/SavedResumesDialog";
 import { UploadCustomResumeDialog } from "@/components/UploadCustomResumeDialog";
 import { NaturalToneDialog } from "@/components/NaturalToneDialog";
+import { QuestionCard } from "@/components/ApplicationDetail/QuestionCard";
+import { ResumeTab } from "@/components/ApplicationDetail/ResumeTab";
+import { InterviewersTab } from "@/components/ApplicationDetail/InterviewersTab";
+import { TimelineTab } from "@/components/ApplicationDetail/TimelineTab";
+import { RoleDetailsCard } from "@/components/ApplicationDetail/RoleDetailsCard";
 import { useToast } from "@/hooks/use-toast";
-import ReactMarkdown from "react-markdown";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
@@ -1578,33 +1578,7 @@ const ApplicationDetail = () => {
     }
   };
 
-            {/* Shared Questions from Community */}
-            {sharedQuestions.length > 0 && (
-              <Collapsible open={showSharedQuestions} onOpenChange={setShowSharedQuestions}>
-                <Card className="p-4 border-dashed border-primary/30 bg-primary/5">
-                  <CollapsibleTrigger className="flex items-center justify-between w-full">
-                    <div className="flex items-center gap-2">
-                      <MessageSquare className="h-4 w-4 text-primary" />
-                      <span className="font-medium text-sm">
-                        {sharedQuestions.length} additional question{sharedQuestions.length > 1 ? 's' : ''} reported by other applicants
-                      </span>
-                    </div>
-                    {showSharedQuestions ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="mt-3 space-y-2">
-                    {sharedQuestions.map((sq, i) => (
-                      <div key={i} className="flex items-start gap-2 text-sm p-2 rounded bg-background">
-                        <span className="text-muted-foreground font-mono text-xs mt-0.5">{i + 1}.</span>
-                        <span>{sq.question_text}</span>
-                      </div>
-                    ))}
-                    <p className="text-xs text-muted-foreground mt-2">
-                      These questions were encountered by other users applying to this role.
-                    </p>
-                  </CollapsibleContent>
-                </Card>
-              </Collapsible>
-            )}
+  // Shared questions JSX rendered inside questions tab below
 
   // Get company logo domain - use stored domain or derive it
   const logoDomain = application?.company_domain || 
@@ -1820,138 +1794,18 @@ const ApplicationDetail = () => {
 
           {/* Role Details */}
           {application.role_summary && (
-            <Card className="p-6 bg-card/30 backdrop-blur-sm border-border/50">
-              <Collapsible open={roleDetailsOpen} onOpenChange={setRoleDetailsOpen}>
-                <div className="flex items-center justify-between mb-4">
-                  <CollapsibleTrigger asChild>
-                    <button className="flex items-center gap-2 hover:text-primary transition-colors">
-                      <h3 className="font-semibold text-lg">Role Details</h3>
-                      {roleDetailsOpen ? (
-                        <ChevronUp className="h-4 w-4" />
-                      ) : (
-                        <ChevronDown className="h-4 w-4" />
-                      )}
-                    </button>
-                  </CollapsibleTrigger>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      onClick={() => roleFitRef.current?.analyzeRoleFit()}
-                      disabled={roleFitRef.current?.loading || !userProfile?.resume_text}
-                      variant="outline"
-                      size="sm"
-                    >
-                      {roleFitRef.current?.loading ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Analyzing...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          AI Role Fit
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      onClick={handleRefreshJobDescription}
-                      disabled={refreshingDescription}
-                      variant="outline"
-                      size="sm"
-                    >
-                      {refreshingDescription ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Refreshing...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          Refresh Description
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </div>
-                <CollapsibleContent className="animate-accordion-down">
-                  <div className="grid gap-4">
-                    {(application.role_summary.location || application.role_summary.salary_range) && (
-                      <div className="grid md:grid-cols-2 gap-4">
-                        {application.role_summary.location && (
-                          <div>
-                            <span className="text-sm text-muted-foreground">Location</span>
-                            <p className="font-medium">{application.role_summary.location}</p>
-                          </div>
-                        )}
-                        {application.role_summary.salary_range && (
-                          <div>
-                            <span className="text-sm text-muted-foreground">Salary Range</span>
-                            <p className="font-medium">{application.role_summary.salary_range}</p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    {application.role_summary.description && (
-                      <div>
-                        <span className="text-sm text-muted-foreground">Description</span>
-                        <p className="text-sm mt-1 leading-relaxed">{application.role_summary.description}</p>
-                      </div>
-                    )}
-                    {application.role_summary.responsibilities && application.role_summary.responsibilities.length > 0 && (
-                      <div>
-                        <span className="text-sm text-muted-foreground">Key Responsibilities</span>
-                        <ul className="mt-2 space-y-1">
-                          {application.role_summary.responsibilities.map((item, idx) => (
-                            <li key={idx} className="text-sm flex items-start gap-2">
-                              <span className="text-primary mt-1">•</span>
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {application.role_summary.requirements && application.role_summary.requirements.length > 0 && (
-                      <div>
-                        <span className="text-sm text-muted-foreground">Requirements</span>
-                        <ul className="mt-2 space-y-1">
-                          {application.role_summary.requirements.map((item, idx) => (
-                            <li key={idx} className="text-sm flex items-start gap-2">
-                              <span className="text-primary mt-1">•</span>
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {application.role_summary.benefits && application.role_summary.benefits.length > 0 && (
-                      <div>
-                        <span className="text-sm text-muted-foreground">Benefits</span>
-                        <ul className="mt-2 space-y-1">
-                          {application.role_summary.benefits.map((item, idx) => (
-                            <li key={idx} className="text-sm flex items-start gap-2">
-                              <span className="text-primary mt-1">•</span>
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-            </Card>
-          )}
-
-          {/* AI Role Fit Analysis */}
-          {application.role_summary && (
-            <RoleFitAnalysis 
-              ref={roleFitRef}
+            <RoleDetailsCard
+              roleSummary={application.role_summary}
               company={application.company}
               position={application.position}
-              roleDetails={application.role_summary} 
+              roleDetailsOpen={roleDetailsOpen}
+              onRoleDetailsOpenChange={setRoleDetailsOpen}
+              roleFitRef={roleFitRef}
               resumeText={userProfile?.resume_text || null}
               subscribed={subscriptionStatus.subscribed || subscriptionStatus.is_trialing}
               onUpgrade={handleUpgrade}
-              hideButton={true}
+              refreshingDescription={refreshingDescription}
+              onRefreshJobDescription={handleRefreshJobDescription}
             />
           )}
         </div>
@@ -2038,575 +1892,82 @@ const ApplicationDetail = () => {
             </Card>
           ) : (
             <div className="space-y-6">
-              {questions.map((question, index) => {
-                const hasAnswer = savedAnswers[question.id]?.trim();
-                const isModified = answers[question.id] !== savedAnswers[question.id];
-                const isSaving = saving[question.id];
-                const isSuggesting = suggesting[question.id];
-                const isImproving = improving[question.id];
-                const isMakingNatural = makingNatural[question.id];
-                const hasCurrentAnswer = answers[question.id]?.trim();
-
-                const isFileUpload = (() => {
-                  const lowerQuestion = question.question_text.toLowerCase();
-                  // Only treat as file upload if it explicitly asks to upload/attach
-                  const hasUploadKeyword = 
-                    lowerQuestion.includes('upload') ||
-                    lowerQuestion.includes('attach') ||
-                    lowerQuestion.includes('submit a');
-                  
-                  const hasFileKeyword = 
-                    lowerQuestion.includes('resume') ||
-                    lowerQuestion.includes('cv') ||
-                    lowerQuestion.includes('cover letter');
-                  
-                  // Must have both upload action and file type to be file upload
-                  return hasUploadKeyword && hasFileKeyword;
-                })();
-
-                const isShortAnswer = (() => {
-                  const lowerQuestion = question.question_text.toLowerCase();
-                  const questionWords = lowerQuestion.split(' ').length;
-                  
-                  // Yes/no questions and short field questions
-                  const isYesNoQuestion = 
-                    lowerQuestion.includes('are you') ||
-                    lowerQuestion.includes('do you') ||
-                    lowerQuestion.includes('will you') ||
-                    lowerQuestion.includes('have you') ||
-                    lowerQuestion.includes('can you') ||
-                    (lowerQuestion.includes('?') && questionWords > 5);
-                  
-                  const isShortField = 
-                    lowerQuestion.includes('first name') ||
-                    lowerQuestion.includes('last name') ||
-                    lowerQuestion.includes('email') ||
-                    lowerQuestion.includes('phone') ||
-                    lowerQuestion.includes('linkedin') ||
-                    lowerQuestion.includes('github') ||
-                    lowerQuestion.includes('portfolio') ||
-                    lowerQuestion.includes('website') ||
-                    lowerQuestion.includes('location') ||
-                    lowerQuestion.includes('city') ||
-                    lowerQuestion.includes('office') ||
-                    (lowerQuestion === 'name' || lowerQuestion.includes('your name'));
-                  
-                  return (isYesNoQuestion || isShortField) && (answers[question.id] || '').length < 150;
-                })();
-
-                const isExpanded = !isMobile || expandedQuestions.has(question.id);
-
-                return (
-                  <Card key={question.id} className="p-4 bg-card/30 backdrop-blur-sm border-border/50 hover:border-primary/30 transition-all">
-                    <Collapsible open={isExpanded} onOpenChange={() => isMobile && toggleQuestion(question.id)}>
-                      <div className="flex items-start gap-3">
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold mt-0.5">
-                          {index + 1}
-                        </div>
-                         <div className="flex-1 min-w-0 space-y-3">
-                           <div className="flex items-start justify-between gap-3">
-                             <CollapsibleTrigger asChild className={isMobile ? "cursor-pointer" : "cursor-default"}>
-                               <div className="flex items-start gap-2 flex-1 flex-wrap">
-                                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                                   {editingQuestionId === question.id ? (
-                                     <Input
-                                       value={editingQuestionText}
-                                       onChange={(e) => setEditingQuestionText(e.target.value)}
-                                       onClick={(e) => e.stopPropagation()}
-                                       className="flex-1"
-                                     />
-                                   ) : (
-                                     <h3 className="font-medium leading-tight flex-1 min-w-0">{question.question_text}</h3>
-                                   )}
-                                   {editingQuestionId === question.id ? (
-                                     <div className="flex gap-1 flex-shrink-0">
-                                       <Button
-                                         size="sm"
-                                         variant="ghost"
-                                         onClick={async (e) => {
-                                           e.stopPropagation();
-                                           await handleEditQuestion(question.id, editingQuestionText);
-                                           setEditingQuestionId(null);
-                                         }}
-                                       >
-                                         <Check className="h-4 w-4" />
-                                       </Button>
-                                       <Button
-                                         size="sm"
-                                         variant="ghost"
-                                         onClick={(e) => {
-                                           e.stopPropagation();
-                                           setEditingQuestionId(null);
-                                         }}
-                                       >
-                                         <X className="h-4 w-4" />
-                                       </Button>
-                                     </div>
-                                   ) : (
-                                     <div className="flex gap-1 flex-shrink-0">
-                                       <Button
-                                         size="sm"
-                                         variant="ghost"
-                                         onClick={(e) => {
-                                           e.stopPropagation();
-                                           setEditingQuestionId(question.id);
-                                           setEditingQuestionText(question.question_text);
-                                         }}
-                                       >
-                                         <Edit2 className="h-4 w-4" />
-                                       </Button>
-                                       <Button
-                                         size="sm"
-                                         variant="ghost"
-                                         onClick={(e) => {
-                                           e.stopPropagation();
-                                           if (confirm("Are you sure you want to delete this question?")) {
-                                             handleDeleteQuestion(question.id);
-                                           }
-                                         }}
-                                       >
-                                         <Trash2 className="h-4 w-4" />
-                                       </Button>
-                                     </div>
-                                   )}
-                                   {isMobile && (
-                                     <button className="flex-shrink-0 p-1 hover:bg-muted rounded transition-colors">
-                                       {isExpanded ? (
-                                         <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                                       ) : (
-                                         <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                                       )}
-                                     </button>
-                                   )}
-                                 </div>
-                                {autoPopulatedAnswers.has(question.id) && (
-                                  <Badge variant="secondary" className="text-xs flex-shrink-0">
-                                    <Sparkles className="w-3 h-3 mr-1" />
-                                    Auto-filled
-                                  </Badge>
-                                )}
-                                {confidenceScores[question.id] && (
-                                  <Badge 
-                                    variant={
-                                      confidenceScores[question.id].score >= 80 ? "default" :
-                                      confidenceScores[question.id].score >= 60 ? "secondary" :
-                                      "destructive"
-                                    }
-                                    className="text-xs flex-shrink-0 cursor-pointer"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setExpandedConfidence(
-                                        expandedConfidence === question.id ? null : question.id
-                                      );
-                                    }}
-                                  >
-                                    <TrendingUp className="w-3 h-3 mr-1" />
-                                    ~{confidenceScores[question.id].score}% fit
-                                  </Badge>
-                                )}
-                              </div>
-                            </CollapsibleTrigger>
-                            {hasAnswer && !isModified && (
-                              <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
-                            )}
-                          </div>
-                        
-                          <CollapsibleContent className="animate-accordion-down">
-                            {/* Confidence Score Details */}
-                            {confidenceScores[question.id] && expandedConfidence === question.id && (
-                              <div className="mt-3 p-3 rounded-lg bg-muted/50 border border-border space-y-2">
-                                <div className="flex items-start gap-2">
-                                  <Info className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                                  <div className="space-y-2 flex-1">
-                                    <p className="text-sm text-foreground">
-                                      <span className="font-medium">Analysis:</span> {confidenceScores[question.id].reasoning}
-                                    </p>
-                                    {confidenceScores[question.id].suggestions && confidenceScores[question.id].score < 100 && (
-                                      <div className="space-y-2">
-                                        <div className="flex items-center justify-between">
-                                          <p className="text-sm font-medium text-foreground">Suggestions to improve:</p>
-                                          <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => handleQuickApplySuggestion(question.id, question.question_text)}
-                                            disabled={applyingSuggestion[question.id]}
-                                            className="h-7 text-xs"
-                                          >
-                                            {applyingSuggestion[question.id] ? (
-                                              <>
-                                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                                                Applying...
-                                              </>
-                                            ) : (
-                                              <>
-                                                <Sparkles className="h-3 w-3 mr-1" />
-                                                Quick Apply
-                                              </>
-                                            )}
-                                          </Button>
-                                        </div>
-                                        <p className="text-sm text-muted-foreground whitespace-pre-line">
-                                          {confidenceScores[question.id].suggestions}
-                                        </p>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                            <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium">Your Answer</span>
-                            {hasCurrentAnswer && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleCopyAnswer(question.id)}
-                                className="h-8"
-                              >
-                                {copiedAnswers[question.id] ? (
-                                  <Check className="h-4 w-4 text-green-600" />
-                                ) : (
-                                  <Copy className="h-4 w-4" />
-                                )}
-                              </Button>
-                            )}
-                          </div>
-                          {isFileUpload ? (
-                            <div className="space-y-2">
-                              <div className="text-sm text-muted-foreground">
-                                File upload - Please upload directly on the application form
-                              </div>
-                              <Input
-                                placeholder="Or paste file URL here..."
-                                value={answers[question.id] || ""}
-                                onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                              />
-                            </div>
-                          ) : isShortAnswer ? (
-                            <Input
-                              placeholder="Type your answer here..."
-                              value={answers[question.id] || ""}
-                              onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                            />
-                          ) : (
-                            <Textarea
-                              placeholder="Type your answer here..."
-                              value={answers[question.id] || ""}
-                              onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                              className="min-h-[100px]"
-                            />
-                          )}
-                        </div>
-                        {!isFileUpload && (
-                        <div className="flex gap-2 flex-wrap items-center">
-                          <Button
-                            onClick={() => handleGetSuggestion(question.id, question.question_text)}
-                            disabled={isSuggesting}
-                            variant="outline"
-                            size="sm"
-                          >
-                            {isSuggesting ? (
-                              <>
-                                <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
-                                Generating...
-                              </>
-                            ) : (
-                              <>
-                                <Sparkles className="h-3 w-3 mr-1.5" />
-                                AI Suggest
-                              </>
-                            )}
-                          </Button>
-                          <Button
-                            onClick={() => {
-                              setCurrentQuestionForTemplate(question.id);
-                              setShowBrowseTemplatesDialog(true);
-                            }}
-                            variant="outline"
-                            size="sm"
-                          >
-                            <Library className="h-3 w-3 mr-1.5" />
-                            Templates
-                          </Button>
-                          {hasCurrentAnswer && (
-                            <>
-                              <Button
-                                onClick={() => handleImproveAnswer(question.id, question.question_text)}
-                                disabled={isImproving}
-                                variant="outline"
-                                size="sm"
-                              >
-                                {isImproving ? (
-                                  <>
-                                    <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
-                                    Analyzing...
-                                  </>
-                                ) : (
-                                  <>
-                                    <Lightbulb className="h-3 w-3 mr-1.5" />
-                                    Improve
-                                  </>
-                                )}
-                              </Button>
-                              <Button
-                                onClick={() => handleMakeNatural(question.id, question.question_text)}
-                                disabled={isMakingNatural}
-                                variant="outline"
-                                size="sm"
-                              >
-                                {isMakingNatural ? (
-                                  <>
-                                    <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
-                                    Rewriting...
-                                  </>
-                                ) : (
-                                  <>
-                                    <MessageSquare className="h-3 w-3 mr-1.5" />
-                                    More Natural
-                                  </>
-                                )}
-                              </Button>
-                              <Button
-                                onClick={() => handleCalculateConfidence(question.id, question.question_text)}
-                                disabled={calculatingConfidence[question.id]}
-                                variant="outline"
-                                size="sm"
-                              >
-                                {calculatingConfidence[question.id] ? (
-                                  <>
-                                    <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
-                                    Calculating...
-                                  </>
-                                ) : (
-                                  <>
-                                    <TrendingUp className="h-3 w-3 mr-1.5" />
-                                    Check Fit
-                                  </>
-                                )}
-                              </Button>
-                              <Button
-                                onClick={() => {
-                                  setCurrentQuestionForTemplate(question.id);
-                                  setShowSaveTemplateDialog(true);
-                                }}
-                                variant="outline"
-                                size="sm"
-                              >
-                                <BookmarkPlus className="h-3 w-3 mr-1.5" />
-                                Save
-                              </Button>
-                            </>
-                          )}
-                          <Button
-                            onClick={() => handleSaveAnswer(question.id)}
-                            disabled={isSaving || !isModified}
-                            size="sm"
-                            className="ml-auto"
-                          >
-                            {isSaving ? (
-                              <>
-                                <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
-                                Saving...
-                              </>
-                            ) : (
-                              <>
-                                <Save className="h-3 w-3 mr-1.5" />
-                                Save Answer
-                              </>
-                            )}
-                          </Button>
-                         </div>
-                            )}
-                          </CollapsibleContent>
-                        </div>
-                      </div>
-                    </Collapsible>
-                  </Card>
-                );
-              })}
+              {questions.map((question, index) => (
+                <QuestionCard
+                  key={question.id}
+                  question={question}
+                  index={index}
+                  answer={answers[question.id] || ""}
+                  savedAnswer={savedAnswers[question.id] || ""}
+                  isMobile={isMobile}
+                  isExpanded={!isMobile || expandedQuestions.has(question.id)}
+                  confidenceScore={confidenceScores[question.id]}
+                  expandedConfidence={expandedConfidence}
+                  isAutoPopulated={autoPopulatedAnswers.has(question.id)}
+                  isCopied={copiedAnswers[question.id] || false}
+                  isSaving={saving[question.id] || false}
+                  isSuggesting={suggesting[question.id] || false}
+                  isImproving={improving[question.id] || false}
+                  isMakingNatural={makingNatural[question.id] || false}
+                  isCalculatingConfidence={calculatingConfidence[question.id] || false}
+                  isApplyingSuggestion={applyingSuggestion[question.id] || false}
+                  editingQuestionId={editingQuestionId}
+                  editingQuestionText={editingQuestionText}
+                  onToggleQuestion={toggleQuestion}
+                  onAnswerChange={handleAnswerChange}
+                  onSaveAnswer={handleSaveAnswer}
+                  onGetSuggestion={handleGetSuggestion}
+                  onImproveAnswer={(qId, qText) => handleImproveAnswer(qId, qText)}
+                  onMakeNatural={handleMakeNatural}
+                  onCalculateConfidence={handleCalculateConfidence}
+                  onQuickApplySuggestion={handleQuickApplySuggestion}
+                  onCopyAnswer={handleCopyAnswer}
+                  onSaveAsTemplate={(qId) => { setCurrentQuestionForTemplate(qId); setShowSaveTemplateDialog(true); }}
+                  onBrowseTemplates={(qId) => { setCurrentQuestionForTemplate(qId); setShowBrowseTemplatesDialog(true); }}
+                  onStartEditing={(qId, qText) => { setEditingQuestionId(qId); setEditingQuestionText(qText); }}
+                  onConfirmEdit={async (qId, newText) => { await handleEditQuestion(qId, newText); setEditingQuestionId(null); }}
+                  onCancelEdit={() => setEditingQuestionId(null)}
+                  onDeleteQuestion={handleDeleteQuestion}
+                  onSetExpandedConfidence={setExpandedConfidence}
+                  onEditingQuestionTextChange={setEditingQuestionText}
+                />
+              ))}
             </div>
           )}
           </TabsContent>
 
           {/* Resume Tab */}
           <TabsContent value="resume" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-semibold mb-2">Resume Tailoring</h2>
-                <p className="text-sm text-muted-foreground">
-                  Get AI-powered suggestions to tailor your resume for this specific role
-                </p>
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                <Button 
-                  onClick={() => setShowSavedResumesDialog(true)}
-                  variant="outline"
-                  className="gap-2"
-                >
-                  <Library className="h-4 w-4" />
-                  View All
-                </Button>
-                <Button 
-                  onClick={() => setShowUploadResumeDialog(true)}
-                  variant="outline"
-                  className="gap-2"
-                >
-                  <Upload className="h-4 w-4" />
-                  Upload Resume
-                </Button>
-                <Button 
-                  onClick={() => setShowResumeTailorDialog(true)}
-                  className="gap-2"
-                >
-                  <FileText className="h-4 w-4" />
-                  {savedTailoredResume ? 'Update Resume' : 'Tailor Resume'}
-                </Button>
-              </div>
-            </div>
-
-            {loadingTailoredResume ? (
-              <Card className="p-8 text-center">
-                <Loader2 className="h-6 w-6 animate-spin mx-auto" />
-              </Card>
-            ) : savedTailoredResume ? (
-              <Card className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="font-semibold text-lg">Tailored Resume</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Last updated: {new Date(savedTailoredResume.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        navigator.clipboard.writeText(savedTailoredResume.resume_text);
-                        toast({
-                          title: "Copied",
-                          description: "Resume copied to clipboard",
-                        });
-                      }}
-                      className="gap-2"
-                    >
-                      <Copy className="h-4 w-4" />
-                      Copy
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowResumeTailorDialog(true)}
-                      className="gap-2"
-                    >
-                      <Edit2 className="h-4 w-4" />
-                      Edit
-                    </Button>
-                  </div>
-                </div>
-                <div className="prose prose-sm max-w-none dark:prose-invert max-h-[600px] overflow-y-auto">
-                  <ReactMarkdown>{savedTailoredResume.resume_text}</ReactMarkdown>
-                </div>
-              </Card>
-            ) : (
-              <Card className="p-6 bg-gradient-to-br from-primary/5 to-transparent border-primary/20">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="h-6 w-6 text-primary" />
-                </div>
-                <div className="flex-1 space-y-4">
-                  <div>
-                    <h3 className="font-semibold text-lg mb-2">How Resume Tailoring Works</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      Our AI analyzes your resume alongside the job description and requirements for {application?.position} at {application?.company}. 
-                      It provides specific, actionable suggestions to:
-                    </p>
-                  </div>
-                  
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                      <span>Highlight relevant experience and skills that match the role</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                      <span>Incorporate keywords from the job description to pass ATS screening</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                      <span>Quantify your achievements and demonstrate measurable impact</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                      <span>Restructure sections to emphasize your strongest qualifications</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </Card>
-            )}
+            <ResumeTab
+              application={application}
+              savedTailoredResume={savedTailoredResume}
+              loadingTailoredResume={loadingTailoredResume}
+              onShowResumeTailorDialog={() => setShowResumeTailorDialog(true)}
+              onShowSavedResumesDialog={() => setShowSavedResumesDialog(true)}
+              onShowUploadResumeDialog={() => setShowUploadResumeDialog(true)}
+            />
           </TabsContent>
 
           {/* Interviewers Tab */}
           <TabsContent value="interviewers" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-semibold">Interview Preparation</h2>
-              {application && (
-                <AddInterviewerDialog 
-                  applicationId={application.id}
-                  applicationCompany={application.company}
-                  onInterviewerAdded={fetchInterviewers}
-                />
-              )}
-            </div>
-
-            {interviewers.length === 0 ? (
-              <Card className="p-8 text-center">
-                <p className="text-muted-foreground text-lg mb-2">
-                  No interviewers added yet
-                </p>
-                <p className="text-muted-foreground text-sm">
-                  Add interviewers to get AI-powered interview prep based on their background and your resume
-                </p>
-              </Card>
-            ) : (
-              <div className="space-y-4">
-                {interviewers.map((interviewer) => (
-                  <InterviewPrepCard
-                    key={interviewer.id}
-                    interviewer={interviewer}
-                    onDelete={fetchInterviewers}
-                    onPrepGenerated={fetchInterviewers}
-                  />
-                ))}
-              </div>
-            )}
+            <InterviewersTab
+              applicationId={application.id}
+              applicationCompany={application.company}
+              interviewers={interviewers}
+              onInterviewersRefresh={fetchInterviewers}
+            />
           </TabsContent>
 
           {/* Timeline Tab */}
           <TabsContent value="timeline" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-semibold">Timeline & Notes</h2>
-              <Button onClick={() => setShowAddTimelineDialog(true)} className="rounded-full">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Event
-              </Button>
-            </div>
-
-          {/* Status History Timeline */}
-          {application && statusHistory.length > 0 && (
-            <StatusHistoryTimeline 
-              history={statusHistory}
+            <TimelineTab
               appliedDate={application.applied_date}
+              timelineEvents={timelineEvents}
+              statusHistory={statusHistory}
+              onShowAddTimelineDialog={() => setShowAddTimelineDialog(true)}
+              onDeleteTimelineEvent={handleDeleteTimelineEvent}
             />
-          )}
-
-          <TimelineView
-            events={timelineEvents}
-            onDelete={handleDeleteTimelineEvent}
-          />
-        </TabsContent>
+          </TabsContent>
         </Tabs>
       </main>
 
