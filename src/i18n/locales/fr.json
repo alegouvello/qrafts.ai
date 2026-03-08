@@ -162,11 +162,13 @@
     "overview": "Aperçu des candidatures",
     "stats": {
       "total": "Total des candidatures",
+      "newToday": "Nouvelles aujourd'hui",
       "pending": "En attente",
       "pendingReview": "En attente de révision",
       "interview": "Entretiens",
       "accepted": "Acceptées",
-      "responseRate": "Taux de réponse"
+      "responseRate": "Taux de réponse",
+      "active": "{{count}} actif(s)"
     },
     "recent": "Candidatures récentes",
     "addApplication": "Ajouter une candidature",
