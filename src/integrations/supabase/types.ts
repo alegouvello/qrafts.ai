@@ -771,7 +771,45 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      company_experiences_public: {
+        Row: {
+          company_name: string | null
+          created_at: string | null
+          experience_text: string | null
+          experience_type: string | null
+          id: string | null
+          is_anonymous: boolean | null
+          rating: number | null
+          title: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string | null
+          experience_text?: string | null
+          experience_type?: string | null
+          id?: string | null
+          is_anonymous?: boolean | null
+          rating?: number | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: never
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string | null
+          experience_text?: string | null
+          experience_type?: string | null
+          id?: string | null
+          is_anonymous?: boolean | null
+          rating?: number | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: never
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_company_stats: {
