@@ -137,7 +137,7 @@ export default function Profile() {
   }>({ subscribed: false, product_id: null, is_trialing: false });
 
   useEffect(() => {
-    checkAuth();
+    fetchProfile();
     fetchProfile();
     checkSubscription();
   }, []);
