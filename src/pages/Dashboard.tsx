@@ -45,6 +45,7 @@ function normalizeCompanyName(name: string): string {
 }
 
 const Dashboard = () => {
+  useAuthGuard({ requireEmailConfirmed: true });
   const { t } = useTranslation();
   const [applications, setApplications] = useState<Application[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
