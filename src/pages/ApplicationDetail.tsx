@@ -1933,6 +1933,8 @@ const ApplicationDetail = () => {
                 />
               ))}
             </div>
+          )}
+          </TabsContent>
 
           {/* Resume Tab */}
           <TabsContent value="resume" className="space-y-6">
