@@ -5,6 +5,7 @@ import { ArrowLeft, LogOut, Calendar as CalendarIcon, Filter, Search, Grid, List
 import { useToast } from "@/hooks/use-toast";
 import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { Calendar } from "@/components/ui/calendar";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

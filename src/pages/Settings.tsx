@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Crown, CreditCard, Calendar, Download, Settings as SettingsIcon, RefreshCw, Lock, Trash2, Eye, EyeOff, LogOut, User, Shield, Sparkles, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { useAdminCheck } from "@/hooks/useAdminCheck";
 import { Footer } from "@/components/Footer";
 import qraftLogo from "@/assets/qrafts-logo.png";
