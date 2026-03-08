@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
+import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { ChatAssistant } from "@/components/ChatAssistant";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { PageTransition } from "@/components/PageTransition";
@@ -41,6 +42,7 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <TooltipProvider>
+          <SubscriptionProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -69,6 +71,7 @@ const App = () => (
             </PageTransition>
             <ChatAssistantWrapper />
           </BrowserRouter>
+          </SubscriptionProvider>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
