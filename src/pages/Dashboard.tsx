@@ -70,7 +70,6 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchApplications();
-    fetchApplications();
     fetchUserProfile();
     checkIfFirstTimeUser();
     
