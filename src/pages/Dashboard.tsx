@@ -69,7 +69,7 @@ const Dashboard = () => {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    checkAuth();
+    fetchApplications();
     fetchApplications();
     fetchUserProfile();
     checkIfFirstTimeUser();
