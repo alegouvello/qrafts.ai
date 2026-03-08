@@ -1794,138 +1794,18 @@ const ApplicationDetail = () => {
 
           {/* Role Details */}
           {application.role_summary && (
-            <Card className="p-6 bg-card/30 backdrop-blur-sm border-border/50">
-              <Collapsible open={roleDetailsOpen} onOpenChange={setRoleDetailsOpen}>
-                <div className="flex items-center justify-between mb-4">
-                  <CollapsibleTrigger asChild>
-                    <button className="flex items-center gap-2 hover:text-primary transition-colors">
-                      <h3 className="font-semibold text-lg">Role Details</h3>
-                      {roleDetailsOpen ? (
-                        <ChevronUp className="h-4 w-4" />
-                      ) : (
-                        <ChevronDown className="h-4 w-4" />
-                      )}
-                    </button>
-                  </CollapsibleTrigger>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      onClick={() => roleFitRef.current?.analyzeRoleFit()}
-                      disabled={roleFitRef.current?.loading || !userProfile?.resume_text}
-                      variant="outline"
-                      size="sm"
-                    >
-                      {roleFitRef.current?.loading ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Analyzing...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          AI Role Fit
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      onClick={handleRefreshJobDescription}
-                      disabled={refreshingDescription}
-                      variant="outline"
-                      size="sm"
-                    >
-                      {refreshingDescription ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Refreshing...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          Refresh Description
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </div>
-                <CollapsibleContent className="animate-accordion-down">
-                  <div className="grid gap-4">
-                    {(application.role_summary.location || application.role_summary.salary_range) && (
-                      <div className="grid md:grid-cols-2 gap-4">
-                        {application.role_summary.location && (
-                          <div>
-                            <span className="text-sm text-muted-foreground">Location</span>
-                            <p className="font-medium">{application.role_summary.location}</p>
-                          </div>
-                        )}
-                        {application.role_summary.salary_range && (
-                          <div>
-                            <span className="text-sm text-muted-foreground">Salary Range</span>
-                            <p className="font-medium">{application.role_summary.salary_range}</p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    {application.role_summary.description && (
-                      <div>
-                        <span className="text-sm text-muted-foreground">Description</span>
-                        <p className="text-sm mt-1 leading-relaxed">{application.role_summary.description}</p>
-                      </div>
-                    )}
-                    {application.role_summary.responsibilities && application.role_summary.responsibilities.length > 0 && (
-                      <div>
-                        <span className="text-sm text-muted-foreground">Key Responsibilities</span>
-                        <ul className="mt-2 space-y-1">
-                          {application.role_summary.responsibilities.map((item, idx) => (
-                            <li key={idx} className="text-sm flex items-start gap-2">
-                              <span className="text-primary mt-1">•</span>
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {application.role_summary.requirements && application.role_summary.requirements.length > 0 && (
-                      <div>
-                        <span className="text-sm text-muted-foreground">Requirements</span>
-                        <ul className="mt-2 space-y-1">
-                          {application.role_summary.requirements.map((item, idx) => (
-                            <li key={idx} className="text-sm flex items-start gap-2">
-                              <span className="text-primary mt-1">•</span>
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {application.role_summary.benefits && application.role_summary.benefits.length > 0 && (
-                      <div>
-                        <span className="text-sm text-muted-foreground">Benefits</span>
-                        <ul className="mt-2 space-y-1">
-                          {application.role_summary.benefits.map((item, idx) => (
-                            <li key={idx} className="text-sm flex items-start gap-2">
-                              <span className="text-primary mt-1">•</span>
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-            </Card>
-          )}
-
-          {/* AI Role Fit Analysis */}
-          {application.role_summary && (
-            <RoleFitAnalysis 
-              ref={roleFitRef}
+            <RoleDetailsCard
+              roleSummary={application.role_summary}
               company={application.company}
               position={application.position}
-              roleDetails={application.role_summary} 
+              roleDetailsOpen={roleDetailsOpen}
+              onRoleDetailsOpenChange={setRoleDetailsOpen}
+              roleFitRef={roleFitRef}
               resumeText={userProfile?.resume_text || null}
               subscribed={subscriptionStatus.subscribed || subscriptionStatus.is_trialing}
               onUpgrade={handleUpgrade}
-              hideButton={true}
+              refreshingDescription={refreshingDescription}
+              onRefreshJobDescription={handleRefreshJobDescription}
             />
           )}
         </div>
