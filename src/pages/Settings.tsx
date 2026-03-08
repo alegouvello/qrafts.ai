@@ -70,7 +70,6 @@ const Settings = () => {
 
   useEffect(() => {
     fetchUserProfile();
-    fetchUserProfile();
     
     const searchParams = new URLSearchParams(window.location.search);
     const checkoutStatus = searchParams.get('checkout');
