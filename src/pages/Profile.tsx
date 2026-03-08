@@ -101,6 +101,7 @@ interface ParsedResume {
 }
 
 export default function Profile() {
+  useAuthGuard();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
