@@ -151,12 +151,8 @@ const CompanyProfile = () => {
     });
   }, []);
 
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate("/auth");
-    }
-  };
+
+
 
   const fetchCompanyData = async () => {
     setLoading(true);
