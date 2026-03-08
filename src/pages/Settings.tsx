@@ -98,12 +98,8 @@ const Settings = () => {
     }
   }, []);
 
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate("/auth");
-    }
-  };
+
+
 
   const fetchUserProfile = async () => {
     const { data: { user } } = await supabase.auth.getUser();

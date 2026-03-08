@@ -66,12 +66,8 @@ const CalendarPage = () => {
     localStorage.setItem("calendarFilters", JSON.stringify(filters));
   }, [filters]);
 
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate("/auth");
-    }
-  };
+
+
 
   const fetchEvents = async () => {
     setLoading(true);

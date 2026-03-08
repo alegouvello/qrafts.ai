@@ -265,12 +265,8 @@ const ApplicationDetail = () => {
     }
   }, [id]);
 
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate("/auth");
-    }
-  };
+
+
 
   const checkSubscription = async () => {
     try {
