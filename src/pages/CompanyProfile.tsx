@@ -117,7 +117,7 @@ const CompanyProfile = () => {
 
   const fetchExperiences = async () => {
     try {
-      const { data, error } = await (supabase as any).from("company_experiences_public").select("*").eq("company_name", decodedCompany).order("created_at", { ascending: false });
+      const { data, error } = await supabase.rpc("get_company_experiences", { p_company_name: decodedCompany });
       if (!error) setExperiences(data || []);
     } catch (error) { console.error("Error fetching experiences:", error); }
   };
