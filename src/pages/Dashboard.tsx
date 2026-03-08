@@ -111,19 +111,6 @@ const Dashboard = () => {
     }
   };
 
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate("/auth");
-      return;
-    }
-
-    // Check if email is verified
-    if (!session.user.email_confirmed_at) {
-      console.log('Email not confirmed, redirecting to auth');
-      navigate("/auth");
-    }
-  };
 
   const fetchUserProfile = async () => {
     try {
