@@ -253,7 +253,7 @@ const CompanyProfile = () => {
     try {
       const decodedCompany = decodeURIComponent(companyName || "");
       const { data, error } = await (supabase as any)
-        .from("company_experiences")
+        .from("company_experiences_public")
         .select("*")
         .eq("company_name", decodedCompany)
         .order("created_at", { ascending: false });
