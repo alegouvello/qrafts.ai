@@ -28,6 +28,7 @@ interface TimelineEvent {
 }
 
 const CalendarPage = () => {
+  useAuthGuard();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
