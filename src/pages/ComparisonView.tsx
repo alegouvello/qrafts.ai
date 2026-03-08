@@ -33,6 +33,7 @@ interface ApplicationWithScore extends Application {
 }
 
 const ComparisonView = () => {
+  useAuthGuard();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
