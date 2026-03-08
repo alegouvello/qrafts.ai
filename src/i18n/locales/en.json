@@ -483,5 +483,109 @@
     "instructionsPlaceholder": "E.g., 'Make it more concise', 'Add more technical details', 'Focus on leadership experience'...",
     "regenerate": "Regenerate",
     "applyChanges": "Apply Changes"
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Welcome to Qrafts!",
+      "subtitle": "Let's set up your account in 2 quick steps so you can start tracking applications with AI-powered insights."
+    },
+    "resume": {
+      "title": "Upload Your Resume",
+      "subtitle": "This powers AI answer suggestions and resume tailoring across all your applications.",
+      "uploaded": "Resume uploaded & set as default!",
+      "dropzone": "Drop your resume here or click to browse",
+      "dropzoneHint": "DOC or DOCX (max 10MB)",
+      "uploading": "Uploading...",
+      "uploadButton": "Upload Resume",
+      "uploadSuccess": "Resume Uploaded!",
+      "uploadSuccessDesc": "Your resume is being parsed in the background.",
+      "uploadFailed": "Upload Failed",
+      "uploadFailedDesc": "Please try again or skip this step.",
+      "invalidFile": "Invalid File",
+      "invalidFileDesc": "Please upload a DOC or DOCX file.",
+      "fileTooLarge": "File Too Large",
+      "fileTooLargeDesc": "Maximum file size is 10MB."
+    },
+    "app": {
+      "title": "Add Your First Application",
+      "subtitle": "Paste a job posting URL and we'll extract the company, position, and application questions automatically.",
+      "added": "Application added! Details are being extracted.",
+      "placeholder": "https://company.com/jobs/...",
+      "adding": "Adding...",
+      "addButton": "Add Application",
+      "addSuccess": "Application Added!",
+      "addSuccessDesc": "Job details are being extracted.",
+      "addError": "Error",
+      "addErrorDesc": "Failed to add application."
+    },
+    "complete": {
+      "title": "You're All Set!",
+      "both": "Your resume is being parsed and your first application is being processed. Explore your dashboard!",
+      "resumeOnly": "Your resume is ready. Add applications anytime from the dashboard.",
+      "appOnly": "Your application is being processed. Upload your resume from your Profile for AI features.",
+      "neither": "You can upload your resume and add applications anytime from the dashboard."
+    },
+    "letsGo": "Let's Go",
+    "goToDashboard": "Go to Dashboard",
+    "skip": "Skip",
+    "skipSetup": "Skip setup entirely"
+  },
+  "pricing": {
+    "simplePricing": "Simple Pricing",
+    "chooseYourPlan": "Choose Your Plan",
+    "heroSubtitle": "Start free and upgrade when you're ready for unlimited applications and AI-powered features",
+    "free": "Free",
+    "freeDesc": "Perfect for getting started",
+    "month": "/month",
+    "freeFeatures": {
+      "apps": "Up to 10 applications",
+      "status": "Status tracking & timeline",
+      "calendar": "Calendar view",
+      "notes": "Company notes",
+      "noAi": "AI-powered features"
+    },
+    "currentPlan": "Current Plan",
+    "getStartedFree": "Get Started Free",
+    "mostPopular": "Most Popular",
+    "pro": "Pro",
+    "proDesc": "For serious job seekers",
+    "freeTrialBadge": "7-day free trial",
+    "proFeatures": {
+      "unlimited": "Unlimited applications",
+      "everything": "Everything in Free",
+      "aiSuggestions": "AI answer suggestions",
+      "resume": "Resume tailoring",
+      "roleFit": "Role fit analysis",
+      "chatAssistant": "AI chat assistant"
+    },
+    "upgradeToPro": "Upgrade to Pro",
+    "getStartedPro": "Get Started with Pro",
+    "guarantee": {
+      "title": "30-Day Money-Back Guarantee",
+      "desc": "Not satisfied? Get a full refund within 30 days, no questions asked. We're confident you'll love Qrafts."
+    },
+    "featureComparison": "Feature Comparison",
+    "feature": "Feature",
+    "featureNames": {
+      "trackApps": "Track Applications",
+      "statusTracking": "Application Status Tracking",
+      "calendarTimeline": "Calendar & Timeline View",
+      "companyNotes": "Company Notes",
+      "aiSuggestions": "AI Answer Suggestions",
+      "aiImprovements": "AI Answer Improvements",
+      "resumeTailoring": "Resume Tailoring",
+      "roleFitAnalysis": "Role Fit Analysis",
+      "confidenceAnalysis": "Confidence Analysis",
+      "profileReview": "Profile Review & Enhancement",
+      "aiChat": "AI Chat Assistant",
+      "interviewPrep": "Interview Prep Generation"
+    },
+    "ctaTitle": "Ready to supercharge your job search?",
+    "ctaSubtitle": "Join thousands of job seekers using Qrafts to land their dream jobs faster",
+    "goToDashboard": "Go to Dashboard",
+    "upgradePrice": "Upgrade to Pro - $29.99/month",
+    "back": "Back",
+    "dashboard": "Dashboard",
+    "getStarted": "Get Started"
   }
 }

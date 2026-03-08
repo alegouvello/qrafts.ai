@@ -483,5 +483,109 @@
     "instructionsPlaceholder": "Ex : 'Rendre plus concis', 'Ajouter plus de détails techniques', 'Se concentrer sur l'expérience de leadership'...",
     "regenerate": "Régénérer",
     "applyChanges": "Appliquer les modifications"
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Bienvenue sur Qrafts !",
+      "subtitle": "Configurons votre compte en 2 étapes rapides pour commencer à suivre vos candidatures avec des insights IA."
+    },
+    "resume": {
+      "title": "Téléchargez votre CV",
+      "subtitle": "Cela alimente les suggestions de réponses IA et la personnalisation du CV pour toutes vos candidatures.",
+      "uploaded": "CV téléchargé et défini par défaut !",
+      "dropzone": "Déposez votre CV ici ou cliquez pour parcourir",
+      "dropzoneHint": "DOC ou DOCX (max 10 Mo)",
+      "uploading": "Téléchargement...",
+      "uploadButton": "Télécharger le CV",
+      "uploadSuccess": "CV téléchargé !",
+      "uploadSuccessDesc": "Votre CV est en cours d'analyse en arrière-plan.",
+      "uploadFailed": "Échec du téléchargement",
+      "uploadFailedDesc": "Veuillez réessayer ou passer cette étape.",
+      "invalidFile": "Fichier invalide",
+      "invalidFileDesc": "Veuillez télécharger un fichier DOC ou DOCX.",
+      "fileTooLarge": "Fichier trop volumineux",
+      "fileTooLargeDesc": "La taille maximale est de 10 Mo."
+    },
+    "app": {
+      "title": "Ajoutez votre première candidature",
+      "subtitle": "Collez l'URL d'une offre d'emploi et nous extrairons automatiquement l'entreprise, le poste et les questions.",
+      "added": "Candidature ajoutée ! Les détails sont en cours d'extraction.",
+      "placeholder": "https://entreprise.com/emplois/...",
+      "adding": "Ajout en cours...",
+      "addButton": "Ajouter la candidature",
+      "addSuccess": "Candidature ajoutée !",
+      "addSuccessDesc": "Les détails de l'offre sont en cours d'extraction.",
+      "addError": "Erreur",
+      "addErrorDesc": "Impossible d'ajouter la candidature."
+    },
+    "complete": {
+      "title": "Vous êtes prêt !",
+      "both": "Votre CV est en cours d'analyse et votre première candidature est en traitement. Explorez votre tableau de bord !",
+      "resumeOnly": "Votre CV est prêt. Ajoutez des candidatures à tout moment depuis le tableau de bord.",
+      "appOnly": "Votre candidature est en traitement. Téléchargez votre CV depuis votre profil pour les fonctionnalités IA.",
+      "neither": "Vous pouvez télécharger votre CV et ajouter des candidatures à tout moment depuis le tableau de bord."
+    },
+    "letsGo": "C'est parti",
+    "goToDashboard": "Aller au tableau de bord",
+    "skip": "Passer",
+    "skipSetup": "Passer la configuration"
+  },
+  "pricing": {
+    "simplePricing": "Tarification simple",
+    "chooseYourPlan": "Choisissez votre plan",
+    "heroSubtitle": "Commencez gratuitement et passez à la version supérieure quand vous êtes prêt pour des candidatures illimitées et des fonctionnalités IA",
+    "free": "Gratuit",
+    "freeDesc": "Parfait pour commencer",
+    "month": "/mois",
+    "freeFeatures": {
+      "apps": "Jusqu'à 10 candidatures",
+      "status": "Suivi du statut et chronologie",
+      "calendar": "Vue calendrier",
+      "notes": "Notes d'entreprise",
+      "noAi": "Fonctionnalités IA"
+    },
+    "currentPlan": "Plan actuel",
+    "getStartedFree": "Commencer gratuitement",
+    "mostPopular": "Le plus populaire",
+    "pro": "Pro",
+    "proDesc": "Pour les chercheurs d'emploi sérieux",
+    "freeTrialBadge": "Essai gratuit de 7 jours",
+    "proFeatures": {
+      "unlimited": "Candidatures illimitées",
+      "everything": "Tout le plan gratuit inclus",
+      "aiSuggestions": "Suggestions de réponses IA",
+      "resume": "Personnalisation du CV",
+      "roleFit": "Analyse d'adéquation au poste",
+      "chatAssistant": "Assistant de chat IA"
+    },
+    "upgradeToPro": "Passer à Pro",
+    "getStartedPro": "Commencer avec Pro",
+    "guarantee": {
+      "title": "Garantie satisfait ou remboursé 30 jours",
+      "desc": "Pas satisfait ? Obtenez un remboursement complet sous 30 jours, sans questions. Nous sommes convaincus que vous adorerez Qrafts."
+    },
+    "featureComparison": "Comparaison des fonctionnalités",
+    "feature": "Fonctionnalité",
+    "featureNames": {
+      "trackApps": "Suivre les candidatures",
+      "statusTracking": "Suivi du statut des candidatures",
+      "calendarTimeline": "Vue calendrier et chronologie",
+      "companyNotes": "Notes d'entreprise",
+      "aiSuggestions": "Suggestions de réponses IA",
+      "aiImprovements": "Améliorations de réponses IA",
+      "resumeTailoring": "Personnalisation du CV",
+      "roleFitAnalysis": "Analyse d'adéquation au poste",
+      "confidenceAnalysis": "Analyse de confiance",
+      "profileReview": "Révision et amélioration du profil",
+      "aiChat": "Assistant de chat IA",
+      "interviewPrep": "Génération de préparation d'entretien"
+    },
+    "ctaTitle": "Prêt à booster votre recherche d'emploi ?",
+    "ctaSubtitle": "Rejoignez des milliers de chercheurs d'emploi qui utilisent Qrafts pour décrocher leur emploi de rêve plus rapidement",
+    "goToDashboard": "Aller au tableau de bord",
+    "upgradePrice": "Passer à Pro - 29,99 $/mois",
+    "back": "Retour",
+    "dashboard": "Tableau de bord",
+    "getStarted": "Commencer"
   }
 }
