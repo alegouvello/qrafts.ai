@@ -162,11 +162,13 @@
     "overview": "Application Overview",
     "stats": {
       "total": "Total Applications",
+      "newToday": "New Today",
       "pending": "Pending",
       "pendingReview": "Pending Review",
       "interview": "Interviews",
       "accepted": "Accepted",
-      "responseRate": "Response Rate"
+      "responseRate": "Response Rate",
+      "active": "{{count}} active"
     },
     "recent": "Recent Applications",
     "addApplication": "Add Application",
