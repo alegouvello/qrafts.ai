@@ -52,6 +52,7 @@ interface ScanResult {
 }
 
 const RecommendedJobs = () => {
+  useAuthGuard();
   const [jobs, setJobs] = useState<JobWithScore[]>([]);
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
