@@ -771,47 +771,24 @@ export type Database = {
       }
     }
     Views: {
-      company_experiences_public: {
-        Row: {
-          company_name: string | null
-          created_at: string | null
-          experience_text: string | null
-          experience_type: string | null
-          id: string | null
-          is_anonymous: boolean | null
-          rating: number | null
-          title: string | null
-          updated_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          company_name?: string | null
-          created_at?: string | null
-          experience_text?: string | null
-          experience_type?: string | null
-          id?: string | null
-          is_anonymous?: boolean | null
-          rating?: number | null
-          title?: string | null
-          updated_at?: string | null
-          user_id?: never
-        }
-        Update: {
-          company_name?: string | null
-          created_at?: string | null
-          experience_text?: string | null
-          experience_type?: string | null
-          id?: string | null
-          is_anonymous?: boolean | null
-          rating?: number | null
-          title?: string | null
-          updated_at?: string | null
-          user_id?: never
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
+      get_company_experiences: {
+        Args: { p_company_name: string }
+        Returns: {
+          company_name: string
+          created_at: string
+          experience_text: string
+          experience_type: string
+          id: string
+          is_anonymous: boolean
+          rating: number
+          title: string
+          updated_at: string
+          user_id: string
+        }[]
+      }
       get_company_stats: {
         Args: { company_name: string }
         Returns: {
