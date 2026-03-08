@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import DOMPurify from "dompurify";
+import { ProfileSections } from "@/components/Profile/ProfileSections";
+import { ProfileContactInfo } from "@/components/Profile/ProfileContactInfo";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { Button } from "@/components/ui/button";
