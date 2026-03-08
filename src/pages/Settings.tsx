@@ -42,6 +42,7 @@ const passwordSchema = z.object({
 });
 
 const Settings = () => {
+  useAuthGuard();
   const { t } = useTranslation();
   const { isAdmin } = useAdminCheck();
   const [subscriptionStatus, setSubscriptionStatus] = useState<{
