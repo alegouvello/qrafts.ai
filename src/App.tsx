@@ -71,6 +71,7 @@ const App = () => (
             </PageTransition>
             <ChatAssistantWrapper />
           </BrowserRouter>
+          </SubscriptionProvider>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>

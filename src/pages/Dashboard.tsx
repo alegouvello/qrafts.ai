@@ -12,7 +12,7 @@ import { deriveCompanyDomain } from "@/utils/jobBoardPatterns";
 import PullToRefresh from "react-simple-pull-to-refresh";
 import { useTranslation } from "react-i18next";
 import { EmptyState } from "@/components/EmptyState";
-import { useSubscription } from "@/hooks/useSubscription";
+import { useSubscription } from "@/contexts/SubscriptionContext";
 import { OnboardingDialog } from "@/components/OnboardingDialog";
 import { DashboardHeader } from "@/components/Dashboard/DashboardHeader";
 import { DashboardStats } from "@/components/Dashboard/DashboardStats";
