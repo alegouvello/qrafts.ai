@@ -803,6 +803,19 @@ export type Database = {
           total_applications: number
         }[]
       }
+      get_my_feedback: {
+        Args: never
+        Returns: {
+          category: string
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          status: string
+          user_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
