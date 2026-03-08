@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Sparkles, Upload, FileText, Briefcase, PartyPopper, ArrowRight, Check, X, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 interface OnboardingDialogProps {
   open: boolean;
@@ -23,6 +24,7 @@ export const OnboardingDialog = ({ open, onComplete, onAddApplication }: Onboard
   const [appAdded, setAppAdded] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const TOTAL_STEPS = 4;
 
@@ -39,16 +41,15 @@ export const OnboardingDialog = ({ open, onComplete, onAddApplication }: Onboard
     onComplete();
   };
 
-  // Resume upload logic
   const validateFile = (file: File): boolean => {
     const allowedExtensions = ['.doc', '.docx'];
     const ext = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
     if (!allowedExtensions.includes(ext)) {
-      toast({ title: "Invalid File", description: "Please upload a DOC or DOCX file.", variant: "destructive" });
+      toast({ title: t("onboarding.resume.invalidFile"), description: t("onboarding.resume.invalidFileDesc"), variant: "destructive" });
       return false;
     }
     if (file.size > 10 * 1024 * 1024) {
-      toast({ title: "File Too Large", description: "Maximum file size is 10MB.", variant: "destructive" });
+      toast({ title: t("onboarding.resume.fileTooLarge"), description: t("onboarding.resume.fileTooLargeDesc"), variant: "destructive" });
       return false;
     }
     return true;
@@ -83,7 +84,6 @@ export const OnboardingDialog = ({ open, onComplete, onAddApplication }: Onboard
         .upload(filePath, resumeFile, { upsert: true });
       if (uploadError) throw uploadError;
 
-      // Save to resumes table
       await supabase.from("resumes").insert({
         user_id: user.id,
         file_name: resumeFile.name,
@@ -92,7 +92,6 @@ export const OnboardingDialog = ({ open, onComplete, onAddApplication }: Onboard
         is_primary: true,
       });
 
-      // Parse resume in background
       const { data: { session } } = await supabase.auth.getSession();
       supabase.functions.invoke('parse-resume', {
         body: { resumeUrl: filePath },
@@ -100,25 +99,24 @@ export const OnboardingDialog = ({ open, onComplete, onAddApplication }: Onboard
       });
 
       setResumeUploaded(true);
-      toast({ title: "Resume Uploaded!", description: "Your resume is being parsed in the background." });
+      toast({ title: t("onboarding.resume.uploadSuccess"), description: t("onboarding.resume.uploadSuccessDesc") });
     } catch (error) {
       console.error("Upload error:", error);
-      toast({ title: "Upload Failed", description: "Please try again or skip this step.", variant: "destructive" });
+      toast({ title: t("onboarding.resume.uploadFailed"), description: t("onboarding.resume.uploadFailedDesc"), variant: "destructive" });
     } finally {
       setResumeUploading(false);
     }
   };
 
-  // Add application logic
   const handleAddApp = async () => {
     if (!jobUrl.trim() || !onAddApplication) return;
     setAddingApp(true);
     try {
       await onAddApplication({ url: jobUrl.trim() });
       setAppAdded(true);
-      toast({ title: "Application Added!", description: "Job details are being extracted." });
+      toast({ title: t("onboarding.app.addSuccess"), description: t("onboarding.app.addSuccessDesc") });
     } catch {
-      toast({ title: "Error", description: "Failed to add application.", variant: "destructive" });
+      toast({ title: t("onboarding.app.addError"), description: t("onboarding.app.addErrorDesc"), variant: "destructive" });
     } finally {
       setAddingApp(false);
     }
@@ -126,7 +124,7 @@ export const OnboardingDialog = ({ open, onComplete, onAddApplication }: Onboard
 
   const renderStep = () => {
     switch (step) {
-      case 0: // Welcome
+      case 0:
         return (
           <div className="flex flex-col items-center text-center gap-5">
             <div className="relative">
@@ -136,27 +134,27 @@ export const OnboardingDialog = ({ open, onComplete, onAddApplication }: Onboard
               </div>
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold">Welcome to Qrafts!</h2>
-              <p className="text-muted-foreground">Let's set up your account in 2 quick steps so you can start tracking applications with AI-powered insights.</p>
+              <h2 className="text-2xl font-bold">{t("onboarding.welcome.title")}</h2>
+              <p className="text-muted-foreground">{t("onboarding.welcome.subtitle")}</p>
             </div>
           </div>
         );
 
-      case 1: // Upload Resume
+      case 1:
         return (
           <div className="flex flex-col items-center text-center gap-4">
             <div className="relative h-16 w-16 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center border border-primary/20">
               <Upload className="h-8 w-8 text-primary" />
             </div>
             <div className="space-y-1.5">
-              <h2 className="text-xl font-bold">Upload Your Resume</h2>
-              <p className="text-sm text-muted-foreground">This powers AI answer suggestions and resume tailoring across all your applications.</p>
+              <h2 className="text-xl font-bold">{t("onboarding.resume.title")}</h2>
+              <p className="text-sm text-muted-foreground">{t("onboarding.resume.subtitle")}</p>
             </div>
 
             {resumeUploaded ? (
               <div className="w-full flex items-center gap-3 p-4 rounded-xl bg-green-500/10 border border-green-500/20">
                 <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
-                <span className="text-sm font-medium text-green-600 dark:text-green-400">Resume uploaded & set as default!</span>
+                <span className="text-sm font-medium text-green-600 dark:text-green-400">{t("onboarding.resume.uploaded")}</span>
               </div>
             ) : !resumeFile ? (
               <div
@@ -170,8 +168,8 @@ export const OnboardingDialog = ({ open, onComplete, onAddApplication }: Onboard
                 onClick={() => fileInputRef.current?.click()}
               >
                 <FileText className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                <p className="text-sm font-medium">Drop your resume here or click to browse</p>
-                <p className="text-xs text-muted-foreground mt-1">DOC or DOCX (max 10MB)</p>
+                <p className="text-sm font-medium">{t("onboarding.resume.dropzone")}</p>
+                <p className="text-xs text-muted-foreground mt-1">{t("onboarding.resume.dropzoneHint")}</p>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -196,9 +194,9 @@ export const OnboardingDialog = ({ open, onComplete, onAddApplication }: Onboard
                 </div>
                 <Button onClick={handleResumeUpload} disabled={resumeUploading} className="w-full">
                   {resumeUploading ? (
-                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Uploading...</>
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{t("onboarding.resume.uploading")}</>
                   ) : (
-                    <><Upload className="h-4 w-4 mr-2" />Upload Resume</>
+                    <><Upload className="h-4 w-4 mr-2" />{t("onboarding.resume.uploadButton")}</>
                   )}
                 </Button>
               </div>
@@ -206,26 +204,26 @@ export const OnboardingDialog = ({ open, onComplete, onAddApplication }: Onboard
           </div>
         );
 
-      case 2: // Add Application
+      case 2:
         return (
           <div className="flex flex-col items-center text-center gap-4">
             <div className="relative h-16 w-16 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center border border-primary/20">
               <Briefcase className="h-8 w-8 text-primary" />
             </div>
             <div className="space-y-1.5">
-              <h2 className="text-xl font-bold">Add Your First Application</h2>
-              <p className="text-sm text-muted-foreground">Paste a job posting URL and we'll extract the company, position, and application questions automatically.</p>
+              <h2 className="text-xl font-bold">{t("onboarding.app.title")}</h2>
+              <p className="text-sm text-muted-foreground">{t("onboarding.app.subtitle")}</p>
             </div>
 
             {appAdded ? (
               <div className="w-full flex items-center gap-3 p-4 rounded-xl bg-green-500/10 border border-green-500/20">
                 <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
-                <span className="text-sm font-medium text-green-600 dark:text-green-400">Application added! Details are being extracted.</span>
+                <span className="text-sm font-medium text-green-600 dark:text-green-400">{t("onboarding.app.added")}</span>
               </div>
             ) : (
               <div className="w-full space-y-3">
                 <Input
-                  placeholder="https://company.com/jobs/..."
+                  placeholder={t("onboarding.app.placeholder")}
                   value={jobUrl}
                   onChange={(e) => setJobUrl(e.target.value)}
                   disabled={addingApp}
@@ -237,9 +235,9 @@ export const OnboardingDialog = ({ open, onComplete, onAddApplication }: Onboard
                   className="w-full"
                 >
                   {addingApp ? (
-                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Adding...</>
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{t("onboarding.app.adding")}</>
                   ) : (
-                    <><Briefcase className="h-4 w-4 mr-2" />Add Application</>
+                    <><Briefcase className="h-4 w-4 mr-2" />{t("onboarding.app.addButton")}</>
                   )}
                 </Button>
               </div>
@@ -247,7 +245,7 @@ export const OnboardingDialog = ({ open, onComplete, onAddApplication }: Onboard
           </div>
         );
 
-      case 3: // Complete
+      case 3:
         return (
           <div className="flex flex-col items-center text-center gap-5">
             <div className="relative">
@@ -257,26 +255,20 @@ export const OnboardingDialog = ({ open, onComplete, onAddApplication }: Onboard
               </div>
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold">You're All Set!</h2>
+              <h2 className="text-2xl font-bold">{t("onboarding.complete.title")}</h2>
               <p className="text-muted-foreground">
                 {resumeUploaded && appAdded
-                  ? "Your resume is being parsed and your first application is being processed. Explore your dashboard!"
+                  ? t("onboarding.complete.both")
                   : resumeUploaded
-                  ? "Your resume is ready. Add applications anytime from the dashboard."
+                  ? t("onboarding.complete.resumeOnly")
                   : appAdded
-                  ? "Your application is being processed. Upload your resume from your Profile for AI features."
-                  : "You can upload your resume and add applications anytime from the dashboard."}
+                  ? t("onboarding.complete.appOnly")
+                  : t("onboarding.complete.neither")}
               </p>
             </div>
           </div>
         );
     }
-  };
-
-  const canProceed = () => {
-    if (step === 1) return true; // Can always skip resume
-    if (step === 2) return true; // Can always skip application
-    return true;
   };
 
   return (
@@ -285,7 +277,6 @@ export const OnboardingDialog = ({ open, onComplete, onAddApplication }: Onboard
         <div className="flex flex-col gap-6 py-4">
           {renderStep()}
 
-          {/* Progress dots */}
           <div className="flex justify-center gap-1.5">
             {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
               <div
@@ -297,11 +288,10 @@ export const OnboardingDialog = ({ open, onComplete, onAddApplication }: Onboard
             ))}
           </div>
 
-          {/* Navigation */}
           <div className="flex gap-3 w-full">
             {step > 0 && step < TOTAL_STEPS - 1 && (
               <Button variant="outline" onClick={() => setStep(step - 1)} className="flex-1">
-                Back
+                {t("common.back")}
               </Button>
             )}
             <Button
@@ -309,11 +299,11 @@ export const OnboardingDialog = ({ open, onComplete, onAddApplication }: Onboard
               className="flex-1"
             >
               {step === 0 ? (
-                <>Let's Go <ArrowRight className="h-4 w-4 ml-2" /></>
+                <>{t("onboarding.letsGo")} <ArrowRight className="h-4 w-4 ml-2" /></>
               ) : step === TOTAL_STEPS - 1 ? (
-                "Go to Dashboard"
+                t("onboarding.goToDashboard")
               ) : (
-                <>{(step === 1 && !resumeUploaded) || (step === 2 && !appAdded) ? "Skip" : "Next"} <ArrowRight className="h-4 w-4 ml-2" /></>
+                <>{(step === 1 && !resumeUploaded) || (step === 2 && !appAdded) ? t("onboarding.skip") : t("common.next")} <ArrowRight className="h-4 w-4 ml-2" /></>
               )}
             </Button>
           </div>
@@ -323,7 +313,7 @@ export const OnboardingDialog = ({ open, onComplete, onAddApplication }: Onboard
               onClick={handleComplete}
               className="text-xs text-muted-foreground hover:text-foreground transition-colors text-center"
             >
-              Skip setup entirely
+              {t("onboarding.skipSetup")}
             </button>
           )}
         </div>
