@@ -71,7 +71,7 @@ const RecommendedJobs = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    checkAuth();
+    fetchRecommendedJobs();
     fetchRecommendedJobs();
   }, []);
 
