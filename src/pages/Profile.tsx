@@ -140,7 +140,6 @@ export default function Profile() {
 
   useEffect(() => {
     fetchProfile();
-    fetchProfile();
     checkSubscription();
   }, []);
 
