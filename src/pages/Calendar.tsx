@@ -57,7 +57,7 @@ const CalendarPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    checkAuth();
+    fetchEvents();
     fetchEvents();
   }, []);
 
