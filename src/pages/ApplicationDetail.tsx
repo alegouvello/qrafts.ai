@@ -2285,182 +2285,36 @@ const ApplicationDetail = () => {
 
           {/* Resume Tab */}
           <TabsContent value="resume" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-semibold mb-2">Resume Tailoring</h2>
-                <p className="text-sm text-muted-foreground">
-                  Get AI-powered suggestions to tailor your resume for this specific role
-                </p>
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                <Button 
-                  onClick={() => setShowSavedResumesDialog(true)}
-                  variant="outline"
-                  className="gap-2"
-                >
-                  <Library className="h-4 w-4" />
-                  View All
-                </Button>
-                <Button 
-                  onClick={() => setShowUploadResumeDialog(true)}
-                  variant="outline"
-                  className="gap-2"
-                >
-                  <Upload className="h-4 w-4" />
-                  Upload Resume
-                </Button>
-                <Button 
-                  onClick={() => setShowResumeTailorDialog(true)}
-                  className="gap-2"
-                >
-                  <FileText className="h-4 w-4" />
-                  {savedTailoredResume ? 'Update Resume' : 'Tailor Resume'}
-                </Button>
-              </div>
-            </div>
-
-            {loadingTailoredResume ? (
-              <Card className="p-8 text-center">
-                <Loader2 className="h-6 w-6 animate-spin mx-auto" />
-              </Card>
-            ) : savedTailoredResume ? (
-              <Card className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="font-semibold text-lg">Tailored Resume</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Last updated: {new Date(savedTailoredResume.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        navigator.clipboard.writeText(savedTailoredResume.resume_text);
-                        toast({
-                          title: "Copied",
-                          description: "Resume copied to clipboard",
-                        });
-                      }}
-                      className="gap-2"
-                    >
-                      <Copy className="h-4 w-4" />
-                      Copy
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowResumeTailorDialog(true)}
-                      className="gap-2"
-                    >
-                      <Edit2 className="h-4 w-4" />
-                      Edit
-                    </Button>
-                  </div>
-                </div>
-                <div className="prose prose-sm max-w-none dark:prose-invert max-h-[600px] overflow-y-auto">
-                  <ReactMarkdown>{savedTailoredResume.resume_text}</ReactMarkdown>
-                </div>
-              </Card>
-            ) : (
-              <Card className="p-6 bg-gradient-to-br from-primary/5 to-transparent border-primary/20">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="h-6 w-6 text-primary" />
-                </div>
-                <div className="flex-1 space-y-4">
-                  <div>
-                    <h3 className="font-semibold text-lg mb-2">How Resume Tailoring Works</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      Our AI analyzes your resume alongside the job description and requirements for {application?.position} at {application?.company}. 
-                      It provides specific, actionable suggestions to:
-                    </p>
-                  </div>
-                  
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                      <span>Highlight relevant experience and skills that match the role</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                      <span>Incorporate keywords from the job description to pass ATS screening</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                      <span>Quantify your achievements and demonstrate measurable impact</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                      <span>Restructure sections to emphasize your strongest qualifications</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </Card>
-            )}
+            <ResumeTab
+              application={application}
+              savedTailoredResume={savedTailoredResume}
+              loadingTailoredResume={loadingTailoredResume}
+              onShowResumeTailorDialog={() => setShowResumeTailorDialog(true)}
+              onShowSavedResumesDialog={() => setShowSavedResumesDialog(true)}
+              onShowUploadResumeDialog={() => setShowUploadResumeDialog(true)}
+            />
           </TabsContent>
 
           {/* Interviewers Tab */}
           <TabsContent value="interviewers" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-semibold">Interview Preparation</h2>
-              {application && (
-                <AddInterviewerDialog 
-                  applicationId={application.id}
-                  applicationCompany={application.company}
-                  onInterviewerAdded={fetchInterviewers}
-                />
-              )}
-            </div>
-
-            {interviewers.length === 0 ? (
-              <Card className="p-8 text-center">
-                <p className="text-muted-foreground text-lg mb-2">
-                  No interviewers added yet
-                </p>
-                <p className="text-muted-foreground text-sm">
-                  Add interviewers to get AI-powered interview prep based on their background and your resume
-                </p>
-              </Card>
-            ) : (
-              <div className="space-y-4">
-                {interviewers.map((interviewer) => (
-                  <InterviewPrepCard
-                    key={interviewer.id}
-                    interviewer={interviewer}
-                    onDelete={fetchInterviewers}
-                    onPrepGenerated={fetchInterviewers}
-                  />
-                ))}
-              </div>
-            )}
+            <InterviewersTab
+              applicationId={application.id}
+              applicationCompany={application.company}
+              interviewers={interviewers}
+              onInterviewersRefresh={fetchInterviewers}
+            />
           </TabsContent>
 
           {/* Timeline Tab */}
           <TabsContent value="timeline" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-semibold">Timeline & Notes</h2>
-              <Button onClick={() => setShowAddTimelineDialog(true)} className="rounded-full">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Event
-              </Button>
-            </div>
-
-          {/* Status History Timeline */}
-          {application && statusHistory.length > 0 && (
-            <StatusHistoryTimeline 
-              history={statusHistory}
+            <TimelineTab
               appliedDate={application.applied_date}
+              timelineEvents={timelineEvents}
+              statusHistory={statusHistory}
+              onShowAddTimelineDialog={() => setShowAddTimelineDialog(true)}
+              onDeleteTimelineEvent={handleDeleteTimelineEvent}
             />
-          )}
-
-          <TimelineView
-            events={timelineEvents}
-            onDelete={handleDeleteTimelineEvent}
-          />
-        </TabsContent>
+          </TabsContent>
         </Tabs>
       </main>
 
