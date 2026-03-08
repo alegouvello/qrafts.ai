@@ -252,7 +252,7 @@ const ApplicationDetail = () => {
   };
 
   useEffect(() => {
-    checkAuth();
+    if (id) {
     if (id) {
       fetchUserProfile();
       fetchApplicationData();
