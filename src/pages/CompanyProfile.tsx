@@ -107,6 +107,7 @@ const StatCard = ({
 );
 
 const CompanyProfile = () => {
+  useAuthGuard();
   const { companyName } = useParams<{ companyName: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
