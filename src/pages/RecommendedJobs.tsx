@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { useToast } from "@/hooks/use-toast";
 import { Footer } from "@/components/Footer";
 import { SEO } from "@/components/SEO";
@@ -51,6 +52,7 @@ interface ScanResult {
 }
 
 const RecommendedJobs = () => {
+  useAuthGuard();
   const [jobs, setJobs] = useState<JobWithScore[]>([]);
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
@@ -69,14 +71,12 @@ const RecommendedJobs = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    checkAuth();
+    fetchRecommendedJobs();
     fetchRecommendedJobs();
   }, []);
 
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) navigate("/auth");
-  };
+
+
 
   const fetchRecommendedJobs = async () => {
     setLoading(true);

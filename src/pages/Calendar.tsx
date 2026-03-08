@@ -5,6 +5,7 @@ import { ArrowLeft, LogOut, Calendar as CalendarIcon, Filter, Search, Grid, List
 import { useToast } from "@/hooks/use-toast";
 import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { Calendar } from "@/components/ui/calendar";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +28,7 @@ interface TimelineEvent {
 }
 
 const CalendarPage = () => {
+  useAuthGuard();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,7 +57,7 @@ const CalendarPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    checkAuth();
+    fetchEvents();
     fetchEvents();
   }, []);
 
@@ -64,12 +66,8 @@ const CalendarPage = () => {
     localStorage.setItem("calendarFilters", JSON.stringify(filters));
   }, [filters]);
 
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate("/auth");
-    }
-  };
+
+
 
   const fetchEvents = async () => {
     setLoading(true);

@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Minus, ExternalLink, Sparkles, ChevronDown, ChevronUp, Settings, Crown } from "lucide-react";
 import { Footer } from "@/components/Footer";
@@ -32,6 +33,7 @@ interface ApplicationWithScore extends Application {
 }
 
 const ComparisonView = () => {
+  useAuthGuard();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -47,18 +49,14 @@ const ComparisonView = () => {
   }>({ subscribed: false, product_id: null, is_trialing: false });
 
   useEffect(() => {
-    checkAuth();
+    fetchUserProfile();
     fetchUserProfile();
     fetchApplications();
     checkSubscription();
   }, []);
 
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate("/auth");
-    }
-  };
+
+
 
   const checkSubscription = async () => {
     try {

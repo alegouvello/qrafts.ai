@@ -7,6 +7,8 @@ import { Crown, Sparkles, Filter, Search, X } from "lucide-react";
 import { AddApplicationDialog } from "@/components/AddApplicationDialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
+import { deriveCompanyDomain } from "@/utils/jobBoardPatterns";
 import PullToRefresh from "react-simple-pull-to-refresh";
 import { useTranslation } from "react-i18next";
 import { EmptyState } from "@/components/EmptyState";
@@ -33,81 +35,6 @@ interface Application {
   companyDomain?: string | null;
 }
 
-// Helper to derive company domain from URL (mirrors ApplicationCard logic)
-const JOB_BOARD_PATTERNS = [
-  /lever\.co$/i,
-  /greenhouse\.io$/i,
-  /workday\.com$/i,
-  /myworkdayjobs\.com$/i,
-  /ashbyhq\.com$/i,
-  /icims\.com$/i,
-  /smartrecruiters\.com$/i,
-  /jobvite\.com$/i,
-  /applytojob\.com$/i,
-  /breezy\.hr$/i,
-  /recruitee\.com$/i,
-  /bamboohr\.com$/i,
-  /jazz\.co$/i,
-  /jazzhq\.com$/i,
-  /workable\.com$/i,
-  /taleo\.net$/i,
-  /oraclecloud\.com$/i,
-  /successfactors\.com$/i,
-  /ultipro\.com$/i,
-  /paylocity\.com$/i,
-  /paycom\.com$/i,
-  /adp\.com$/i,
-  /phenom\.com$/i,
-  /eightfold\.ai$/i,
-  /avature\.net$/i,
-  /cornerstoneondemand\.com$/i,
-  /pinpointhq\.com$/i,
-  /teamtailor\.com$/i,
-  /personio\.de$/i,
-  /personio\.com$/i,
-  /gem\.com$/i,
-  /wellfound\.com$/i,
-  /angel\.co$/i,
-  /ycombinator\.com$/i,
-  /workatastartup\.com$/i,
-  /dover\.com$/i,
-  /rippling\.com$/i,
-  /gusto\.com$/i,
-  /deel\.com$/i,
-  /remote\.com$/i,
-  /oysterhr\.com$/i,
-  /linkedin\.com$/i,
-  /indeed\.com$/i,
-  /ziprecruiter\.com$/i,
-  /glassdoor\.com$/i,
-  /monster\.com$/i,
-  /careerbuilder\.com$/i,
-  /dice\.com$/i,
-  /simplyhired\.com$/i,
-  /snagajob\.com$/i,
-  /flexjobs\.com$/i,
-  /builtin\.com$/i,
-  /themuse\.com$/i,
-  /hired\.com$/i,
-  /triplebyte\.com$/i,
-  /otta\.com$/i,
-  /cord\.co$/i,
-  /getro\.com$/i,
-];
-
-function deriveCompanyDomain(url: string, companyName: string): string {
-  try {
-    const u = new URL(url);
-    const hostname = u.hostname.replace(/^www\./, "");
-    if (JOB_BOARD_PATTERNS.some((p) => p.test(hostname))) {
-      return companyName.toLowerCase().replace(/\s+/g, "") + ".com";
-    }
-    return hostname;
-  } catch {
-    return companyName.toLowerCase().replace(/\s+/g, "") + ".com";
-  }
-}
-
 // Normalize company names for grouping (handles variations like "JPMorgan Chase" vs "JPMorgan Chase & Co.")
 function normalizeCompanyName(name: string): string {
   // Remove common suffixes and normalize
@@ -118,6 +45,7 @@ function normalizeCompanyName(name: string): string {
 }
 
 const Dashboard = () => {
+  useAuthGuard({ requireEmailConfirmed: true });
   const { t } = useTranslation();
   const [applications, setApplications] = useState<Application[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -141,7 +69,7 @@ const Dashboard = () => {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    checkAuth();
+    fetchApplications();
     fetchApplications();
     fetchUserProfile();
     checkIfFirstTimeUser();
@@ -183,19 +111,6 @@ const Dashboard = () => {
     }
   };
 
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate("/auth");
-      return;
-    }
-
-    // Check if email is verified
-    if (!session.user.email_confirmed_at) {
-      console.log('Email not confirmed, redirecting to auth');
-      navigate("/auth");
-    }
-  };
 
   const fetchUserProfile = async () => {
     try {

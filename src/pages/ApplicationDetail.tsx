@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { deriveCompanyDomain } from "@/utils/jobBoardPatterns";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -85,36 +87,7 @@ interface Application {
 }
 
 // Common job board hostnames to ignore when deriving company domain
-const JOB_BOARD_PATTERNS = [
-  /lever\.co$/i, /greenhouse\.io$/i, /workday\.com$/i, /myworkdayjobs\.com$/i,
-  /ashbyhq\.com$/i, /icims\.com$/i, /smartrecruiters\.com$/i, /jobvite\.com$/i,
-  /applytojob\.com$/i, /breezy\.hr$/i, /recruitee\.com$/i, /bamboohr\.com$/i,
-  /jazz\.co$/i, /jazzhq\.com$/i, /workable\.com$/i, /taleo\.net$/i,
-  /oraclecloud\.com$/i, /successfactors\.com$/i, /ultipro\.com$/i,
-  /paylocity\.com$/i, /paycom\.com$/i, /adp\.com$/i, /phenom\.com$/i,
-  /eightfold\.ai$/i, /avature\.net$/i, /cornerstoneondemand\.com$/i,
-  /pinpointhq\.com$/i, /teamtailor\.com$/i, /personio\.de$/i, /personio\.com$/i,
-  /gem\.com$/i, /wellfound\.com$/i, /angel\.co$/i, /ycombinator\.com$/i,
-  /workatastartup\.com$/i, /dover\.com$/i, /rippling\.com$/i, /gusto\.com$/i,
-  /deel\.com$/i, /remote\.com$/i, /oysterhr\.com$/i, /linkedin\.com$/i,
-  /indeed\.com$/i, /ziprecruiter\.com$/i, /glassdoor\.com$/i, /monster\.com$/i,
-  /careerbuilder\.com$/i, /dice\.com$/i, /simplyhired\.com$/i, /snagajob\.com$/i,
-  /flexjobs\.com$/i, /builtin\.com$/i, /themuse\.com$/i, /hired\.com$/i,
-  /triplebyte\.com$/i, /otta\.com$/i, /cord\.co$/i, /getro\.com$/i,
-];
-
-function deriveCompanyDomain(url: string, companyName: string): string {
-  try {
-    const u = new URL(url);
-    const hostname = u.hostname.replace(/^www\./, "");
-    if (JOB_BOARD_PATTERNS.some((p) => p.test(hostname))) {
-      return companyName.toLowerCase().replace(/\s+/g, "") + ".com";
-    }
-    return hostname;
-  } catch {
-    return companyName.toLowerCase().replace(/\s+/g, "") + ".com";
-  }
-}
+// JOB_BOARD_PATTERNS and deriveCompanyDomain imported from shared utility
 
 interface Question {
   id: string;
@@ -160,6 +133,7 @@ const ApplicationDetail = () => {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  useAuthGuard();
   const { toast } = useToast();
 
   const [application, setApplication] = useState<Application | null>(null);
@@ -278,7 +252,6 @@ const ApplicationDetail = () => {
   };
 
   useEffect(() => {
-    checkAuth();
     if (id) {
       fetchUserProfile();
       fetchApplicationData();
@@ -291,12 +264,8 @@ const ApplicationDetail = () => {
     }
   }, [id]);
 
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate("/auth");
-    }
-  };
+
+
 
   const checkSubscription = async () => {
     try {

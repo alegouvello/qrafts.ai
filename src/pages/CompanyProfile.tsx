@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { useToast } from "@/hooks/use-toast";
 import { Footer } from "@/components/Footer";
 import { SEO } from "@/components/SEO";
@@ -106,6 +107,7 @@ const StatCard = ({
 );
 
 const CompanyProfile = () => {
+  useAuthGuard();
   const { companyName } = useParams<{ companyName: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -131,7 +133,6 @@ const CompanyProfile = () => {
   const [togglingWatch, setTogglingWatch] = useState(false);
 
   useEffect(() => {
-    checkAuth();
     if (companyName) {
       fetchCompanyData();
       fetchCompanyNotes();
@@ -149,12 +150,8 @@ const CompanyProfile = () => {
     });
   }, []);
 
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate("/auth");
-    }
-  };
+
+
 
   const fetchCompanyData = async () => {
     setLoading(true);

@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import DOMPurify from "dompurify";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -100,6 +101,7 @@ interface ParsedResume {
 }
 
 export default function Profile() {
+  useAuthGuard();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -135,17 +137,13 @@ export default function Profile() {
   }>({ subscribed: false, product_id: null, is_trialing: false });
 
   useEffect(() => {
-    checkAuth();
+    fetchProfile();
     fetchProfile();
     checkSubscription();
   }, []);
 
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate("/auth");
-    }
-  };
+
+
 
   const checkSubscription = async () => {
     try {
