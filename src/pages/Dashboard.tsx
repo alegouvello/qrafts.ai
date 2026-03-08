@@ -7,6 +7,8 @@ import { Crown, Sparkles, Filter, Search, X } from "lucide-react";
 import { AddApplicationDialog } from "@/components/AddApplicationDialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
+import { deriveCompanyDomain } from "@/utils/jobBoardPatterns";
 import PullToRefresh from "react-simple-pull-to-refresh";
 import { useTranslation } from "react-i18next";
 import { EmptyState } from "@/components/EmptyState";
