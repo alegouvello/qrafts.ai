@@ -253,7 +253,6 @@ const ApplicationDetail = () => {
 
   useEffect(() => {
     if (id) {
-    if (id) {
       fetchUserProfile();
       fetchApplicationData();
       fetchTimelineEvents();
