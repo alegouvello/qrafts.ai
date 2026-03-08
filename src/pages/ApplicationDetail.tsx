@@ -1578,33 +1578,7 @@ const ApplicationDetail = () => {
     }
   };
 
-            {/* Shared Questions from Community */}
-            {sharedQuestions.length > 0 && (
-              <Collapsible open={showSharedQuestions} onOpenChange={setShowSharedQuestions}>
-                <Card className="p-4 border-dashed border-primary/30 bg-primary/5">
-                  <CollapsibleTrigger className="flex items-center justify-between w-full">
-                    <div className="flex items-center gap-2">
-                      <MessageSquare className="h-4 w-4 text-primary" />
-                      <span className="font-medium text-sm">
-                        {sharedQuestions.length} additional question{sharedQuestions.length > 1 ? 's' : ''} reported by other applicants
-                      </span>
-                    </div>
-                    {showSharedQuestions ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="mt-3 space-y-2">
-                    {sharedQuestions.map((sq, i) => (
-                      <div key={i} className="flex items-start gap-2 text-sm p-2 rounded bg-background">
-                        <span className="text-muted-foreground font-mono text-xs mt-0.5">{i + 1}.</span>
-                        <span>{sq.question_text}</span>
-                      </div>
-                    ))}
-                    <p className="text-xs text-muted-foreground mt-2">
-                      These questions were encountered by other users applying to this role.
-                    </p>
-                  </CollapsibleContent>
-                </Card>
-              </Collapsible>
-            )}
+  // Shared questions JSX rendered inside questions tab below
 
   // Get company logo domain - use stored domain or derive it
   const logoDomain = application?.company_domain || 
