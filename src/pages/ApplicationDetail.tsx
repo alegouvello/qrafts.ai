@@ -1892,396 +1892,47 @@ const ApplicationDetail = () => {
             </Card>
           ) : (
             <div className="space-y-6">
-              {questions.map((question, index) => {
-                const hasAnswer = savedAnswers[question.id]?.trim();
-                const isModified = answers[question.id] !== savedAnswers[question.id];
-                const isSaving = saving[question.id];
-                const isSuggesting = suggesting[question.id];
-                const isImproving = improving[question.id];
-                const isMakingNatural = makingNatural[question.id];
-                const hasCurrentAnswer = answers[question.id]?.trim();
-
-                const isFileUpload = (() => {
-                  const lowerQuestion = question.question_text.toLowerCase();
-                  // Only treat as file upload if it explicitly asks to upload/attach
-                  const hasUploadKeyword = 
-                    lowerQuestion.includes('upload') ||
-                    lowerQuestion.includes('attach') ||
-                    lowerQuestion.includes('submit a');
-                  
-                  const hasFileKeyword = 
-                    lowerQuestion.includes('resume') ||
-                    lowerQuestion.includes('cv') ||
-                    lowerQuestion.includes('cover letter');
-                  
-                  // Must have both upload action and file type to be file upload
-                  return hasUploadKeyword && hasFileKeyword;
-                })();
-
-                const isShortAnswer = (() => {
-                  const lowerQuestion = question.question_text.toLowerCase();
-                  const questionWords = lowerQuestion.split(' ').length;
-                  
-                  // Yes/no questions and short field questions
-                  const isYesNoQuestion = 
-                    lowerQuestion.includes('are you') ||
-                    lowerQuestion.includes('do you') ||
-                    lowerQuestion.includes('will you') ||
-                    lowerQuestion.includes('have you') ||
-                    lowerQuestion.includes('can you') ||
-                    (lowerQuestion.includes('?') && questionWords > 5);
-                  
-                  const isShortField = 
-                    lowerQuestion.includes('first name') ||
-                    lowerQuestion.includes('last name') ||
-                    lowerQuestion.includes('email') ||
-                    lowerQuestion.includes('phone') ||
-                    lowerQuestion.includes('linkedin') ||
-                    lowerQuestion.includes('github') ||
-                    lowerQuestion.includes('portfolio') ||
-                    lowerQuestion.includes('website') ||
-                    lowerQuestion.includes('location') ||
-                    lowerQuestion.includes('city') ||
-                    lowerQuestion.includes('office') ||
-                    (lowerQuestion === 'name' || lowerQuestion.includes('your name'));
-                  
-                  return (isYesNoQuestion || isShortField) && (answers[question.id] || '').length < 150;
-                })();
-
-                const isExpanded = !isMobile || expandedQuestions.has(question.id);
-
-                return (
-                  <Card key={question.id} className="p-4 bg-card/30 backdrop-blur-sm border-border/50 hover:border-primary/30 transition-all">
-                    <Collapsible open={isExpanded} onOpenChange={() => isMobile && toggleQuestion(question.id)}>
-                      <div className="flex items-start gap-3">
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold mt-0.5">
-                          {index + 1}
-                        </div>
-                         <div className="flex-1 min-w-0 space-y-3">
-                           <div className="flex items-start justify-between gap-3">
-                             <CollapsibleTrigger asChild className={isMobile ? "cursor-pointer" : "cursor-default"}>
-                               <div className="flex items-start gap-2 flex-1 flex-wrap">
-                                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                                   {editingQuestionId === question.id ? (
-                                     <Input
-                                       value={editingQuestionText}
-                                       onChange={(e) => setEditingQuestionText(e.target.value)}
-                                       onClick={(e) => e.stopPropagation()}
-                                       className="flex-1"
-                                     />
-                                   ) : (
-                                     <h3 className="font-medium leading-tight flex-1 min-w-0">{question.question_text}</h3>
-                                   )}
-                                   {editingQuestionId === question.id ? (
-                                     <div className="flex gap-1 flex-shrink-0">
-                                       <Button
-                                         size="sm"
-                                         variant="ghost"
-                                         onClick={async (e) => {
-                                           e.stopPropagation();
-                                           await handleEditQuestion(question.id, editingQuestionText);
-                                           setEditingQuestionId(null);
-                                         }}
-                                       >
-                                         <Check className="h-4 w-4" />
-                                       </Button>
-                                       <Button
-                                         size="sm"
-                                         variant="ghost"
-                                         onClick={(e) => {
-                                           e.stopPropagation();
-                                           setEditingQuestionId(null);
-                                         }}
-                                       >
-                                         <X className="h-4 w-4" />
-                                       </Button>
-                                     </div>
-                                   ) : (
-                                     <div className="flex gap-1 flex-shrink-0">
-                                       <Button
-                                         size="sm"
-                                         variant="ghost"
-                                         onClick={(e) => {
-                                           e.stopPropagation();
-                                           setEditingQuestionId(question.id);
-                                           setEditingQuestionText(question.question_text);
-                                         }}
-                                       >
-                                         <Edit2 className="h-4 w-4" />
-                                       </Button>
-                                       <Button
-                                         size="sm"
-                                         variant="ghost"
-                                         onClick={(e) => {
-                                           e.stopPropagation();
-                                           if (confirm("Are you sure you want to delete this question?")) {
-                                             handleDeleteQuestion(question.id);
-                                           }
-                                         }}
-                                       >
-                                         <Trash2 className="h-4 w-4" />
-                                       </Button>
-                                     </div>
-                                   )}
-                                   {isMobile && (
-                                     <button className="flex-shrink-0 p-1 hover:bg-muted rounded transition-colors">
-                                       {isExpanded ? (
-                                         <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                                       ) : (
-                                         <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                                       )}
-                                     </button>
-                                   )}
-                                 </div>
-                                {autoPopulatedAnswers.has(question.id) && (
-                                  <Badge variant="secondary" className="text-xs flex-shrink-0">
-                                    <Sparkles className="w-3 h-3 mr-1" />
-                                    Auto-filled
-                                  </Badge>
-                                )}
-                                {confidenceScores[question.id] && (
-                                  <Badge 
-                                    variant={
-                                      confidenceScores[question.id].score >= 80 ? "default" :
-                                      confidenceScores[question.id].score >= 60 ? "secondary" :
-                                      "destructive"
-                                    }
-                                    className="text-xs flex-shrink-0 cursor-pointer"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setExpandedConfidence(
-                                        expandedConfidence === question.id ? null : question.id
-                                      );
-                                    }}
-                                  >
-                                    <TrendingUp className="w-3 h-3 mr-1" />
-                                    ~{confidenceScores[question.id].score}% fit
-                                  </Badge>
-                                )}
-                              </div>
-                            </CollapsibleTrigger>
-                            {hasAnswer && !isModified && (
-                              <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
-                            )}
-                          </div>
-                        
-                          <CollapsibleContent className="animate-accordion-down">
-                            {/* Confidence Score Details */}
-                            {confidenceScores[question.id] && expandedConfidence === question.id && (
-                              <div className="mt-3 p-3 rounded-lg bg-muted/50 border border-border space-y-2">
-                                <div className="flex items-start gap-2">
-                                  <Info className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                                  <div className="space-y-2 flex-1">
-                                    <p className="text-sm text-foreground">
-                                      <span className="font-medium">Analysis:</span> {confidenceScores[question.id].reasoning}
-                                    </p>
-                                    {confidenceScores[question.id].suggestions && confidenceScores[question.id].score < 100 && (
-                                      <div className="space-y-2">
-                                        <div className="flex items-center justify-between">
-                                          <p className="text-sm font-medium text-foreground">Suggestions to improve:</p>
-                                          <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => handleQuickApplySuggestion(question.id, question.question_text)}
-                                            disabled={applyingSuggestion[question.id]}
-                                            className="h-7 text-xs"
-                                          >
-                                            {applyingSuggestion[question.id] ? (
-                                              <>
-                                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                                                Applying...
-                                              </>
-                                            ) : (
-                                              <>
-                                                <Sparkles className="h-3 w-3 mr-1" />
-                                                Quick Apply
-                                              </>
-                                            )}
-                                          </Button>
-                                        </div>
-                                        <p className="text-sm text-muted-foreground whitespace-pre-line">
-                                          {confidenceScores[question.id].suggestions}
-                                        </p>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                            <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium">Your Answer</span>
-                            {hasCurrentAnswer && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleCopyAnswer(question.id)}
-                                className="h-8"
-                              >
-                                {copiedAnswers[question.id] ? (
-                                  <Check className="h-4 w-4 text-green-600" />
-                                ) : (
-                                  <Copy className="h-4 w-4" />
-                                )}
-                              </Button>
-                            )}
-                          </div>
-                          {isFileUpload ? (
-                            <div className="space-y-2">
-                              <div className="text-sm text-muted-foreground">
-                                File upload - Please upload directly on the application form
-                              </div>
-                              <Input
-                                placeholder="Or paste file URL here..."
-                                value={answers[question.id] || ""}
-                                onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                              />
-                            </div>
-                          ) : isShortAnswer ? (
-                            <Input
-                              placeholder="Type your answer here..."
-                              value={answers[question.id] || ""}
-                              onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                            />
-                          ) : (
-                            <Textarea
-                              placeholder="Type your answer here..."
-                              value={answers[question.id] || ""}
-                              onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                              className="min-h-[100px]"
-                            />
-                          )}
-                        </div>
-                        {!isFileUpload && (
-                        <div className="flex gap-2 flex-wrap items-center">
-                          <Button
-                            onClick={() => handleGetSuggestion(question.id, question.question_text)}
-                            disabled={isSuggesting}
-                            variant="outline"
-                            size="sm"
-                          >
-                            {isSuggesting ? (
-                              <>
-                                <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
-                                Generating...
-                              </>
-                            ) : (
-                              <>
-                                <Sparkles className="h-3 w-3 mr-1.5" />
-                                AI Suggest
-                              </>
-                            )}
-                          </Button>
-                          <Button
-                            onClick={() => {
-                              setCurrentQuestionForTemplate(question.id);
-                              setShowBrowseTemplatesDialog(true);
-                            }}
-                            variant="outline"
-                            size="sm"
-                          >
-                            <Library className="h-3 w-3 mr-1.5" />
-                            Templates
-                          </Button>
-                          {hasCurrentAnswer && (
-                            <>
-                              <Button
-                                onClick={() => handleImproveAnswer(question.id, question.question_text)}
-                                disabled={isImproving}
-                                variant="outline"
-                                size="sm"
-                              >
-                                {isImproving ? (
-                                  <>
-                                    <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
-                                    Analyzing...
-                                  </>
-                                ) : (
-                                  <>
-                                    <Lightbulb className="h-3 w-3 mr-1.5" />
-                                    Improve
-                                  </>
-                                )}
-                              </Button>
-                              <Button
-                                onClick={() => handleMakeNatural(question.id, question.question_text)}
-                                disabled={isMakingNatural}
-                                variant="outline"
-                                size="sm"
-                              >
-                                {isMakingNatural ? (
-                                  <>
-                                    <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
-                                    Rewriting...
-                                  </>
-                                ) : (
-                                  <>
-                                    <MessageSquare className="h-3 w-3 mr-1.5" />
-                                    More Natural
-                                  </>
-                                )}
-                              </Button>
-                              <Button
-                                onClick={() => handleCalculateConfidence(question.id, question.question_text)}
-                                disabled={calculatingConfidence[question.id]}
-                                variant="outline"
-                                size="sm"
-                              >
-                                {calculatingConfidence[question.id] ? (
-                                  <>
-                                    <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
-                                    Calculating...
-                                  </>
-                                ) : (
-                                  <>
-                                    <TrendingUp className="h-3 w-3 mr-1.5" />
-                                    Check Fit
-                                  </>
-                                )}
-                              </Button>
-                              <Button
-                                onClick={() => {
-                                  setCurrentQuestionForTemplate(question.id);
-                                  setShowSaveTemplateDialog(true);
-                                }}
-                                variant="outline"
-                                size="sm"
-                              >
-                                <BookmarkPlus className="h-3 w-3 mr-1.5" />
-                                Save
-                              </Button>
-                            </>
-                          )}
-                          <Button
-                            onClick={() => handleSaveAnswer(question.id)}
-                            disabled={isSaving || !isModified}
-                            size="sm"
-                            className="ml-auto"
-                          >
-                            {isSaving ? (
-                              <>
-                                <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
-                                Saving...
-                              </>
-                            ) : (
-                              <>
-                                <Save className="h-3 w-3 mr-1.5" />
-                                Save Answer
-                              </>
-                            )}
-                          </Button>
-                         </div>
-                            )}
-                          </CollapsibleContent>
-                        </div>
-                      </div>
-                    </Collapsible>
-                  </Card>
-                );
-              })}
+              {questions.map((question, index) => (
+                <QuestionCard
+                  key={question.id}
+                  question={question}
+                  index={index}
+                  answer={answers[question.id] || ""}
+                  savedAnswer={savedAnswers[question.id] || ""}
+                  isMobile={isMobile}
+                  isExpanded={!isMobile || expandedQuestions.has(question.id)}
+                  confidenceScore={confidenceScores[question.id]}
+                  expandedConfidence={expandedConfidence}
+                  isAutoPopulated={autoPopulatedAnswers.has(question.id)}
+                  isCopied={copiedAnswers[question.id] || false}
+                  isSaving={saving[question.id] || false}
+                  isSuggesting={suggesting[question.id] || false}
+                  isImproving={improving[question.id] || false}
+                  isMakingNatural={makingNatural[question.id] || false}
+                  isCalculatingConfidence={calculatingConfidence[question.id] || false}
+                  isApplyingSuggestion={applyingSuggestion[question.id] || false}
+                  editingQuestionId={editingQuestionId}
+                  editingQuestionText={editingQuestionText}
+                  onToggleQuestion={toggleQuestion}
+                  onAnswerChange={handleAnswerChange}
+                  onSaveAnswer={handleSaveAnswer}
+                  onGetSuggestion={handleGetSuggestion}
+                  onImproveAnswer={(qId, qText) => handleImproveAnswer(qId, qText)}
+                  onMakeNatural={handleMakeNatural}
+                  onCalculateConfidence={handleCalculateConfidence}
+                  onQuickApplySuggestion={handleQuickApplySuggestion}
+                  onCopyAnswer={handleCopyAnswer}
+                  onSaveAsTemplate={(qId) => { setCurrentQuestionForTemplate(qId); setShowSaveTemplateDialog(true); }}
+                  onBrowseTemplates={(qId) => { setCurrentQuestionForTemplate(qId); setShowBrowseTemplatesDialog(true); }}
+                  onStartEditing={(qId, qText) => { setEditingQuestionId(qId); setEditingQuestionText(qText); }}
+                  onConfirmEdit={async (qId, newText) => { await handleEditQuestion(qId, newText); setEditingQuestionId(null); }}
+                  onCancelEdit={() => setEditingQuestionId(null)}
+                  onDeleteQuestion={handleDeleteQuestion}
+                  onSetExpandedConfidence={setExpandedConfidence}
+                  onEditingQuestionTextChange={setEditingQuestionText}
+                />
+              ))}
             </div>
-          )}
-          </TabsContent>
 
           {/* Resume Tab */}
           <TabsContent value="resume" className="space-y-6">
