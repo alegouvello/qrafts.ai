@@ -133,6 +133,7 @@ const ApplicationDetail = () => {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  useAuthGuard();
   const { toast } = useToast();
 
   const [application, setApplication] = useState<Application | null>(null);
