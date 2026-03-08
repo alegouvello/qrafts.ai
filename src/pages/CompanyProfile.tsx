@@ -133,7 +133,7 @@ const CompanyProfile = () => {
   const [togglingWatch, setTogglingWatch] = useState(false);
 
   useEffect(() => {
-    checkAuth();
+    if (companyName) {
     if (companyName) {
       fetchCompanyData();
       fetchCompanyNotes();
