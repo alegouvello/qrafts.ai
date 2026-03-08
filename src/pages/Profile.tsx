@@ -1344,93 +1344,18 @@ export default function Profile() {
             </CardContent>
           </Card>
 
-          {/* Contact Information - Minimalist Cards */}
-          <div className="grid sm:grid-cols-2 gap-4">
-            {parsedData?.email && (
-              <Card className="border-none shadow-lg hover:shadow-xl transition-shadow bg-card/50 backdrop-blur-sm">
-                <CardContent className="p-5 sm:p-6">
-                  <div className="flex items-center gap-3 sm:gap-4">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Mail className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Email</p>
-                      <a href={`mailto:${parsedData.email}`} className="text-sm sm:text-base font-medium hover:text-primary transition-colors truncate block">
-                        {parsedData.email}
-                      </a>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-            
-            {parsedData?.phone && (
-              <Card className="border-none shadow-lg hover:shadow-xl transition-shadow bg-card/50 backdrop-blur-sm">
-                <CardContent className="p-5 sm:p-6">
-                  <div className="flex items-center gap-3 sm:gap-4">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Phone className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Phone</p>
-                      <a href={`tel:${parsedData.phone}`} className="text-sm sm:text-base font-medium hover:text-primary transition-colors truncate block">
-                        {parsedData.phone}
-                      </a>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-            
-            {parsedData?.linkedin_url && (
-              <Card className="border-none shadow-lg hover:shadow-xl transition-shadow bg-card/50 backdrop-blur-sm sm:col-span-2">
-                <CardContent className="p-5 sm:p-6">
-                  <div className="flex items-center gap-3 sm:gap-4">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Linkedin className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">LinkedIn</p>
-                      <a
-                        href={parsedData.linkedin_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm sm:text-base font-medium text-primary hover:underline truncate block"
-                      >
-                        {parsedData.linkedin_url}
-                      </a>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {parsedData?.website_url && (
-              <Card className="border-none shadow-lg hover:shadow-xl transition-shadow bg-card/50 backdrop-blur-sm sm:col-span-2">
-                <CardContent className="p-5 sm:p-6">
-                  <div className="flex items-center gap-3 sm:gap-4">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Globe className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Website</p>
-                      <a
-                        href={parsedData.website_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm sm:text-base font-medium text-primary hover:underline truncate block"
-                      >
-                        {parsedData.website_url}
-                      </a>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+          {/* Contact Information */}
+          {parsedData && (
+            <ProfileContactInfo
+              email={parsedData.email}
+              phone={parsedData.phone}
+              linkedin_url={parsedData.linkedin_url}
+              website_url={parsedData.website_url}
+            />
+          )}
 
           {/* Render sections dynamically based on saved order */}
-          {renderSectionsInOrder()}
+          {parsedData && <ProfileSections parsedData={parsedData} />}
 
           {/* My Resumes Library */}
           <MyResumesSection onUploadClick={() => setShowUploadDialog(true)} />
