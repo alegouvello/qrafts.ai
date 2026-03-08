@@ -69,7 +69,7 @@ const Settings = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    checkAuth();
+    fetchUserProfile();
     fetchUserProfile();
     
     const searchParams = new URLSearchParams(window.location.search);
