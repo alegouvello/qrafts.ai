@@ -70,7 +70,6 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchApplications();
-    fetchApplications();
     fetchUserProfile();
     checkIfFirstTimeUser();
     
@@ -153,7 +152,38 @@ const Dashboard = () => {
         variant: "destructive",
       });
     } else {
-      // Helper function to identify file upload questions (same as ApplicationDetail)
+      const apps = data || [];
+      const appIds = apps.map(a => a.id);
+
+      if (appIds.length === 0) {
+        setApplications([]);
+        setLoading(false);
+        return;
+      }
+
+      // Batch fetch all questions, answers, and status history in parallel
+      const batchSize = 50;
+      const questionsBatches = [];
+      const historyBatches = [];
+      for (let i = 0; i < appIds.length; i += batchSize) {
+        const batch = appIds.slice(i, i + batchSize);
+        questionsBatches.push(
+          supabase.from("questions").select("id, application_id, question_text").in("application_id", batch)
+        );
+        historyBatches.push(
+          supabase.from("application_status_history").select("application_id, changed_at, status").in("application_id", batch).order("changed_at", { ascending: true })
+        );
+      }
+
+      const [questionsResults, historyResults] = await Promise.all([
+        Promise.all(questionsBatches),
+        Promise.all(historyBatches),
+      ]);
+
+      const allQuestions = questionsResults.flatMap(r => r.data || []);
+      const allHistory = historyResults.flatMap(r => r.data || []);
+
+      // Helper to identify file upload questions
       const isFileUploadQuestion = (questionText: string) => {
         const lower = questionText.toLowerCase();
         return lower.includes('resume') || lower.includes('cv') || 
@@ -161,86 +191,84 @@ const Dashboard = () => {
                lower.includes('attach');
       };
 
-      // Transform data to match the expected format
-      const transformed = await Promise.all(
-        (data || []).map(async (app) => {
-          // Get all questions for this application
-          const { data: questions } = await supabase
-            .from("questions")
-            .select("id, question_text")
-            .eq("application_id", app.id);
+      // Filter to text questions and collect their IDs for answers fetch
+      const textQuestions = allQuestions.filter(q => !isFileUploadQuestion(q.question_text));
+      const textQuestionIds = textQuestions.map(q => q.id);
 
-          // Filter out file upload questions
-          const textQuestions = questions?.filter(q => !isFileUploadQuestion(q.question_text)) || [];
-          const textQuestionIds = textQuestions.map(q => q.id);
-          
-          let answerCount = 0;
-          if (textQuestionIds.length > 0) {
-            const { data: answersData } = await supabase
-              .from("answers")
-              .select("question_id, answer_text")
-              .in("question_id", textQuestionIds);
-            
-            // Count only questions that have non-empty, non-whitespace answers
-            const uniqueAnsweredQuestions = new Set(
-              answersData
-                ?.filter(a => a.answer_text && a.answer_text.trim().length > 0)
-                .map(a => a.question_id)
-            );
-            answerCount = uniqueAnsweredQuestions.size;
-          }
+      // Batch fetch all answers for text questions
+      let allAnswers: { question_id: string; answer_text: string | null }[] = [];
+      if (textQuestionIds.length > 0) {
+        const answerBatches = [];
+        for (let i = 0; i < textQuestionIds.length; i += batchSize) {
+          answerBatches.push(
+            supabase.from("answers").select("question_id, answer_text").in("question_id", textQuestionIds.slice(i, i + batchSize))
+          );
+        }
+        const answerResults = await Promise.all(answerBatches);
+        allAnswers = answerResults.flatMap(r => r.data || []);
+      }
 
-          // Get status history to calculate actual response time
-          const { data: statusHistory } = await supabase
-            .from("application_status_history")
-            .select("changed_at, status")
-            .eq("application_id", app.id)
-            .order("changed_at", { ascending: true });
+      // Build lookup maps
+      const questionsByApp = new Map<string, typeof textQuestions>();
+      for (const q of textQuestions) {
+        const list = questionsByApp.get(q.application_id) || [];
+        list.push(q);
+        questionsByApp.set(q.application_id, list);
+      }
 
-          // Calculate response time from applied_date to first status change
-          let actualResponseDays = null;
-          if (statusHistory && statusHistory.length > 0 && app.status !== "pending") {
-            const appliedDate = new Date(app.applied_date);
-            const firstStatusChange = new Date(statusHistory[0].changed_at);
-            
-            // Normalize to calendar days
-            const appliedDay = new Date(appliedDate.getFullYear(), appliedDate.getMonth(), appliedDate.getDate());
-            const responseDay = new Date(firstStatusChange.getFullYear(), firstStatusChange.getMonth(), firstStatusChange.getDate());
-            
-            const daysDiff = Math.floor((responseDay.getTime() - appliedDay.getTime()) / (1000 * 60 * 60 * 24));
-            actualResponseDays = daysDiff;
-          }
-
-          const everInterviewed = app.status === "interview" || 
-            (statusHistory || []).some((h: any) => h.status === "interview");
-
-          return {
-            id: app.id,
-            company: app.company,
-            position: app.position,
-            status: app.status as "pending" | "interview" | "rejected" | "accepted",
-            appliedDate: app.applied_date,
-            url: app.url,
-            questions: textQuestions.length,
-            answersCompleted: answerCount,
-            actualResponseDays,
-            companyDomain: app.company_domain,
-            everInterviewed,
-          };
-        })
+      const answeredByQuestion = new Set(
+        allAnswers
+          .filter(a => a.answer_text && a.answer_text.trim().length > 0)
+          .map(a => a.question_id)
       );
 
-      // Fetch company stats for each unique company
+      const historyByApp = new Map<string, typeof allHistory>();
+      for (const h of allHistory) {
+        const list = historyByApp.get(h.application_id) || [];
+        list.push(h);
+        historyByApp.set(h.application_id, list);
+      }
+
+      // Transform in memory — no more per-app queries
+      const transformed = apps.map(app => {
+        const appQuestions = questionsByApp.get(app.id) || [];
+        const answerCount = appQuestions.filter(q => answeredByQuestion.has(q.id)).length;
+        const statusHistory = historyByApp.get(app.id) || [];
+
+        let actualResponseDays: number | null = null;
+        if (statusHistory.length > 0 && app.status !== "pending") {
+          const appliedDate = new Date(app.applied_date);
+          const firstChange = new Date(statusHistory[0].changed_at);
+          const appliedDay = new Date(appliedDate.getFullYear(), appliedDate.getMonth(), appliedDate.getDate());
+          const responseDay = new Date(firstChange.getFullYear(), firstChange.getMonth(), firstChange.getDate());
+          actualResponseDays = Math.floor((responseDay.getTime() - appliedDay.getTime()) / (1000 * 60 * 60 * 24));
+        }
+
+        const everInterviewed = app.status === "interview" || statusHistory.some(h => h.status === "interview");
+
+        return {
+          id: app.id,
+          company: app.company,
+          position: app.position,
+          status: app.status as "pending" | "interview" | "rejected" | "accepted",
+          appliedDate: app.applied_date,
+          url: app.url,
+          questions: appQuestions.length,
+          answersCompleted: answerCount,
+          actualResponseDays,
+          companyDomain: app.company_domain,
+          everInterviewed,
+        };
+      });
+
+      // Fetch company stats in batch (one RPC per unique company — already efficient)
       const uniqueCompanies = [...new Set(transformed.map(app => app.company))];
-      const companyStatsMap = new Map();
+      const companyStatsMap = new Map<string, { avgResponseDays: number; fastestResponseDays: number }>();
       
       await Promise.all(
         uniqueCompanies.map(async (company) => {
           try {
-            const { data: stats } = await supabase.rpc('get_company_stats', { 
-              company_name: company 
-            });
-            
+            const { data: stats } = await supabase.rpc('get_company_stats', { company_name: company });
             if (stats && stats.length > 0) {
               companyStatsMap.set(company, {
                 avgResponseDays: stats[0].avg_response_days,
@@ -253,7 +281,6 @@ const Dashboard = () => {
         })
       );
 
-      // Add stats to applications
       const transformedWithStats = transformed.map(app => ({
         ...app,
         avgResponseDays: app.actualResponseDays !== null ? app.actualResponseDays : companyStatsMap.get(app.company)?.avgResponseDays,
