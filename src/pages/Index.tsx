@@ -144,7 +144,7 @@ const Index = () => {
 
           {/* Mobile Menu */}
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild className="md:hidden">
+            <SheetTrigger asChild className="lg:hidden">
               <Button variant="ghost" size="icon" className="rounded-full min-w-[44px] min-h-[44px]" aria-label="Open menu">
                 <Menu className="h-5 w-5" />
               </Button>
